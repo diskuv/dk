@@ -500,8 +500,8 @@ fi
 #   2. Check if CI since many CI providers can only cache content in a subdirectory
 #      of the project.
 if [ -z "$tools_dir" ] && [ "${CI:-}" = true ]; then
-  install -d "$PROJ_DIR/.dkcoder"
-  tools_dir="$PROJ_DIR/.dkcoder"
+  install -d "$PROJ_DIR/.dk/tools"
+  tools_dir="$PROJ_DIR/.dk/tools"
 fi
 #   3. Check in locations rooted under /opt/diskuv
 #      We look under a /opt/diskuv early because
