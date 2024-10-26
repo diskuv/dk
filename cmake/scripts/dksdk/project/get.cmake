@@ -25,9 +25,16 @@ Get the dependencies stated in the `dkproject.jsonc` file.
 Directory Structure
 ===================
 
-The dependencies will be placed into the `fetch/` directory.
+The dependencies will be placed in the FETCH_DIR directory which
+defaults to `fetch/`.
+The version of DkSDK will be placed into the .z-dk/dk-version/
+folder for both the Major.Minor and Major.Minor.Patch formats.
 
 ./
+├── .z-dk/
+│   └── dk-version/
+│       └── majminpat
+│       └── majmin
 ├── __dk.cmake
 ├── dk
 ├── dk.cmd
@@ -79,12 +86,16 @@ SOURCE_DIR <dir>
   performance of the mount is quite poor (could be 100X slowdown on WSL2
   I/O), so a copy of the local development environment speeds up builds
   tremendously.
-  
+
   The local development environment will be copied in this version, although
   future versions may use symlinks when the I/O speed to read <dir> is fast.
 
 SANDBOX
   Skip any URLs that use \${sourceParentDir} or \${projectParentDir}.
+
+ONLY_DKSDK_VERSION
+  Only fetch enough dependencies to calculate the DkSDK version accurately.
+  Currently the dksdk-cmake dependency is the only dependency needed.
 
 NONINTERACTIVE
   Best effort attempt to stop `git` and any other source fetching tools from
@@ -94,7 +105,7 @@ NONINTERACTIVE
 endfunction()
 
 function(dksdk_project_get)
-    set(noValues NONINTERACTIVE SANDBOX)
+    set(noValues NONINTERACTIVE SANDBOX ONLY_DKSDK_VERSION)
     set(singleValues LOG_LEVEL FETCH_DIR CONFIG_FILE SOURCE_DIR)
     set(multiValues)
     cmake_parse_arguments(PARSE_ARGV 0 ARG "${noValues}" "${singleValues}" "${multiValues}")
@@ -112,10 +123,15 @@ function(dksdk_project_get)
     else()
         set(sandbox 0)
     endif()
-    
+
     set(source_dir_OPTS)
     if(ARG_SOURCE_DIR)
-        set(source_dir_OPTS -D "SOURCE_DIR=${ARG_SOURCE_DIR}")
+        list(APPEND source_dir_OPTS -D "SOURCE_DIR=${ARG_SOURCE_DIR}")
+    endif()
+
+    set(only_dksdk_version_OPTS)
+    if(ARG_ONLY_DKSDK_VERSION)
+        list(APPEND only_dksdk_version_OPTS -D ONLY_DKSDK_VERSION=1)
     endif()
 
     # Fetch dksdk-access.
@@ -145,7 +161,7 @@ function(dksdk_project_get)
                 SOURCE_DIR "${access_src_dir}"
                 SUBBUILD_DIR "${access_subbuild_dir}"
                 GIT_REPOSITORY https://gitlab.com/diskuv/dksdk-access.git
-                GIT_TAG main
+                GIT_TAG origin/main
                 # As of 3.25.3 the bug https://gitlab.kitware.com/cmake/cmake/-/issues/24578
                 # has still not been fixed. That means empty strings get removed.
                 # ExternalProject_Add(GIT_SUBMODULES) in dkcoder-subbuild/CMakeLists.txt
@@ -157,15 +173,19 @@ function(dksdk_project_get)
     endif()
 
     # Do get
+    cmake_path(GET ARG_CONFIG_FILE PARENT_PATH CONFIG_DIR)
     execute_process(
             COMMAND
             "${CMAKE_COMMAND}"
             -D "INTERACTIVE=${interactive}"
             -D "SANDBOX=${sandbox}"
             -D "CONFIG_FILE=${ARG_CONFIG_FILE}"
-            ${source_dir_OPTS}            
+            ${source_dir_OPTS}
             -D "COMMAND_GET=${ARG_FETCH_DIR}"
             -D "CACHE_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+            -D "OUT_DKSDK_VERSION=${CONFIG_DIR}/.z-dk/dk-version/majminpat"
+            -D "OUT_DKSDK_VERSION_MAJMIN=${CONFIG_DIR}/.z-dk/dk-version/majmin"
+            ${only_dksdk_version_OPTS}
             -P "${access_src_dir}/cmake/run/get.cmake"
             COMMAND_ERROR_IS_FATAL ANY
     )
