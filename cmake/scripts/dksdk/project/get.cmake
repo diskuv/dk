@@ -101,12 +101,15 @@ NONINTERACTIVE
   Best effort attempt to stop `git` and any other source fetching tools from
   asking interactive questions like username/password prompts. Use when
   scripting.
+
+DKSDK_CMAKE_GITREF <ref>
+  Set the dksdk-cmake_GITREF variable. The default is `main`.
 ")
 endfunction()
 
 function(dksdk_project_get)
     set(noValues NONINTERACTIVE SANDBOX ONLY_DKSDK_VERSION)
-    set(singleValues LOG_LEVEL FETCH_DIR CONFIG_FILE SOURCE_DIR)
+    set(singleValues LOG_LEVEL FETCH_DIR CONFIG_FILE SOURCE_DIR DKSDK_CMAKE_GITREF)
     set(multiValues)
     cmake_parse_arguments(PARSE_ARGV 0 ARG "${noValues}" "${singleValues}" "${multiValues}")
 
@@ -124,14 +127,15 @@ function(dksdk_project_get)
         set(sandbox 0)
     endif()
 
-    set(source_dir_OPTS)
+    set(get_OPTS)
     if(ARG_SOURCE_DIR)
-        list(APPEND source_dir_OPTS -D "SOURCE_DIR=${ARG_SOURCE_DIR}")
+        list(APPEND get_OPTS -D "SOURCE_DIR=${ARG_SOURCE_DIR}")
     endif()
-
-    set(only_dksdk_version_OPTS)
     if(ARG_ONLY_DKSDK_VERSION)
-        list(APPEND only_dksdk_version_OPTS -D ONLY_DKSDK_VERSION=1)
+        list(APPEND get_OPTS -D ONLY_DKSDK_VERSION=1)
+    endif()
+    if(ARG_DKSDK_CMAKE_GITREF)
+        list(APPEND get_OPTS -D "DKSDK_CMAKE_GITREF=${DKSDK_CMAKE_GITREF}")
     endif()
 
     # Fetch dksdk-access.
@@ -180,12 +184,11 @@ function(dksdk_project_get)
             -D "INTERACTIVE=${interactive}"
             -D "SANDBOX=${sandbox}"
             -D "CONFIG_FILE=${ARG_CONFIG_FILE}"
-            ${source_dir_OPTS}
             -D "COMMAND_GET=${ARG_FETCH_DIR}"
             -D "CACHE_DIR=${CMAKE_CURRENT_BINARY_DIR}"
             -D "OUT_DKSDK_VERSION=${CONFIG_DIR}/.z-dk/dk-version/majminpat"
             -D "OUT_DKSDK_VERSION_MAJMIN=${CONFIG_DIR}/.z-dk/dk-version/majmin"
-            ${only_dksdk_version_OPTS}
+            ${get_OPTS}
             -P "${access_src_dir}/cmake/run/get.cmake"
             COMMAND_ERROR_IS_FATAL ANY
     )
@@ -196,7 +199,7 @@ function(run)
     include(${CMAKE_CURRENT_FUNCTION_LIST_FILE})
 
     set(noValues HELP QUIET NONINTERACTIVE SANDBOX ONLY_DKSDK_VERSION)
-    set(singleValues FETCH_DIR SOURCE_DIR)
+    set(singleValues FETCH_DIR SOURCE_DIR DKSDK_CMAKE_GITREF)
     set(multiValues)
     cmake_parse_arguments(PARSE_ARGV 0 ARG "${noValues}" "${singleValues}" "${multiValues}")
 
@@ -240,6 +243,12 @@ function(run)
         set(expand_SANDBOX SANDBOX)
     endif()
 
+    # DKSDK_CMAKE_GITREF
+    set(expand_DKSDK_CMAKE_GITREF)
+    if(ARG_DKSDK_CMAKE_GITREF)
+        list(APPEND expand_DKSDK_CMAKE_GITREF DKSDK_CMAKE_GITREF "${ARG_DKSDK_CMAKE_GITREF}")
+    endif()
+
     # ONLY_DKSDK_VERSION
     set(expand_ONLY_DKSDK_VERSION)
     if(ARG_ONLY_DKSDK_VERSION)
@@ -257,6 +266,7 @@ function(run)
             ${expand_NONINTERACTIVE}
             ${expand_SOURCE_DIR}
             ${expand_SANDBOX}
-            ${expand_ONLY_DKSDK_VERSION})
+            ${expand_ONLY_DKSDK_VERSION}
+            ${expand_DKSDK_CMAKE_GITREF})
     message(STATUS "Project dependencies have been updated.")
 endfunction()
