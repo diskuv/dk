@@ -2,6 +2,10 @@
 
 ## Pending
 
+## 2.1.4.9
+
+- The marshalled `.mli` filenames (part of `Location.t`) are now equal in both DkSDK CMake and DkSDK Coder for all the package dependencies of DkSDKFFI_OCaml: base,ocplib-endian,res,result,sexplib0, and stdio. That makes their `.cmi` checksums equivalent which avoids `make inconsistent assumptions` ocamlc errors.
+
 ## 2.1.4.8
 
 - Allow unpackaged scripts to run. That means `./dk DkRun_Project.Run somefile.ml` can have `somefile.ml` be any path on the filesystem. That gives a new third way to run scripts:
