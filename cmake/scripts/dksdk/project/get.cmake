@@ -97,7 +97,7 @@ ONLY_DKSDK_VERSION
   Only fetch enough dependencies to calculate the DkSDK version accurately.
   Currently the dksdk-cmake dependency is the only dependency needed.
 
-OVERRIDE_DKSDK_VERSION <version
+OVERRIDE_DKSDK_VERSION <version>
   Specify the DkSDK version rather than interrogating the dksdk-cmake
   dependency. The <version> must be in the Major.Minor.Patch format.
 
