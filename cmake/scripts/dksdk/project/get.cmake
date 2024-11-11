@@ -206,7 +206,7 @@ function(run)
     include(${CMAKE_CURRENT_FUNCTION_LIST_FILE})
 
     set(noValues HELP QUIET NONINTERACTIVE SANDBOX ONLY_DKSDK_VERSION)
-    set(singleValues FETCH_DIR SOURCE_DIR DKSDK_CMAKE_GITREF)
+    set(singleValues FETCH_DIR SOURCE_DIR DKSDK_CMAKE_GITREF OVERRIDE_DKSDK_VERSION)
     set(multiValues)
     cmake_parse_arguments(PARSE_ARGV 0 ARG "${noValues}" "${singleValues}" "${multiValues}")
 
@@ -262,6 +262,12 @@ function(run)
         set(expand_ONLY_DKSDK_VERSION ONLY_DKSDK_VERSION)
     endif()
 
+    # OVERRIDE_DKSDK_VERSION
+    set(expand_OVERRIDE_DKSDK_VERSION)
+    if(ARG_OVERRIDE_DKSDK_VERSION)
+        set(expand_OVERRIDE_DKSDK_VERSION OVERRIDE_DKSDK_VERSION "${ARG_OVERRIDE_DKSDK_VERSION}")
+    endif()
+
     # configFile
     set(configFile dkproject.jsonc)
     cmake_path(ABSOLUTE_PATH configFile BASE_DIRECTORY "${CMAKE_SOURCE_DIR}" NORMALIZE
@@ -274,6 +280,7 @@ function(run)
             ${expand_SOURCE_DIR}
             ${expand_SANDBOX}
             ${expand_ONLY_DKSDK_VERSION}
+            ${expand_OVERRIDE_DKSDK_VERSION}
             ${expand_DKSDK_CMAKE_GITREF})
     message(STATUS "Project dependencies have been updated.")
 endfunction()
