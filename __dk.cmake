@@ -352,13 +352,15 @@ endfunction()
 #   VERSION - `Env` or `V0_2`. `Project` is not valid.
 #   LOGLEVEL
 # Read-only Filesystem Outputs: (never modify the files or mutate the directories. On macOS part of a Bundle)
+#   Authoritative documentation: ./dk DkRun_Project.Run --help
 # - DKCODER - location of the `dkcoder` executable
 # - DKCODER_VERSION - dotted form of DkCoder like 0.2.0.1
 # - DKCODER_RUN - location of the `DkCoder_Edge-Run.bc` bytecode executable (here "Edge" means the latest version for the VERSION; aka. the VERSION itself)
 # - DKCODER_RUN_VERSION - `Env` or `V0_2`. Whatever was used to launch in `./dk DkRun_V0_2.Run` (etc.)
 # - DKCODER_HELPERS - location of bin directory or DkCoder.bundle/Contents/Helpers on macOS
 # - DKCODER_ETC - location of etc/dkcoder directory
-# - DKCODER_SITELIB - location of lib/ directory containing lib/ocaml/ and other libraries compatible with dkcoder
+# - DKCODER_BASE_SITELIB - location of lib/ directory containing the base system that at minimum includes the ocaml-system (ie. lib/ocaml/)
+# - DKCODER_EXT_SITELIB - may be empty. location of lib/ directory containing the extended system, if it exists.
 # - DKCODER_SHARE - location of share directory
 # - DKCODER_OCAMLC - location of ocamlc compatible with dkcoder
 # - DKCODER_OCAMLRUN - location of ocamlrun compatible with dkcoder
@@ -589,11 +591,12 @@ stdlib="@DKCODER_HOME@/DkCoder.bundle/Contents/Resources/lib/ocaml"]] @ONLY NEWL
     set(DKCODER_ETC "${dkcoder_etc}" PARENT_SCOPE)
 
     # Export lib
-    cmake_path(APPEND dkcoder_resourcesdir lib OUTPUT_VARIABLE dkcoder_sitelib)
-    if(NOT IS_DIRECTORY "${dkcoder_sitelib}")
+    cmake_path(APPEND dkcoder_resourcesdir lib OUTPUT_VARIABLE dkcoder_base_sitelib)
+    if(NOT IS_DIRECTORY "${dkcoder_base_sitelib}")
         message(FATAL_ERROR "${problem_solution}")
     endif()
-    set(DKCODER_SITELIB "${dkcoder_sitelib}" PARENT_SCOPE)
+    set(DKCODER_BASE_SITELIB "${dkcoder_base_sitelib}" PARENT_SCOPE)
+    set(DKCODER_EXT_SITELIB "" PARENT_SCOPE)
 
     # Export share
     cmake_path(APPEND dkcoder_resourcesdir share OUTPUT_VARIABLE dkcoder_share)
@@ -660,7 +663,7 @@ function(__dkcoder_delegate)
     #   compiling a bytecode executable, we have to do union of environments for
     #   both ocamlc + ocamlrun.
     __dkcoder_prep_environment()
-    __dkcoder_add_environment_set("OCAMLLIB=${DKCODER_SITELIB}/ocaml")
+    __dkcoder_add_environment_set("OCAMLLIB=${DKCODER_BASE_SITELIB}/ocaml")
     if(ARG_VERSION VERSION_LESS_EQUAL 0.4.0.1)
         #   Assumptions.ocamlfind_configuration_available_to_ocaml_compiler_in_coder_run
         __dkcoder_add_environment_set("OCAMLFIND_CONF=${DKCODER_OCAMLFIND_CONF}")
@@ -673,10 +676,16 @@ function(__dkcoder_delegate)
         __dkcoder_add_environment_mod("CAML_LD_LIBRARY_PATH=path_list_prepend:${DKCODER_HELPERS}/stublibs")
         __dkcoder_add_environment_mod("PATH=path_list_prepend:${DKCODER_HELPERS}/stublibs")
     else()
-        __dkcoder_add_environment_mod("CAML_LD_LIBRARY_PATH=path_list_prepend:${DKCODER_SITELIB}/stublibs")
-        __dkcoder_add_environment_mod("CAML_LD_LIBRARY_PATH=path_list_prepend:${DKCODER_SITELIB}/ocaml/stublibs")
-        __dkcoder_add_environment_mod("PATH=path_list_prepend:${DKCODER_SITELIB}/stublibs")
-        __dkcoder_add_environment_mod("PATH=path_list_prepend:${DKCODER_SITELIB}/ocaml/stublibs")
+        if(DKCODER_EXT_SITELIB)
+            __dkcoder_add_environment_mod("CAML_LD_LIBRARY_PATH=path_list_prepend:${DKCODER_EXT_SITELIB}/stublibs")
+        endif()
+        __dkcoder_add_environment_mod("CAML_LD_LIBRARY_PATH=path_list_prepend:${DKCODER_BASE_SITELIB}/stublibs")
+        __dkcoder_add_environment_mod("CAML_LD_LIBRARY_PATH=path_list_prepend:${DKCODER_BASE_SITELIB}/ocaml/stublibs")
+        if(DKCODER_EXT_SITELIB)
+            __dkcoder_add_environment_mod("PATH=path_list_prepend:${DKCODER_EXT_SITELIB}/stublibs")
+        endif()
+        __dkcoder_add_environment_mod("PATH=path_list_prepend:${DKCODER_BASE_SITELIB}/stublibs")
+        __dkcoder_add_environment_mod("PATH=path_list_prepend:${DKCODER_BASE_SITELIB}/ocaml/stublibs")
     endif()
     #   Assumptions.coder_run_has_environment_for_compiling_bytecode
     #
@@ -693,10 +702,18 @@ function(__dkcoder_delegate)
     #   detection of ABI (ex. ./dk downloads x86_64 for macOS but ABI is detected as arm64).
     cmake_path(NATIVE_PATH DKCODER_HELPERS NORMALIZE DKCODER_HELPERS_NATIVE)
     cmake_path(NATIVE_PATH DKCODER_SHARE NORMALIZE DKCODER_SHARE_NATIVE)
-    cmake_path(NATIVE_PATH DKCODER_SITELIB NORMALIZE DKCODER_SITELIB_NATIVE)
+    cmake_path(NATIVE_PATH DKCODER_BASE_SITELIB NORMALIZE DKCODER_BASE_SITELIB_NATIVE)
+    if(DKCODER_EXT_SITELIB)
+        cmake_path(NATIVE_PATH DKCODER_EXT_SITELIB NORMALIZE DKCODER_EXT_SITELIB_NATIVE)
+    else()
+        set(DKCODER_EXT_SITELIB_NATIVE)
+    endif()
     __dkcoder_add_environment_set("DKCODER_HELPERS=${DKCODER_HELPERS_NATIVE}")
     __dkcoder_add_environment_set("DKCODER_SHARE=${DKCODER_SHARE_NATIVE}")
-    if(ARG_VERSION VERSION_GREATER 0.4.0.1 OR ARG_VERSION STREQUAL Env)
+    if(ARG_VERSION VERSION_GREATER_EQUAL 2.1.4.10 OR ARG_VERSION STREQUAL Env)
+        __dkcoder_add_environment_set("DKCODER_BASE_SITELIB=${DKCODER_BASE_SITELIB_NATIVE}")
+        __dkcoder_add_environment_set("DKCODER_EXT_SITELIB=${DKCODER_EXT_SITELIB_NATIVE}")
+    elseif(ARG_VERSION VERSION_GREATER 0.4.0.1 OR ARG_VERSION STREQUAL Env)
         __dkcoder_add_environment_set("DKCODER_SITELIB=${DKCODER_SITELIB_NATIVE}")
     endif()
     __dkcoder_add_environment_set("DKCODER_RUN_VERSION=${DKCODER_RUN_VERSION}")
