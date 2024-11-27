@@ -352,6 +352,7 @@ endfunction()
 #   VERSION - `Env` or `V0_2`. `Project` is not valid.
 #   LOGLEVEL
 #   DKCODER_RUN_REQUIRES_OCAMLRUN_VARNAME - The name of a variable that will be set to ON if OCAMLRUN is required to run DKCODER_RUN
+#
 # Read-only Filesystem Outputs: (never modify the files or mutate the directories. On macOS part of a Bundle)
 #   Authoritative documentation: ./dk DkRun_Project.Run --help
 # - DKCODER - location of the `dkcoder` executable
@@ -998,6 +999,7 @@ Environment variables:
             QUIET "${quiet}")
 
         # Do DkCoder install
+        #   __dkrun_compile_version (ex. 2.1.4-r10 or Env) -> DKCODER_VERSION (ex. 2.1.4.10 or Env)
         __dkcoder_install(
             ABI "${abi}"
             LOGLEVEL "${__dkcoder_log_level}"
@@ -1010,7 +1012,7 @@ Environment variables:
             PACKAGE_NAMESPACE "${package_namespace}"
             PACKAGE_QUALIFIER "${package_qualifier}"
             FULLY_QUALIFIED_MODULE "${module}"
-            VERSION "${__dkrun_compile_version}"
+            VERSION "${DKCODER_VERSION}"
             DKCODER_RUN_REQUIRES_OCAMLRUN "${dkcoder_run_requires_ocamlrun}"
             ARGUMENT_LIST_VARIABLE argument_list)
         return()
