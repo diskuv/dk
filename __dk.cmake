@@ -355,7 +355,7 @@ endfunction()
 #
 # Read-only Filesystem Outputs: (never modify the files or mutate the directories. On macOS part of a Bundle)
 #   Authoritative documentation: ./dk DkRun_Project.Run --help
-# - DKCODER - location of the `dkcoder` executable
+# - DKCODER_TOOL - location of the `dkcoder-tool` executable
 # - DKCODER_VERSION - dotted form of DkCoder like 0.2.0.1
 # - DKCODER_RUN - location of the `DkCoder_Edge-Run` executable (here "Edge" means the latest version for the VERSION; aka. the VERSION itself)
 # - DKCODER_RUN_VERSION - `Env` or `V0_2`. Whatever was used to launch in `./dk DkRun_V0_2.Run` (etc.)
@@ -469,7 +469,7 @@ function(__dkcoder_install)
     # Find if DkCoder already installed
     set(hints "${DKCODER_HOME}/DkCoder.bundle/Contents/Helpers" "${DKCODER_HOME}/bin")
     set(find_program_ARGS NO_DEFAULT_PATH)
-    find_program(DKCODER NAMES dkcoder HINTS ${hints} ${find_program_ARGS})
+    find_program(DKCODER_TOOL NAMES dkcoder-tool HINTS ${hints} ${find_program_ARGS})
 
     # Re-install if the file:// tarball has changed.
     set(reinstall)
@@ -485,7 +485,7 @@ function(__dkcoder_install)
         endif()
     endif()
 
-    if(NOT DKCODER OR reinstall)
+    if(NOT DKCODER_TOOL OR reinstall)
         # Download into ${DKCODER_HOME} (which is one of the HINTS)
         set(downloaded)
 
@@ -549,12 +549,12 @@ stdlib="@DKCODER_HOME@/DkCoder.bundle/Contents/Resources/lib/ocaml"]] @ONLY NEWL
             file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/stdexport${out_exp}")
         endif() # if(compile_version VERSION_LESS_EQUAL 0.4.0.1)
 
-        # Get and verify DKCODER is present
-        find_program(DKCODER NAMES dkcoder REQUIRED HINTS ${hints} ${find_program_ARGS})
+        # Get and verify DKCODER_TOOL is present
+        find_program(DKCODER_TOOL NAMES dkcoder-tool REQUIRED HINTS ${hints} ${find_program_ARGS})
         message(${ARG_LOGLEVEL} "DkCoder installed.")
-    endif() # if(NOT DKCODER OR reinstall)
+    endif() # if(NOT DKCODER_TOOL OR reinstall)
 
-    cmake_path(GET DKCODER PARENT_PATH dkcoder_helpers)
+    cmake_path(GET DKCODER_TOOL PARENT_PATH dkcoder_helpers)
 
     # macOS requires a code signing separation between executables (including shared libraries)
     # and non-executables (include bytecode). The latter will be in macOS bundle Resources/.
