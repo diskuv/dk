@@ -215,12 +215,16 @@ REM Sometimes a command wants to own the terminal or the command line arguments.
 REM CMake, for example, intercepts the Ctrl-C signal in buggy ways:
 REM https://stackoverflow.com/questions/75071180/pass-ctrlc-to-cmake-custom-command-under-vscode
 
+REM     Both DK_WORKDIR and DK_NONCE can be zeroed by the nonce script so capture it
+SET DKTEMP_NONCE=%DK_WORKDIR%\%DK_NONCE%.cmd
+
 REM     We don't use nested parentheses or else we'd have to be concerned about delayed
 REM     variable expansion. https://stackoverflow.com/questions/24866477/if-call-exit-and-errorlevel-in-a-bat
-IF EXIST "%DK_WORKDIR%\%DK_NONCE%.cmd" CALL "%DK_WORKDIR%\%DK_NONCE%.cmd" %*
+IF EXIST "%DKTEMP_NONCE%" CALL "%DKTEMP_NONCE%" %*
 @ECHO OFF
 SET CALLERROR=%ERRORLEVEL%
-IF EXIST "%DK_WORKDIR%\%DK_NONCE%.cmd" DEL /Q /F "%DK_WORKDIR%\%DK_NONCE%.cmd"
+IF EXIST "%DKTEMP_NONCE%" DEL /Q /F "%DKTEMP_NONCE%"
+SET DKTEMP_NONCE=
 EXIT /B %CALLERROR%
 
 REM ------ SUBROUTINE [downloadFile]
