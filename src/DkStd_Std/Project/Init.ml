@@ -130,12 +130,21 @@ let () =
   Utils.git ~quiet:() ~slots ("add" :: files);
   Utils.git ~quiet:() ~slots ["update-index"; "--chmod=+x"; "dk"];
 
-  (* fail fast if there are any changes in the dkcoder project. We don't want to delete modifications. *)
-  let git_status = Utils.git_out ~quiet:() ~alt_project_dir:!dkcoder_project_dir ~slots ["status"; "--short"] in
-  match git_status with
-  | s when String.trim s = "" ->
-    Utils.git ~quiet:() ~slots ("status" :: "--short" :: files)
-  | changes ->  
+  (* fail fast if there are any changes in the dkcoder project. We don't want to delete modifications! *)
+  let changes = Utils.git_out ~quiet:() ~alt_project_dir:!dkcoder_project_dir ~slots ["status"; "--short"] in
+  if String.trim changes <> "" then begin
     Printf.eprintf "dkcoder: The %s project has changes and will not be deleted:\n" !dkcoder_project_dir;
     Format.eprintf "@[<v 2>   %a@]@." Fmt.lines changes;
     exit 3
+  end;
+
+  (* fail fast if there are any unpushed commits in the dkcoder project. We don't want to delete modifications!
+     technique: https://stackoverflow.com/a/3338774 *)
+  let unpushed = Utils.git_out ~quiet:() ~alt_project_dir:!dkcoder_project_dir ~slots ["log"; "--branches"; "--not"; "--remotes"; "--simplify-by-decoration"; "--decorate"; "--oneline"] in
+  if String.trim unpushed <> "" then begin
+    Printf.eprintf "dkcoder: The %s project has unpushed commits and will not be deleted:\n" !dkcoder_project_dir;
+    Format.eprintf "@[<v 2>   %a@]@." Fmt.lines unpushed;
+    exit 3
+  end;
+
+  Utils.git ~quiet:() ~slots ("status" :: "--short" :: files)
