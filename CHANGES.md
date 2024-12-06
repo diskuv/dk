@@ -2,6 +2,8 @@
 
 ## Pending
 
+- `V0_1` was removed as its end of grace period was 2024-09-30.
+
 ## 2.1.4.10
 
 - New `DkDev_Std.Export create-blib` subcommand to make a blib archive.

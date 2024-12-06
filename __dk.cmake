@@ -40,16 +40,6 @@ string(TIMESTAMP now_YYYY_MM_DD "%Y-%m-%d" UTC)
 #   EOL = End of Life
 #   EOG = End of Grace Period (6 months past EOL usually)
 #   EOL > EOG. EOL starts the warning to upgrade but continues. EOG errors out.
-set(__DkRun_V0_1_COMPILE_VERSION 0.1.0-4)
-set(__DkRun_V0_1_URL_BASE https://gitlab.com/api/v4/projects/52918795/packages/generic/stdexport/${__DkRun_V0_1_COMPILE_VERSION})
-set(__DkRun_V0_1_SHA256_windows_x86_64 ef49d016468db34d39f6f0a90231d9ff15bb482ec3ba91d329646185d6ae9002)
-set(__DkRun_V0_1_SHA256_windows_x86    cddc4ddd7a907769582e3593069f50fa21f04fedae3a8fecb5cfad8e01e725e9)
-set(__DkRun_V0_1_SHA256_linux_x86_64   1573e460ea4805da255ecd981aa505881968b1ffc4f188c37c9da9273367ce04)
-set(__DkRun_V0_1_SHA256_linux_x86      todo_v0_1_release)
-set(__DkRun_V0_1_SHA256_darwin_x86_64  5ffd147bb4131c86dcffe9e186cc3459d4f73e0c1c1f19460dd053f21d49f5d0)
-set(__DkRun_V0_1_SHA256_darwin_arm64   159826b6977a2ff9e70dd20abd71ca7b92d9753840a2b88fa40bab71b2c5ea00)
-set(__DkRun_V0_1_EOL_YYYY_MM_DD "2024-03-30")
-set(__DkRun_V0_1_EOG_YYYY_MM_DD "2024-09-30")
 set(__DkRun_V0_2_COMPILE_VERSION 0.2.0-3)
 set(__DkRun_V0_2_URL_BASE https://gitlab.com/api/v4/projects/52918795/packages/generic/stdexport/${__DkRun_V0_2_COMPILE_VERSION})
 set(__DkRun_V0_2_SHA256_linux_x86_64   b66a7f1409ede57ff22ca5c9946d288e9eae0784a7dc9eede25833ed64ea8553)
@@ -102,7 +92,7 @@ endif()
 #   The last LTS version is what ./dk uses by default, so keep this chronologically sorted
 #   by oldest to newest.
 #   The last LTS version _is_ the project version.
-set(__DkRun_LTS_VERSIONS V0_1 V0_2 V0_3 V0_4 V2_1) # do not erase this line: this can be parsed externally to discover project version. must be on single line!
+set(__DkRun_LTS_VERSIONS V0_2 V0_3 V0_4 V2_1) # do not erase this line: this can be parsed externally to discover project version. must be on single line!
 list(GET __DkRun_LTS_VERSIONS -1 __DkRun_LTS_VERSION) # ie. the latest Vx_y
 
 # ocamlc.exe, ocamlrun.exe, ocamldep.exe, dune.exe, dkcoder.exe all are compiled with
