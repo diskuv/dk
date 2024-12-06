@@ -80,6 +80,16 @@ set(__DkRun_V2_1_SHA256_windows_x86_64 01ae44e396ea336f2633e1e0bf70eea3f79fe9ba0
 set(__DkRun_V2_1_SHA256_windows_x86    1c6a11a9647f9f8e801b570f424f8bcafb1994ca02f098fcfc66deb6bfa7d395)
 set(__DkRun_V2_1_EOL_YYYY_MM_DD "2025-08-30")
 set(__DkRun_V2_1_EOG_YYYY_MM_DD "2026-02-30")
+set(__DkRun_V2_2_COMPILE_VERSION 2.2.0-1)
+set(__DkRun_V2_2_URL_BASE https://gitlab.com/api/v4/projects/52918795/packages/generic/stdexport/${__DkRun_V2_2_COMPILE_VERSION})
+set(__DkRun_V2_2_SHA256_darwin_x86_64  fa34623c89e196bec885146b3c6a4eb8f4754c2a1ef6da94c40fe7b5f713dea1)
+set(__DkRun_V2_2_SHA256_darwin_arm64   0b05dbc55264b865e0308953bea0fcb08077c9ce43db73fd940029dcaccf4d7b)
+set(__DkRun_V2_2_SHA256_linux_x86_64   f0df54cd7cd4ced453e31efd63328984198d2cf367c7487b5e8441083caea4fa)
+set(__DkRun_V2_2_SHA256_linux_x86      059f56944ec77a701f181ba760a16b8537ca965fe832d744d463f954fcf4e01c)
+set(__DkRun_V2_2_SHA256_windows_x86_64 b1f13cf52f5ae90ed8bb28c85aff9b56e3c01a339ca0c97473d2bc1fb15e1b80)
+set(__DkRun_V2_2_SHA256_windows_x86    0af7ff3ea8f91e0464a79fac3cf69449804df1fb66a8efd8fec4bd69732a5996)
+set(__DkRun_V2_2_EOL_YYYY_MM_DD "2025-12-30")
+set(__DkRun_V2_2_EOG_YYYY_MM_DD "2026-06-30")
 #   `Env` is a valid DkCoder version if $DKRUN_ENV_URL_BASE exists. Typically it is a file:// URL.
 set(__DkRun_Env_URL_BASE)
 if(DEFINED ENV{DKRUN_ENV_URL_BASE})
@@ -92,7 +102,7 @@ endif()
 #   The last LTS version is what ./dk uses by default, so keep this chronologically sorted
 #   by oldest to newest.
 #   The last LTS version _is_ the project version.
-set(__DkRun_LTS_VERSIONS V0_2 V0_3 V0_4 V2_1) # do not erase this line: this can be parsed externally to discover project version. must be on single line!
+set(__DkRun_LTS_VERSIONS V0_2 V0_3 V0_4 V2_1 V2_2) # do not erase this line: this can be parsed externally to discover project version. must be on single line!
 list(GET __DkRun_LTS_VERSIONS -1 __DkRun_LTS_VERSION) # ie. the latest Vx_y
 
 # ocamlc.exe, ocamlrun.exe, ocamldep.exe, dune.exe, dkcoder.exe all are compiled with

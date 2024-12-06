@@ -2,6 +2,11 @@
 
 ## Pending
 
+## 2.2.0.1
+
+- Run accepts `sbom` subcommand which will print an early version of a software bill of materials. There is now also a `run` subcommand which is chosen by default.
+- The Run `--cmake-exe` (DKCODER_CMAKE_EXE envar) and `--ninja-exe` (DKCODER_NINJA_EXE envvar) options were removed. In later versions of DkCoder CMake will be completely removed from the initial boot sequence.
+- Allow `file://` in RemoteSpec
 - `V0_1` was removed as its end of grace period was 2024-09-30.
 
 ## 2.1.4.10
