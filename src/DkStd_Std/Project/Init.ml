@@ -111,6 +111,12 @@ let contents_extensions_json_untrimmed = {|
     ]
 }|}
 
+let contents_ocamlformat_untrimmed = {|
+profile=conventional
+exp-grouping=preserve
+nested-match=align
+|}
+
 let () =
   Arg.parse speclist anon_fun usage_msg;
   if !new_project_dir = "" then Utils.fail "NEW_PROJECT_DIR argument is missing";
@@ -128,9 +134,9 @@ let () =
   (* git init *)
   if not (Bos.OS.Dir.exists Fpath.(new_project_dirp / ".git") |> Utils.rmsg) then
     Utils.git ~slots ["init"; "--quiet"; "--initial-branch=main"];
-  
+
   (* dk, dk.cmd, __dk.cmake, .gitattributes *)
-  let copy_if ?mode s = 
+  let copy_if ?mode s =
     let src = Fpath.(dkcoder_project_dirp / s) in
     let dest = Fpath.(new_project_dirp / s) in
     if not (Bos.OS.File.exists dest |> Utils.rmsg) then (
@@ -149,7 +155,15 @@ let () =
   if not (Bos.OS.File.exists gitignore |> Utils.rmsg) then (
     Printf.eprintf "dkcoder: create .gitignore\n%!";
     Bos.OS.File.write gitignore (String.trim contents_gitignore_untrimmed) |> Utils.rmsg);
-  
+
+  (* .ocamlformat *)
+  let ocamlformat = Fpath.(new_project_dirp / ".ocamlformat") in
+  if not (Bos.OS.File.exists ocamlformat |> Utils.rmsg) then (
+    Printf.eprintf "dkcoder: create .ocamlformat\n%!";
+    (* Use CRLF on Windows since .ocamlformat is ".ocamlformat text" in .gitattributes *)
+    Out_channel.with_open_text (Fpath.to_string ocamlformat) (fun oc ->
+      Out_channel.output_string oc (String.trim contents_ocamlformat_untrimmed)));
+
   (* .vscode/ *)
   let vscode_dirp = Fpath.(new_project_dirp / ".vscode") in
   Bos.OS.Dir.create vscode_dirp |> Utils.rmsg |> ignore;
@@ -171,7 +185,9 @@ let () =
       Out_channel.output_string oc (String.trim contents_settings_json_untrimmed)));
 
   (* git add, git update-index *)
-  let project_files = ["dk"; "dk.cmd"; "__dk.cmake"; ".gitattributes"; ".gitignore";
+  let project_files = ["dk"; "dk.cmd"; "__dk.cmake"; 
+    ".gitattributes"; ".gitignore";
+    ".ocamlformat";
     ".vscode/settings.json"; ".vscode/extensions.json"] in
   Utils.git ~quiet:() ~slots ("add" :: project_files);
   Utils.git ~quiet:() ~slots ["update-index"; "--chmod=+x"; "dk"];

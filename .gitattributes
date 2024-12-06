@@ -28,6 +28,7 @@
 *.java text
 *.json text
 *.md text
+.ocamlformat text
 
 # Declare files that will always have LF line endings on checkout.
 *.capnp text eol=lf
