@@ -1,4 +1,4 @@
-@ECHO OFF
+@REM @ECHO OFF
 REM ##########################################################################
 REM # File: dkcoder\dk.cmd                                                   #
 REM #                                                                        #
@@ -221,7 +221,7 @@ SET DKTEMP_NONCE=%DK_WORKDIR%\%DK_NONCE%.cmd
 REM     We don't use nested parentheses or else we'd have to be concerned about delayed
 REM     variable expansion. https://stackoverflow.com/questions/24866477/if-call-exit-and-errorlevel-in-a-bat
 IF EXIST "%DKTEMP_NONCE%" CALL "%DKTEMP_NONCE%" %*
-@ECHO OFF
+REM @ECHO OFF
 SET CALLERROR=%ERRORLEVEL%
 IF EXIST "%DKTEMP_NONCE%" DEL /Q /F "%DKTEMP_NONCE%"
 SET DKTEMP_NONCE=

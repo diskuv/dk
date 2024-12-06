@@ -809,6 +809,7 @@ REM Clear variables that influence __dk.cmake. They are not part of DkCoder API.
 SET DKRUN_ENV_URL_BASE=
 
 "@CMAKE_COMMAND_NATIVE@" -E env @envMods_DOS@ -- @entryExec_PRECOMMAND@"@entryExec_NATIVE@" @dkcoder_ARGS@
+ECHO FINISHED __dk.cmake post script
 ]]
             @ONLY NEWLINE_STYLE DOS)
     else()
