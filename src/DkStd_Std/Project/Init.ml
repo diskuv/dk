@@ -104,6 +104,13 @@ let contents_settings_json_untrimmed = {|
     }
 }|}
 
+let contents_extensions_json_untrimmed = {|
+{
+    "recommendations": [
+        "ocamllabs.ocaml-platform"
+    ]
+}|}
+
 let () =
   Arg.parse speclist anon_fun usage_msg;
   if !new_project_dir = "" then Utils.fail "NEW_PROJECT_DIR argument is missing";
@@ -143,9 +150,19 @@ let () =
     Printf.eprintf "dkcoder: create .gitignore\n%!";
     Bos.OS.File.write gitignore (String.trim contents_gitignore_untrimmed) |> Utils.rmsg);
   
-  (* .vscode/settings.json *)
+  (* .vscode/ *)
   let vscode_dirp = Fpath.(new_project_dirp / ".vscode") in
   Bos.OS.Dir.create vscode_dirp |> Utils.rmsg |> ignore;
+
+  (* .vscode/extensions.json *)
+  let extensions_json = Fpath.(vscode_dirp / "extensions.json") in
+  if not (Bos.OS.File.exists extensions_json |> Utils.rmsg) then (
+    Printf.eprintf "dkcoder: create .vscode/extensions.json\n%!";
+    (* Use CRLF on Windows since .json are "*.json text" in .gitattributes *)
+    Out_channel.with_open_text (Fpath.to_string extensions_json) (fun oc ->
+      Out_channel.output_string oc (String.trim contents_extensions_json_untrimmed)));
+
+  (* .vscode/settings.json *)
   let settings_json = Fpath.(vscode_dirp / "settings.json") in
   if not (Bos.OS.File.exists settings_json |> Utils.rmsg) then (
     Printf.eprintf "dkcoder: create .vscode/settings.json\n%!";
@@ -154,7 +171,8 @@ let () =
       Out_channel.output_string oc (String.trim contents_settings_json_untrimmed)));
 
   (* git add, git update-index *)
-  let project_files = ["dk"; "dk.cmd"; "__dk.cmake"; ".gitattributes"; ".gitignore"; ".vscode/settings.json"] in
+  let project_files = ["dk"; "dk.cmd"; "__dk.cmake"; ".gitattributes"; ".gitignore";
+    ".vscode/settings.json"; ".vscode/extensions.json"] in
   Utils.git ~quiet:() ~slots ("add" :: project_files);
   Utils.git ~quiet:() ~slots ["update-index"; "--chmod=+x"; "dk"];
 
