@@ -3,6 +3,7 @@ module Bos = Tr1Bos_Std.Bos
 module Format = Tr1Stdlib_V414CRuntime.Format
 module Printf = Tr1Stdlib_V414CRuntime.Printf
 module Logs = Tr1Logs_Std.Logs
+module Out_channel = Tr1Stdlib_V414CRuntime.Out_channel
 module StdExit = Tr1Stdlib_V414CRuntime.StdExit
 module String = Tr1Stdlib_V414Base.String
 module Sys = Tr1Stdlib_V414CRuntime.Sys
@@ -94,6 +95,15 @@ let contents_gitignore_untrimmed = {|
 /dune-workspace
 |}
 
+(* TODO: Once 2.0.0.1 released, add [MlStd_Std.Exec --merlin] *)
+let contents_settings_json_untrimmed = {|
+{
+    "ocaml.sandbox": {
+        "kind": "custom",
+        "template": "${firstWorkspaceFolder}/dk DkRun_Project.RunQuiet --log-level ERROR --fixed-length-modules false -- MlStd_Std.Exec -- $prog $args"
+    }
+}|}
+
 let () =
   Arg.parse speclist anon_fun usage_msg;
   if !new_project_dir = "" then Utils.fail "NEW_PROJECT_DIR argument is missing";
@@ -132,9 +142,19 @@ let () =
   if not (Bos.OS.File.exists gitignore |> Utils.rmsg) then (
     Printf.eprintf "dkcoder: create .gitignore\n%!";
     Bos.OS.File.write gitignore (String.trim contents_gitignore_untrimmed) |> Utils.rmsg);
+  
+  (* .vscode/settings.json *)
+  let vscode_dirp = Fpath.(new_project_dirp / ".vscode") in
+  Bos.OS.Dir.create vscode_dirp |> Utils.rmsg |> ignore;
+  let settings_json = Fpath.(vscode_dirp / "settings.json") in
+  if not (Bos.OS.File.exists settings_json |> Utils.rmsg) then (
+    Printf.eprintf "dkcoder: create .vscode/settings.json\n%!";
+    (* Use CRLF on Windows since .json are "*.json text" in .gitattributes *)
+    Out_channel.with_open_text (Fpath.to_string settings_json) (fun oc ->
+      Out_channel.output_string oc (String.trim contents_settings_json_untrimmed)));
 
   (* git add, git update-index *)
-  let project_files = ["dk"; "dk.cmd"; "__dk.cmake"; ".gitattributes"; ".gitignore"] in
+  let project_files = ["dk"; "dk.cmd"; "__dk.cmake"; ".gitattributes"; ".gitignore"; ".vscode/settings.json"] in
   Utils.git ~quiet:() ~slots ("add" :: project_files);
   Utils.git ~quiet:() ~slots ["update-index"; "--chmod=+x"; "dk"];
 

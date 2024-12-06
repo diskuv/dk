@@ -26,6 +26,7 @@
 *.c++ text
 *.h text
 *.java text
+*.json text
 *.md text
 
 # Declare files that will always have LF line endings on checkout.
@@ -33,6 +34,7 @@
 configure text eol=lf
 dk text eol=lf
 dune text eol=lf
+dune-file text eol=lf
 dune-project text eol=lf
 *.dune text eol=lf
 gradlew text eol=lf
