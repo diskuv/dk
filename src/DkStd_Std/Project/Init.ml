@@ -96,12 +96,11 @@ let contents_gitignore_untrimmed = {|
 /.merlin
 |}
 
-(* TODO: Once 2.0.0.1 released, add [MlStd_Std.Exec --merlin] *)
 let contents_settings_json_untrimmed = {|
 {
     "ocaml.sandbox": {
         "kind": "custom",
-        "template": "${firstWorkspaceFolder}/dk DkRun_Project.RunQuiet --log-level ERROR --fixed-length-modules false -- MlStd_Std.Exec -- $prog $args"
+        "template": "${firstWorkspaceFolder}/dk DkRun_Project.RunQuiet --log-level ERROR --fixed-length-modules false -- MlStd_Std.Exec --merlin -- $prog $args"
     }
 }|}
 
