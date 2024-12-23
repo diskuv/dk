@@ -2,6 +2,14 @@
 
 ## Pending
 
+## 2.2.1.1
+
+- `dk.sqlite3` is now backwards-compatible, which is required for soon-to-be old versions like `./dk DkRun_V2_2.Run` to co-exist with `./dk DkRun_V2_3.Run`.
+- lsp upgraded to 1.20.1 from 1.20.0 to fix slowness
+- Added `--debug-on-compile-failure` option that will launch a [Down-enhanced](https://erratique.ch/software/down/doc/) OCaml toplevel session after a build failure. Use it to debug type errors since the OCaml toplevel will have any successfully compiled modules available for inspection.
+- The `--override-dkcoderppx-exe` option, if specified, is now written into the generated `dune-file` files. That makes the Dune files not portable, but the overrides can only be done with `run-you.sh` and `run-us.sh` for DkCoder subscribers. Without the override, `dkcoder-ppx` is expected on the PATH which is portable and trivially satisfied by the PATH setup in `./dk`.
+- Run accepts `repl` subcommand which will start a REPL (OCaml toplevel). The entry module's `let __repl () : unit = ...` function, which does nothing by default, will be called during the REPL initialization.
+
 ## 2.2.0.1
 
 - Run accepts `sbom` subcommand which will print an early version of a software bill of materials. There is now also a `run` subcommand which is chosen by default.
