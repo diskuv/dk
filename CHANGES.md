@@ -2,6 +2,10 @@
 
 ## Pending
 
+## 2.2.1.4
+
+- Include custom version of `topfind` in REPL so equivalent of `#use "topfind";;`.
+
 ## 2.2.1.3
 
 - Add `Tr1Fpath_Std`.
