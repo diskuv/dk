@@ -547,7 +547,6 @@ fi
 # PREREQS
 # -------
 
-cmake_majmin_ver=3.25
 cmake_majminpat_ver=3.25.2
 cmake_cksum256_darwin_universal="a988e2a69c1d105987f12782ee0fa80d6be941b3e1a68b4bd6a661f0fdb56d75"
 cmake_cksum256_linux_arm64="98cbec4d939adecc0a52b0bf2d537ebbcd629f9ac4d935b399619faa4d4f0d44"
@@ -861,6 +860,7 @@ if [ "$DKCODER_AWAY" -eq 0 ]; then cd "$PROJ_DIR"; fi
 "$cmake_bindir/cmake" \
   -D CMAKE_GENERATOR=Ninja -D CMAKE_MAKE_PROGRAM="$NINJA_EXE" \
   -D "DKCODER_PWD:FILEPATH=$dk_pwd" \
+  -D "DKCODER_ARG0:FILEPATH=$0" \
   -D "DKCODER_DATA_HOME:FILEPATH=$tools_dir" \
   -D "DKCODER_WORKDIR:FILEPATH=$dk_work" \
   -D "DKCODER_NONCE:STRING=$dk_nonce" \

@@ -25,6 +25,11 @@
 # CMake vars:
 #   DKCODER_DATA_HOME - required
 #   DKCODER_WORKDIR - required
+#   DKCODER_ARG0
+#   DKCODER_PWD
+#   DKCODER_NONCE
+#   DKCODER_TTY
+#   DKCODER_CMDLINE
 
 include(FetchContent)
 
@@ -727,6 +732,7 @@ function(__dkcoder_delegate)
     __dkcoder_add_environment_set("DKCODER_RUN_VERSION=${DKCODER_RUN_VERSION}")
     __dkcoder_add_environment_set("DKCODER_RUN_ENV_URL_BASE=${__DkRun_Env_URL_BASE}")
     __dkcoder_add_environment_set("DKCODER_PWD=${DKCODER_PWD}")
+    __dkcoder_add_environment_set("DKCODER_ARG0=${DKCODER_ARG0}")
 
     # Console
     __dkcoder_add_environment_set("DKCODER_TTY=${DKCODER_TTY}")
