@@ -11,13 +11,13 @@
 #                                                                        #
 ##########################################################################
 
-name: Publish CMake as a tarball with static binaries
+name: Publish CMake suitable for dk.exe bootstrap
 
 on:
   push:
 
 jobs:
-  build:
+  build-static:
     runs-on: ubuntu-latest
 
     strategy:
@@ -36,6 +36,9 @@ jobs:
 
     name: ${{ matrix.dkml_target_abi }}
     steps:
+      - name: Validation
+        run: zip --version
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -59,21 +62,48 @@ jobs:
         if: matrix.testable
         run: out/usr/local/cmake/bin/cmake --version
 
-      - name: Bundle cmake-${{ matrix.dkml_target_abi }}.tar.gz
-        run: X=$(pwd) && cd out/usr/local/cmake && tar cfz $X/cmake-${{ matrix.dkml_target_abi }}.tar.gz *
+      - name: Bundle cmake-${{ matrix.dkml_target_abi }}.zip
+        run: X=$(pwd) && cd out/usr/local && zip -y -r $X/cmake-${{ matrix.dkml_target_abi }} cmake
 
-      - name: Upload cmake tarball
+      - name: Upload cmake archives
         uses: actions/upload-artifact@v4
         with:
           retention-days: 30
           name: cmake-${{ matrix.dkml_target_abi }}
-          path: cmake-${{ matrix.dkml_target_abi }}.tar.gz
+          path: cmake-${{ matrix.dkml_target_abi }}.zip
+
+  rearchive-as-zip:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+            - abi: darwin_universal
+              cksum256: a988e2a69c1d105987f12782ee0fa80d6be941b3e1a68b4bd6a661f0fdb56d75
+              cmake_majminpat_ver: 3.25.2
+              cmake_base_suffix: macos10.10-universal
+
+    name: ${{ matrix.abi }}
+    steps:
+      - name: Download and repack
+        run: |
+          curl -o cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v${cmake_majminpat_ver}/cmake-${cmake_majminpat_ver}-${cmake_base_suffix}.tar.gz
+          install -d dist && cd dist
+          tar xfz ../cmake.tar.gz
+          zip -y -r ../cmake-${{ matrix.abi }} *
+
+      - name: Upload cmake zip
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 30
+          name: cmake-${{ matrix.abi }}
+          path: cmake-${{ matrix.abi }}.zip
 
   publish:
     permissions:
         contents: write
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-static
     # We never want the DkCoder version numbers to conflict with the CMake releases.
     # So use tags that are real CMake versions. Example: cmake-3.25.2
     if: startsWith(github.ref, 'refs/tags/cmake-')
@@ -87,6 +117,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            cmake-linux_x86_64.tar.gz
-            cmake-linux_x86.tar.gz
-            cmake-linux_arm64.tar.gz
+            cmake-linux_x86_64.zip
+            cmake-linux_x86.zip
+            cmake-linux_arm64.zip
+            cmake-darwin_universal.zip
