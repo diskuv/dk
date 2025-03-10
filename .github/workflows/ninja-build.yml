@@ -64,15 +64,15 @@ jobs:
         if: matrix.testable
         run: out/usr/local/src/ninja-build/ninja --version
 
-      - name: Rename ninja binary to ninja-${{ matrix.dkml_target_abi }}
-        run: mv out/usr/local/src/ninja-build/ninja ninja-${{ matrix.dkml_target_abi }}
+      - name: Bundle ninja-${{ matrix.dkml_target_abi }}.zip
+        run: X=$(pwd) && cd out/usr/local/src/ninja-build/ && zip -y $X/ninja-${{ matrix.dkml_target_abi }} ninja
 
-      - name: Upload ninja binary
+      - name: Upload ninja archive
         uses: actions/upload-artifact@v4
         with:
           retention-days: 30
           name: ninja-${{ matrix.dkml_target_abi }}
-          path: ninja-${{ matrix.dkml_target_abi }}
+          path: ninja-${{ matrix.dkml_target_abi }}.zip
 
   publish:
     permissions:
@@ -81,7 +81,7 @@ jobs:
     needs: build-static
     if: startsWith(github.ref, 'refs/tags/ninja-')
     steps:
-      - name: Download ninja binaries
+      - name: Download ninja archives
         uses: actions/download-artifact@v4
         with:
             pattern: ninja-*
@@ -90,6 +90,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ninja-linux_x86_64
-            ninja-linux_x86
-            ninja-linux_arm64
+            ninja-linux_x86_64.zip
+            ninja-linux_x86.zip
+            ninja-linux_arm64.zip

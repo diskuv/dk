@@ -72,7 +72,7 @@ jobs:
       - name: Bundle cmake-${{ matrix.dkml_target_abi }}.zip
         run: X=$(pwd) && cd out/usr/local && zip -y -r $X/cmake-${{ matrix.dkml_target_abi }} cmake
 
-      - name: Upload cmake archives
+      - name: Upload cmake archive
         uses: actions/upload-artifact@v4
         with:
           retention-days: 30
