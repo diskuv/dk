@@ -54,12 +54,12 @@ HERE
   directory that ./dk lives.
   This is useful as the first step in adding ./dk to a
   new project:
-    git clone https://github.com/diskuv/dkcoder.git
-    dkcoder/dk user.dkml.wrapper.upgrade HERE
+    git clone https://github.com/diskuv/dk.git
+    dk/dk user.dkml.wrapper.upgrade HERE
 
 DONE
-  Remove the dkcoder/ created by a prior invocation of:
-    git clone https://github.com/diskuv/dkcoder.git
+  Remove the dk/ created by a prior invocation of:
+    git clone https://github.com/diskuv/dk.git
   This is useful as the final step in adding ./dk to a
   new project.
 ]])

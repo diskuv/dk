@@ -1,4 +1,4 @@
-# DkCoder - Scripting at Scale
+# dk - A script runner and cross-compiler
 
 > A few clicks from your web browser and four (4) minutes
 > later you and your Windows and macOS users can start
@@ -58,16 +58,16 @@ git clone --branch V0_3 https://gitlab.com/diskuv/samples/devops/DkSubscribeWebh
 In Windows PowerShell, macOS and desktop Linux:
 
 ```sh
-git clone https://github.com/diskuv/dkcoder.git
-dkcoder/dk user.dkml.wrapper.upgrade HERE
+git clone https://github.com/diskuv/dk.git
+dk/dk user.dkml.wrapper.upgrade HERE
 ./dk dkml.wrapper.upgrade DONE
 ```
 
 In Windows Command Prompt:
 
 ```dosbatch
-git clone https://github.com/diskuv/dkcoder.git
-dkcoder\dk user.dkml.wrapper.upgrade HERE
+git clone https://github.com/diskuv/dk.git
+dk\dk user.dkml.wrapper.upgrade HERE
 .\dk dkml.wrapper.upgrade DONE
 ```
 

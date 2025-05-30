@@ -90,12 +90,12 @@ Getting Started
 
    Use the following commands:
 
-     git clone https://github.com/diskuv/dkcoder.git
-     dkcoder/dk @ARG_COMMAND@
+     git clone https://github.com/diskuv/dk.git
+     dk/dk @ARG_COMMAND@
 
    Experienced user? Get more help with:
 
-     dkcoder/dk @ARG_COMMAND@ MOREHELP
+     dk/dk @ARG_COMMAND@ MOREHELP
 ]])
     string(CONFIGURE "${msg}" msg @ONLY)
     message(${ARG_MODE} ${msg})
