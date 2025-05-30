@@ -1,3 +1,16 @@
+(*************************************************************************
+ * File: dkcoder/src/DkStd_Std/Project/Init.ml                           *
+ *                                                                       *
+ * Copyright 2025 Diskuv, Inc.                                           *
+ *                                                                       *
+ * Licensed under the Open Software License version 3.0                  *
+ * (the "License"); you may not use this file except in compliance       *
+ * with the License. You may obtain a copy of the License at             *
+ *                                                                       *
+ *     https://opensource.org/license/osl-3-0-php/                       *
+ *                                                                       *
+ *************************************************************************)
+
 module Arg = Tr1Stdlib_V414CRuntime.Arg
 module Bos = Tr1Bos_Std.Bos
 module Format = Tr1Stdlib_V414CRuntime.Format
@@ -38,7 +51,7 @@ let speclist =
   [
     ("-verbose", Arg.Set verbose, "Output debug information.");
     ("-delete-dkcoder-after", Arg.Set delete_dkcoder_after, "Delete the DKCODER_PROJECT_DIR after the NEW_PROJECT_DIR is initialized.");
-    ("-windows-boot", Arg.Set windows_boot, "Do git init if necessary and then copy dk.cmd and __dk.cmake. No other steps are performed. The copied scripts are all that are necessary to run `DkStd_Std.Project.Init -delete-dkcoder-after`. The separate step is necessary so that the running dk.cmd is not deleted, which Command Prompt does not support.");
+    ("-windows-boot", Arg.Set windows_boot, "Do git init if necessary and then copy dk.cmd. No other steps are performed. The copied scripts are all that are necessary to run `DkStd_Std.Project.Init -delete-dkcoder-after`. The separate step is necessary so that the running dk.cmd is not deleted, which Command Prompt does not support.");
   ]
 
 
@@ -151,7 +164,7 @@ let () =
   if not (Bos.OS.Dir.exists Fpath.(new_project_dirp / ".git") |> Utils.rmsg) then
     Utils.git ~slots ["init"; "--quiet"; "--initial-branch=main"];
 
-  (* dk, dk.cmd, __dk.cmake, .gitattributes *)
+  (* dk, dk.cmd, .gitattributes *)
   let copy_if ?mode s =
     let src = Fpath.(dkcoder_project_dirp / s) in
     let dest = Fpath.(new_project_dirp / s) in
@@ -160,7 +173,6 @@ let () =
       DkFs_C99.File.copy ?mode ~src ~dest () |> Utils.rmsg)
   in
   copy_if "dk.cmd";
-  copy_if "__dk.cmake";
   (*    Stop here if [windows_boot]. *)
   if !windows_boot then exit 0;
   copy_if ~mode:0o755 "dk";
@@ -215,7 +227,7 @@ let () =
   in
 
   (* git add, git update-index *)
-  let project_files = ["dk"; "dk.cmd"; "__dk.cmake"; 
+  let project_files = ["dk"; "dk.cmd"; 
     ".gitattributes"; ".gitignore";
     ".ocamlformat";
     ".vscode/settings.json"; ".vscode/extensions.json"]

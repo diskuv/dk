@@ -105,7 +105,7 @@ macro(_install_android_studio_helper ARCHIVE_NAME TYPE)
         EXPECTED_HASH SHA256=${android_studio_256_${TYPE}})
 endmacro()
 
-# Clone of internal section in __dk.cmake:__dkcoder_abi
+# Clone of internal section in legacy __dk.cmake:__dkcoder_abi
 function(find_macos_host_abi)
     execute_process(COMMAND /usr/sbin/sysctl -n machdep.cpu.brand_string
             OUTPUT_VARIABLE brand_string

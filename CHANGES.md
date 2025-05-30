@@ -1,6 +1,8 @@
 # Changes
 
-## Pending
+## 2.3.202505282324
+
+- Moved to dkcoder based `dk` executable which is downloaded by `./dk` and `./dk.cmd`. No CMake is required, so `__dk.cmake` is no longer necessary.
 
 ## 2.2.1.4
 

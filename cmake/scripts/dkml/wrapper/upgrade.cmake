@@ -18,13 +18,13 @@ function(help)
     endif()
     message(${ARG_MODE} [[usage: ./dk dkml.wrapper.upgrade
 
-Upgrade ./dk, ./dk.cmd and __dk.cmake.
+Upgrade ./dk and ./dk.cmd.
 
 If there is a .git/ directory and no .gitattributes then a 
 default .gitattributes configuration file is added.
 
-And if there is a .git/ directory the .gitattributes, ./dk, ./dk.cmd
-and __dk.cmake are added to Git.
+And if there is a .git/ directory the .gitattributes, ./dk
+and ./dk.cmd are added to Git.
 
 Usage
 =====
@@ -248,11 +248,9 @@ function(run)
     cmake_path(SET path_dk "dk")
     cmake_path(SET path_dkcmd "dk.cmd")
     cmake_path(SET path_gitattributes ".gitattributes")
-    cmake_path(SET path_dkfindscriptscmake "__dk.cmake")
     cmake_path(APPEND d ${path_dk} OUTPUT_VARIABLE file_dk)
     cmake_path(APPEND d ${path_dkcmd} OUTPUT_VARIABLE file_dkcmd)
     cmake_path(APPEND d ${path_gitattributes} OUTPUT_VARIABLE file_gitattributes)
-    cmake_path(APPEND d ${path_dkfindscriptscmake} OUTPUT_VARIABLE file_dkfindscriptscmake)
 
     # validate
     if(NOT EXISTS ${file_dk})
@@ -260,9 +258,6 @@ function(run)
     endif()
     if(NOT EXISTS ${file_dkcmd})
       message(FATAL_ERROR "Missing 'dk.cmd' at expected ${file_dkcmd}")
-    endif()
-    if(NOT EXISTS ${file_dkfindscriptscmake})
-      message(FATAL_ERROR "Missing '__dk.cmake' at expected ${file_dkfindscriptscmake}")
     endif()
 
     # DONE?
@@ -293,13 +288,10 @@ Congratulations. Let's get building!
     file(INSTALL "${file_dkcmd}"
         DESTINATION "${dest}"
         FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
-    file(INSTALL "${file_dkfindscriptscmake}"
-        DESTINATION "${dest}"
-        FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
     file(INSTALL "${file_dk}"
         DESTINATION "${dest}"
         FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-    set(paths_ADDED "${path_dk}" "${path_dkcmd}" "${path_dkfindscriptscmake}")
+    set(paths_ADDED "${path_dk}" "${path_dkcmd}")
 
     # deletions
     set(paths_DELETED)

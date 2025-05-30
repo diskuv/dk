@@ -18,18 +18,34 @@
 # Invoking: ./dk
 #   That works in Powershell on Windows, and in Unix. Copy-and-paste works!
 #
-# Purpose: Install CMake if not already. Then invoke CMake.
+# Purpose: Install DkCoder if not present. Then invoke DkCoder.
 
 set -euf
 
+# Update within dksdk-coder:
+#   f_dk() { jq -r 'def ck(p): .files[] | select(.path == p).checksum.sha256; { majminpat_ver:.listing_unencrypted.version, ck_darwin_arm64:ck("dk-darwin_arm64"), ck_darwin_x86_64:ck("dk-darwin_x86_64"), ck_linux_x86_64:ck("dist/dk-linux_x86_64"), ck_linux_x86:ck("dist/dk-linux_x86"), fn:input_filename } | "# "+.fn+"\n"+"majminpat_ver="+.majminpat_ver+"\n"+"cksum256_darwin_arm64="+.ck_darwin_arm64+"\n"+"cksum256_darwin_x86_64="+.ck_darwin_x86_64+"\n"+"cksum256_linux_x86="+.ck_linux_x86+"\n"+"cksum256_linux_x86_64="+.ck_linux_x86_64 ' $1 }
+#   eval $(awk '$2=="f_dk()" {$1=""; print}' dk-new) # avoids typing the line above
+#   f_dk packaging/specs/2.3.202505280211.json
+# -------------------------------------
+# packaging/specs/2.3.202505282324.json
+majminpat_ver=2.3.202505282324
+cksum256_darwin_arm64=2a85f4e9a823bc371639f9856189399414d87bd9c938be843c3f579183750e0c
+cksum256_darwin_x86_64=057995e1e6ba23049be2096a80cce0ab8c303e74c6d877d2c0f7a2c42cdf487a
+cksum256_linux_x86=3bf9c1c71faac7b0750870c5e51997ddc5d06887701fcee3ac28b1a5fb5e3a0d
+cksum256_linux_x86_64=df93ac0895c4c0099a21744768b0a42eb62eb54be9c3ed4c799cc7054ec8e982
+
 dk_pwd=$PWD
 
-# --- Quiet or Away mode detection ---
-# Any command like ./dk DkRun_V0_1.RunQuiet that ends in "Quiet".
+# --- Quiet mode detection ---
+# Any command like ./dk StdStd_V0_1.RunQuiet that ends in "Quiet".
 # However, for user safety won't quiet a command if `sudo` is required.
+#
+# Enabled? If suffix of the first argument is "Quiet"
+# Example: `StdStd_V0_1.RunQuiet`
+# Edge Case: `--fixed-length-modules false RunQuiet` for IDE integration
 
 DKCODER_QUIET=0
-DKCODER_AWAY=0
+_DKEXE_OPTIONS=
 run_maybe_quiet() {
   "$@" >&2 # Always redirect stdout to stderr in this script
 }
@@ -42,14 +58,24 @@ if [ $# -ge 1 ]; then
   case "$1" in
     *Quiet)
       DKCODER_QUIET=1
+      _DKEXE_OPTIONS="-l ERROR"
       run_maybe_quiet() {
         "$@" > /dev/null 2> /dev/null
       }
       printf_maybe_quiet() {
         true
       } ;;
-    *Away)
-      DKCODER_AWAY=1
+  esac
+  case "${3:-}" in # Edge Case
+    *Quiet)
+      DKCODER_QUIET=1
+      _DKEXE_OPTIONS="-l ERROR"
+      run_maybe_quiet() {
+        "$@" > /dev/null 2> /dev/null
+      }
+      printf_maybe_quiet() {
+        true
+      } ;;
   esac
 fi
 
@@ -487,9 +513,9 @@ autodetect_system_binaries
 autodetect_buildhost_arch
 
 # Use the project tree as the current directory
-PROJ_DIR=$(dirname "$0")
-PROJ_DIR=$(cd "$PROJ_DIR" && pwd)
-cd "$PROJ_DIR"
+DKCODER_PROJECT_DIR=$(dirname "$0")
+DKCODER_PROJECT_DIR=$(cd "$DKCODER_PROJECT_DIR" && pwd)
+cd "$DKCODER_PROJECT_DIR"
 
 # --- DkCoder data home ---
 
@@ -503,8 +529,8 @@ fi
 #   2. Check if CI since many CI providers can only cache content in a subdirectory
 #      of the project.
 if [ -z "$tools_dir" ] && [ "${CI:-}" = true ]; then
-  install -d "$PROJ_DIR/.z-dk/tools"
-  tools_dir="$PROJ_DIR/.z-dk/tools"
+  install -d "$DKCODER_PROJECT_DIR/.z-dk/tools"
+  tools_dir="$DKCODER_PROJECT_DIR/.z-dk/tools"
 fi
 #   3. Check in locations rooted under /opt/diskuv
 #      We look under a /opt/diskuv early because
@@ -547,18 +573,6 @@ fi
 # PREREQS
 # -------
 
-cmake_majminpat_ver=3.25.2
-cmake_cksum256_darwin_universal="a988e2a69c1d105987f12782ee0fa80d6be941b3e1a68b4bd6a661f0fdb56d75"
-cmake_cksum256_linux_arm64="98cbec4d939adecc0a52b0bf2d537ebbcd629f9ac4d935b399619faa4d4f0d44"
-cmake_cksum256_linux_x86_64="6fc551dcd74ca93e155b54b5537f5659e072031e8dc07160b9d4e92f5ee375b8"
-cmake_cksum256_linux_x86="0e4b95fd912896e5f85480a2c0a09e863d4f6d44acf1e5070ef257fe041d1d0c"
-
-ninja_majminpat_ver=1.12.1
-ninja_cksum256_darwin_universal="89a287444b5b3e98f88a945afa50ce937b8ffd1dcc59c555ad9b1baf855298c9"
-ninja_cksum256_linux_arm64="70d0c5f7dfc0d2aa6af85b1190e75cd01275d2cb9f010df227256829c92a8ee3"
-ninja_cksum256_linux_x86_64="7223fda005b060cec765868576c0db5035fdb8fa1cce2d89ab9ca95045e55122"
-ninja_cksum256_linux_x86="abe169ccb576c9983537cf94fd144b36f9f3ce712f240ced45ad9488399c7e29"
-
 install_linux_prog() {
   install_linux_prog_NAME=$1
   shift
@@ -598,287 +612,68 @@ install_linux_prog() {
   fi
 }
 
-get_homebrew_binary() {
-  get_homebrew_binary_NAME=$1
-  shift
-  if command -v brew > /dev/null 2> /dev/null; then
-    get_homebrew_binary_PREFIX=$(brew --prefix)
-    if [ -x "$get_homebrew_binary_PREFIX/bin/$get_homebrew_binary_NAME" ]; then
-      export DK_PROG_INSTALLED_LOCATION="$get_homebrew_binary_PREFIX/bin/$get_homebrew_binary_NAME"
-      return 0
-    fi
-  fi
-  return 1
-}
-
-install_macos_prog() {
-  install_macos_prog_NAME=$1
-  shift
-  install_macos_prog_PKG=$1
-  shift
-  if [ -x "/usr/bin/$install_macos_prog_NAME" ]; then
-    export DK_PROG_INSTALLED_LOCATION="/usr/bin/$install_macos_prog_NAME"
-  elif [ -x "/bin/$install_macos_prog_NAME" ]; then
-    export DK_PROG_INSTALLED_LOCATION="/bin/$install_macos_prog_NAME"
-  elif [ -x "/usr/local/bin/$install_macos_prog_NAME" ]; then
-    export DK_PROG_INSTALLED_LOCATION="/usr/local/bin/$install_macos_prog_NAME"
-  elif get_homebrew_binary "$install_macos_prog_NAME"; then
-    # DK_PROG_INSTALLED_LOCATION already set by [get_homebrew_binary]
-    true
-  else
-    if command -v brew > /dev/null 2> /dev/null; then
-      run_maybe_quiet brew install --quiet --formula "$install_macos_prog_PKG"
-      get_homebrew_binary "$install_macos_prog_NAME"
-      # DK_PROG_INSTALLED_LOCATION already set by [get_homebrew_binary]
-    elif command -v port > /dev/null 2> /dev/null; then
-      if [ "$(id -u)" -eq 0 ]; then
-        run_maybe_quiet port install "$install_macos_prog_PKG"
-      else
-        echo "Running: sudo port install $install_macos_prog_PKG" >&2
-        sudo port install "$install_macos_prog_PKG"
-      fi
-      DK_PROG_INSTALLED_LOCATION=$(command -v "$install_macos_prog_NAME")
-      export DK_PROG_INSTALLED_LOCATION
-    else
-      echo "FATAL: Neither Homebrew nor MacPorts are available on your macOS. You can follow https://docs.brew.sh/Installation to install Homebrew." >&2
-      exit 2
-    fi
-  fi
-}
-
 case "$BUILDHOST_ARCH" in
   linux_*)
     #   Need either [wget] or [curl] for [downloadfile]
     if [ ! -x /usr/bin/wget ] && [ ! -x /bin/wget ] && [ ! -x /usr/bin/curl ] && [ ! -x /bin/curl ]; then
       install_linux_prog wget wget wget || install_linux_prog curl curl curl
     fi
-    #   For handling tar balls later in this script
-    install_linux_prog tar tar tar
     ;;
 esac
 
-# NINJA
 # -----
-#   We need a valid CMAKE_GENERATOR to do FetchContent_Populate() in script mode
-
-NINJA_EXE=
-
-ninja_destdir=$tools_dir/ninja-$ninja_majminpat_ver
-install -d "$tools_dir/dl"
-download_ninja() {
-  case "$BUILDHOST_ARCH" in
-    darwin_*)
-      printf_maybe_quiet "%s\n\n" "-- Downloading ninja-v$ninja_majminpat_ver for macOS"
-      downloadfile \
-        "https://github.com/ninja-build/ninja/releases/download/v$ninja_majminpat_ver/ninja-mac.zip" \
-        "$tools_dir/dl/ninja.zip" \
-        $ninja_cksum256_darwin_universal ;;
-    linux_x86_64)
-      printf_maybe_quiet "%s\n\n" "-- Downloading ninja-v$ninja_majminpat_ver for Linux x86_64"
-      downloadfile \
-        "https://github.com/diskuv/dkcoder/releases/download/ninja-$ninja_majminpat_ver/ninja-linux_x86_64" \
-        "$tools_dir/dl/ninja" \
-        $ninja_cksum256_linux_x86_64 ;;
-    linux_x86)
-      printf_maybe_quiet "%s\n\n" "-- Downloading ninja-v$ninja_majminpat_ver for Linux x86"
-      downloadfile \
-        "https://github.com/diskuv/dkcoder/releases/download/ninja-$ninja_majminpat_ver/ninja-linux_x86" \
-        "$tools_dir/dl/ninja" \
-        $ninja_cksum256_linux_x86 ;;
-    linux_arm64)
-      printf_maybe_quiet "%s\n\n" "-- Downloading ninja-v$ninja_majminpat_ver for Linux arm64"
-      downloadfile \
-        "https://github.com/diskuv/dkcoder/releases/download/ninja-$ninja_majminpat_ver/ninja-linux_arm64" \
-        "$tools_dir/dl/ninja" \
-        $ninja_cksum256_linux_arm64 ;;
-  esac
-}
-export_ninja_vars() {
-  if [ -z "${NINJA_EXE:-}" ]; then
-    case "$BUILDHOST_ARCH" in
-      darwin_*)
-        NINJA_EXE="$ninja_destdir/bin/ninja" ;;
-      linux_*)
-        NINJA_EXE="$ninja_destdir/bin/ninja" ;;
-    esac
-  fi
-}
-have_correct_ninja=0
-if [ -x "$tools_dir/ninja-$ninja_majminpat_ver/bin/ninja" ]; then
-  # shellcheck disable=SC2016
-  have_correct_ninja_VER=$("$tools_dir/ninja-$ninja_majminpat_ver/bin/ninja" --version)
-  if [ "$have_correct_ninja_VER" = "$ninja_majminpat_ver" ]; then
-    have_correct_ninja=1
-  fi
-fi
-if [ $have_correct_ninja -eq 0 ]; then
-  download_ninja
-fi
-#   Handle executable or zip
-if [ -e "$tools_dir/dl/ninja" ]; then
-  install -d "$ninja_destdir/bin"
-  install "$tools_dir/dl/ninja" "$ninja_destdir/bin/"
-elif [ -e "$tools_dir/dl/ninja.zip" ]; then
-  # Only macOS at this point. And macOS distributes 'unzip'.
-  rm -rf "$tools_dir/ninja-$ninja_majminpat_ver"
-  cd "$tools_dir/dl"
-  rm -f ninja
-  unzip -q ninja.zip
-  rm -f ninja.zip
-  cd - > /dev/null
-  install -d "$ninja_destdir/bin"
-  mv "$tools_dir/dl/ninja" "$ninja_destdir/bin/"
-fi
-
-# Set NINJA_EXE
-export_ninja_vars
-if [ -z "${NINJA_EXE:-}" ]; then
-  echo "This platform is not supported. No ninja download logic has been added" >&2
-  exit 1
-fi
-
-# Validate
-"$NINJA_EXE" --version > /dev/null
-
-# CMAKE
+# dk executable
 # -----
 
-cmake_base=
-cmake_bindir=
-cmake_destdir=$tools_dir/cmake-$cmake_majminpat_ver
-install -d "$tools_dir/dl"
-download_cmake() {
-  case "$BUILDHOST_ARCH" in
-    linux_x86_64) cmake_cksum256_linux=$cmake_cksum256_linux_x86_64 ;;
-    linux_x86) cmake_cksum256_linux=$cmake_cksum256_linux_x86 ;;
-    linux_arm64) cmake_cksum256_linux=$cmake_cksum256_linux_arm64
+DK_EXE=
+
+destdir=$tools_dir/dkexe-$majminpat_ver-$BUILDHOST_ARCH
+install -d "$destdir"
+download_helper() {
+  download_helper_OS=$1; shift
+  download_helper_CKSUM=$1; shift
+  download_helper_SUBPATH=
+  case "$download_helper_OS" in
+    Linux|Windows) download_helper_SUBPATH=dist/
   esac
+  printf_maybe_quiet "%s dk-%s for %s\n\n" "-- Downloading" "$majminpat_ver" "$download_helper_OS"
+  downloadfile \
+    "https://diskuv.com/a/dk-distribution/$majminpat_ver/${download_helper_SUBPATH}dk-$BUILDHOST_ARCH" \
+    "$destdir/dk" \
+    "$download_helper_CKSUM"
+}
+download_dk() {
   case "$BUILDHOST_ARCH" in
-    darwin_*)
-      cmake_base="cmake-$cmake_majminpat_ver-macos10.10-universal"
-      printf_maybe_quiet "%s\n\n" "-- Downloading cmake-$cmake_majminpat_ver for macOS"
-      downloadfile \
-        "https://github.com/Kitware/CMake/releases/download/v$cmake_majminpat_ver/$cmake_base.tar.gz" \
-        "$tools_dir/dl/cmake.tar.gz" \
-        $cmake_cksum256_darwin_universal
-      cmake_bindir="$cmake_destdir/bin"
-      ;;
-    linux_x86_64|linux_x86|linux_arm64)
-      cmake_base=.
-      printf_maybe_quiet "%s\n\n" "-- Downloading cmake-$cmake_majminpat_ver for $BUILDHOST_ARCH"
-      downloadfile \
-        "https://github.com/diskuv/dkcoder/releases/download/cmake-$cmake_majminpat_ver/cmake-$BUILDHOST_ARCH.tar.gz" \
-        "$tools_dir/dl/cmake.tar.gz" \
-        "$cmake_cksum256_linux"
-      cmake_bindir="$cmake_destdir/bin"
-      ;;
+    darwin_arm64) download_helper macOS $cksum256_darwin_arm64 ;;
+    darwin_x86_64) download_helper macOS $cksum256_darwin_x86_64 ;;
+    linux_x86_64) download_helper Linux $cksum256_linux_x86_64 ;;
+    linux_x86) download_helper Linux $cksum256_linux_x86 ;;
+    *) echo "FATAL: There is no support for $BUILDHOST_ARCH" >&2; exit 3 ;;
   esac
 }
-export_cmake_vars() {
-  case "$BUILDHOST_ARCH" in
-    darwin_*)
-      cmake_bindir="$cmake_destdir/bin" ;;
-    linux_x86_64|linux_x86|linux_arm64)
-      cmake_bindir="$cmake_destdir/bin" ;;
-  esac
-}
-have_correct_cmake=0
-if [ -x "$tools_dir/cmake-$cmake_majminpat_ver/bin/cmake" ]; then
+have_correct_dk=0
+if [ -x "$destdir/dk" ]; then
   # shellcheck disable=SC2016
-  have_correct_cmake_VER=$("$tools_dir/cmake-$cmake_majminpat_ver/bin/cmake" --version | $DKMLSYS_AWK 'NR==1{print $NF}')
-  if [ "$have_correct_cmake_VER" = "$cmake_majminpat_ver" ]; then
-    have_correct_cmake=1
+  have_correct_VER=$("$destdir/dk" --version)
+  if [ "$have_correct_VER" = "$majminpat_ver" ]; then
+    have_correct_dk=1
   fi
 fi
-if [ $have_correct_cmake -eq 0 ]; then
-  download_cmake
-fi
-#   Handle tarball
-if [ -e "$tools_dir/dl/cmake.tar.gz" ] && [ -n "$cmake_base" ]; then
-  rm -rf "$tools_dir/cmake-$cmake_majminpat_ver"
-  install -d "$cmake_destdir"
-  #   nit: BusyBox has a strict command line argument parsing ...
-  #   tar c|x|t [-ZzJjahmvokO] [-f TARFILE] [-C DIR] [-T FILE] [-X FILE] [LONGOPT]... [FILE]...
-  tar x -z -f "$tools_dir/dl/cmake.tar.gz" -C "$cmake_destdir"
-  rm -f "$tools_dir/dl/cmake.tar.gz"
-  set +f
-  if [ ! "." = "$cmake_base" ]; then
-    if [ -e "$cmake_destdir/$cmake_base/CMake.app" ]; then
-        mv "$cmake_destdir/$cmake_base/CMake.app/Contents"/* "$cmake_destdir/"
-    else
-        mv "$cmake_destdir/$cmake_base"/* "$cmake_destdir/"
-    fi
-  fi
-  set -f
+if [ $have_correct_dk -eq 0 ]; then
+  download_dk
+  chmod +x "$destdir/dk"
 fi
 
-# Put cmake in PATH
-export_cmake_vars
-if [ ! "$cmake_bindir" = "/usr/bin" ]; then
-  true
-elif [ -n "$cmake_bindir" ] && [ -d "$cmake_bindir" ]; then
-  tools_bin_dir=$(cd "$cmake_bindir" && pwd)
-  export PATH="$tools_bin_dir:$PATH"
-  unset tools_bin_dir
-else
-  echo "This platform is not supported. No cmake 3.25+ download logic has been added" >&2
-  exit 1
-fi
+# Set DK_EXE
+DK_EXE="$destdir/dk"
 
-# Validate
-"$cmake_bindir/cmake" --version > /dev/null
+# --- Run dk executable ---
 
-# --- Create an 8-byte nonce ---
+#   We already changed to DKCODER_PROJECT_DIR earlier. Be explicit anyway.
+cd "$DKCODER_PROJECT_DIR"
 
-# Always prefer (in order):
-#   /usr/bin/openssl rand
-#   /usr/bin/dd status=none if=/dev/urandom count=8 bs=1 | /usr/bin/od -An -t x8 | /usr/bin/tr -cd 0-9A-Fa-f
-
-if [ -x /usr/bin/openssl ]; then
-  dk_nonce=$(/usr/bin/openssl rand -hex 8)
-elif [ -b /dev/urandom ] && [ -x /usr/bin/dd ] && [ -x /usr/bin/od ] && [ -x /usr/bin/tr ]; then
-  dk_nonce=$(/usr/bin/dd status=none if=/dev/urandom count=8 bs=1 | /usr/bin/od -An -t x8 | /usr/bin/tr -cd 0-9A-Fa-f)
-else
-  # Default to the PID which should not be predictable on safe operating systems
-  dk_nonce=$$
-fi
-
-# --- Console ---
-
-if [ -t 0 ]; then
-  dk_tty=1
-else
-  dk_tty=0
-fi
-
-# --- Run finder script ---
-
-dk_work=$tools_dir/work
-
-if [ "$DKCODER_AWAY" -eq 0 ]; then cd "$PROJ_DIR"; fi
-
-"$cmake_bindir/cmake" \
-  -D CMAKE_GENERATOR=Ninja -D CMAKE_MAKE_PROGRAM="$NINJA_EXE" \
-  -D "DKCODER_PWD:FILEPATH=$dk_pwd" \
-  -D "DKCODER_ARG0:FILEPATH=$0" \
-  -D "DKCODER_DATA_HOME:FILEPATH=$tools_dir" \
-  -D "DKCODER_WORKDIR:FILEPATH=$dk_work" \
-  -D "DKCODER_NONCE:STRING=$dk_nonce" \
-  -D "DKCODER_TTY:STRING=$dk_tty" \
-  -D "DKCODER_CMDLINE:STRING=$*" \
-  -P "$PROJ_DIR/__dk.cmake"
-
-# --------------- Execute post-command outside of CMake --------------
-# Sometimes a command wants to own the terminal or the command line arguments.
-# CMake, for example, intercepts the Ctrl-C signal in buggy ways:
-# https://stackoverflow.com/questions/75071180/pass-ctrlc-to-cmake-custom-command-under-vscode
-
-cleanup() {
-  PATH=/usr/bin:/bin rm -f "$dk_work/$dk_nonce.sh"
-}
-
-if [ -e "$dk_work/$dk_nonce.sh" ]; then
-  trap cleanup EXIT
-  /bin/sh "$dk_work/$dk_nonce.sh" "$@"
-  cleanup
-fi
+export DKCODER_ARG0="$0"
+export DKCODER_PWD="$dk_pwd"
+export DKCODER_PROJECT_DIR
+#   shellcheck disable=SC2086
+exec "$DK_EXE" $_DKEXE_OPTIONS "$@"

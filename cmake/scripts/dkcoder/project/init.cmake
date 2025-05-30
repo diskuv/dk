@@ -23,13 +23,13 @@ function(help)
 
     set(msg [[usage: ./dk @ARG_COMMAND@ <options>
 
-Installs ./dk, ./dk.cmd and __dk.cmake in the current directory.
+Installs ./dk and ./dk.cmd in the current directory.
 
 If there is a .git/ directory and no .gitattributes then a
 default .gitattributes configuration file is added.
 
-And if there is a .git/ directory the .gitattributes, ./dk, ./dk.cmd
-and __dk.cmake are added to Git.
+And if there is a .git/ directory the .gitattributes, ./dk
+and ./dk.cmd are added to Git.
 
 Arguments
 =========
@@ -143,7 +143,7 @@ macro(dkcoder_project_init)
         file(CONFIGURE OUTPUT "${DKCODER_POST_SCRIPT}" CONTENT [[
 CD /D "@CMAKE_CURRENT_BINARY_DIR_NATIVE@"
 
-REM 1. We copy the dk.cmd and __dk.cmake to the new project directory
+REM 1. We copy the dk.cmd to the new project directory
 CALL "@dk_cmd_NATIVE@" @dk_run@ --generator dune --you-dir "@CMAKE_SOURCE_DIR_NATIVE@\src" -- DkStd_Std.Project.Init -windows-boot @init_OPTIONS@ "@DKCODER_PWD_NATIVE@" "@CMAKE_SOURCE_DIR_NATIVE@"
 IF %ERRORLEVEL% NEQ 0 EXIT /B %ERRORLEVEL%
 

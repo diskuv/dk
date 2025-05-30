@@ -35,7 +35,6 @@ folder for both the Major.Minor and Major.Minor.Patch formats.
 │   └── dk-version/
 │       └── majminpat
 │       └── majmin
-├── __dk.cmake
 ├── dk
 ├── dk.cmd
 ├── dkproject.jsonc

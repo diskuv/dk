@@ -71,16 +71,22 @@ dkcoder\dk user.dkml.wrapper.upgrade HERE
 .\dk dkml.wrapper.upgrade DONE
 ```
 
+## Known Issues
+
+The `dk` executable on Windows requires Visual C++ redistributables. They are typically already
+present on PCs, except brand-new PCs. You may need to download and install
+the [Visual C++ redistributables from Microsoft](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
+
 ## Quiet Mode
 
-Any command that ends in `Quiet`, like `./dk DkRun_Env.RunQuiet`, will not print messages while dk initializes itself.
+Any command that ends in `Quiet`, like `./dk RunQuiet`, will not print messages while dk initializes itself.
 However, if `sudo` is required for elevation, then commands will be echoed to the terminal.
 
 ## Licenses
 
 Copyright 2023 Diskuv, Inc.
 
-The `./dk`, `./dk.cmd` and `__dk.cmake` build scripts ("dk") are
+The `./dk` and `./dk.cmd` build scripts ("dk") are
 available under the Open Software License version 3.0,
 <https://opensource.org/license/osl-3-0-php/>.
 A guide to the Open Software License version 3.0 is available at
