@@ -113,7 +113,7 @@ IF "%PROGRAMFILES(x86)%" == "" (
         IF NOT "%DK_CKSUM_WINDOWS_X86%" == "" RD "%TEMP%\%DK_CKSUM_WINDOWS_X86%" /s /q
     )
 ) ELSE (
-    SET "DK_EXEDIR=%DK_DATA_HOME%\dkexe-%DK_VER%-windows_x86"
+    SET "DK_EXEDIR=%DK_DATA_HOME%\dkexe-%DK_VER%-windows_x86_64"
     IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!"
     SET "DK_EXE=!DK_EXEDIR!\dk.exe"
     IF NOT EXIST "!DK_EXE!" (
