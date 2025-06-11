@@ -1,3 +1,6 @@
+# signify from dksdk-coder/src/DkCoder_Std/PublicKeys.ml
+/build/
+
 # ./dk dksdk.cmd.exec
 /_build/dksdk-cmd-exe.log
 # ./dk dksdk.android.studio.download
