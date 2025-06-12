@@ -23,16 +23,17 @@
 set -euf
 
 # Update within dksdk-coder:
-#   f_dk() { jq -r 'def ck(p): .files[] | select(.path == p).checksum.sha256; { majminpat_ver:.listing_unencrypted.version, ck_darwin_arm64:ck("dk-darwin_arm64"), ck_darwin_x86_64:ck("dk-darwin_x86_64"), ck_linux_x86_64:ck("dist/dk-linux_x86_64"), ck_linux_x86:ck("dist/dk-linux_x86"), fn:input_filename } | "# "+.fn+"\n"+"majminpat_ver="+.majminpat_ver+"\n"+"cksum256_darwin_arm64="+.ck_darwin_arm64+"\n"+"cksum256_darwin_x86_64="+.ck_darwin_x86_64+"\n"+"cksum256_linux_x86="+.ck_linux_x86+"\n"+"cksum256_linux_x86_64="+.ck_linux_x86_64 ' $1 }
-#   eval $(awk '$2=="f_dk()" {$1=""; print}' dk-new) # avoids typing the line above
+#   f_dk() { jq -r 'def ck(p): .files[] | select(.path == p).checksum.sha256; { majminpat_ver:.listing_unencrypted.version, ck_darwin_arm64:ck("dk-darwin_arm64"), ck_darwin_x86_64:ck("dk-darwin_x86_64"), ck_linux_x86_64:ck("dk-linux_x86_64"), ck_linux_x86:ck("dk-linux_x86"), fn:input_filename } | "# "+.fn+"\n"+"majminpat_ver="+.majminpat_ver+"\n"+"cksum256_darwin_arm64="+.ck_darwin_arm64+"\n"+"cksum256_darwin_x86_64="+.ck_darwin_x86_64+"\n"+"cksum256_linux_x86="+.ck_linux_x86+"\n"+"cksum256_linux_x86_64="+.ck_linux_x86_64 ' $1; }
+#   eval $(awk '$2=="f_dk()" {$1=""; print}' dk) # avoids typing the line above
 #   f_dk packaging/specs/2.3.202505280211.json
 # -------------------------------------
-# packaging/specs/2.3.202505282324.json
-majminpat_ver=2.3.202505282324
-cksum256_darwin_arm64=2a85f4e9a823bc371639f9856189399414d87bd9c938be843c3f579183750e0c
-cksum256_darwin_x86_64=057995e1e6ba23049be2096a80cce0ab8c303e74c6d877d2c0f7a2c42cdf487a
-cksum256_linux_x86=3bf9c1c71faac7b0750870c5e51997ddc5d06887701fcee3ac28b1a5fb5e3a0d
-cksum256_linux_x86_64=df93ac0895c4c0099a21744768b0a42eb62eb54be9c3ed4c799cc7054ec8e982
+# packaging/specs/2.4.202506130531-signed.json
+majminpat_ver=2.4.202506130531-signed
+cksum256_darwin_arm64=b37781918016723bf1a90bfa9cc5107b52edabdcd5a8f3c59ddb30d11478587c
+cksum256_darwin_x86_64=08eadac3343017ac4c269e14e6f933fcb2571f4bfcac77e07002ac4cadbc60aa
+cksum256_linux_x86=15c1667ffa45e2a248821c5c19c65ef96c344761876b478458e32418c46a48c8
+cksum256_linux_x86_64=19fdd9d0262bdf0d3331f8666abbfc8f854854ba7962e49565027082dd30b763
+# note: cksum256_linux_x86 dk.exe affected by https://github.com/diskuv/dk/issues/5.
 
 dk_pwd=$PWD
 
@@ -632,13 +633,9 @@ install -d "$destdir"
 download_helper() {
   download_helper_OS=$1; shift
   download_helper_CKSUM=$1; shift
-  download_helper_SUBPATH=
-  case "$download_helper_OS" in
-    Linux|Windows) download_helper_SUBPATH=dist/
-  esac
   printf_maybe_quiet "%s dk-%s for %s\n\n" "-- Downloading" "$majminpat_ver" "$download_helper_OS"
   downloadfile \
-    "https://diskuv.com/a/dk-distribution/$majminpat_ver/${download_helper_SUBPATH}dk-$BUILDHOST_ARCH" \
+    "https://diskuv.com/a/dk-exe/$majminpat_ver/dk-$BUILDHOST_ARCH" \
     "$destdir/dk" \
     "$download_helper_CKSUM"
 }

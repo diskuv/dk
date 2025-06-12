@@ -40,16 +40,17 @@ SET DKCODER_PROJECT_DIR=%~dp0
 SET DKCODER_PWD=%CD%
 
 REM Update within dksdk-coder:
-REM   f_dk() { jq -r 'def ck(p): .files[] | select(.path == p).checksum.sha256; { majminpat_ver:.listing_unencrypted.version, ck_windows_x86_64:(ck("dist/dk-windows_x86_64.exe") // ""), ck_windows_x86:(ck("dist/dk-windows_x86.exe") // ""), fn:input_filename } | "REM "+.fn+"\n"+"SET DK_VER="+.majminpat_ver+"\n"+"SET DK_CKSUM_WINDOWS_X86="+.ck_windows_x86+"\n"+"SET DK_CKSUM_WINDOWS_X86_64="+.ck_windows_x86_64 ' $1 }
-REM   eval $(awk '$2=="f_dk()" {$1=""; print}' dk-new.cmd | tr -d '\r') # avoids typing the line above
+REM   f_dk() { jq -r 'def ck(p): .files[] | select(.path == p).checksum.sha256; { majminpat_ver:.listing_unencrypted.version, ck_windows_x86_64:(ck("dk-windows_x86_64.exe") // ""), ck_windows_x86:(ck("dk-windows_x86.exe") // ""), fn:input_filename } | "REM "+.fn+"\n"+"SET DK_VER="+.majminpat_ver+"\n"+"SET DK_CKSUM_WINDOWS_X86="+.ck_windows_x86+"\n"+"SET DK_CKSUM_WINDOWS_X86_64="+.ck_windows_x86_64 ' $1; }
+REM   eval $(awk '$2=="f_dk()" {$1=""; print}' dk.cmd | tr -d '\r') # avoids typing the line above
 REM   f_dk packaging/specs/2.3.202505280211.json
 REM
 REM   Empty value if the architecture is not supported.
 REM -------------------------------------
-REM packaging/specs/2.3.202505282324.json
-SET DK_VER=2.3.202505282324
-SET DK_CKSUM_WINDOWS_X86=
-SET DK_CKSUM_WINDOWS_X86_64=40b191e00e083854bb05e9d6af26bc00943030a85c24de1a0ad44edaa794b879
+REM packaging/specs/2.4.202506130531-signed.json
+SET DK_VER=2.4.202506130531-signed
+SET DK_CKSUM_WINDOWS_X86=e8a007ebade1934c8b846be29bc82a6b9e1059960e6a01ae1748368bb753ba24
+SET DK_CKSUM_WINDOWS_X86_64=8f6680aa8c983ee73210d0290a7178a7d8cfc8bfcb16b57a5432ef3d68b005c4
+REM note: DK_CKSUM_WINDOWS_X86 has no distribution (stdexport) yet, and also dk.exe affected by https://github.com/diskuv/dk/issues/5.
 
 REM --------- Quiet Detection ---------
 REM Enabled? If suffix of the first argument is "Quiet"
@@ -102,7 +103,7 @@ IF "%PROGRAMFILES(x86)%" == "" (
         CALL :downloadFile ^
             dk ^
             "dk %DK_VER% 32-bit" ^
-            "https://diskuv.com/a/dk-distribution/%DK_VER%/dist/dk-windows_x86.exe" ^
+            "https://diskuv.com/a/dk-exe/%DK_VER%/dk-windows_x86.exe" ^
             %DK_CKSUM_WINDOWS_X86%\dk.exe ^
             %DK_CKSUM_WINDOWS_X86%
         REM On error the error message was already displayed.
@@ -122,7 +123,7 @@ IF "%PROGRAMFILES(x86)%" == "" (
         CALL :downloadFile ^
             dk ^
             "dk %DK_VER% 64-bit" ^
-            "https://diskuv.com/a/dk-distribution/%DK_VER%/dist/dk-windows_x86_64.exe" ^
+            "https://diskuv.com/a/dk-exe/%DK_VER%/dk-windows_x86_64.exe" ^
             %DK_CKSUM_WINDOWS_X86_64%\dk.exe ^
             %DK_CKSUM_WINDOWS_X86_64%
         REM On error the error message was already displayed.
