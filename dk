@@ -27,12 +27,12 @@ set -euf
 #   eval $(awk '$2=="f_dk()" {$1=""; print}' dk) # avoids typing the line above
 #   f_dk packaging/specs/2.3.202505280211.json
 # -------------------------------------
-# packaging/specs/2.4.202506130531-signed.json
-majminpat_ver=2.4.202506130531-signed
-cksum256_darwin_arm64=b37781918016723bf1a90bfa9cc5107b52edabdcd5a8f3c59ddb30d11478587c
-cksum256_darwin_x86_64=08eadac3343017ac4c269e14e6f933fcb2571f4bfcac77e07002ac4cadbc60aa
-cksum256_linux_x86=15c1667ffa45e2a248821c5c19c65ef96c344761876b478458e32418c46a48c8
-cksum256_linux_x86_64=19fdd9d0262bdf0d3331f8666abbfc8f854854ba7962e49565027082dd30b763
+# packaging/specs/2.4.202506160116-signed.json
+majminpat_ver=2.4.202506160116-signed
+cksum256_darwin_arm64=95f183dec1b16fb4cd01863c6a3c44dd1d18086ae1d8f413bdeec2095671451e
+cksum256_darwin_x86_64=1b8048db2117dbea37fd50205d77115a5974346c458672ba5e10278f3be505bb
+cksum256_linux_x86=c68939fd68174bed924401e9c97134cf778c765476bc5f98b673fdb44570a2ea
+cksum256_linux_x86_64=9ee84e4d74b857833b98b5f91fb056077be816c612960199610ef966cb89b360
 # note: cksum256_linux_x86 dk.exe affected by https://github.com/diskuv/dk/issues/5.
 
 dk_pwd=$PWD

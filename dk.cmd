@@ -46,10 +46,10 @@ REM   f_dk packaging/specs/2.3.202505280211.json
 REM
 REM   Empty value if the architecture is not supported.
 REM -------------------------------------
-REM packaging/specs/2.4.202506130531-signed.json
-SET DK_VER=2.4.202506130531-signed
-SET DK_CKSUM_WINDOWS_X86=e8a007ebade1934c8b846be29bc82a6b9e1059960e6a01ae1748368bb753ba24
-SET DK_CKSUM_WINDOWS_X86_64=8f6680aa8c983ee73210d0290a7178a7d8cfc8bfcb16b57a5432ef3d68b005c4
+REM packaging/specs/2.4.202506160116-signed.json
+SET DK_VER=2.4.202506160116-signed
+SET DK_CKSUM_WINDOWS_X86=eff29e2099681ec8978fa1c439976d3be03313bdf777320df9e41df5c3593e17
+SET DK_CKSUM_WINDOWS_X86_64=8c41e4bfb552fc6ca503f41d772d1749a43cc7a3baa19633f60f64c734a55d43
 REM note: DK_CKSUM_WINDOWS_X86 has no distribution (stdexport) yet, and also dk.exe affected by https://github.com/diskuv/dk/issues/5.
 
 REM --------- Quiet Detection ---------
