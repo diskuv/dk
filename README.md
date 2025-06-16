@@ -2,6 +2,72 @@
 
 The main documentation site is <https://diskuv.com/dk/help/latest/>.
 
+## Quick Start
+
+<!-- SYNC: site:src/content/docs/guide/dk-quick-walkthrough.mdoc, dk.git:README.md#quickstart -->
+
+Install on Windows:
+
+```powershell
+winget install -e --id Diskuv.dk
+```
+
+or Apple/Silicon:
+
+```sh
+sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-distribution/2.3.202505282324/dk-darwin_arm64
+sudo chmod +x /usr/local/bin/dk
+```
+
+or Apple/Intel:
+
+```sh
+sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-distribution/2.3.202505282324/dk-darwin_x86_64
+sudo chmod +x /usr/local/bin/dk
+```
+
+or Linux with glibc (Debian, Ubuntu, etc. but not Alpine):
+
+```sh
+sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-distribution/2.3.202505282324/dist/dk-linux_x86_64
+sudo chmod +x /usr/local/bin/dk
+```
+
+Then cross-compile a script to standalone Windows, Linux, Android executables (and to a macOS executable if you are on a macOS machine):
+
+```sh
+dk -g dune -S "
+    module Http = DkNet_Std.Http
+    module Uri = Tr1Uri_Std.Uri
+    let print_endline = Tr1Stdlib_V414Io.StdIo.print_endline
+ " -U "
+    print_endline @@
+    Lwt_main.run @@
+    Http.fetch_url ~max_sz:4096 @@
+    Uri.of_string {|https://jigsaw.w3.org/HTTP/h-content-md5.html|}
+ " -O ReleaseSmall Exe
+```
+
+The executables will be available in the `target/` folder:
+
+```sh
+file target/ZzZz_Zz.Adhoc-* | cut -c1-69 | awk '{print $0 "..."}'
+
+target/ZzZz_Zz.Adhoc-android_arm32v7a:   ELF 32-bit LSB pie executabl...
+target/ZzZz_Zz.Adhoc-android_arm64v8a:   ELF 64-bit LSB pie executabl...
+target/ZzZz_Zz.Adhoc-android_x86_64:     ELF 64-bit LSB pie executabl...
+target/ZzZz_Zz.Adhoc-darwin_arm64:       Mach-O 64-bit executable arm...
+target/ZzZz_Zz.Adhoc-darwin_x86_64:      Mach-O 64-bit executable x86...
+target/ZzZz_Zz.Adhoc-linux_x86:          ELF 32-bit LSB pie executabl...
+target/ZzZz_Zz.Adhoc-linux_x86_64:       ELF 64-bit LSB pie executabl...
+target/ZzZz_Zz.Adhoc-windows_x86_64.exe: PE32+ executable (console) x...
+target/ZzZz_Zz.Adhoc-windows_x86_64.pdb: MSVC program database ver 7....
+target/ZzZz_Zz.Adhoc-windows_x86.exe:    PE32 executable (console) In...
+target/ZzZz_Zz.Adhoc-windows_x86.pdb:    MSVC program database ver 7....
+```
+
+32-bit targets are not ready yet. <https://github.com/diskuv/dk/issues> has the full list of issues.
+
 ## Licenses
 
 Copyright 2023 Diskuv, Inc.
