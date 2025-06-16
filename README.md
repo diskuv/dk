@@ -30,7 +30,7 @@ Those licenses include but are not limited to:
 
 ## Open-Source
 
-The significant parts of `dk` that downloaded and open-source:
+The significant parts of `dk` that are open-source and downloaded:
 
 - DkML compiler: <https://github.com/diskuv/dkml-compiler> and <https://gitlab.com/dkml/distributions/dkml>
 - MlFront: <https://gitlab.com/dkml/build-tools/MlFront>
