@@ -469,13 +469,19 @@ downloadfile() {
     # Set DKMLSYS_*
     autodetect_system_binaries
 
+    # Quick exit if exists and checksum verified. Do not display
+    # anything (even the checksum output) since this is the normal scenario
+    # that can run a billion times. The checksum verification for the
+    # download (if this fails) will not be silenced.
     if [ -e "$downloadfile_FILE" ]; then
-        if sha256check "$downloadfile_FILE" "$downloadfile_SUM"; then
+        if sha256check "$downloadfile_FILE" "$downloadfile_SUM" > /dev/null 2>&1; then
             return 0
         else
             $DKMLSYS_RM -f "$downloadfile_FILE"
         fi
     fi
+
+    printf_maybe_quiet "... %s %s\n" "Downloading" "$downloadfile_URL"
     if [ "${CI:-}" = true ] || [ "${DKCODER_QUIET:-}" -eq 1 ]; then
         if [ -n "$DKMLSYS_CURL" ]; then
             log_trace "$DKMLSYS_CURL" -L -s "$downloadfile_URL" -o "$downloadfile_FILE".tmp
@@ -495,10 +501,12 @@ downloadfile() {
             exit 107
         fi
     fi
+    printf_maybe_quiet "\n... %s %s\n" "Verifying" "$downloadfile_URL"
     if ! sha256check "$downloadfile_FILE".tmp "$downloadfile_SUM"; then
         printf "%s\n" "FATAL: Encountered a corrupted or compromised download from $downloadfile_URL" >&2
         exit 1
     fi
+    printf_maybe_quiet "\n"
     $DKMLSYS_MV "$downloadfile_FILE".tmp "$downloadfile_FILE"
 }
 
@@ -631,9 +639,7 @@ DK_EXE=
 destdir=$tools_dir/dkexe-$majminpat_ver-$BUILDHOST_ARCH
 install -d "$destdir"
 download_helper() {
-  download_helper_OS=$1; shift
   download_helper_CKSUM=$1; shift
-  printf_maybe_quiet "%s dk-%s for %s\n\n" "-- Downloading" "$majminpat_ver" "$download_helper_OS"
   downloadfile \
     "https://diskuv.com/a/dk-exe/$majminpat_ver/dk-$BUILDHOST_ARCH" \
     "$destdir/dk" \
@@ -641,10 +647,10 @@ download_helper() {
 }
 download_dk() {
   case "$BUILDHOST_ARCH" in
-    darwin_arm64) download_helper macOS $cksum256_darwin_arm64 ;;
-    darwin_x86_64) download_helper macOS $cksum256_darwin_x86_64 ;;
-    linux_x86_64) download_helper Linux $cksum256_linux_x86_64 ;;
-    linux_x86) download_helper Linux $cksum256_linux_x86 ;;
+    darwin_arm64) download_helper $cksum256_darwin_arm64 ;;
+    darwin_x86_64) download_helper $cksum256_darwin_x86_64 ;;
+    linux_x86_64) download_helper $cksum256_linux_x86_64 ;;
+    linux_x86) download_helper $cksum256_linux_x86 ;;
     *) echo "FATAL: There is no support for $BUILDHOST_ARCH" >&2; exit 3 ;;
   esac
 }
