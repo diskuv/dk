@@ -29,20 +29,19 @@ winget install komac
 
 It is available for [Linux and macOS](https://github.com/russellbanks/Komac?tab=readme-ov-file) as well.
 
-SECOND, make a file `$env:TEMP\komac.env.ps1`:
+SECOND, komac needs a classic GitHub token to submit PRs to `winget-pkgs`.
 
-```powershell
-$env:GITHUB_TOKEN = "...the..public_repo..token..described..at..https://github.com/russellbanks/Komac?tab=readme-ov-file#github-token..."
+This should be a classic token with the `public_repo` scope.
+
+![Screenshot of classic token being created with public_repo scope selected](https://github.com/russellbanks/komac/assets/74878137/fbe4472e-dc53-4caf-ad2b-3bef75c47b07)
+
+Adding to komac:
+
+```bash
+komac token add
 ```
 
 THIRD, run in Powershell:
-
-```powershell
-& "$env:TEMP\komac.env.ps1"
-Remove-Item "$env:TEMP\komac.env.ps1"
-```
-
-FOURTH, run in Powershell:
 
 ```powershell
 # If you have already forked `winget-pkgs` then its `master` branch must be
