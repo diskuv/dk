@@ -212,7 +212,8 @@ target/ZzZz_Zz.Adhoc-windows_x86.pdb:    MSVC program database ver 7....
 | Docker    | Huge set of images            | Works well on Windows              |
 | (contd.)  | Works very well in CI         | Works in CI and *during installs*  |
 
-The following are tools specific to the OCaml language, and `dk` should not replace them. Skip this table you are not an OCaml-er.
+The following are tools specific to the OCaml language, and `dk` should not replace them.
+Skip this table if you are not an OCaml-er.
 
 | Tool | Features better with the tool | Features better with `dk`            |
 | ---- | ----------------------------- | ------------------------------------ |
