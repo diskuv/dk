@@ -109,7 +109,7 @@ you can create a build file with the following content (save it with a `.thunk.j
 
 ```json
 {
-  "$schema": "../../etc/jsonschema/mlfront-thunk.json"
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/1.0/etc/jsonschema/mlfront-thunk.json"
 }
 ```
 

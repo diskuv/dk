@@ -341,7 +341,7 @@ Here is an example use of a pipe:
 
 ```json
 {
-  "$schema": "../../../src/MlFront_Thunk/json/schema.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/1.0/etc/jsonschema/mlfront-thunk.json",
   "version": {
     "major": 1,
     "minor": 0
@@ -593,7 +593,7 @@ For example, the thunk:
 
 ```json
 {
-  "$schema": "../../../src/MlFront_Thunk/json/schema.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/1.0/etc/jsonschema/mlfront-thunk.json",
   "schema_version":{
     "major":1,
     "minor":0
