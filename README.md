@@ -10,9 +10,9 @@ Running and cross-compiling scripts with `dk` solves the problem of **README-iti
 
 Skip down to [Comparisons](#comparisons) for how `dk` fits in the ecosystem. TLDR: `dk` is similar to the Nix package manager (except `dk` works on Windows) and to Docker (except not as heavy).
 
-The build tool is quite new and has not yet been integrated into the script runner. But it has a working reference implementation, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
+The build tool is quite new and has not yet been integrated into the script runner. But it has a reference implementation, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
 
-A [Quick Start for Scripting](#quick-start---scripting) is below, and the main documentation site for the script runner is <https://diskuv.com/dk/help/latest/>.
+Separately, a [Quick Start for Scripting](#quick-start---scripting) is below, and the main documentation site for the script runner is <https://diskuv.com/dk/help/latest/>.
 
 ## Quick Start - Build Tool
 
@@ -67,7 +67,61 @@ total 17216
 
 All of the dates will be squashed to Jan 1, 1980 for reproducibility.
 
-**Build your first package** with:
+**Shell into your first build** with:
+
+> 2025-08-29: There are [two serious performance bugs](https://github.com/diskuv/dk/issues?q=state%3Aopen%20label%3A%22performance%22) where all assets are downloaded, each time.
+
+```sh
+# Only for Apple Silicon ...
+
+$ dk/mlfront-shell -- enter-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64
+
+DkDistribution_Std.Asset.Latest@1.0.202501010000 fn/File.Darwin_arm64 %
+../../out/File.Darwin_arm64/DkCoder.bundle/Contents/Helpers/ocamlrun ../../out/File.Darwin_arm64/DkCoder.bundle/Contents/Helpers/ocaml -I ../../out/File.Darwin_arm64/DkCoder.bundle/Contents/Resources/lib/ocaml
+
+OCaml version 4.14.2
+Enter #help;; for help.
+
+# #show Stdlib;;
+# #quit;;
+```
+
+or
+
+```sh
+# Only for Windows and Linux (use "Linux_x86_64") ...
+
+$ dk/mlfront-shell -- enter-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Windows_x86_64
+
+DkDistribution_Std.Asset.Latest@1.0.202501010000 fn/File.Windows_x86_64 %
+../../out/File.Windows_x86_64/DkCoder.bundle/Contents/Helpers/ocamlrun ../../out/File.Windows_x86_64/DkCoder.bundle/Contents/Helpers/ocaml -I ../../out/File.Windows_x86_64/DkCoder.bundle/Contents/Resources/lib/ocaml
+
+OCaml version 4.14.2
+Enter #help;; for help.
+
+# #show Stdlib;;
+# #quit;;
+
+```
+
+**Explore more with the schema**. If you have an IDE/editor that supports JSON schema like Visual Studio Code,
+you can create a build file with the following content (save it with a `.thunk.jsonc` extension):
+
+```json
+{
+  "$schema": "../../etc/jsonschema/mlfront-thunk.json"
+}
+```
+
+and you will get auto-completion for your build file.
+
+Then you can run it with:
+
+```sh
+dk/mlfront-shell -I the/directory/to/your/build/file -- get-object YourLibrary_Something.Something@1.0.202501010000 -s File.Agnostic
+```
+
+Almost any command you have been doing with `dk/mlfront-shell ... -- THE-COMMAND ...` you can do inside the "precommands" of your build file.
 
 ## Quick Start - Scripting
 

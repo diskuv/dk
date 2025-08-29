@@ -1,0 +1,192 @@
+/* 
+
+Getting the latest version of the dk distribution
+-------------------------------------------------
+
+The object DkDistribution_Std.Asset.Latest will build (ie. fetch) the
+"private" and "public" asset files listed below. Running the
+following command with `mlfront-shell` or within your own "precommands":
+
+  get-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64 -d dir-darwin_arm64
+
+will make the "dk-darwin_arm64" executable available to you as the file
+"dk-darwin_arm64".
+
+Getting a historical version of the dk distribution
+---------------------------------------------------
+
+All historical versions are/will be available as assets in this file as
+well. Running the following command with `mlfront-shell` or within your
+own "precommands":
+
+  get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p dk-darwin_arm64 -f dk-darwin_arm64
+
+will make the "dk-darwin_arm64" executable from version
+`2.4.202508011516-signed` available to you as the file "dk-darwin_arm64".
+
+*/
+{
+  "$schema": "../../etc/jsonschema/mlfront-thunk.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "module_id": {
+    "package": "DkDistribution_Std.Asset",
+    "name": "Latest",
+    "version": {
+      "major": 1,
+      "minor": 0
+    }
+  },
+  "precommands": {
+    // This list of commands is built automatically by
+    // `get-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64`
+    // (and File.Windows_x86_64, etc.).
+    "private": [
+      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-darwin_arm64.zip -d ${SLOT.File.Darwin_arm64}",
+      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-darwin_x86_64.zip -d ${SLOT.File.Darwin_x86_64}",
+      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-linux_x86_64.zip -d ${SLOT.File.Linux_x86_64}",
+      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-linux_x86.zip -d ${SLOT.File.Linux_x86}",
+      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-windows_x86_64.zip -d ${SLOT.File.Windows_x86_64}",
+      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-windows_x86.zip -d ${SLOT.File.Windows_x86}"
+    ]
+  },
+  "assets": [
+    {
+      "listing_unencrypted": {
+        "spec_version": 2,
+        "name": "DkDistribution_Std.Asset",
+        "version": "2.4.202508011515"
+      },
+      "listing": {
+        "origins": [
+          {
+            "name": "github-release",
+            "mirrors": [
+              "https://github.com/diskuv/dk/releases/download/2.4.202508011515"
+            ]
+          }
+        ]
+      },
+      "files": [
+        {
+          "origin": "github-release",
+          "path": "SHA256.sig",
+          "size": 151,
+          "checksum": {
+            "sha256": "12abf736e880411f1e754edc4f0af6a82c1288c6287935b7e1f498f0b2e4aeb5"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "SHA256",
+          "size": 617,
+          "checksum": {
+            "sha256": "378f2a1bdb6f1d4c40e0f7ddc471592d209d642148659098fd5584c5c22f3977"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "stdexport-darwin_arm64.zip",
+          "size": 327193728,
+          "checksum": {
+            "sha256": "c231e35aa07e1d5a0d5f6bad09437eeb99469e4b748760ea3910e6a1cf0703be"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "stdexport-darwin_x86_64.zip",
+          "size": 324123809,
+          "checksum": {
+            "sha256": "9e94ab7108d8816779c3763036529f1cd0fd5af8dacc40c78e49a94447e0968a"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "stdexport-linux_x86.zip",
+          "size": 355305072,
+          "checksum": {
+            "sha256": "0f6d9625c87422475ea2bc063a0f831e25c262f5c5b4510ef713e2a6c57e961b"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "stdexport-linux_x86_64.zip",
+          "size": 372163075,
+          "checksum": {
+            "sha256": "8dac65088586adf3a668615eceda2b3ed6b92b2306e1f7a9328bb8056115b36e"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "stdexport-windows_x86.zip",
+          "size": 314510157,
+          "checksum": {
+            "sha256": "57231d4758b665070ba1b852a1af8a719ee79f9b2b76de12195ce1e7f8951cfc"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "stdexport-windows_x86_64.zip",
+          "size": 304561723,
+          "checksum": {
+            "sha256": "11f562180bb15caad4b6a3014dc0704aede3a8e3f3e6374ced59787586d04ad8"
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "files": [
+      {
+        "slots": [
+          "File.Darwin_arm64"
+        ],
+        "paths": [
+          "."
+        ]
+      },
+      {
+        "slots": [
+          "File.Darwin_x86_64"
+        ],
+        "paths": [
+          "."
+        ]
+      },
+      {
+        "slots": [
+          "File.Linux_x86_64"
+        ],
+        "paths": [
+          "."
+        ]
+      },
+      {
+        "slots": [
+          "File.Linux_x86"
+        ],
+        "paths": [
+          "."
+        ]
+      },
+      {
+        "slots": [
+          "File.Windows_x86_64"
+        ],
+        "paths": [
+          "."
+        ]
+      },
+      {
+        "slots": [
+          "File.Windows_x86"
+        ],
+        "paths": [
+          "."
+        ]
+      }
+    ]
+  }
+}

@@ -7,7 +7,7 @@ The object DkExe_Std.Asset.Latest will build (ie. fetch) the
 "private" and "public" asset files listed below. Running the
 following command with `mlfront-shell` or within your own "precommands":
 
-  get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64 -f dk-darwin_arm64
+  get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64 -d dir-darwin_arm64
 
 will make the "dk-darwin_arm64" executable available to you as the file
 "dk-darwin_arm64".
