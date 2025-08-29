@@ -41,14 +41,14 @@ SET DKCODER_PWD=%CD%
 
 REM Update within dksdk-coder:
 REM   f_mlfrontshell() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/mlfrontshell-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/$ver/mlfront-shell-$i$extexe"; done }
-REM   f_mlfrontshell 2.4.2.1
+REM   f_mlfrontshell 2.4.2.2
 REM   shasum -a 256 build/mlfrontshell-* | awk 'BEGIN{FS="[ /-]"} {printf "SET DK_CKSUM_%s=%s\n", toupper($5), $1}' |  sort
 REM
 REM   Empty value if the architecture is not supported.
 REM -------------------------------------
-SET DK_VER=2.4.2.1
-SET DK_CKSUM_WINDOWS_X86_64=473f29c2b3452662dc8526783f9b30c83f62f572518015a0bc0f8328d844fb81
-SET DK_CKSUM_WINDOWS_X86=1b0bbb99ee1164b719fce5ff7227f7baf86493def82c3ca019520b84be611385
+SET DK_VER=2.4.2.2
+SET DK_CKSUM_WINDOWS_X86_64=3114896cafe55f3606df48cdd16fe1319b643dc0a188feabcb2cd76ccf89d4e1
+SET DK_CKSUM_WINDOWS_X86=ea206740db5355d70a6833138dc9171d2958139f50ca5c6ce4028e19dbb82b58
 
 REM --------- Quiet Detection ---------
 SET DK_QUIET=0
@@ -145,7 +145,7 @@ SET "DK_DATA_HOME="
 SET "DK_QUIET="
 SET "_DK_PATH="
 SET "_XCOPY_SWITCHES="
-REM     Then run ot
+REM     Then run it
 "%DK_EXE%" %_DKEXE_OPTIONS% -I "%DK_PROJECT_DIR%\pkgs\include" %*
 EXIT /B %ERRORLEVEL%
 
