@@ -58,14 +58,16 @@ If we inspect our new directory, we'll see:
 ```sh
 # Windows
 PS1> dir dir-for-darwin_arm64
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            1/1/1980 12:00 AM        8810960 dk
 
 # Unix
 $ ls -l dir-for-darwin_arm64
-total 17216
 -rw-r--r--  1 jonah  staff  8810960 Jan  1  1980 dk
 ```
 
-All of the dates will be squashed to Jan 1, 1980 for reproducibility.
+All of the dates are set to Jan 1, 1980 for reproducibility.
 
 **Shell into your first build** with:
 
@@ -208,10 +210,10 @@ target/ZzZz_Zz.Adhoc-windows_x86.pdb:    MSVC program database ver 7....
 
 The following are tools specific to the OCaml language, and `dk` should not replace them. Skip this table you are not an OCaml-er.
 
-| Tool | Features better with the tool | Features better with `dk`      |
-| ---- | ----------------------------- | ------------------------------ |
-| opam | Thousands of packages         | Immutable storage              |
-| dune | Watch mode. Fast              | Extensible. Not tied to OCaml. |
+| Tool | Features better with the tool | Features better with `dk`            |
+| ---- | ----------------------------- | ------------------------------------ |
+| opam | Thousands of packages         | Immutable storage. Binary artifacts. |
+| dune | Watch mode. Fast              | Extensible. Not tied to OCaml.       |
 
 ## Licenses
 

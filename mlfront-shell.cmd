@@ -76,19 +76,19 @@ IF "%PROGRAMFILES(x86)%" == "" (
     )
     SET "DK_EXEDIR=%DK_DATA_HOME%\mlfrontshellexe-%DK_VER%-windows_x86"
     IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!"
-    SET "DK_EXE=!DK_EXEDIR!\mlfront-shell.exe"
+    SET "DK_EXE=!DK_EXEDIR!\mlfshell.exe"
     IF NOT EXIST "!DK_EXE!" (
-        IF %DK_QUIET% EQU 0 ECHO.dk executable:
+        IF %DK_QUIET% EQU 0 ECHO.mlfront-shell executable:
         IF NOT EXIST "%TEMP%\%DK_CKSUM_WINDOWS_X86%" MKDIR "%TEMP%\%DK_CKSUM_WINDOWS_X86%"
         CALL :downloadFile ^
-            dk ^
+            mlfront-shell ^
             "dk %DK_VER% 32-bit" ^
             "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/%DK_VER%/mlfront-shell-windows_x86.exe" ^
-            %DK_CKSUM_WINDOWS_X86%\mlfront-shell.exe ^
+            %DK_CKSUM_WINDOWS_X86%\mlfshell.exe ^
             %DK_CKSUM_WINDOWS_X86%
         REM On error the error message was already displayed.
         IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
-        XCOPY "%TEMP%\%DK_CKSUM_WINDOWS_X86%\mlfront-shell.exe" "!DK_EXEDIR!" %_XCOPY_SWITCHES% /v /g /i /r /n /y /j >NUL
+        XCOPY "%TEMP%\%DK_CKSUM_WINDOWS_X86%\mlfshell.exe" "!DK_EXEDIR!" %_XCOPY_SWITCHES% /v /g /i /r /n /y /j >NUL
         IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
         REM It is okay if the temp dir is not cleaned up. No error checking.
         IF NOT "%DK_CKSUM_WINDOWS_X86%" == "" RD "%TEMP%\%DK_CKSUM_WINDOWS_X86%" /s /q
@@ -96,19 +96,19 @@ IF "%PROGRAMFILES(x86)%" == "" (
 ) ELSE (
     SET "DK_EXEDIR=%DK_DATA_HOME%\mlfront-shellexe-%DK_VER%-windows_x86_64"
     IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!"
-    SET "DK_EXE=!DK_EXEDIR!\mlfront-shell.exe"
+    SET "DK_EXE=!DK_EXEDIR!\mlfshell.exe"
     IF NOT EXIST "!DK_EXE!" (
-        IF %DK_QUIET% EQU 0 ECHO.dk executable:
+        IF %DK_QUIET% EQU 0 ECHO.mlfront-shell executable:
         IF NOT EXIST "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%" MKDIR "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%"
         CALL :downloadFile ^
-            dk ^
-            "dk %DK_VER% 64-bit" ^
+            mlfront-shell ^
+            "mlfront-shell %DK_VER% 64-bit" ^
             "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/%DK_VER%/mlfront-shell-windows_x86_64.exe" ^
-            %DK_CKSUM_WINDOWS_X86_64%\mlfront-shell.exe ^
+            %DK_CKSUM_WINDOWS_X86_64%\mlfshell.exe ^
             %DK_CKSUM_WINDOWS_X86_64%
         REM On error the error message was already displayed.
         IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
-        XCOPY "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%\mlfront-shell.exe" "!DK_EXEDIR!" %_XCOPY_SWITCHES% /v /g /i /r /n /y /j >NUL
+        XCOPY "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%\mlfshell.exe" "!DK_EXEDIR!" %_XCOPY_SWITCHES% /v /g /i /r /n /y /j >NUL
         IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
         REM It is okay if the temp dir is not cleaned up. No error checking.
         IF NOT "%DK_CKSUM_WINDOWS_X86_64%" == "" RD "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%" /s /q
