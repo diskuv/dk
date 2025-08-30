@@ -24,7 +24,7 @@
     - [Variables available in TSL](#variables-available-in-tsl)
       - [get-object ID -s SLOT (-f FILE | -d DIR/)](#get-object-id--s-slot--f-file---d-dir)
       - [install-object ID -s SLOT (-f FILE | -d DIR/)](#install-object-id--s-slot--f-file---d-dir)
-      - [pipe-object ID s SLOT -x PIPE](#pipe-object-id-s-slot--x-pipe)
+      - [pipe-object ID -s SLOT -x PIPE](#pipe-object-id--s-slot--x-pipe)
       - [get-asset-file ID FILE\_PATH (-f FILE | -d DIR/)](#get-asset-file-id-file_path--f-file---d-dir)
       - [get-asset ID (-f FILE | -d DIR/)](#get-asset-id--f-file---d-dir)
       - [Options: -f FILE and -d DIR](#options--f-file-and--d-dir)
@@ -181,12 +181,7 @@ There is a special edge case for the install thunk controller: the install thunk
 
 Each object has one or more slots. Each slot is a container for the object's files.
 
-The built-in slots are:
-
-- `File.Agnostic` - Any files that are ABI-agnostic may go into this slot.
-- `File._abi_` like `File.Windows_x86_64` - Any files that are specific to the named abi `_abi_` may go into this slot.
-
-There will be a capability to make more slots in the future.
+There are no built-in slots. However, `File.Agnostic` is the conventional slot for files that are ABI-agnostic.
 
 The names of the slots are period-separated "MlFront standard namespace terms". Each of these terms:
 
@@ -200,7 +195,15 @@ The names of the slots are period-separated "MlFront standard namespace terms". 
 The `precommands` are a **set** of commands run *before* an object's `function`. It is not a sequence of commands since you
 cannot make assumptions about the order of the precommands.
 
-As an optimization, precommands may be run in parallel.
+The following optimizations are allowed:
+
+- Precommands may be run in parallel.
+- Precommands may be skipped if the requested slot does not match the precommand output slot.
+  For example, let's say you issue the command `get-object THE_ID -s File.Agnostic`.
+  Let's also say `THE_ID` object has two precommands:
+  1. `get-asset-file ... -f ${SLOT.File.Agnostic}`
+  2. `get-object ... -d ${SLOT.Something.Else}`
+  Then the second precommand may be skipped because the requested slot `File.Agnostic` does not match `Something.Else`.
 
 ## Assets
 
@@ -312,7 +315,7 @@ Install the contents of the slot `SLOT` for the object with identifier `ID`.
 
 See [Options: -f FILE and -d DIR](#options--f-file-and--d-dir) for output path restrictions.
 
-#### pipe-object ID s SLOT -x PIPE
+#### pipe-object ID -s SLOT -x PIPE
 
 Write the contents of the slot `SLOT` for the object with identifier `ID` to the pipe named `PIPE`.
 
