@@ -63,16 +63,19 @@ endfunction()
 # Check the running [cmake] is in a standalone cmake directory
 # rather than /usr/bin/cmake
 function(check_standalone_cmake OUT_SUCCESS_VARIABLE OUT_DIR_VARIABLE)
-    # cmake-3.25.2/bin/cmake -> cmake-3.25.2/
-    cmake_path(GET CMAKE_COMMAND PARENT_PATH d)
-    cmake_path(GET d PARENT_PATH d)
-
-    cmake_path(GET d FILENAME f)
-    if(NOT f MATCHES "^cmake-" AND NOT f STREQUAL cmake)
-      set(${OUT_SUCCESS_VARIABLE} OFF PARENT_SCOPE)
-    else()
+    # Either: cmake-3.25.2/bin/cmake -> cmake-3.25.2/
+    # or:     cmake-3.25.2-macos10.10-universal/CMake.app/Contents/bin/cmake
+    cmake_path(GET CMAKE_COMMAND PARENT_PATH d1)
+    cmake_path(GET d1 PARENT_PATH d2)
+    cmake_path(GET d2 FILENAME f2)
+    if(f2 MATCHES "^cmake-" OR f2 STREQUAL cmake)
       set(${OUT_SUCCESS_VARIABLE} ON PARENT_SCOPE)
-      set(${OUT_DIR_VARIABLE} "${d}" PARENT_SCOPE)
+      set(${OUT_DIR_VARIABLE} "${d2}" PARENT_SCOPE)
+    elseif(f2 STREQUAL "Contents")
+      set(${OUT_SUCCESS_VARIABLE} ON PARENT_SCOPE)
+      set(${OUT_DIR_VARIABLE} "${d2}" PARENT_SCOPE)
+    else()
+      set(${OUT_SUCCESS_VARIABLE} OFF PARENT_SCOPE)
     endif()
 endfunction()
 
@@ -101,7 +104,7 @@ function(run)
     # validate it is a standalone cmake directory
     check_standalone_cmake(IS_STANDALONE STANDALONE_DIR)
     if(NOT IS_STANDALONE)
-      message(FATAL_ERROR "This script does not support CMake installations that are not embedded in a standalone directory named `cmake-{VERSION}` or `cmake`")
+      message(FATAL_ERROR "This script does not support CMake installations that are not embedded in a standalone directory named `cmake-{VERSION}` or `cmake`. CMAKE_COMMAND=${CMAKE_COMMAND}")
     endif()
 
     # gitignore
@@ -111,6 +114,15 @@ function(run)
         "${CMAKE_SOURCE_DIR}/.ci/cmake/.gitignore"
         ONLY_IF_DIFFERENT)
 
+    # during copy macOS has dangling symlinks, so we need to not use
+    # FOLLOW_SYMLINK_CHAIN.
+    # cmake-3.25.2-macos10.10-universal/CMake.app/Contents/Frameworks/QtPrintSupport.framework/Resources -> Versions/Current/Resources
+    if(APPLE)
+      set(file_ARGS)
+    else()
+      set(file_ARGS FOLLOW_SYMLINK_CHAIN)
+    endif()
+
     # copy
     file(GLOB entries
       LIST_DIRECTORIES true
@@ -119,7 +131,7 @@ function(run)
     foreach(entry IN LISTS entries)
         file(${file_COMMAND} ${STANDALONE_DIR}/${entry}
             DESTINATION ${CMAKE_SOURCE_DIR}/.ci/cmake
-            FOLLOW_SYMLINK_CHAIN
+            ${file_ARGS}
             USE_SOURCE_PERMISSIONS)
     endforeach()
 endfunction()
