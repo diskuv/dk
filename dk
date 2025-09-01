@@ -24,15 +24,15 @@ set -euf
 
 # Update within dksdk-coder:
 #   f_dk() { jq -r 'def ck(p): .files[] | select(.path == p).checksum.sha256; { majminpat_ver:.listing_unencrypted.version, ck_darwin_arm64:ck("dk-darwin_arm64"), ck_darwin_x86_64:ck("dk-darwin_x86_64"), ck_linux_x86_64:ck("dk-linux_x86_64"), ck_linux_x86:ck("dk-linux_x86"), fn:input_filename } | "# "+.fn+"\n"+"majminpat_ver="+.majminpat_ver+"\n"+"cksum256_darwin_arm64="+.ck_darwin_arm64+"\n"+"cksum256_darwin_x86_64="+.ck_darwin_x86_64+"\n"+"cksum256_linux_x86="+.ck_linux_x86+"\n"+"cksum256_linux_x86_64="+.ck_linux_x86_64 ' $1; }
-#   eval $(awk '$2=="f_dk()" {$1=""; print}' dk) # avoids typing the line above
-#   f_dk ../dksdk-coder/packaging/specs/2.4.202507191916-signed.json
+#   eval $(awk '$2=="f_dk()" {$1=""; print}' ext/dk/dk) # avoids typing the line above
+#   f_dk packaging/specs/2.4.202507191916-signed.json
 # -------------------------------------
-# ../dksdk-coder/packaging/specs/2.4.202508011516-signed.json
-majminpat_ver=2.4.202508011516-signed
-cksum256_darwin_arm64=aedc1831f3dc4af8c3fd9eefcf4fd2edf9b0f47e3534e382e20368ff15857393
-cksum256_darwin_x86_64=f6e8d64c16757a7ceb9c16f3d65d4a8a1464cf33182966d1e8a135fcfd104449
-cksum256_linux_x86=c6a46d60ab4c567ef3c2d9c0287a42e098a1776d725f3659555c2ebe3e0e73b7
-cksum256_linux_x86_64=b7f75cc9993c3e024a41777eff32f79a6aee687e39ee2878dcdf4a1dfec0141b
+# packaging/specs/2.4.202508302258-signed.json
+majminpat_ver=2.4.202508302258-signed
+cksum256_darwin_arm64=7f4f98b9fe213a6ba924db16f3eda43efa411bd84be6b777b5aee3c2efcb8921
+cksum256_darwin_x86_64=18eafbc2fa81c56e607feb4712e0a5efec1b7c73b4ef2f39c807d9c42f7856f2
+cksum256_linux_x86=17f66bcd4c3d32a71bd85eb9f9b6f6f26edd44c3479a4f16cdd8b3c8f3761393
+cksum256_linux_x86_64=490990b1c6de9721db9707612c491c157e0d1c81b23a77aa5cca04b37c01d4f0
 
 dk_pwd=$PWD
 

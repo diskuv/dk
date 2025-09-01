@@ -41,15 +41,15 @@ SET DKCODER_PWD=%CD%
 
 REM Update within dksdk-coder:
 REM   f_dk() { jq -r 'def ck(p): .files[] | select(.path == p).checksum.sha256; { majminpat_ver:.listing_unencrypted.version, ck_windows_x86_64:(ck("dk-windows_x86_64.exe") // ""), ck_windows_x86:(ck("dk-windows_x86.exe") // ""), fn:input_filename } | "REM "+.fn+"\n"+"SET DK_VER="+.majminpat_ver+"\n"+"SET DK_CKSUM_WINDOWS_X86="+.ck_windows_x86+"\n"+"SET DK_CKSUM_WINDOWS_X86_64="+.ck_windows_x86_64 ' $1; }
-REM   eval $(awk '$2=="f_dk()" {$1=""; print}' dk.cmd | tr -d '\r') # avoids typing the line above
-REM   f_dk ../dksdk-coder/packaging/specs/2.4.202507191916-signed.json
+REM   eval $(awk '$2=="f_dk()" {$1=""; print}' ext/dk/dk.cmd | tr -d '\r') # avoids typing the line above
+REM   f_dk packaging/specs/2.4.202507191916-signed.json
 REM
 REM   Empty value if the architecture is not supported.
 REM -------------------------------------
-REM ../dksdk-coder/packaging/specs/2.4.202508011516-signed.json
-SET DK_VER=2.4.202508011516-signed
-SET DK_CKSUM_WINDOWS_X86=4719f427122c9696a286c0aefa17c5ab284e0856e149f01ad75d676f2a0c8cc8
-SET DK_CKSUM_WINDOWS_X86_64=68514ecd6d4ba6508acab15745473f2a00a51e09a78e1d72fa284d68704093d7
+REM packaging/specs/2.4.202508302258-signed.json
+SET DK_VER=2.4.202508302258-signed
+SET DK_CKSUM_WINDOWS_X86=60b9d6e960739f4d9d3031cbdf7a500a4b80b9dfcbb24b195c26cf58e7df9ee5
+SET DK_CKSUM_WINDOWS_X86_64=33316406532521c65a16c1c0df8086d172d8eccfae971ac67d575bdf9c2848e1
 
 REM --------- Quiet Detection ---------
 REM Enabled? If suffix of the first argument is "Quiet"
