@@ -1,0 +1,19 @@
+/* This package closely models https://github.com/theseus-rs/postgresql-binaries.git */
+{
+    "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+    "schema_version": { "major": 1, "minor": 0 },
+    "assets": [
+        {
+            "listing_unencrypted": {
+                "name": "CommonsPostgreSQL_Std.Binaries",
+                "spec_version": 2,
+                "version": "17.6.0"
+            },
+            "listing": {
+                "origins": [
+                    
+                ]
+            }
+        }
+    ]
+}
