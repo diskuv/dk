@@ -46,9 +46,9 @@ REM   shasum -a 256 build/mlfrontshell-* | awk 'BEGIN{FS="[ /-]"} {printf "SET D
 REM
 REM   Empty value if the architecture is not supported.
 REM -------------------------------------
-SET DK_VER=2.4.2.2
-SET DK_CKSUM_WINDOWS_X86_64=3114896cafe55f3606df48cdd16fe1319b643dc0a188feabcb2cd76ccf89d4e1
-SET DK_CKSUM_WINDOWS_X86=ea206740db5355d70a6833138dc9171d2958139f50ca5c6ce4028e19dbb82b58
+SET DK_VER=2.4.2.4
+SET DK_CKSUM_WINDOWS_X86_64=588b588a603157d501d7db15e9ccf5ba55308859296414b618e8af20f04da6f4
+SET DK_CKSUM_WINDOWS_X86=e7111c1719b2ef887c0f9ed85b8ffe5bf05e1b96d6821dc7778c328cd13e9b19
 
 REM --------- Quiet Detection ---------
 SET DK_QUIET=0

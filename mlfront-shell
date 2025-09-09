@@ -26,11 +26,11 @@ set -euf
 #   f_mlfrontshell 2.4.2.2
 #   shasum -a 256 build/mlfrontshell-* | awk 'BEGIN{FS="[ /-]"} {printf "cksum256_%s=%s\n", $5, $1}' | sort
 # -------------------------------------
-majminpat_ver=2.4.2.2
-cksum256_darwin_arm64=c0578805b74a042ebd8fc0afc68dc53a6046acab568e5ab90a494dcdd6a71231
-cksum256_darwin_x86_64=925562d3a00f1537f59240227b35206e425c079f6ba170c8e4e5345254357a0a
-cksum256_linux_x86_64=ae4c35ece7c1ba9c2270095c9023a6a2bb0fa6312e602e983cdf45f550bd1628
-cksum256_linux_x86=1543a511f8e9f8f6253f5a173f5cc6769326a4c1cb3c3701e2647c115cba8bf2
+majminpat_ver=2.4.2.4
+cksum256_darwin_arm64=cdc1e8b6197e8430365f30601e4cf2f9937b8066f3f250d615e41a53f72e111f
+cksum256_darwin_x86_64=3dc6f93773e3b21b8b6e41a442e47ac1632d2cd8c6c19b7f47d7763de45859c4
+cksum256_linux_x86_64=15078b8b28fba7b0c1fb1b39a667e8cc4d002efcd612398ed983691692fe92bf
+cksum256_linux_x86=ef971327843da0c5900747286faedf3a9f84ef42a69be0e344be388a761da522
 
 dk_pwd=$PWD
 
