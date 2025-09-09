@@ -18,3 +18,5 @@
 
 # mlfront-shell
 /target/
+/.mlfshell_*
+/xconfig/
