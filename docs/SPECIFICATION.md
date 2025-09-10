@@ -42,6 +42,12 @@
       - [Option: \[-m MEMBER\]](#option--m-member)
     - [JSON Schema](#json-schema)
     - [JSON Canonicalization](#json-canonicalization)
+  - [Graph](#graph)
+    - [Nodes](#nodes)
+      - [V256 - SHA256 of Values File](#v256---sha256-of-values-file)
+      - [CT - Compatibility Tag](#ct---compatibility-tag)
+      - [ACI - Asset Canonical ID](#aci---asset-canonical-id)
+    - [Dependencies](#dependencies)
 
 ## Introduction
 
@@ -704,3 +710,88 @@ is canonicalized to:
 ```json
 {"assets":[],"function":{"args":["first"],"envmods":["+OCAMLRUNPARAM=b"],"newthunks":false},"module_id":{"name":"example","version":{"major":1,"minor":0}},"outputs":[["hello.i"]],"precommands":{"private":["VDSo_TM=gcc"],"public":[]},"schema_version":{"major":1,"minor":0}}
 ```
+
+## Graph
+
+### Nodes
+
+Each node in the graph has a key, a value id, a value sha256 and the value itself:
+
+- The **key** is one of two types:
+  - A **module key** is what you -- the user -- specify in a shell command as the MODULE_ID and SLOT or PATH in the [Value Shell Language](#value-shell-language-vsl)
+  - A **checksum key** is the SHA-256 of some content
+- A **value id** is a string which is a *value type* (defined below) and a set of fields, concatenated together and then SHA-256 base32-encoded. The value id serves as a unique key for the value in a value store.
+  - The **value type** is a single letter that categorizes what the value is:
+
+    | Value Type | What               | Docs                        |
+    | ---------- | ------------------ | --------------------------- |
+    | `o`        | object             | [Objects](#objects)         |
+    | `a`        | asset              | [Assets](#assets)           |
+    | `p`        | asset file         | [Assets](#assets)           |
+    | `f`        | form               | [Forms](#forms)             |
+    | `v`        | values file        | [JSON Schema](#json-schema) |
+    | `c`        | built-in constants | [Objects](#objects)         |
+    | `d`        | debug source file  | FILLMEIN                    |
+
+- A **value** is a file whose content matches the value tppe. A values file is a `value.json` build file itself. An object is a zip archive of the output of a [form](#forms). Form, asset and asset file value are serialized parsed abstract syntax trees.
+- A **value sha256** is a SHA-256 hex-encoded string of the value. That is, if you ran `certutil` (Windows), `sha256sum` (Linux) or `shasum -a 256` (macOS) on the value file, the *value sha256* is what you would see.
+
+| Value Type | Value Id before SHA256 and base32     | Value                                      |
+| ---------- | ------------------------------------- | ------------------------------------------ |
+| `v`        | [V256](#v256---sha256-of-values-file) | json `{schema_version:,forms:,assets:}`    |
+| `a`        | [ACI](#aci---asset-canonical-id)      | parsed                                     |
+|            | + [CT](#ct---compatibility-tag)       | `{listing_unencrypted:, listing:, files:}` |
+
+#### V256 - SHA256 of Values File
+
+The SHA-256 (raw, not hex-encoded) of the `values.json` file that contains the asset (or form or asset file).
+
+#### CT - Compatibility Tag
+
+A string with the format `oc<OCAMLVERSION>_ws<OCAMLWORDSIZE>`.
+
+For example, `oc414_wd64` is OCaml 4.14 with a 64-bit word size.
+
+#### ACI - Asset Canonical ID
+
+The hex-encoded SHA256 of the asset's JSON.
+
+An example *before* removing whitespace as per [JSON Canonicalization](#json-canonicalization):
+
+```json
+{
+  "listing_unencrypted": {
+    "spec_version": 2,
+    "name": "DkDistribution_Std.Asset",
+    "version": "2.4.202508011516-signed"
+  },
+  "listing": {
+    "origins": [
+      {
+        "name": "github-release",
+        "mirrors": [
+          "https://github.com/diskuv/dk/releases/download/2.4.202508011516-signed"
+        ]
+      }
+    ]
+  },
+  "files": [
+    {
+      "origin": "github-release",
+      "path": "SHA256.sig",
+      "size": 151,
+      "checksum": {
+        "sha256": "0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"
+      }
+    }
+  ]
+}
+```
+
+### Dependencies
+
+| Value Type From | Value Type To | Why                                         |
+| --------------- | ------------- | ------------------------------------------- |
+| `f`             | `v`           | Rebuild form if `values.json` changes       |
+| `a`             | `v`           | Rebuild asset if `values.json` changes      |
+| `p`             | `v`           | Rebuild asset file if `values.json` changes |
