@@ -45,7 +45,10 @@
   - [Graph](#graph)
     - [Nodes](#nodes)
       - [V256 - SHA256 of Values File](#v256---sha256-of-values-file)
+      - [P256 - SHA256 of Asset File](#p256---sha256-of-asset-file)
+      - [Z256 - SHA256 of Zip Archive File](#z256---sha256-of-zip-archive-file)
       - [CT - Compatibility Tag](#ct---compatibility-tag)
+      - [VCI - Values Canonical ID](#vci---values-canonical-id)
       - [ACI - Asset Canonical ID](#aci---asset-canonical-id)
     - [Dependencies](#dependencies)
 
@@ -723,28 +726,56 @@ Each node in the graph has a key, a value id, a value sha256 and the value itsel
 - A **value id** is a string which is a *value type* (defined below) and a set of fields, concatenated together and then SHA-256 base32-encoded. The value id serves as a unique key for the value in a value store.
   - The **value type** is a single letter that categorizes what the value is:
 
-    | Value Type | What               | Docs                        |
-    | ---------- | ------------------ | --------------------------- |
-    | `o`        | object             | [Objects](#objects)         |
-    | `a`        | asset              | [Assets](#assets)           |
-    | `p`        | asset file         | [Assets](#assets)           |
-    | `f`        | form               | [Forms](#forms)             |
-    | `v`        | values file        | [JSON Schema](#json-schema) |
-    | `c`        | built-in constants | [Objects](#objects)         |
-    | `d`        | debug source file  | FILLMEIN                    |
+    | Value Type | What                | Docs                        |
+    | ---------- | ------------------- | --------------------------- |
+    | `o`        | object              | [Objects](#objects)         |
+    | `a`        | asset               | [Assets](#assets)           |
+    | `p`        | asset file          | [Assets](#assets)           |
+    | `f`        | form                | [Forms](#forms)             |
+    | `v`        | values file         | [JSON Schema](#json-schema) |
+    | `w`        | values (parsed AST) | [JSON Schema](#json-schema) |
+    | `c`        | built-in constants  | [Objects](#objects)         |
+    | `d`        | debug source file   | FILLMEIN                    |
+
+    All value types are *lowercase* for support on case-insensitive file systems.
 
 - A **value** is a file whose content matches the value tppe. A values file is a `value.json` build file itself. An object is a zip archive of the output of a [form](#forms). Form, asset and asset file value are serialized parsed abstract syntax trees.
 - A **value sha256** is a SHA-256 hex-encoded string of the value. That is, if you ran `certutil` (Windows), `sha256sum` (Linux) or `shasum -a 256` (macOS) on the value file, the *value sha256* is what you would see.
 
-| Value Type | Value Id before SHA256 and base32     | Value                                      |
-| ---------- | ------------------------------------- | ------------------------------------------ |
-| `v`        | [V256](#v256---sha256-of-values-file) | json `{schema_version:,forms:,assets:}`    |
-| `a`        | [ACI](#aci---asset-canonical-id)      | parsed                                     |
-|            | + [CT](#ct---compatibility-tag)       | `{listing_unencrypted:, listing:, files:}` |
+| Value Type | Value Id before SHA256 and base32          | Value                                      |
+| ---------- | ------------------------------------------ | ------------------------------------------ |
+| `v`        | [V256](#v256---sha256-of-values-file)      | json `{schema_version:,forms:,assets:}`    |
+| `w`        | [VCI](#vci---values-canonical-id)          | parsed `{schema_version:,forms:,assets:}`  |
+| `a`        | [ACI](#aci---asset-canonical-id)           | parsed                                     |
+|            | + [CT](#ct---compatibility-tag)            | `{listing_unencrypted:, listing:, files:}` |
+| `o`        | [P256](#p256---sha256-of-asset-file)       | contents of asset file                     |
+| `o`        | [Z256](#z256---sha256-of-zip-archive-file) | contents of zip archive file               |
 
 #### V256 - SHA256 of Values File
 
 The SHA-256 (raw, not hex-encoded) of the `values.json` file that contains the asset (or form or asset file).
+
+#### P256 - SHA256 of Asset File
+
+The hex-encoded SHA-256 of the asset file. It is the `checksum.sha256` in the following asset file:
+
+```json
+{
+  "origin": "github-release",
+  "path": "SHA256.sig",
+  "size": 151,
+  "checksum": {
+    "sha256": "0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"
+  }
+}
+```
+
+#### Z256 - SHA256 of Zip Archive File
+
+The hex-encoded SHA-256 of the zip archive generated from either:
+
+- the output directory of a form
+- the asset directory for one or more asset files
 
 #### CT - Compatibility Tag
 
@@ -752,9 +783,13 @@ A string with the format `oc<OCAMLVERSION>_ws<OCAMLWORDSIZE>`.
 
 For example, `oc414_wd64` is OCaml 4.14 with a 64-bit word size.
 
+#### VCI - Values Canonical ID
+
+The hex-encoded SHA256 of the `values.json` *canonicalized* JSON.
+
 #### ACI - Asset Canonical ID
 
-The hex-encoded SHA256 of the asset's JSON.
+The hex-encoded SHA256 of the asset's *canonicalized* JSON.
 
 An example *before* removing whitespace as per [JSON Canonicalization](#json-canonicalization):
 
@@ -790,8 +825,11 @@ An example *before* removing whitespace as per [JSON Canonicalization](#json-can
 
 ### Dependencies
 
-| Value Type From | Value Type To | Why                                         |
-| --------------- | ------------- | ------------------------------------------- |
-| `f`             | `v`           | Rebuild form if `values.json` changes       |
-| `a`             | `v`           | Rebuild asset if `values.json` changes      |
-| `p`             | `v`           | Rebuild asset file if `values.json` changes |
+| Value Type From | Value Type To | Why                                                     |
+| --------------- | ------------- | ------------------------------------------------------- |
+| `a`             | `v`           | Rebuild asset if contents of `values.json` changes      |
+| `a`             | `w`           | Rebuild asset if parsed `values.json` changes           |
+| `f`             | `v`           | Rebuild form if contents of `values.json` changes       |
+| `f`             | `w`           | Rebuild form if parsed `values.json` changes            |
+| `p`             | `v`           | Rebuild asset file if contents of `values.json` changes |
+| `p`             | `w`           | Rebuild asset file if parsed `values.json` changes      |
