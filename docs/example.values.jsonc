@@ -36,10 +36,7 @@ will make the "dk-darwin_arm64" executable from version
             "id": {
                 "package": "DkExe_Std.Asset",
                 "name": "Latest",
-                "version": {
-                    "major": 1,
-                    "minor": 0
-                }
+                "version": "1.0.0"
             },
             "precommands": {
                 // This list of commands is built automatically by

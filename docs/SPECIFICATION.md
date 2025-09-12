@@ -40,6 +40,7 @@
       - [Options: -f FILE and -d DIR](#options--f-file-and--d-dir)
       - [Option: \[-n STRIP\]](#option--n-strip)
       - [Option: \[-m MEMBER\]](#option--m-member)
+      - [Object ID with Build Metadata](#object-id-with-build-metadata)
     - [JSON Schema](#json-schema)
     - [JSON Canonicalization](#json-canonicalization)
   - [Graph](#graph)
@@ -376,7 +377,7 @@ For security, the commands may be evaluated in a sandbox or a chroot environment
 
 #### get-object ID -s SLOT (-f FILE | -d DIR/)
 
-Get the contents of the slot `SLOT` for the object with identifier `ID`.
+Get the contents of the slot `SLOT` for the object uniquely identified by identifier `ID`.
 
 | Option      | Description                                                                   |
 | ----------- | ----------------------------------------------------------------------------- |
@@ -387,9 +388,11 @@ Get the contents of the slot `SLOT` for the object with identifier `ID`.
 
 See [Options: -f FILE and -d DIR](#options--f-file-and--d-dir) for output path restrictions.
 
+The object `ID` implicitly or explicitly contains build metadata; see [ID with Build Metadata](#object-id-with-build-metadata).
+
 #### install-object ID -s SLOT (-f FILE | -d DIR/)
 
-Install the contents of the slot `SLOT` for the object with identifier `ID`.
+Install the contents of the slot `SLOT` for the object uniquely identified by identifier `ID`.
 
 | Option      | Description                                                                                            |
 | ----------- | ------------------------------------------------------------------------------------------------------ |
@@ -402,13 +405,17 @@ Install the contents of the slot `SLOT` for the object with identifier `ID`.
 
 See [Options: -f FILE and -d DIR](#options--f-file-and--d-dir) for output path restrictions.
 
+The object `ID` implicitly or explicitly contains build metadata; see [ID with Build Metadata](#object-id-with-build-metadata).
+
 #### pipe-object ID -s SLOT -x PIPE
 
-Write the contents of the slot `SLOT` for the object with identifier `ID` to the pipe named `PIPE`.
+Write the contents of the slot `SLOT` for the object uniquely identified by identifier `ID` to the pipe named `PIPE`.
 
 | Option      | Description                                  |
 | ----------- | -------------------------------------------- |
 | `-m MEMBER` | See [Option: [-m MEMBER](#option--m-member)] |
+
+The object `ID` implicitly or explicitly contains build metadata; see [ID with Build Metadata](#object-id-with-build-metadata).
 
 No two `pipe-object` commands may write to the same pipe `PIPE`.
 
@@ -636,6 +643,75 @@ To leave the directory structure as-is, set `STRIP` to `0`. To strip away the to
 #### Option: [-m MEMBER]
 
 Gets the zip file member from the object or asset file, which must be a zip archive.
+
+#### Object ID with Build Metadata
+
+These rules apply to the `*-object` commands **only**:
+
+- `get-object ID@VERSION ...`
+- `install-object ID@VERSION ...`
+- `pipe-object ID@VERSION ...`
+- `enter-objectID@VERSION ...`
+
+The purpose of these rules is to ensure that unique builds can be uniquely and deterministically identified.
+
+Versions can have explicit build metadata.
+For example, the VERSION `1.0.0+bn-20250801235901.commit-054d5983` has the two dot-separated build metadata fields: `bn-20250801235901` and `commit-054d5983`.
+
+If the version `VERSION` has explicit build metadata in the format `bn-*`, then the object is **locked** to that specific build number.
+In the above example the object is locked to build number `20250801235901` because that is the build metadata with format `bn-*`.
+
+When the version `VERSION` has no explicit build metadata, or the version `VERSION`'s build metadata does not include a `bn-*` field, then the first matching rule of the following rules determines what the build metadata will be:
+
+1. If a lockfile (not available yet in the reference implementation) has a build metadata reference (ex. `1.0.0` = `bn-20250801235901+commit-054d5983`), the build metadata is used.
+2. The constructive trace store list of traces `key(i), dependencies(i), result(i)` is scanned. If there is a trace `i` where the version of `key(i)` matches the `VERSION` and where `result(i)` is an object value, then the build metadata of the *latest* such `key(i)` will be used.
+3. The build metadata will be constructed from mlfront-shell's or dk's `-t TIMESTAMP` command line option, with the `bn-YYYYMMDDhhmmss` format.
+4. The build metadata will be `bn-20250101000000`.
+
+Important: the system clock is never consulted.
+
+In CI, the best practice is to use the `-t TIMESTAMP` option, and base it on either:
+
+- the source control commit timestamp.
+  - Pro: Very easy to go back to the source code.
+  - Con: If you need to force a new build from existing source code, you must create an empty commit-
+- a monotonically increasing build number (ex. `GITHUB_RUN_NUMBER` if you use GitHub Actions).
+  - Pro: No empty commits.
+  - Con: Depending on your CI provider, it may be hard to go from a build number back to the source code.
+
+Here are some examples for using the source control commit timestamp:
+
+```yaml
+# file: .github/workflows/example-build.yml
+
+# CI System: GitHub Actions
+# Variable Name: github.event.head_commit-timestamp
+- name: Build project
+  run: mlfront-shell -t "${{ github.event.head_commit-timestamp }}" ...
+```
+
+```yaml
+# file: .gitlab-ci.yml
+
+# CI System: GitLab CI
+# Docs: https://docs.gitlab.com/ci/variables/predefined_variables/#predefined-variables
+# Variable Name: CI_COMMIT_TIMESTAMP
+# Variable Example: 2022-01-31T16:47:55-08:00
+job:
+  script:
+    - mlfront-shell -t "$CI_COMMIT_TIMESTAMP" ...
+```
+
+Here are some example of using a monotonically increasing build number:
+
+```yaml
+# GitHub Actions: GITHUB_RUN_NUMBER https://docs.github.com/en/actions/reference/workflows-and-actions/variables
+# GitLab CI: CI_PIPELINE_IID https://docs.gitlab.com/ci/variables/predefined_variables/
+# Azure Pipelines: Build.BuildId https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml
+
+# FILLMEIN ... wait for `-n RUN_NUMBER` option to complement `-t TIMESTAMP`
+# FILLMEIN ... `-n` includes leading zeroes so lexographic comparisons work
+```
 
 ### JSON Schema
 

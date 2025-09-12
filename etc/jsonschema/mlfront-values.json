@@ -54,21 +54,8 @@
                                 "description": "The local name of the form. The local name must conform to the MlFront_Core standard namespace term specifications."
                             },
                             "version": {
-                                "type": "object",
-                                "description": "The version of the form. The patch version number will be automatically set to the \"current timestamp\" in YYYYMMDDHHMM UTC format (ex. 202507191633). The current timestamp can (and should) be given as an option to the value controller.",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "major": {
-                                        "type": "integer"
-                                    },
-                                    "minor": {
-                                        "type": "integer"
-                                    }
-                                },
-                                "required": [
-                                    "major",
-                                    "minor"
-                                ]
+                                "type": "string",
+                                "description": "The version of the form, which must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Including semver build metadata will lock any generated object versions to the specified build."
                             }
                         },
                         "required": [
@@ -174,7 +161,7 @@
                 "additionalProperties": false,
                 "properties": {
                     "listing_unencrypted": {
-                        "description": "The name and version of the asset must be unique across the object storage",
+                        "description": "The name and version of the asset must be unique across the value store",
                         "type": "object",
                         "properties": {
                             "spec_version": {
@@ -188,7 +175,7 @@
                             },
                             "version": {
                                 "type": "string",
-                                "description": "The version must be a semver 2.0.0 compatible version number as documented by https://semver.org/."
+                                "description": "The version must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Including semver build metadata will lock any generated object versions to the specified build."
                             }
                         },
                         "required": [
