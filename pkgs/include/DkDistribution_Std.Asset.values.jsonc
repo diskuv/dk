@@ -26,32 +26,85 @@ will make the "dk-darwin_arm64" executable from version
 
 */
 {
-  "$schema": "../../etc/jsonschema/mlfront-thunk.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": {
     "major": 1,
     "minor": 0
   },
-  "module_id": {
-    "package": "DkDistribution_Std.Asset",
-    "name": "Latest",
-    "version": {
-      "major": 1,
-      "minor": 0
+  "forms": [
+    {
+      "id": {
+        "package": "DkDistribution_Std.Asset",
+        "name": "Latest",
+        "version": "0.1.0"
+      },
+      "precommands": {
+        // This list of commands is built automatically by
+        // `get-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64`
+        // (and File.Windows_x86_64, etc.).
+        "private": [
+          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-darwin_arm64.zip -d ${SLOT.File.Darwin_arm64}",
+          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-darwin_x86_64.zip -d ${SLOT.File.Darwin_x86_64}",
+          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-linux_x86_64.zip -d ${SLOT.File.Linux_x86_64}",
+          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-linux_x86.zip -d ${SLOT.File.Linux_x86}",
+          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-windows_x86_64.zip -d ${SLOT.File.Windows_x86_64}",
+          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-windows_x86.zip -d ${SLOT.File.Windows_x86}"
+        ]
+      },
+      "outputs": {
+        "files": [
+          {
+            "slots": [
+              "File.Darwin_arm64"
+            ],
+            "paths": [
+              "."
+            ]
+          },
+          {
+            "slots": [
+              "File.Darwin_x86_64"
+            ],
+            "paths": [
+              "."
+            ]
+          },
+          {
+            "slots": [
+              "File.Linux_x86_64"
+            ],
+            "paths": [
+              "."
+            ]
+          },
+          {
+            "slots": [
+              "File.Linux_x86"
+            ],
+            "paths": [
+              "."
+            ]
+          },
+          {
+            "slots": [
+              "File.Windows_x86_64"
+            ],
+            "paths": [
+              "."
+            ]
+          },
+          {
+            "slots": [
+              "File.Windows_x86"
+            ],
+            "paths": [
+              "."
+            ]
+          }
+        ]
+      }
     }
-  },
-  "precommands": {
-    // This list of commands is built automatically by
-    // `get-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64`
-    // (and File.Windows_x86_64, etc.).
-    "private": [
-      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-darwin_arm64.zip -d ${SLOT.File.Darwin_arm64}",
-      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-darwin_x86_64.zip -d ${SLOT.File.Darwin_x86_64}",
-      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-linux_x86_64.zip -d ${SLOT.File.Linux_x86_64}",
-      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-linux_x86.zip -d ${SLOT.File.Linux_x86}",
-      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-windows_x86_64.zip -d ${SLOT.File.Windows_x86_64}",
-      "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-windows_x86.zip -d ${SLOT.File.Windows_x86}"
-    ]
-  },
+  ],
   "assets": [
     {
       "listing_unencrypted": {
@@ -136,57 +189,5 @@ will make the "dk-darwin_arm64" executable from version
         }
       ]
     }
-  ],
-  "outputs": {
-    "files": [
-      {
-        "slots": [
-          "File.Darwin_arm64"
-        ],
-        "paths": [
-          "."
-        ]
-      },
-      {
-        "slots": [
-          "File.Darwin_x86_64"
-        ],
-        "paths": [
-          "."
-        ]
-      },
-      {
-        "slots": [
-          "File.Linux_x86_64"
-        ],
-        "paths": [
-          "."
-        ]
-      },
-      {
-        "slots": [
-          "File.Linux_x86"
-        ],
-        "paths": [
-          "."
-        ]
-      },
-      {
-        "slots": [
-          "File.Windows_x86_64"
-        ],
-        "paths": [
-          "."
-        ]
-      },
-      {
-        "slots": [
-          "File.Windows_x86"
-        ],
-        "paths": [
-          "."
-        ]
-      }
-    ]
-  }
+  ]
 }
