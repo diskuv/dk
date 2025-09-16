@@ -103,6 +103,22 @@
                                 "items": {
                                     "type": "string"
                                 }
+                            },
+                            "execution": {
+                                "description": "Technical requirements for the machine that will execute the function. The OSFamily and ISA from Bazel's Platform Lexicon (https://github.com/bazelbuild/remote-apis/blob/main/build/bazel/remote/execution/v2/platform.md) may be supported by the build system.",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "value": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
                             }
                         },
                         "required": [
