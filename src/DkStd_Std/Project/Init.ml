@@ -82,7 +82,7 @@ module Utils = struct
   let git ?quiet ?alt_project_dir ~slots args =
     let open Bos in
     if !verbose && quiet = None then
-      Printf.eprintf "dkcoder: %s\n%!" (String.concat " " ("git" :: args));
+      Printf.eprintf "dk: %s\n%!" (String.concat " " ("git" :: args));
     let git_exe =
       match Slots.git slots with
       | Some exe -> Cmd.(v (p exe))
@@ -98,7 +98,7 @@ module Utils = struct
   let git_out ?quiet ?alt_project_dir ~slots args =
     let open Bos in
     if !verbose && quiet = None then
-      Printf.eprintf "dkcoder: %s\n%!" (String.concat " " ("git" :: args));
+      Printf.eprintf "dk: %s\n%!" (String.concat " " ("git" :: args));
     let git_exe =
       match Slots.git slots with
       | Some exe -> Cmd.(v (p exe))
@@ -121,11 +121,12 @@ let contents_gitignore_untrimmed = {|
 /.merlin
 |}
 
+(* SYNC: src/DkStd_Std/Project/Init.ml, .vscode/settings.json *)
 let contents_settings_json_untrimmed = {|
 {
     "ocaml.sandbox": {
         "kind": "custom",
-        "template": "${firstWorkspaceFolder}/dk DkRun_Project.RunQuiet --log-level ERROR --fixed-length-modules false -- MlStd_Std.Exec --merlin -- $prog $args"
+        "template": "${firstWorkspaceFolder}/dk -g dune-ide --fixed-length-modules false RunQuiet Ml.Exec --merlin -- $prog $args"
     }
 }|}
 
@@ -169,7 +170,7 @@ let () =
     let src = Fpath.(dkcoder_project_dirp / s) in
     let dest = Fpath.(new_project_dirp / s) in
     if not (Bos.OS.File.exists dest |> Utils.rmsg) then (
-      Printf.eprintf "dkcoder: create %s\n%!" s;
+      Printf.eprintf "dk: create %s\n%!" s;
       DkFs_C99.File.copy ?mode ~src ~dest () |> Utils.rmsg)
   in
   copy_if "dk.cmd";
@@ -181,14 +182,14 @@ let () =
   (* .gitignore *)
   let gitignore = Fpath.(new_project_dirp / ".gitignore") in
   if not (Bos.OS.File.exists gitignore |> Utils.rmsg) then (
-    Printf.eprintf "dkcoder: create .gitignore\n%!";
+    Printf.eprintf "dk: create .gitignore\n%!";
     (* Use CRLF on Windows since ".gitignore text" in .gitattributes *)
     write_crlf_on_win32 gitignore (String.trim contents_gitignore_untrimmed));
 
   (* .ocamlformat *)
   let ocamlformat = Fpath.(new_project_dirp / ".ocamlformat") in
   if not (Bos.OS.File.exists ocamlformat |> Utils.rmsg) then (
-    Printf.eprintf "dkcoder: create .ocamlformat\n%!";
+    Printf.eprintf "dk: create .ocamlformat\n%!";
     (* Use CRLF on Windows since ".ocamlformat text" in .gitattributes *)
     write_crlf_on_win32 ocamlformat (String.trim contents_ocamlformat_untrimmed));
 
@@ -199,14 +200,14 @@ let () =
   (* .vscode/extensions.json *)
   let extensions_json = Fpath.(vscode_dirp / "extensions.json") in
   if not (Bos.OS.File.exists extensions_json |> Utils.rmsg) then (
-    Printf.eprintf "dkcoder: create .vscode/extensions.json\n%!";
+    Printf.eprintf "dk: create .vscode/extensions.json\n%!";
     (* Use CRLF on Windows since .json are "*.json text" in .gitattributes *)
     write_crlf_on_win32 extensions_json (String.trim contents_extensions_json_untrimmed));
 
   (* .vscode/settings.json *)
   let settings_json = Fpath.(vscode_dirp / "settings.json") in
   if not (Bos.OS.File.exists settings_json |> Utils.rmsg) then (
-    Printf.eprintf "dkcoder: create .vscode/settings.json\n%!";
+    Printf.eprintf "dk: create .vscode/settings.json\n%!";
     (* Use CRLF on Windows since .json are "*.json text" in .gitattributes *)
     write_crlf_on_win32 settings_json (String.trim contents_settings_json_untrimmed));
 
@@ -217,7 +218,7 @@ let () =
       (String.concat "/" src_mod) ^ ".ml"
     in
     match Fpath.of_string ml_file with
-    | Error (`Msg msg) -> Printf.eprintf "dkcoder: INVALID module id: %s. %s\n%!" module_id msg; exit 4
+    | Error (`Msg msg) -> Printf.eprintf "dk: INVALID module id: %s. %s\n%!" module_id msg; exit 4
     | Ok fp ->
       let abs_fp = Fpath.(new_project_dirp // fp) in
       Bos.OS.Dir.create (Fpath.parent abs_fp) |> Utils.rmsg |> ignore;
@@ -239,7 +240,7 @@ let () =
   (* fail fast if there are any changes in the dkcoder project. We don't want to delete modifications! *)
   let changes = Utils.git_out ~quiet:() ~alt_project_dir:!dkcoder_project_dir ~slots ["status"; "--short"] in
   if String.trim changes <> "" then begin
-    Printf.eprintf "dkcoder: The %s project has changes and will not be deleted:\n" !dkcoder_project_dir;
+    Printf.eprintf "dk: The %s project has changes and will not be deleted:\n" !dkcoder_project_dir;
     Format.eprintf "@[<v 2>   %a@]@." Fmt.lines changes;
     exit 3
   end;
@@ -248,7 +249,7 @@ let () =
      technique: https://stackoverflow.com/a/3338774 *)
   let unpushed = Utils.git_out ~quiet:() ~alt_project_dir:!dkcoder_project_dir ~slots ["log"; "--branches"; "--not"; "--remotes"; "--simplify-by-decoration"; "--decorate"; "--oneline"] in
   if String.trim unpushed <> "" then begin
-    Printf.eprintf "dkcoder: The %s project has unpushed commits and will not be deleted:\n" !dkcoder_project_dir;
+    Printf.eprintf "dk: The %s project has unpushed commits and will not be deleted:\n" !dkcoder_project_dir;
     Format.eprintf "@[<v 2>   %a@]@." Fmt.lines unpushed;
     exit 3
   end;

@@ -1,5 +1,3 @@
 {
-    "recommendations": [
-        "psioniq.psi-header"
-    ]
+  "recommendations": ["esbenp.prettier-vscode"]
 }
