@@ -37,14 +37,14 @@ jobs:
                   XDG_DATA_HOME: ${{ github.workspace }}/target/data
               run: |
                 git clone --branch V2_4 https://github.com/diskuv/dk.git dk0
-                dk0/mlfront-shell -I pkgs/include -d buildlog --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_arm64   -m ./7zz.exe -f target/Darwin_arm64.7zz.exe
-                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_x86_64  -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
-                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_arm      -m ./7zz.exe -f target/Linux_arm.7zz.exe
-                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_arm64    -m ./7zz.exe -f target/Linux_arm64.7zz.exe
-                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_x86      -m ./7zz.exe -f target/Linux_x86.7zz.exe
-                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_x86_64   -m ./7zz.exe -f target/Linux_x86_64.7zz.exe
-                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Windows_x86    -m ./7zz.exe -f target/Windows_x86.7zz.exe
-                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Windows_x86_64 -m ./7zz.exe -f target/Windows_x86_64.7zz.exe
+                dk0/mlfront-shell -I dk0/pkgs/include -d buildlog --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_arm64   -m ./7zz.exe -f target/Darwin_arm64.7zz.exe
+                dk0/mlfront-shell -I dk0/pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_x86_64  -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
+                dk0/mlfront-shell -I dk0/pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_arm      -m ./7zz.exe -f target/Linux_arm.7zz.exe
+                dk0/mlfront-shell -I dk0/pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_arm64    -m ./7zz.exe -f target/Linux_arm64.7zz.exe
+                dk0/mlfront-shell -I dk0/pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_x86      -m ./7zz.exe -f target/Linux_x86.7zz.exe
+                dk0/mlfront-shell -I dk0/pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_x86_64   -m ./7zz.exe -f target/Linux_x86_64.7zz.exe
+                dk0/mlfront-shell -I dk0/pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Windows_x86    -m ./7zz.exe -f target/Windows_x86.7zz.exe
+                dk0/mlfront-shell -I dk0/pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Windows_x86_64 -m ./7zz.exe -f target/Windows_x86_64.7zz.exe
 
             - name: Checksum trace store after
               run: if (Test-Path target\data\dk\cts.1.oc414_wd64\trace) {Get-FileHash target\data\dk\cts.1.oc414_wd64\trace -Algorithm SHA256}

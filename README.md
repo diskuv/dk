@@ -1,8 +1,8 @@
-# dk - The boring build and script tool
+# dk - The most uninteresting build and scripting system
 
-Running scripts with `dk` solves the problem of **README-itis**: you give your users a long README document, your users fail to setup your software, and you lose a user forever.
+`dk` solves the problem of **README-itis**: you give your users a long README document, your users fail to setup your software, and you lose a user forever.
 
-We are going to use `dk` as our first example of average complexity software: its scripting functionality requires a runtime environment and platform development kits are downloaded on-demand. We want our users (ex. you) to install and get started quickly, using just the initial paragraphs of a README. Our users do this on Windows (go ahead!):
+We'll use the software behind `dk` as the first example of easy-to-fail, average-complexity software: `dk`'s scripting functionality requires a runtime environment and platform development kits are downloaded on-demand. We want our users (ex. you) to install and get started *quickly*. Users copy-and-paste this on Windows (go ahead!):
 
 <!-- $MDX skip -->
 ```sh
@@ -12,9 +12,9 @@ $ winget install -e --id Diskuv.dk
 
 <!-- $MDX skip -->
 ```sh
-# YOU: Let your users do whatever your software does ...
-# EXAMPLE: The `dk` software has scripting (discussed in detail later).
-#          Here's a script to download and print a page to the screen.
+# THIS EXAMPLE: The `dk` software has scripting (discussed later).
+#      Here's a script to download and print a page to the screen.
+# IN GENERAL: Your users copy-and-paste your first example ...
 $ dk -S "
     module Uri = Tr1Uri_Std.Uri
   " -U "
@@ -24,12 +24,16 @@ $ dk -S "
     Uri.of_string {|https://jigsaw.w3.org/HTTP/h-content-md5.html|}
   " -O ReleaseSmall Exe
 
-... YOU: Your software does downloads for setup.
-... EXAMPLE: `dk` will install a scripting environment and download
-... development kits on-demand for different platforms.
+... THIS EXAMPLE: `dk` will install a scripting environment, download
+... development kits on-demand for different platforms, and do a
+... cross-compile. It *takes time* to download massive development kits.
+... You (and your user) will do something else in another window, but as
+... long as you don't have to type anything, you'll probably stick around!
+... ⟳ ⟳ ⟳ software installed automatically ⟳ ⟳ ⟳
+... ⟳ ⟳ ⟳         example executed         ⟳ ⟳ ⟳
 
-# YOU: Give your users the results they want ...
-# EXAMPLE: The `dk` scripting environment makes standalone executables.
+# THIS EXAMPLE: `dk` scripting makes standalone executables.
+# IN GENERAL: Your users get the results they want ...
 target/ZzZz_Zz.Adhoc-android_arm32v7a:   ELF 32-bit LSB pie executabl...
 target/ZzZz_Zz.Adhoc-android_arm64v8a:   ELF 64-bit LSB pie executabl...
 target/ZzZz_Zz.Adhoc-android_x86_64:     ELF 64-bit LSB pie executabl...
@@ -41,28 +45,72 @@ target/ZzZz_Zz.Adhoc-windows_x86_64.exe: PE32+ executable (console) x...
 target/ZzZz_Zz.Adhoc-windows_x86.exe:    PE32 executable (console) In...
 ```
 
-You still need that long README or long manual for your complex software,
-but **your software is in your users' hands quickly**.
+You still need that long README for your complex software,
+but **your software setup is boring and in your users' hands quickly**.
 
 ## Introduction
 
 `dk` solves README-itis in two ways:
 
-1. You model your actions (all that stuff you would put into a README) with scripts that `dk` will cross-compile for your users's platforms.
-2. All required actions are executed as needed on your end-users' machines with dk's build tool.
+1. You model your actions (all that stuff you would put into a README) with scripts that `dk` will cross-compile for your users' platforms.
+2. All required actions are executed as needed on your users' machines with dk's build tool.
+
+Keep your setup boring: no interesting knobs, and no typing beyond the initial copy-and-paste.
 
 Skip down to [Comparisons](#comparisons) for how `dk` fits with other tools. TLDR: `dk` is similar to the Nix package manager (except `dk` works on Windows) and to Docker (except not as heavy).
 
-The build tool is quite new and has not yet been integrated into the script runner. But it has a `dk0/mlfront-shell` reference implementation which we'll document in the next section, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
+The build tool is quite new and has not yet been integrated into the script runner. But it has a `dk0/mlfront-shell` reference implementation which we'll document in the next sections, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
 
 Separately, a [Quick Start for Scripting](#quick-start---scripting) is further below, and the main documentation site for the script runner is <https://diskuv.com/dk/help/latest/>.
 
-But we'll start with a walk-through of the **build tool** using the popular zip compression
-software "7zip" as an example. (dk has no affliation with 7zip.)
+But we'll start with a walk-through of the **build tool** by unpackaging the popular zip compression software "7zip". (dk has no affliation with 7zip.)
+
+---
+
+- [dk - The most uninteresting build and scripting system](#dk---the-most-uninteresting-build-and-scripting-system)
+  - [Introduction](#introduction)
+  - [Concepts and Theory](#concepts-and-theory)
+  - [Using the Build Tool](#using-the-build-tool)
+  - [Quick Start - Scripting](#quick-start---scripting)
+  - [Comparisons](#comparisons)
+  - [Licenses](#licenses)
+  - [Open-Source](#open-source)
+
+## Concepts and Theory
+
+In the `dk` build system, you submit *forms* that produce *objects* created from *assets*.
+
+The **assets** are input materials. These are files and folders, and they can be local or remote: source code, data files, audio, image and video files.
+
+A **form** is a document with fields and a submit button. At some point ... not now ... there will be a graphical user interface (GUI) for these forms. But the command line interface (CLI) fallback is available today and forever: you use the DOS or Unix terminal, and the document is a command line in your terminal.
+
+An **object** is a folder that the form produces.
+
+Again: You submit *forms* that produce *objects* created from *assets*.
+
+Finally, we have our fourth (4th) word: **value**. A value is any asset, form or object.
+
+Let's relates these concept to the activity of unpacking the 7zip compression software:
+
+| Concept | Examples                                                                                                                                                                |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Assets**  | ![7zip 25.01 GitHub Releases](docs/images/7zip-25-01-github-releases.png)                                                                                               |
+| **Forms**   | <pre>$ dk0/mlfront-shell -I dk0/pkgs/include -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_x86_64  -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe</pre> |
+|         | Same form, different parameters: ![Using a form with the CLI](docs/images/7zip-apply-form.png)                                                                          |
+| **Objects** | `Y:\a\target\pid\500\bnrtauvvz5kvhwd5\out\File.Windows_x86`: ![7z.exe object](docs/images/7zip-object-7z-exe.png)                                                                                                                    |
+|         | `Y:\a\target\pid\500\wtqhxi4flrfk6sab\out\File.Darwin_arm64`: ![7z tar](docs/images/7zip-object-tar.png)                                                                                                                              |
+
+**Values** have unique identifiers. You saw one in the forms example above: `CommonsZip_Std.S7z.S7zExe@25.1.0`.
+
+These identifiers contain versions like `25.1.0`. Making a change to a value means creating a new value with the same name but with an increased version. For example, if the text of your 2025-09-04 privacy policy is in the asset `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904`, an end-of-year update to the privacy policy could be `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20251231`. These *semantic* versions offer a lot of flexibility and are industry-standard: [external link: semver 2.0](https://semver.org/). The important point is that **values do not change; versions do**.
+
+---
+
+NEXT STEPS: The next section goes over how to specify assets, create forms and generate objects.
 
 ## Using the Build Tool
 
-> Sorry macOS users, today the build tool `dk0/mlfront-shell` downloads an *unsigned* standalone binary. It will be signed later, once `dk0` is merged into `dk`. Your mac probably won't like it. If you are adventurous, you can run `xattr -d com.apple.quarantine ~/.local/share/mlfront-shell/mlfrontshellexe-2.4.*-darwin_arm64/mlfront-shell` and try again.
+> Sorry macOS users, today the build tool `dk0/mlfront-shell` downloads an *unsigned* standalone binary. It will be signed later, once `dk0/mlfront-shell` is merged into `dk`. Your mac probably won't like it. If you are adventurous, you can run `xattr -d com.apple.quarantine ~/.local/share/mlfront-shell/mlfrontshellexe-2.4.*-darwin_arm64/mlfront-shell` and try again.
 
 <!-- $MDX skip -->
 ```sh
