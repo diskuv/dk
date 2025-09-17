@@ -1,18 +1,32 @@
+/*
+
+Git on Windows provides a "PortableGit-2.51.0-64-bit.7z.exe" self-extracting archive.
+That self-extracting archive runs on Windows only, so by using 7zip to unpack it,
+we can package it on macOS or Linux.
+
+We do this because:
+1. Removing platform crossover dependencies improves build times
+2. Although anyone can download our pre-built package, removing platform
+crossover lets anyone build the package.
+
+*/
 {
-    "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
-    "schema_version": { "major": 1, "minor": 0 },
-    "assets": [
-        {
-            "listing_unencrypted": {
-                "name": "CommonsGit_Std.Git",
-                "spec_version": 2,
-                "version": "17.6.0"
-            },
-            "listing": {
-                "origins": [
-                    
-                ]
-            }
-        }
-    ]
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "assets": [
+    {
+      "listing_unencrypted": {
+        "name": "CommonsGit_Std.Git",
+        "spec_version": 2,
+        "version": "17.6.0"
+      },
+      "listing": {
+        "origins": []
+      },
+      "files": []
+    }
+  ]
 }
