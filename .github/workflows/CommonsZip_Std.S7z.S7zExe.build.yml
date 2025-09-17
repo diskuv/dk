@@ -27,6 +27,9 @@ jobs:
             - name: List target before
               run: Get-ChildItem -Recurse target
 
+            - name: Checksum trace store before
+              run: if (Test-Path target\data\dk\cts.1.oc414_wd64\trace) {Get-FileHash target\data\dk\cts.1.oc414_wd64\trace -Algorithm SHA256}
+
             - name: Build pkgs/include/CommonsZip_Std.S7z.S7zExe
               env:
                   # Cross-platform CI caches behave best when the cached data is under the project directory
@@ -42,6 +45,9 @@ jobs:
                 dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_x86_64   -m ./7zz.exe -f target/Linux_x86_64.7zz.exe
                 dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Windows_x86    -m ./7zz.exe -f target/Windows_x86.7zz.exe
                 dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Windows_x86_64 -m ./7zz.exe -f target/Windows_x86_64.7zz.exe
+
+            - name: Checksum trace store after
+              run: if (Test-Path target\data\dk\cts.1.oc414_wd64\trace) {Get-FileHash target\data\dk\cts.1.oc414_wd64\trace -Algorithm SHA256}
 
             - name: List target after
               run: Get-ChildItem -Recurse target
