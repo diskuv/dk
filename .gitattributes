@@ -28,7 +28,6 @@
 .gitignore text
 *.java text
 *.json text
-*.md text
 .ocamlformat text
 
 # Declare files that will always have LF line endings on checkout.
@@ -44,6 +43,8 @@ gradlew text eol=lf
 *.sexp text eol=lf
 *.sh text eol=lf
 Makefile text eol=lf
+#   ocaml-mdx requires LF
+*.md text eol=lf
 *.mli text eol=lf
 *.ml text eol=lf
 opam text eol=lf

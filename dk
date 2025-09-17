@@ -36,6 +36,16 @@ cksum256_linux_x86_64=490990b1c6de9721db9707612c491c157e0d1c81b23a77aa5cca04b37c
 
 dk_pwd=$PWD
 
+# Get the dk project tree
+DKCODER_PROJECT_DIR=$(dirname "$0")
+DKCODER_PROJECT_DIR=$(cd "$DKCODER_PROJECT_DIR" && pwd)
+
+# --- Windows shunting ---
+if [ -n "${COMSPEC:-}" ] && [ -x /usr/bin/cmd ] && [ -x /usr/bin/cygpath ] && [ -e "$DKCODER_PROJECT_DIR/dk.cmd" ]; then
+    DKCODER_PROJECT_DIR_WIN=$(/usr/bin/cygpath -aw "$DKCODER_PROJECT_DIR")
+    exec /usr/bin/cmd /c "$DKCODER_PROJECT_DIR_WIN\\dk.cmd" "$@"
+fi
+
 # --- Quiet mode detection ---
 # Any command like ./dk StdStd_V0_1.RunQuiet that ends in "Quiet".
 # However, for user safety won't quiet a command if `sudo` is required.
@@ -521,8 +531,6 @@ autodetect_system_binaries
 autodetect_buildhost_arch
 
 # Use the project tree as the current directory
-DKCODER_PROJECT_DIR=$(dirname "$0")
-DKCODER_PROJECT_DIR=$(cd "$DKCODER_PROJECT_DIR" && pwd)
 cd "$DKCODER_PROJECT_DIR"
 
 # --- DkCoder data home ---

@@ -1,0 +1,153 @@
+/* 
+
+Getting the latest version of dk
+---------------------------------
+
+The object DkExe_Std.Asset.Latest will build (ie. fetch) the
+"private" and "public" asset files listed below. Running the
+following command with `mlfront-shell` or within your own "precommands":
+
+  get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64 -d dir-darwin_arm64
+
+will make the "dk-darwin_arm64" executable available to you as the file
+"dk-darwin_arm64".
+
+Getting a historical version of dk
+---------------------------------
+
+All historical versions are/will be available as assets in this file as
+well. Running the following command with `mlfront-shell` or within your
+own "precommands":
+
+  get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-darwin_arm64 -f dk-darwin_arm64
+
+will make the "dk-darwin_arm64" executable from version
+`2.4.202508302258-signed` available to you as the file "dk-darwin_arm64".
+
+*/
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "forms": [
+    {
+      "id": {
+        "package": "DkSetup_Std",
+        "name": "Exe",
+        "version": "2.4.202508302258-signed"
+      },
+      "precommands": {
+        "private": [
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-darwin_arm64 -f ${SLOT.File.Darwin_arm64}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-darwin_x86_64 -f ${SLOT.File.Darwin_x86_64}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-linux_x86_64 -f ${SLOT.File.Linux_x86_64}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-linux_x86 -f ${SLOT.File.Linux_x86}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-windows_x86_64.exe -f ${SLOT.File.Windows_x86_64}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-windows_x86.exe -f ${SLOT.File.Windows_x86}/dk.exe"
+        ]
+      },
+      "outputs": {
+        "files": [
+          {
+            "slots": [
+              "File.Darwin_arm64",
+              "File.Darwin_x86_64",
+              "File.Linux_x86_64",
+              "File.Linux_x86",
+              "File.Windows_x86_64",
+              "File.Windows_x86"
+            ],
+            "paths": ["dk.exe"]
+          }
+        ]
+      }
+    }
+  ],
+  "assets": [
+    {
+      "listing_unencrypted": {
+        "spec_version": 2,
+        "name": "DkExe_Std.Asset",
+        "version": "2.4.202508302258-signed"
+      },
+      "listing": {
+        "origins": [
+          {
+            "name": "github-release",
+            "mirrors": [
+              "https://github.com/diskuv/dk/releases/download/2.4.202508302258-signed"
+            ]
+          }
+        ]
+      },
+      "files": [
+        {
+          "origin": "github-release",
+          "path": "SHA256.sig",
+          "size": 151,
+          "checksum": {
+            "sha256": "82d39c733e8676e605ae58b2ab5e58dea7f92e88387d89d2a0f99daf3e402dfe"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "SHA256",
+          "size": 559,
+          "checksum": {
+            "sha256": "142742b0a3003212e5d71ac7090623e612f930a3e016ad2d234ea291355ab968"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-darwin_arm64",
+          "size": 8828832,
+          "checksum": {
+            "sha256": "7f4f98b9fe213a6ba924db16f3eda43efa411bd84be6b777b5aee3c2efcb8921"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-darwin_x86_64",
+          "size": 9073888,
+          "checksum": {
+            "sha256": "18eafbc2fa81c56e607feb4712e0a5efec1b7c73b4ef2f39c807d9c42f7856f2"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-linux_x86",
+          "size": 17998660,
+          "checksum": {
+            "sha256": "17f66bcd4c3d32a71bd85eb9f9b6f6f26edd44c3479a4f16cdd8b3c8f3761393"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-linux_x86_64",
+          "size": 19439048,
+          "checksum": {
+            "sha256": "490990b1c6de9721db9707612c491c157e0d1c81b23a77aa5cca04b37c01d4f0"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-windows_x86.exe",
+          "size": 7939072,
+          "checksum": {
+            "sha256": "60b9d6e960739f4d9d3031cbdf7a500a4b80b9dfcbb24b195c26cf58e7df9ee5"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-windows_x86_64.exe",
+          "size": 8765440,
+          "checksum": {
+            "sha256": "33316406532521c65a16c1c0df8086d172d8eccfae971ac67d575bdf9c2848e1"
+          }
+        }
+      ]
+    }
+  ]
+}

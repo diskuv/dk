@@ -1,26 +1,42 @@
-# dk - A script runner, cross-compiler and build tool
+# dk - The boring build and script tool
 
-Running and cross-compiling scripts with `dk` solves the problem of **README-itis**:
+Running scripts with `dk` solves the problem of **README-itis**:
  you give your users a lengthy README document, your users fail to setup your software, and you lose a user forever.
+
+`dk` is meant to be dry and boring. Here is the show-and-tell example ... copy-and-paste it in PowerShell or in a Unix terminal:
+
+```sh
+$ git clone https://github.com/diskuv/dk.git dkx
+asd
+
+$ dkx/mlfront-shell -- get-object DkSetup_Std.Exe@2.4.202508302258-signed -s File.Windows_x86_64 -d target/
+asjkldf
+```
 
 `dk` solves README-itis in two ways:
 
 1. You model your actions (all that stuff you would put into a README) with scripts that `dk` will cross-compile for your users's platforms.
 2. All required actions are executed as needed on your end-users' machines with dk's build tool.
 
-Skip down to [Comparisons](#comparisons) for how `dk` fits in the ecosystem. TLDR: `dk` is similar to the Nix package manager (except `dk` works on Windows) and to Docker (except not as heavy).
+<!-- $MDX skip -->
+```sh
+winget install -e --id Diskuv.dk
+```
+
+Skip down to [Comparisons](#comparisons) for how `dk` fits with other tools. TLDR: `dk` is similar to the Nix package manager (except `dk` works on Windows) and to Docker (except not as heavy).
 
 The build tool is quite new and has not yet been integrated into the script runner. But it has a reference implementation, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
 
-Separately, a [Quick Start for Scripting](#quick-start---scripting) is below, and the main documentation site for the script runner is <https://diskuv.com/dk/help/latest/>.
+Separately, a [Quick Start for Scripting](#quick-start---scripting) is further below, and the main documentation site for the script runner is <https://diskuv.com/dk/help/latest/>.
 
 ## Quick Start - Build Tool
 
 **Install** on Windows with PowerShell, or macOS or Linux with your terminal:
 
+<!-- $MDX skip -->
 ```sh
 git clone https://github.com/diskuv/dk.git
-dk/mlfront-shell --version
+dkx/mlfront-shell --version
 ```
 
 That will do a one-time download of a small binary (< 10MB), and
@@ -30,7 +46,7 @@ give you access to the community-submitted packages (*pending*) in
 **Download your first cloud asset** with:
 
 ```sh
-dk/mlfront-shell -- get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_arm64 -f binary-for-darwin_arm64
+$ dkx/mlfront-shell -- get-asset-file DkSetup_Std.Exe@2.4.202508302258-signed -p dk-darwin_arm64 -f binary-for-darwin_arm64
 ```
 
 That downloaded an executable `dk-darwin_arm64` which is the `dk` script runner for Apple Silicon.
@@ -39,7 +55,7 @@ Change the path to `dk-windows_x86_64`, `dk-windows_x86`, `dk-linux_x86_64`, `dk
 Run it with:
 
 ```sh
-./binary-for-darwin_arm64 --help
+$ ./binary-for-darwin_arm64 --help
 ```
 
 Congratulations! Hint: Later you will do [Quick Start for Scripting](#quick-start---scripting) that makes real use of that script runner.
@@ -47,7 +63,7 @@ Congratulations! Hint: Later you will do [Quick Start for Scripting](#quick-star
 **Download your first object** with:
 
 ```sh
-dk/mlfront-shell -- get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64 -d dir-for-darwin_arm64
+$ dkx/mlfront-shell -- get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64 -d dir-for-darwin_arm64
 ```
 
 Objects (ie. `get-object`) have build commands embedded in them. Think of them like build targets with one or more outputs.
@@ -55,14 +71,14 @@ The `DkExe_Std.Asset.Latest` object has build commands that gets the latest `dk`
 
 If we inspect our new directory, we'll see:
 
-```sh
-# Windows
+```powershell
 PS1> dir dir-for-darwin_arm64
 Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
 -a---            1/1/1980 12:00 AM        8810960 dk
+```
 
-# Unix
+```sh
 $ ls -l dir-for-darwin_arm64
 -rw-r--r--  1 jonah  staff  8810960 Jan  1  1980 dk
 ```
@@ -83,21 +99,18 @@ and you will get auto-completion for your build file.
 Then you can run it with:
 
 ```sh
-dk/mlfront-shell -I the/directory/to/your/build/file -- get-object YourLibrary_Something.Something@1.0.202501010000 -s File.Agnostic
+$ dkx/mlfront-shell -I the/directory/to/your/build/file -- get-object YourLibrary_Something.Something@1.0.202501010000 -s File.Agnostic
 ```
 
-Almost any command you have been doing with `dk/mlfront-shell ... -- THE-COMMAND ...` you can do inside the "precommands" of your build file.
+Almost any command you have been doing with `dkx/mlfront-shell ... -- THE-COMMAND ...` you can do inside the "precommands" of your build file.
 
-<!--
 **Shell into your first build** with:
 
-> 2025-08-29: There are [two serious performance bugs](https://github.com/diskuv/dk/issues?q=state%3Aopen%20label%3A%22performance%22) where all assets are downloaded, each time.
-> Sorry! I wouldn't recommend doing this unless you have tens of minutes to wait.
-
+<!-- $MDX skip -->
 ```sh
 # Only for Apple Silicon ...
 
-$ dk/mlfront-shell -- enter-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64
+$ dkx/mlfront-shell -- enter-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64
 
 DkDistribution_Std.Asset.Latest@1.0.202501010000 fn/File.Darwin_arm64 %
 ../../out/File.Darwin_arm64/DkCoder.bundle/Contents/Helpers/ocamlrun ../../out/File.Darwin_arm64/DkCoder.bundle/Contents/Helpers/ocaml -I ../../out/File.Darwin_arm64/DkCoder.bundle/Contents/Resources/lib/ocaml
@@ -112,10 +125,11 @@ Enter #help;; for help.
 
 or
 
+<!-- $MDX skip -->
 ```sh
 # Only for Windows and Linux (use "Linux_x86_64") ...
 
-$ dk/mlfront-shell -- enter-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Windows_x86_64
+$ dkx/mlfront-shell -- enter-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Windows_x86_64
 
 DkDistribution_Std.Asset.Latest@1.0.202501010000 fn/File.Windows_x86_64 %
 ../../out/File.Windows_x86_64/DkCoder.bundle/Contents/Helpers/ocamlrun ../../out/File.Windows_x86_64/DkCoder.bundle/Contents/Helpers/ocaml -I ../../out/File.Windows_x86_64/DkCoder.bundle/Contents/Resources/lib/ocaml
@@ -127,7 +141,6 @@ Enter #help;; for help.
 # #quit;;
 
 ```
--->
 
 ## Quick Start - Scripting
 
@@ -135,28 +148,32 @@ Enter #help;; for help.
 
 Install on Windows:
 
+<!-- $MDX skip -->
 ```powershell
 winget install -e --id Diskuv.dk
 ```
 
 or Apple/Silicon:
 
+<!-- $MDX skip -->
 ```sh
-sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-exe/2.4.202506160116-signed/dk-darwin_arm64
+sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-exe/2.4.202508302258-signed/dk-darwin_arm64
 sudo chmod +x /usr/local/bin/dk
 ```
 
 or Apple/Intel:
 
+<!-- $MDX skip -->
 ```sh
-sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-exe/2.4.202506160116-signed/dk-darwin_x86_64
+sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-exe/2.4.202508302258-signed/dk-darwin_x86_64
 sudo chmod +x /usr/local/bin/dk
 ```
 
 or Linux with glibc and libstdc++ (Debian, Ubuntu, etc. but not Alpine):
 
+<!-- $MDX skip -->
 ```sh
-sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-exe/2.4.202506160116-signed/dk-linux_x86_64
+sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-exe/2.4.202508302258-signed/dk-linux_x86_64
 sudo chmod +x /usr/local/bin/dk
 [ -x /usr/bin/dnf ] && sudo dnf install -y libstdc++
 ```
@@ -164,22 +181,22 @@ sudo chmod +x /usr/local/bin/dk
 Then cross-compile a script to standalone Windows, Linux, Android executables (and to a macOS executable if you are on a macOS machine):
 
 ```sh
-dk -g dune -S "
+$ dk -g dune -S "
     module Http = DkNet_Std.Http
     module Uri = Tr1Uri_Std.Uri
     let print_endline = Tr1Stdlib_V414Io.StdIo.print_endline
- " -U "
+  " -U "
     print_endline @@
     Lwt_main.run @@
     Http.fetch_url ~max_sz:4096 @@
     Uri.of_string {|https://jigsaw.w3.org/HTTP/h-content-md5.html|}
- " -O ReleaseSmall Exe
+  " -O ReleaseSmall Exe
 ```
 
 The executables will be available in the `target/` folder:
 
 ```sh
-file target/ZzZz_Zz.Adhoc-* | cut -c1-69 | awk '{print $0 "..."}'
+$ file target/ZzZz_Zz.Adhoc-* | cut -c1-69 | awk '{print $0 "..."}'
 
 target/ZzZz_Zz.Adhoc-android_arm32v7a:   ELF 32-bit LSB pie executabl...
 target/ZzZz_Zz.Adhoc-android_arm64v8a:   ELF 64-bit LSB pie executabl...
