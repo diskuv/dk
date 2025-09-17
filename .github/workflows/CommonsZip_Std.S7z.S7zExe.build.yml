@@ -1,0 +1,55 @@
+name: CommonsZip_Std.S7z.S7zExe
+on: push
+
+jobs:
+    build:
+        # Your job will be different, but this job needs Windows since CommonsZip_Std.S7z.MacLinux7zExe@25.1.0 has OSFamily=windows.
+        runs-on: windows-2022
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Cache dk data stores and build keys
+              uses: actions/cache@v4
+              with:
+                  # The data stores and build keys are safe to share between Windows, macOS and Linux
+                  enableCrossOsArchive: true
+                  path: |
+                      target/data/val.1
+                      target/data/cts.1.*
+                      target/config/build.pub
+                      target/config/build.sec
+                  key: dk-stores-and-keys
+
+            - name: Build pkgs/include/CommonsZip_Std.S7z.S7zExe
+              env:
+                  # Cross-platform CI caches behave best when the cached data is under the project directory
+                  XDG_CONFIG_HOME: ${{ github.workspace }}/target/config
+                  XDG_DATA_HOME: ${{ github.workspace }}/target/data
+              run: |
+                git clone --branch V2_4 https://github.com/diskuv/dk.git dk0
+                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_arm64   -m ./7zz.exe -f target/Darwin_arm64.7zz.exe
+                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_x86_64  -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
+                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_arm      -m ./7zz.exe -f target/Linux_arm.7zz.exe
+                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_arm64    -m ./7zz.exe -f target/Linux_arm64.7zz.exe
+                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_x86      -m ./7zz.exe -f target/Linux_x86.7zz.exe
+                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_x86_64   -m ./7zz.exe -f target/Linux_x86_64.7zz.exe
+                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Windows_x86    -m ./7zz.exe -f target/Windows_x86.7zz.exe
+                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Windows_x86_64 -m ./7zz.exe -f target/Windows_x86_64.7zz.exe
+
+            - name: Test 7zz.exe
+              run: target/Windows_x86_64.7zz.exe --help
+
+            - name: Release all slots
+              uses: softprops/action-gh-release@v2
+              if: github.ref_type == 'tag'
+              with:
+                files: |
+                  target/Darwin_arm64.7zz.exe
+                  target/Darwin_x86_64.7zz.exe
+                  target/Linux_arm.7zz.exe
+                  target/Linux_arm64.7zz.exe
+                  target/Linux_x86.7zz.exe
+                  target/Linux_x86_64.7zz.exe
+                  target/Windows_x86.7zz.exe
+                  target/Windows_x86_64.7zz.exe

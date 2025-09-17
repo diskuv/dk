@@ -1,16 +1,27 @@
 # dk - The boring build and script tool
 
-Running scripts with `dk` solves the problem of **README-itis**:
- you give your users a lengthy README document, your users fail to setup your software, and you lose a user forever.
+Running scripts with `dk` solves the problem of **README-itis**: you give your users a lengthy README document, your users fail to setup your software, and you lose a user forever.
 
-`dk` is meant to be dry and boring. Here is the show-and-tell example ... copy-and-paste it in PowerShell or in a Unix terminal:
+`dk` is meant to be dry and boring. Here is an example for you building and running a package **as a developer** ... copy-and-paste it in PowerShell or in a Unix terminal:
 
+<!-- $MDX os_type=Win32 -->
 ```sh
-$ git clone https://github.com/diskuv/dk.git dkx
-asd
+$ git clone https://github.com/diskuv/dk.git dk0
+Cloning into 'dk0'...
+$ dk0/mlfront-shell -- get-object DkSetup_Std.Exe@2.4.202508302258-signed -s File.Windows_x86_64 -d target/
+[up-to-date] DkSetup_Std.Exe@2.4.202508302258-signed+bn-20250101000000 -s File.Windows_x86_64
+$ target/dk.exe --version
+2.4.202508312131 | ocaml 4.14.2
+```
 
-$ dkx/mlfront-shell -- get-object DkSetup_Std.Exe@2.4.202508302258-signed -s File.Windows_x86_64 -d target/
-asjkldf
+and how it would look for **your users** ...
+
+<!-- $MDX skip -->
+```sh
+# this is not working yet, but it is close!
+$ winget install -e --id Diskuv.dk
+$ dk DkSetup.Exe@2.4.202508302258-signed dk.exe --version
+2.4.202508312131 | ocaml 4.14.2
 ```
 
 `dk` solves README-itis in two ways:
@@ -18,14 +29,9 @@ asjkldf
 1. You model your actions (all that stuff you would put into a README) with scripts that `dk` will cross-compile for your users's platforms.
 2. All required actions are executed as needed on your end-users' machines with dk's build tool.
 
-<!-- $MDX skip -->
-```sh
-winget install -e --id Diskuv.dk
-```
-
 Skip down to [Comparisons](#comparisons) for how `dk` fits with other tools. TLDR: `dk` is similar to the Nix package manager (except `dk` works on Windows) and to Docker (except not as heavy).
 
-The build tool is quite new and has not yet been integrated into the script runner. But it has a reference implementation, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
+The build tool is quite new and has not yet been integrated into the script runner. But it has the `dk0/mlfront-shell` reference implementation, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
 
 Separately, a [Quick Start for Scripting](#quick-start---scripting) is further below, and the main documentation site for the script runner is <https://diskuv.com/dk/help/latest/>.
 
@@ -36,7 +42,7 @@ Separately, a [Quick Start for Scripting](#quick-start---scripting) is further b
 <!-- $MDX skip -->
 ```sh
 git clone https://github.com/diskuv/dk.git
-dkx/mlfront-shell --version
+dk0/mlfront-shell --version
 ```
 
 That will do a one-time download of a small binary (< 10MB), and
@@ -46,7 +52,7 @@ give you access to the community-submitted packages (*pending*) in
 **Download your first cloud asset** with:
 
 ```sh
-$ dkx/mlfront-shell -- get-asset-file DkSetup_Std.Exe@2.4.202508302258-signed -p dk-darwin_arm64 -f binary-for-darwin_arm64
+$ dk0/mlfront-shell -- get-asset-file DkSetup_Std.Exe@2.4.202508302258-signed -p dk-darwin_arm64 -f binary-for-darwin_arm64
 ```
 
 That downloaded an executable `dk-darwin_arm64` which is the `dk` script runner for Apple Silicon.
@@ -63,7 +69,7 @@ Congratulations! Hint: Later you will do [Quick Start for Scripting](#quick-star
 **Download your first object** with:
 
 ```sh
-$ dkx/mlfront-shell -- get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64 -d dir-for-darwin_arm64
+$ dk0/mlfront-shell -- get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64 -d dir-for-darwin_arm64
 ```
 
 Objects (ie. `get-object`) have build commands embedded in them. Think of them like build targets with one or more outputs.
@@ -99,10 +105,10 @@ and you will get auto-completion for your build file.
 Then you can run it with:
 
 ```sh
-$ dkx/mlfront-shell -I the/directory/to/your/build/file -- get-object YourLibrary_Something.Something@1.0.202501010000 -s File.Agnostic
+$ dk0/mlfront-shell -I the/directory/to/your/build/file -- get-object YourLibrary_Something.Something@1.0.202501010000 -s File.Agnostic
 ```
 
-Almost any command you have been doing with `dkx/mlfront-shell ... -- THE-COMMAND ...` you can do inside the "precommands" of your build file.
+Almost any command you have been doing with `dk0/mlfront-shell ... -- THE-COMMAND ...` you can do inside the "precommands" of your build file.
 
 **Shell into your first build** with:
 
@@ -110,7 +116,7 @@ Almost any command you have been doing with `dkx/mlfront-shell ... -- THE-COMMAN
 ```sh
 # Only for Apple Silicon ...
 
-$ dkx/mlfront-shell -- enter-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64
+$ dk0/mlfront-shell -- enter-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64
 
 DkDistribution_Std.Asset.Latest@1.0.202501010000 fn/File.Darwin_arm64 %
 ../../out/File.Darwin_arm64/DkCoder.bundle/Contents/Helpers/ocamlrun ../../out/File.Darwin_arm64/DkCoder.bundle/Contents/Helpers/ocaml -I ../../out/File.Darwin_arm64/DkCoder.bundle/Contents/Resources/lib/ocaml
@@ -129,7 +135,7 @@ or
 ```sh
 # Only for Windows and Linux (use "Linux_x86_64") ...
 
-$ dkx/mlfront-shell -- enter-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Windows_x86_64
+$ dk0/mlfront-shell -- enter-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s File.Windows_x86_64
 
 DkDistribution_Std.Asset.Latest@1.0.202501010000 fn/File.Windows_x86_64 %
 ../../out/File.Windows_x86_64/DkCoder.bundle/Contents/Helpers/ocamlrun ../../out/File.Windows_x86_64/DkCoder.bundle/Contents/Helpers/ocaml -I ../../out/File.Windows_x86_64/DkCoder.bundle/Contents/Resources/lib/ocaml
