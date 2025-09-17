@@ -1,8 +1,76 @@
 # dk - The boring build and script tool
 
-Running scripts with `dk` solves the problem of **README-itis**: you give your users a lengthy README document, your users fail to setup your software, and you lose a user forever.
+Running scripts with `dk` solves the problem of **README-itis**: you give your users a long README document, your users fail to setup your software, and you lose a user forever.
 
-`dk` is meant to be dry and boring. Here is an example for you building and running a package **as a developer** ... copy-and-paste it in PowerShell or in a Unix terminal:
+We are going to use `dk` as our first example of average complexity software: its scripting functionality requires a runtime environment and platform development kits are downloaded on-demand. We want our users (ex. you) to install and get started quickly, using just the initial paragraphs of a README. Our users do this on Windows (go ahead!):
+
+<!-- $MDX skip -->
+```sh
+# Install a standalone executable. And available for macOS and Linux.
+$ winget install -e --id Diskuv.dk
+```
+
+<!-- $MDX skip -->
+```sh
+# YOU: Let your users do whatever your software does ...
+# EXAMPLE: The `dk` software has scripting (discussed in detail later).
+#          Here's a script to download and print a page to the screen.
+$ dk -S "
+    module Uri = Tr1Uri_Std.Uri
+  " -U "
+    Tr1Stdlib_V414Io.StdIo.print_endline @@
+    Lwt_main.run @@
+    DkNet_Std.Http.fetch_url ~max_sz:4096 @@
+    Uri.of_string {|https://jigsaw.w3.org/HTTP/h-content-md5.html|}
+  " -O ReleaseSmall Exe
+
+... YOU: Your software does downloads for setup.
+... EXAMPLE: `dk` will install a scripting environment and download
+... development kits on-demand for different platforms.
+
+# YOU: Give your users the results they want ...
+# EXAMPLE: The `dk` scripting environment makes standalone executables.
+target/ZzZz_Zz.Adhoc-android_arm32v7a:   ELF 32-bit LSB pie executabl...
+target/ZzZz_Zz.Adhoc-android_arm64v8a:   ELF 64-bit LSB pie executabl...
+target/ZzZz_Zz.Adhoc-android_x86_64:     ELF 64-bit LSB pie executabl...
+target/ZzZz_Zz.Adhoc-darwin_arm64:       Mach-O 64-bit executable arm...
+target/ZzZz_Zz.Adhoc-darwin_x86_64:      Mach-O 64-bit executable x86...
+target/ZzZz_Zz.Adhoc-linux_x86:          ELF 32-bit LSB pie executabl...
+target/ZzZz_Zz.Adhoc-linux_x86_64:       ELF 64-bit LSB pie executabl...
+target/ZzZz_Zz.Adhoc-windows_x86_64.exe: PE32+ executable (console) x...
+target/ZzZz_Zz.Adhoc-windows_x86.exe:    PE32 executable (console) In...
+```
+
+You still need that long README or long manual for your complex software,
+but **your software is in your users' hands quickly**.
+
+## Introduction
+
+`dk` solves README-itis in two ways:
+
+1. You model your actions (all that stuff you would put into a README) with scripts that `dk` will cross-compile for your users's platforms.
+2. All required actions are executed as needed on your end-users' machines with dk's build tool.
+
+Skip down to [Comparisons](#comparisons) for how `dk` fits with other tools. TLDR: `dk` is similar to the Nix package manager (except `dk` works on Windows) and to Docker (except not as heavy).
+
+The build tool is quite new and has not yet been integrated into the script runner. But it has a `dk0/mlfront-shell` reference implementation which we'll document in the next section, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
+
+Separately, a [Quick Start for Scripting](#quick-start---scripting) is further below, and the main documentation site for the script runner is <https://diskuv.com/dk/help/latest/>.
+
+But we'll start with a walk-through of the **build tool** using the popular zip compression
+software "7zip" as an example. (dk has no affliation with 7zip.)
+
+## Using the Build Tool
+
+<!-- $MDX skip -->
+```sh
+# this is not working yet, but it is close!
+$ winget install -e --id Diskuv.dk
+$ dk DkSetup.Exe@2.4.202508302258-signed dk.exe --version
+2.4.202508312131 | ocaml 4.14.2
+```
+
+Here is an example for you building and running a package **as a developer** ... copy-and-paste it in PowerShell or in a Unix terminal:
 
 <!-- $MDX os_type=Win32 -->
 ```sh
@@ -16,26 +84,6 @@ $ target/dk.exe --version
 
 and how it would look for **your users** ...
 
-<!-- $MDX skip -->
-```sh
-# this is not working yet, but it is close!
-$ winget install -e --id Diskuv.dk
-$ dk DkSetup.Exe@2.4.202508302258-signed dk.exe --version
-2.4.202508312131 | ocaml 4.14.2
-```
-
-`dk` solves README-itis in two ways:
-
-1. You model your actions (all that stuff you would put into a README) with scripts that `dk` will cross-compile for your users's platforms.
-2. All required actions are executed as needed on your end-users' machines with dk's build tool.
-
-Skip down to [Comparisons](#comparisons) for how `dk` fits with other tools. TLDR: `dk` is similar to the Nix package manager (except `dk` works on Windows) and to Docker (except not as heavy).
-
-The build tool is quite new and has not yet been integrated into the script runner. But it has the `dk0/mlfront-shell` reference implementation, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
-
-Separately, a [Quick Start for Scripting](#quick-start---scripting) is further below, and the main documentation site for the script runner is <https://diskuv.com/dk/help/latest/>.
-
-## Quick Start - Build Tool
 
 **Install** on Windows with PowerShell, or macOS or Linux with your terminal:
 

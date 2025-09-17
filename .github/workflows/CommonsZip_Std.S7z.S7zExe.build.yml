@@ -1,5 +1,7 @@
 name: CommonsZip_Std.S7z.S7zExe
-on: push
+on:
+  push:              # build on every commit
+  workflow_dispatch: # allow manual triggering from GitHub page
 
 jobs:
     build:
@@ -15,11 +17,17 @@ jobs:
                   # The data stores and build keys are safe to share between Windows, macOS and Linux
                   enableCrossOsArchive: true
                   path: |
-                      target/data/val.1
-                      target/data/cts.1.*
-                      target/config/build.pub
-                      target/config/build.sec
-                  key: dk-stores-and-keys
+                      target/data/dk/val.1
+                      target/data/dk/cts.1.*
+                      xconfig/build.pub
+                      xconfig/build.sec
+                  restore-keys: dk-stores-and-keys             # use latest cache
+                  key: dk-stores-and-keys-${{ github.run_id }} # update cache on every run
+
+            - name: List xconfig before
+              run: Get-ChildItem -Recurse xconfig
+            - name: List target before
+              run: Get-ChildItem -Recurse target
 
             - name: Build pkgs/include/CommonsZip_Std.S7z.S7zExe
               env:
@@ -28,7 +36,7 @@ jobs:
                   XDG_DATA_HOME: ${{ github.workspace }}/target/data
               run: |
                 git clone --branch V2_4 https://github.com/diskuv/dk.git dk0
-                dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_arm64   -m ./7zz.exe -f target/Darwin_arm64.7zz.exe
+                dk0/mlfront-shell -I pkgs/include -d buildlog --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_arm64   -m ./7zz.exe -f target/Darwin_arm64.7zz.exe
                 dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_x86_64  -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
                 dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_arm      -m ./7zz.exe -f target/Linux_arm.7zz.exe
                 dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Linux_arm64    -m ./7zz.exe -f target/Linux_arm64.7zz.exe
@@ -37,9 +45,13 @@ jobs:
                 dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Windows_x86    -m ./7zz.exe -f target/Windows_x86.7zz.exe
                 dk0/mlfront-shell -I pkgs/include --verbose -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Windows_x86_64 -m ./7zz.exe -f target/Windows_x86_64.7zz.exe
 
+            - name: List target after
+              run: Get-ChildItem -Recurse target
+
             - name: Test 7zz.exe
               run: target/Windows_x86_64.7zz.exe --help
 
+            # Create release if and only if tag is pushed
             - name: Release all slots
               uses: softprops/action-gh-release@v2
               if: github.ref_type == 'tag'
