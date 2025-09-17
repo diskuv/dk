@@ -34,6 +34,16 @@ cksum256_linux_x86=ef971327843da0c5900747286faedf3a9f84ef42a69be0e344be388a761da
 
 dk_pwd=$PWD
 
+# Get the dk project tree
+DK_PROJECT_DIR=$(dirname "$0")
+DK_PROJECT_DIR=$(cd "$DK_PROJECT_DIR" && pwd)
+
+# --- Windows shunting ---
+if [ -n "${COMSPEC:-}" ] && [ -x /usr/bin/cmd ] && [ -x /usr/bin/cygpath ] && [ -e "$DK_PROJECT_DIR/mlfront-shell.cmd" ]; then
+    DK_PROJECT_DIR_WIN=$(/usr/bin/cygpath -aw "$DK_PROJECT_DIR")
+    exec /usr/bin/cmd /c "$DK_PROJECT_DIR_WIN\\mlfront-shell.cmd" "$@"
+fi
+
 # --- Quiet mode detection ---
 DKCODER_QUIET=0
 _DKEXE_OPTIONS=
@@ -485,10 +495,6 @@ autodetect_system_binaries
 
 # Find host ABI. Set in BUILDHOST_ARCH
 autodetect_buildhost_arch
-
-# Get the dk project tree
-DK_PROJECT_DIR=$(dirname "$0")
-DK_PROJECT_DIR=$(cd "$DK_PROJECT_DIR" && pwd)
 
 # --- data home ---
 
