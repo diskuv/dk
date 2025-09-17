@@ -90,23 +90,52 @@ Again: You submit *forms* that produce *objects* created from *assets*.
 
 Finally, we have our fourth (4th) word: **value**. A value is any asset, form or object.
 
-Let's relates these concept to the activity of unpacking the 7zip compression software:
+Let's relate these concepts to a build activity: our task is to unpack a 7zip executable (`7zz.exe` or `7z.exe`) from official, platform-specific 7zip installers.
 
-| Concept | Examples                                                                                                                                                                |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Assets**  | ![7zip 25.01 GitHub Releases](docs/images/7zip-25-01-github-releases.png)                                                                                               |
-| **Forms**   | <pre>$ dk0/mlfront-shell -I dk0/pkgs/include -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_x86_64  -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe</pre> |
-|         | Same form, different parameters: ![Using a form with the CLI](docs/images/7zip-apply-form.png)                                                                          |
-| **Objects** | `Y:\a\target\pid\500\bnrtauvvz5kvhwd5\out\File.Windows_x86`: ![7z.exe object](docs/images/7zip-object-7z-exe.png)                                                                                                                    |
-|         | `Y:\a\target\pid\500\wtqhxi4flrfk6sab\out\File.Darwin_arm64`: ![7z tar](docs/images/7zip-object-tar.png)                                                                                                                              |
+This is *not* a toy problem! We would need the 7zip executable if our second task were to unpack a `git` executable from a [Portable Git Installer](https://github.com/git-for-windows/git/releases).
 
-**Values** have unique identifiers. You saw one in the forms example above: `CommonsZip_Std.S7z.S7zExe@25.1.0`.
+For the 7zip unpacking build, we'll submit a form several times (each time with different parameters):
+
+```sh
+$ dk0/mlfront-shell -I dk0/pkgs/include -- get-object 'CommonsZip_Std.S7z.S7zExe@25.1.0' -s File.Darwin_x86_64 -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
+```
+
+which *builds* the desired files into our desired "target" directory:
+
+```text
+    Directory: Y:\a\target
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         9/17/2025  11:36 AM        5885696 Darwin_arm64.7zz.exe
+-a----         9/17/2025  11:36 AM        5885696 Darwin_x86_64.7zz.exe
+-a----         9/17/2025  11:36 AM        1548480 Linux_arm.7zz.exe
+-a----         9/17/2025  11:36 AM        2456896 Linux_arm64.7zz.exe
+-a----         9/17/2025  11:36 AM        3192444 Linux_x86.7zz.exe
+-a----         9/17/2025  11:36 AM        2878000 Linux_x86_64.7zz.exe
+-a----         9/17/2025  11:36 AM         575488 Windows_x86.7zz.exe
+-a----         9/17/2025  11:36 AM         575488 Windows_x86_64.7zz.exe
+```
+
+so you can see the concepts in action:
+
+| Concept               | Examples                                                                                                             |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Assets**            | ![7zip 25.01 GitHub Releases](docs/images/7zip-25-01-github-releases.png)                                            |
+| **Submitting Forms**  | ![Using a form with the CLI](docs/images/7zip-apply-form.png)                                                        |
+| **Generated Objects** | `Y:\a\target\pid\500\bnrtauvvz5kvhwd5\out\File.Windows_x86`:<br>![7z.exe object](docs/images/7zip-object-7z-exe.png) |
+|                       | `Y:\a\target\pid\500\wtqhxi4flrfk6sab\out\File.Darwin_arm64`:<br>![7z tar](docs/images/7zip-object-tar.png)          |
+
+The objects you see above are intermediate folders, so this might be the first and only time you see them. Normally you pull files out of objects into your own target directories, like was done when we submitted the form with `dk0/mlfront-shell ... -f target/Darwin_x86_64.7zz.exe`.
+
+**Values** have unique identifiers. We used one when we submitted the form: `CommonsZip_Std.S7z.S7zExe@25.1.0`.
 
 These identifiers contain versions like `25.1.0`. Making a change to a value means creating a new value with the same name but with an increased version. For example, if the text of your 2025-09-04 privacy policy is in the asset `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904`, an end-of-year update to the privacy policy could be `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20251231`. These *semantic* versions offer a lot of flexibility and are industry-standard: [external link: semver 2.0](https://semver.org/). The important point is that **values do not change; versions do**.
 
 ---
 
-NEXT STEPS: The next section goes over how to specify assets, create forms and generate objects.
+NEXT STEPS: The next section goes over how to specify assets and forms, and how to submit objects.
 
 ## Using the Build Tool
 
