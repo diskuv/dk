@@ -19,13 +19,11 @@ jobs:
                   path: |
                       target/data/dk/val.1
                       target/data/dk/cts.1.*
-                      xconfig/build.pub
-                      xconfig/build.sec
+                      target/config/dk/build.pub
+                      target/config/dk/build.sec
                   restore-keys: dk-stores-and-keys             # use latest cache
                   key: dk-stores-and-keys-${{ github.run_id }} # update cache on every run
 
-            - name: List xconfig before
-              run: Get-ChildItem -Recurse xconfig
             - name: List target before
               run: Get-ChildItem -Recurse target
 

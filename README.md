@@ -62,6 +62,8 @@ software "7zip" as an example. (dk has no affliation with 7zip.)
 
 ## Using the Build Tool
 
+> Sorry macOS users, today the build tool `dk0/mlfront-shell` downloads an *unsigned* standalone binary. It will be signed later, once `dk0` is merged into `dk`. Your mac probably won't like it. If you are adventurous, you can run `xattr -d com.apple.quarantine ~/.local/share/mlfront-shell/mlfrontshellexe-2.4.*-darwin_arm64/mlfront-shell` and try again.
+
 <!-- $MDX skip -->
 ```sh
 # this is not working yet, but it is close!
