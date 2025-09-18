@@ -1,0 +1,69 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "forms": [
+    {
+      "id": {
+        "package": "CommonsZip_Std.S7z2",
+        "name": "Windows7zExe",
+        "version": "25.1.0"
+      },
+      "precommands": {
+        "private": [
+          // need bin/<architecture>/7zr.exe
+          "get-object CommonsZip_Std.S7z1b.S7zr@25.1.0 -s File.Windows_arm -d bin/File.Windows_arm",
+          "get-object CommonsZip_Std.S7z1b.S7zr@25.1.0 -s File.Windows_arm64 -d bin/File.Windows_arm64",
+          "get-object CommonsZip_Std.S7z1b.S7zr@25.1.0 -s File.Windows_x86 -d bin/File.Windows_x86",
+          "get-object CommonsZip_Std.S7z1b.S7zr@25.1.0 -s File.Windows_x86_64 -d bin/File.Windows_x86_64",
+          // need Windows installers
+          "get-asset-file CommonsZip_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-File.Windows_arm.exe",
+          "get-asset-file CommonsZip_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-File.Windows_arm64.exe",
+          "get-asset-file CommonsZip_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-File.Windows_x86.exe",
+          "get-asset-file CommonsZip_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-File.Windows_x86_64.exe"
+        ]
+      },
+      "function": {
+        "execution": [
+          // 7zr.exe only runs on Windows
+          {
+            "name": "OSFamily",
+            "value": "windows"
+          }
+        ],
+        "args": [
+          // extract assetfile [7z2501-arm.exe] with [7zr.exe] to the output directory
+          // for slot [File.Windows_arm], etc.
+          "bin/${SLOTNAME.request}/7zr.exe",
+          "x",
+          "-o${SLOT.request}",
+          "7z-${SLOTNAME.request}.exe",
+          // extract only the '7z.exe' executable
+          "7z.exe"
+        ]
+      },
+      "outputs": {
+        "files": [
+          {
+            "paths": ["7z.exe"],
+            "slots": [
+              "File.Windows_arm",
+              "File.Windows_arm64",
+              "File.Windows_x86",
+              "File.Windows_x86_64",
+              "File.Agnostic",
+              "File.Darwin_arm64",
+              "File.Darwin_x86_64",
+              "File.Linux_arm",
+              "File.Linux_arm64",
+              "File.Linux_x86",
+              "File.Linux_x86_64"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

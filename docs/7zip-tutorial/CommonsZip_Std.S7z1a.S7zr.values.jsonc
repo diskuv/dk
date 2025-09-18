@@ -1,0 +1,32 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": { "major": 1, "minor": 0 },  
+  "assets": [
+    {
+      "listing_unencrypted": {
+        "name": "CommonsZip_Std.S7z1a.Assets",
+        "spec_version": 2,
+        // 25.01
+        "version": "25.1.0"
+      },
+      "listing": {
+        "origins": [
+          {
+            "name": "7zip-org",
+            "mirrors": [ "https://github.com/ip7z/7zip/releases/download/25.01" ]
+          }
+        ]
+      },
+      "files": [
+        {
+          "origin": "7zip-org",
+          "path": "7zr.exe",
+          "checksum": {
+            "sha256": "27cbe3d5804ad09e90bbcaa916da0d5c3b0be9462d0e0fb6cb54be5ed9030875"
+          },
+          "size": 601088
+        }
+      ]
+    }
+  ]
+}

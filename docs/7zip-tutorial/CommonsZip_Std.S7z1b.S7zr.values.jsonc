@@ -1,0 +1,34 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": { "major": 1, "minor": 0 }, 
+  "forms": [
+    {
+      "id": {
+        "package": "CommonsZip_Std.S7z1b",
+        "name": "S7zr",
+        "version": "25.1.0"
+      },
+      "precommands": {
+        "private": [
+          "get-asset-file CommonsZip_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_arm}/7zr.exe",
+          "get-asset-file CommonsZip_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_arm64}/7zr.exe",
+          "get-asset-file CommonsZip_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_x86}/7zr.exe",
+          "get-asset-file CommonsZip_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_x86_64}/7zr.exe"
+        ]
+      },
+      "outputs": {
+        "files": [
+          {
+            "paths": ["7zr.exe"],
+            "slots": [
+              "File.Windows_arm",
+              "File.Windows_arm64",
+              "File.Windows_x86",
+              "File.Windows_x86_64"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -20,17 +20,23 @@ cd "$(dirname "$0")/.."
 opam show mdx || opam install mdx
 
 # Hack for mlfront-shell until 2.4.2.8 is built
-if [ -x ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe ]; then
-    echo "SECURITY WARNING: Using local build of mlfront-shell" >&2
-    install -v ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe "$LOCALAPPDATA/Programs/mlfront-shell/mlfront-shellexe-2.4.2.5-windows_x86_64/mlfshell.exe"
-fi
+# if [ -x ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe ]; then
+#     echo "SECURITY WARNING: Using local build of mlfront-shell" >&2
+#     install -v ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe "$LOCALAPPDATA/Programs/mlfront-shell/mlfront-shellexe-2.4.2.5-windows_x86_64/mlfshell.exe"
+# fi
 
 rm -rf dk0/
+rm -rf 7zip-project/
+install -d 7zip-project
+set +f
+install docs/7zip-tutorial/* 7zip-project/
+set -f
 
-# CMD=
-# if [ -n "${COMSPEC:-}" ]; then
-#     CMD=.cmd
-# fi
+CMD=
+if [ -n "${COMSPEC:-}" ]; then
+    CMD=.cmd
+fi
+
 # dkx/mlfront-shell$CMD -- get-object DkSetup_Std.Exe@2.4.202508302258-signed -s File.Windows_x86_64 -d target/
 
 # nit: Why doesn't CRLF work with ocaml-mdx?
@@ -38,4 +44,17 @@ if [ -n "${COMSPEC:-}" ]; then
     dos2unix README.md
 fi
 
+if [ -n "${COMSPEC:-}" ]; then
+    # ensure dk cache is populated
+    ./dk$CMD --version
+
+    install -d target/dkexe
+    printf '#!/bin/sh\nexec "%s" "$@"\n' "$LOCALAPPDATA/Programs/DkCoder/dkexe-2.4.202508302258-signed-windows_x86_64/dk.exe" > target/dkexe/dk
+    chmod +x target/dkexe/dk
+    export PATH="$PWD/target/dkexe:$PATH"
+fi
+
 opam exec -- ocaml-mdx test -v -v -o README.corrected.md README.md
+
+install README.md "target/README.$(date +%s).md"
+mv README.corrected.md README.md

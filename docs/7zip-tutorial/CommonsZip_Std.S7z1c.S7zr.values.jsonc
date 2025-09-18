@@ -1,0 +1,100 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },  
+  "assets": [
+    {
+      "listing_unencrypted": {
+        "name": "CommonsZip_Std.S7z1c.Assets",
+        "spec_version": 2,
+        "version": "25.1.0"
+      },
+      "listing": {
+        "origins": [
+          {
+            "name": "7zip-org",
+            "mirrors": [
+              "https://github.com/ip7z/7zip/releases/download/25.01"
+            ]
+          }
+        ]
+      },
+      "files": [
+        {
+          "origin": "7zip-org",
+          "path": "7zr.exe",
+          "checksum": {
+            "sha256": "27cbe3d5804ad09e90bbcaa916da0d5c3b0be9462d0e0fb6cb54be5ed9030875"
+          },
+          "size": 601088
+        },
+        {
+          "origin": "7zip-org",
+          "path": "7z2501-arm.exe",
+          "checksum": {
+            "sha256": "c14b51d97ff644c49dcfc83ab000537ba806ebc7003359d7afc362e2af83f890"
+          },
+          "size": 16547840
+        },
+        {
+          "origin": "7zip-org",
+          "path": "7z2501-arm64.exe",
+          "checksum": {
+            "sha256": "6365c7c44e217b9c1009e065daf9f9aa37454e64315b4aaa263f7f8f060755dc"
+          },
+          "size": 15728640
+        },
+        {
+          "origin": "7zip-org",
+          "path": "7z2501-linux-arm.tar.xz",
+          "checksum": {
+            "sha256": "f5b498a55ab1bb2adb2690f7ad629022b5e52f159a95e7d71be6c5049db0696e"
+          },
+          "size": 12124160
+        },
+        {
+          "origin": "7zip-org",
+          "path": "7z2501-linux-arm64.tar.xz",
+          "checksum": {
+            "sha256": "39c5140f02ce4436599303c59a149f654cb1bbc47cdc105a942120d747ae040d"
+          },
+          "size": 13271040
+        },
+        {
+          "origin": "7zip-org",
+          "path": "7z2501-linux-x64.tar.xz",
+          "checksum": {
+            "sha256": "4ca3b7c6f2f67866b92622818b58233dc70367be2f36b498eb0bdeaaa44b53f4"
+          },
+          "size": 15308800
+        },
+        {
+          "origin": "7zip-org",
+          "path": "7z2501-linux-x86.tar.xz",
+          "checksum": {
+            "sha256": "62a47626eb9ce2886de3fec6f201f6a4210f14ba61b30a16141b953aed705207"
+          },
+          "size": 16793600
+        },
+        {
+          "origin": "7zip-org",
+          "path": "7z2501-mac.tar.xz",
+          "checksum": {
+            "sha256": "26aa75bc262bb10bf0805617b95569c3035c2c590a99f7db55c7e9607b2685e0"
+          },
+          "size": 18841600
+        },
+        {
+          "origin": "7zip-org",
+          "path": "7z2501-x64.exe",
+          "checksum": {
+            "sha256": "78afa2a1c773caf3cf7edf62f857d2a8a5da55fb0fff5da416074c0d28b2b55f"
+          },
+          "size": 15728640
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "forms": [
+    {
+      "id": {
+        "package": "CommonsZip_Std.S7z4",
+        "name": "MacLinux7zExe",
+        "version": "25.1.0"
+      },
+      "precommands": {
+        "private": [
+          // need bin/<architecture>/7z.exe (7zr does not extract tar files)
+          "get-object CommonsZip_Std.S7z2.Windows7zExe@25.1.0 -s File.Windows_x86 -d bin/File.Windows_x86",
+          // need macOS and Linux tar files. since same destination directory need [install-object]
+          "install-object CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Linux_arm -d tarballs",
+          "install-object CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Linux_arm64 -d tarballs",
+          "install-object CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Linux_x86 -d tarballs",
+          "install-object CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Linux_x86_64 -d tarballs",
+          "install-object CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Darwin_arm64 -d tarballs",
+          "install-object CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Darwin_x86_64 -d tarballs"
+        ]
+      },
+      "function": {
+        "execution": [
+          // 7z.exe only runs on Windows
+          {
+            "name": "OSFamily",
+            "value": "windows"
+          }
+        ],
+        "args": [
+          // extract object [7z2501-mac.tar] with [7z.exe] to the output directory
+          // for slot [File.Darwin_arm64], etc.
+          "bin/File.Windows_x86/7z.exe",
+          "x",
+          "-o${SLOT.request}",
+          "tarballs/7z-${SLOTNAME.request}.tar",
+          // extract only the '7zz' executable
+          "7zz"
+        ]
+      },
+      "outputs": {
+        "files": [
+          {
+            "paths": ["7zz"],
+            "slots": ["File.Darwin_arm64"]
+          },
+          {
+            "paths": ["7zz"],
+            "slots": ["File.Darwin_x86_64"]
+          },
+          {
+            "paths": ["7zz"],
+            "slots": ["File.Linux_arm"]
+          },
+          {
+            "paths": ["7zz"],
+            "slots": ["File.Linux_arm64"]
+          },
+          {
+            "paths": ["7zz"],
+            "slots": ["File.Linux_x86"]
+          },
+          {
+            "paths": ["7zz"],
+            "slots": ["File.Linux_x86_64"]
+          }
+        ]
+      }
+    }
+  ]
+}

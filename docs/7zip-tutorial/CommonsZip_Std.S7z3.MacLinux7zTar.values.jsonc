@@ -1,0 +1,75 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "forms": [
+    {
+      "id": {
+        "package": "CommonsZip_Std.S7z3",
+        "name": "MacLinux7zTar",
+        "version": "25.1.0"
+      },
+      "precommands": {
+        "private": [
+          // need bin/<architecture>/7zr.exe
+          "get-object CommonsZip_Std.S7z1b.S7zr@25.1.0 -s File.Windows_x86 -d bin/File.Windows_x86",
+          // need macOS and Linux installers
+          "get-asset-file CommonsZip_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-File.Linux_arm.tar.xz",
+          "get-asset-file CommonsZip_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-File.Linux_arm64.tar.xz",
+          "get-asset-file CommonsZip_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-File.Linux_x86.tar.xz",
+          "get-asset-file CommonsZip_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-File.Linux_x86_64.tar.xz",
+          "get-asset-file CommonsZip_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-File.Darwin_x86_64.tar.xz",
+          "get-asset-file CommonsZip_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-File.Darwin_arm64.tar.xz"
+        ]
+      },
+      "function": {
+        "execution": [
+          // 7zr.exe only runs on Windows
+          {
+            "name": "OSFamily",
+            "value": "windows"
+          }
+        ],
+        "args": [
+          // uncompress assetfile [7z2501-mac.tar.xz] with [7zr.exe] to the output directory
+          // for slot [File.Darwin_arm64], etc.
+          "bin/File.Windows_x86/7zr.exe",
+          "x",
+          "-o${SLOT.request}",
+          "7z-${SLOTNAME.request}.tar.xz",
+          "7z-${SLOTNAME.request}.tar"
+        ]
+      },
+      "outputs": {
+        "files": [
+          {
+            "paths": ["7z-File.Darwin_arm64.tar"],
+            "slots": ["File.Darwin_arm64"]
+          },
+          {
+            "paths": ["7z-File.Darwin_x86_64.tar"],
+            "slots": ["File.Darwin_x86_64"]
+          },
+          {
+            "paths": ["7z-File.Linux_arm.tar"],
+            "slots": ["File.Linux_arm"]
+          },
+          {
+            "paths": ["7z-File.Linux_arm64.tar"],
+            "slots": ["File.Linux_arm64"]
+          },
+          {
+            "paths": ["7z-File.Linux_x86.tar"],
+            "slots": ["File.Linux_x86"]
+          },
+          {
+            "paths": ["7z-File.Linux_x86_64.tar"],
+            "slots": ["File.Linux_x86_64"]
+          }
+        ]
+      }
+    }
+  ]
+}

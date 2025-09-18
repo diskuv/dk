@@ -1,0 +1,55 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "forms": [
+    {
+      "id": {
+        "package": "CommonsZip_Std.S7z5",
+        "name": "S7zExe",
+        "version": "25.1.0"
+      },
+      "precommands": {
+        "private": [
+          // We'll make the executable name '7zz.exe' on all platforms so that
+          // end-users don't have to have complicated logic based on the platform.
+
+          // Windows. 7z.exe -> 7zz.exe
+          "get-object CommonsZip_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_arm -m ./7z.exe -f ${SLOT.File.Windows_arm}/7zz.exe",
+          "get-object CommonsZip_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_arm64 -m ./7z.exe -f ${SLOT.File.Windows_arm64}/7zz.exe",
+          "get-object CommonsZip_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_x86 -m ./7z.exe -f ${SLOT.File.Windows_x86}/7zz.exe",
+          "get-object CommonsZip_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_x86_64 -m ./7z.exe -f ${SLOT.File.Windows_x86_64}/7zz.exe",
+
+          // Unix. 7zz -> 7zz.exe
+          "get-object CommonsZip_Std.S7z.MacLinux7zExe@25.1.0 -s File.Darwin_arm64 -m ./7zz -f ${SLOT.File.Darwin_arm64}/7zz.exe",
+          "get-object CommonsZip_Std.S7z.MacLinux7zExe@25.1.0 -s File.Darwin_x86_64 -m ./7zz -f ${SLOT.File.Darwin_x86_64}/7zz.exe",
+          "get-object CommonsZip_Std.S7z.MacLinux7zExe@25.1.0 -s File.Linux_arm -m ./7zz -f ${SLOT.File.Linux_arm}/7zz.exe",
+          "get-object CommonsZip_Std.S7z.MacLinux7zExe@25.1.0 -s File.Linux_arm64 -m ./7zz -f ${SLOT.File.Linux_arm64}/7zz.exe",
+          "get-object CommonsZip_Std.S7z.MacLinux7zExe@25.1.0 -s File.Linux_x86 -m ./7zz -f ${SLOT.File.Linux_x86}/7zz.exe",
+          "get-object CommonsZip_Std.S7z.MacLinux7zExe@25.1.0 -s File.Linux_x86_64 -m ./7zz -f ${SLOT.File.Linux_x86_64}/7zz.exe"
+        ]
+      },
+      "outputs": {
+        "files": [
+          {
+            "paths": ["7zz.exe"],
+            "slots": [
+              "File.Windows_arm",
+              "File.Windows_arm64",
+              "File.Windows_x86",
+              "File.Windows_x86_64",
+              "File.Darwin_arm64",
+              "File.Darwin_x86_64",
+              "File.Linux_arm",
+              "File.Linux_arm64",
+              "File.Linux_x86",
+              "File.Linux_x86_64"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

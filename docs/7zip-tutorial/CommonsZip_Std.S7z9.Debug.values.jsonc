@@ -1,0 +1,39 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "forms": [
+    {
+      "id": {
+        "package": "CommonsZip_Std.S7z9",
+        "name": "Debug",
+        "version": "25.1.0"
+      },
+      "precommands": {
+        "private": [
+          // we'll use the community 7zip package, not the tutorial 7zip package
+          "get-object CommonsZip_Std.S7z.S7zExe@25.1.0 -s File.Linux_arm -d linuxarm_stuff",
+          "get-object CommonsZip_Std.S7z.S7zExe@25.1.0 -s File.Windows_x86 -d win32_stuff",
+          // all forms, even ones designed to fail, must have at least one slot
+          "get-object CommonsZip_Std.S7z.S7zExe@25.1.0 -s File.Linux_arm64 -d ${SLOT.File.Linux_arm64}"
+        ]
+      },
+      "function": {
+        "args": [
+          // run something that will always fail. the precommands are what we want to test
+          "false"
+        ]
+      },
+      "outputs": {
+        "files": [
+          {
+            "paths": ["7zz.exe"],
+            "slots": ["File.Linux_arm64"]
+          }
+        ]
+      }
+    }
+  ]
+}

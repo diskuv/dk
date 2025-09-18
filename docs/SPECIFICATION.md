@@ -6,7 +6,9 @@
     - [Early Limitations](#early-limitations)
   - [Assets](#assets)
     - [Local Paths](#local-paths)
+    - [Zip Archive Reproducibility](#zip-archive-reproducibility)
     - [Remote Paths](#remote-paths)
+    - [Saving Assets](#saving-assets)
   - [Forms](#forms)
     - [Form Variables](#form-variables)
       - [Variable Availability](#variable-availability)
@@ -77,7 +79,7 @@ All values also have versions like `1.0.0`. Making a change to a value means cre
 
 Practically speaking, the early versions of the `dk` build system have serious limitations:
 
-- only support forms with no fields. Today that means you have to create new forms whenever you need customization.
+- only support forms with a single field (the slot field). Today that means you create new forms when you need more customization.
 - have no graphical user interface or web page for forms (yet!). Everything today must be done from the terminal.
 
 As these limits are removed, this specification document may be updated.
@@ -97,7 +99,12 @@ A local path may be either:
 - a file
 - a directory
 
-A local directory path is always zipped into a zip archive file. For reproducibility, the generated zip archive file will:
+A local directory path is always zipped into a zip archive file.
+The [Zip Archive Reproducibility (next section)](#zip-archive-reproducibility) standards will be followed.
+
+### Zip Archive Reproducibility
+
+ For reproducibility, the generated zip archive file will:
 
 - have the zip last modification time to the earliest datetime (Jan 1, 1980 00:00:00)
 - have each zip entry with its modification time to the earliest datetime (Jan 1, 1980 00:00:00)
@@ -109,6 +116,23 @@ A local directory path is always zipped into a zip archive file. For reproducibi
 ### Remote Paths
 
 A path, if it starts with `https://` or `http://` is a *remote* path.
+
+### Saving Assets
+
+When a value shell command reads an asset and saves it to a file (ex.
+[get-asset -f FILE](#get-asset-id--f-file---d-dir)),
+the members of the asset are zipped and the zip archive bytes are copied directly to the file.
+The standards of [Zip Archive Reproducibility](#zip-archive-reproducibility) will be followed.
+
+When a value shell command reads an asset and saves it to a directory (ex.
+[get-asset -d DIR](#get-asset-id--f-file---d-dir)),
+the members of the asset are copied into the directory tree.
+
+That sounds inefficient, but the build system is allowed to optimize a set of value shell commands.
+For example, if one shell command saves output into a directory,
+and a second shell command reads data from created by the first shell command,
+the build system can give the second shell command a symlink to the first directory
+**without** using a zip archive as an intermediate artifact.
 
 ## Forms
 
@@ -269,7 +293,7 @@ An object is a BLOB, which is a sequence of bytes. The object may be categorized
 But to re-iterate: There is no concept of an object being a "file" or a "directory".
 The object is just a sequence of bytes.
 
-In both cases the thunk system treats the objects as immutable,
+In both cases the build system treats the objects as immutable,
 and the objects may be cached and/or persisted to disk whenever necessary.
 
 When a value shell command is being run (described in the upcoming [Value Shell Language](#value-shell-language-vsl) section),
@@ -294,16 +318,17 @@ When a value shell command reads an immutable object and saves it to a directory
 the bytes of the immutable object are:
 
 - *when the bytes have a zip file header* uncompressed and unzipped into the directory
-- *when the bytes do not have a zip file header* copied into the directory in a file named `THUNKOBJ`
+- *when the bytes do not have a zip file header* copied into the directory in a file named `FORMOBJ`
 
 When a value shell command saves a file as an immutable object, the file's bytes are saved as-is.
 
 When a value shell command saves a directory as an immutable object, the directory is zipped and the zip archive bytes are saved.
+The standards of [Zip Archive Reproducibility](#zip-archive-reproducibility) will be followed.
 
-That sounds inefficient, but the thunk system is allowed to optimize a set of value shell commands.
+That sounds inefficient, but the build system is allowed to optimize a set of value shell commands.
 For example, if one shell command saves output into a directory,
 and a second shell command reads data from created by the first shell command,
-the thunk system can give the second shell command a symlink to the first directory
+the build system can give the second shell command a symlink to the first directory
 **without** using a zip archive as an intermediate artifact.
 
 ### Object Slots
@@ -815,7 +840,7 @@ Each node in the graph has a key, a value id, a value sha256 and the value itsel
 
     All value types are *lowercase* for support on case-insensitive file systems.
 
-- A **value** is a file whose content matches the value tppe. A values file is a `value.json` build file itself. An object is a zip archive of the output of a [form](#forms). Form, asset and asset file value are serialized parsed abstract syntax trees.
+- A **value** is a file whose content matches the value type. A values file is a `value.json` build file itself. An object is a zip archive of the output of a [form](#forms). Form, asset and asset file value are serialized parsed abstract syntax trees.
 - A **value sha256** is a SHA-256 hex-encoded string of the value. That is, if you ran `certutil` (Windows), `sha256sum` (Linux) or `shasum -a 256` (macOS) on the value file, the *value sha256* is what you would see.
 
 | Value Type | Value Id before SHA256 and base32          | Value                                      |
