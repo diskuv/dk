@@ -1,10 +1,10 @@
-# dk - The most uninteresting build and scripting system
+# dk - A terribly uninteresting build and scripting system
 
 `dk` solves the problem of **README-itis**: you give your users a long README document, your users fail to setup your software, and you lose a user forever.
 
 If you have a Linux application you could choose `nix` or Docker, but outside of that domain you have limited options. `dk` reliably builds software comparable to `nix` and Docker, but is designed for non-techie end-users (esp. Windows users) and has a few security controls and a spec for easy adoption into language build tools.
 
-We'll use the software behind `dk` as the first example of easy-to-fail, average-complexity software. `dk`'s scripting functionality requires a runtime environment and platform development kits are downloaded on-demand. We want our users (ex. you) to install and get started *quickly*. Users copy-and-paste the following on Windows. Go ahead and copy-and-paste yourself if you want to try the `dk` cross-compiling multi-gigabyte scripting environment, or skip past it to learn about the lightweight `dk` build tool:
+We'll use the software behind `dk` itself as an example of easy-to-fail, average-complexity software. `dk`'s scripting functionality requires a runtime environment and platform development kits are downloaded on-demand. We want our users (ex. you) to install and get started *quickly*. Users copy-and-paste the text blocks below on Windows. Go ahead and copy-and-paste yourself if you want to try the `dk` cross-compiling scripting environment, or skip past it to learn about the `dk` build tool:
 
 <!-- $MDX skip -->
 ```sh
@@ -14,7 +14,7 @@ $ winget install -e --id Diskuv.dk
 
 <!-- $MDX skip -->
 ```sh
-# THIS EXAMPLE: The `dk` software has scripting (discussed later).
+# THIS EXAMPLE: The `dk` software stack has scripting.
 #      Here's a script to download and print a page to the screen.
 # IN GENERAL: Your users copy-and-paste your first example ...
 $ dk -S "
@@ -60,9 +60,9 @@ but **your software setup is boring and in your users' hands quickly**.
 
 Keep your setup boring: no interesting knobs, and no typing beyond the initial copy-and-paste.
 
-Skip down to [Comparisons](#comparisons) for how `dk` fits with other tools. TLDR: `dk` is similar to the Nix package manager (except `dk` works on Windows) and to Docker (except not as heavy).
+Skip down to [Comparisons](#comparisons) for how `dk` fits with other tools.
 
-The build tool is quite new and has not yet been integrated into the script runner. But it has a `dk0/mlfront-shell` reference implementation which we'll document in the next sections, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
+The build tool is quite new and has not yet been integrated into the script runner. But it has a `dk0/mlfront-shell` reference implementation which are documented in the next sections, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
 
 Separately, a [Quick Start for Scripting](#quick-start---scripting) is further below, and the main documentation site for the script runner is <https://diskuv.com/dk/help/latest/>.
 
@@ -70,7 +70,7 @@ But we'll start with a walk-through of the **build tool** by unpackaging the pop
 
 ---
 
-- [dk - The most uninteresting build and scripting system](#dk---the-most-uninteresting-build-and-scripting-system)
+- [dk - A terribly uninteresting build and scripting system](#dk---a-terribly-uninteresting-build-and-scripting-system)
   - [Introduction](#introduction)
   - [Concepts and Theory](#concepts-and-theory)
     - [Theory](#theory)
@@ -196,7 +196,7 @@ The *don't be stupid* goal, combined with avoiding README-itis, are the reasons 
 
 ---
 
-NEXT STEPS: The next section goes over how to specify assets and forms, and how to submit objects.
+NEXT STEPS: The next section goes over how to specify assets and forms, and how to submit forms.
 
 ## Using the Build Tool to create a multi-platform package
 
@@ -278,7 +278,7 @@ We'll make a JSON file to download `7zr.exe`.
 **Save the following file** as `7zip-project/CommonsZip_Std.S7z1a.S7zr.values.jsonc`.
 
 <!-- $MDX skip file=docs/7zip-tutorial/CommonsZip_Std.S7z1a.S7zr.values.jsonc -->
-```json
+```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },  
@@ -410,7 +410,7 @@ We'll create a new JSON file containing the form.
 **Save the following file** as `7zip-project/CommonsZip_Std.S7z1b.S7zr.values.jsonc`.
 
 <!-- $MDX file=docs/7zip-tutorial/CommonsZip_Std.S7z1b.S7zr.values.jsonc -->
-```json
+```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 }, 
@@ -556,7 +556,7 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
 **Save the following file** as `7zip-project/CommonsZip_Std.S7z1c.S7zr.values.jsonc`.
 
 <!-- $MDX file=docs/7zip-tutorial/CommonsZip_Std.S7z1c.S7zr.values.jsonc -->
-```json
+```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": {
@@ -759,7 +759,7 @@ Whenever we run a command we need a form with a `function`.
 **Save the following file** as `7zip-project/CommonsZip_Std.S7z2.Windows7zExe.values.jsonc`.
 
 <!-- $MDX file=docs/7zip-tutorial/CommonsZip_Std.S7z2.Windows7zExe.values.jsonc -->
-```json
+```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": {
@@ -905,7 +905,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
 **Save the following file** as `7zip-project/CommonsZip_Std.S7z3.MacLinux7zTar.values.jsonc`.
 
 <!-- $MDX file=docs/7zip-tutorial/CommonsZip_Std.S7z3.MacLinux7zTar.values.jsonc -->
-```json
+```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": {
@@ -1010,7 +1010,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
 **Save the following file** as `7zip-project/CommonsZip_Std.S7z4.MacLinux7zExe.values.jsonc`.
 
 <!-- $MDX file=docs/7zip-tutorial/CommonsZip_Std.S7z4.MacLinux7zExe.values.jsonc -->
-```json
+```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": {
@@ -1121,7 +1121,7 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
 **Save the following file** as `7zip-project/CommonsZip_Std.S7z5.values.jsonc`.
 
 <!-- $MDX file=docs/7zip-tutorial/CommonsZip_Std.S7z5.values.jsonc -->
-```json
+```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": {
@@ -1322,7 +1322,7 @@ With that failed form we'll be able to inspect the 7zip packages.
 The always-failing form is the following (you don't need to create your own copy):
 
 <!-- $MDX file=docs/7zip-tutorial/CommonsZip_Std.S7z9.Debug.values.jsonc -->
-```json
+```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": {
