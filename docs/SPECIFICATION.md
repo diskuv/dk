@@ -774,17 +774,16 @@ The form is reconstructed as JSON exactly with the following keys (and only the 
 1. `assets.files.checksum.sha1`
 2. `assets.files.checksum.sha256`
 3. `assets.files.path`
-4. `assets.listing_unencrypted.name`
-5. `assets.listing_unencrypted.version`
-6. `forms.function.args`
-7. `forms.function.envmods`
-8. `forms.id`
-9. `forms.outputs.files.paths`
-10. `forms.outputs.files.slots`
-11. `forms.precommands.private`
-12. `forms.precommands.public`
-13. `schema_version.major`
-14. `schema_version.minor`
+4. `assets.id`
+5. `forms.function.args`
+6. `forms.function.envmods`
+7. `forms.id`
+8. `forms.outputs.files.paths`
+9. `forms.outputs.files.slots`
+10. `forms.precommands.private`
+11. `forms.precommands.public`
+12. `schema_version.major`
+13. `schema_version.minor`
 
 with:
 
@@ -844,11 +843,7 @@ For example, the form:
   ],
   "assets": [
     {
-      "listing_unencrypted": {
-        "spec_version": 2,
-        "name": "DkDistribution_Std.Asset",
-        "version": "2.4.202508011516-signed"
-      },
+      "id": "DkDistribution_Std.Asset@2.4.202508011516-signed",
       "listing": {
         "origins": [
           {
@@ -885,7 +880,7 @@ For example, the form:
 is canonicalized to:
 
 ```json
-{"assets":[{"files":[{"checksum":{"sha256":"4bd73809eda4fb2bf7459d2e58d202282627bac816f59a848fc24b5ad6a7159e"},"path":"SHA256"},{"checksum":{"sha256":"0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"},"path":"SHA256.sig"}],"listing_unencrypted":{"name":"DkDistribution_Std.Asset","version":"2.4.202508011516-signed"}}],"forms":[{"function":{"args":["arg1"],"envmods":["envmod1"]},"id":"FooBar_Baz@0.1.0","outputs":{"files":[{"paths":["outpath1"],"slots":["output1"]}]},"precommands":{"private":["private1"],"public":["public1"]}}],"schema_version":{"major":1,"minor":0}}
+{"assets":[{"files":[{"checksum":{"sha256":"4bd73809eda4fb2bf7459d2e58d202282627bac816f59a848fc24b5ad6a7159e"},"path":"SHA256"},{"checksum":{"sha256":"0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"},"path":"SHA256.sig"}],"id":"DkDistribution_Std.Asset@2.4.202508011516-signed"}],"forms":[{"function":{"args":["arg1"],"envmods":["envmod1"]},"id":"FooBar_Baz@0.1.0","outputs":{"files":[{"paths":["outpath1"],"slots":["output1"]}]},"precommands":{"private":["private1"],"public":["public1"]}}],"schema_version":{"major":1,"minor":0}}
 ```
 
 ## Graph
