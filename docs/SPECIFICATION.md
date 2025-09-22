@@ -813,10 +813,7 @@ For example, the form:
   "schema_version":{"major":1,"minor":0},
   "forms": [
     {
-      "id": {
-        "name": "foo/bar/baz",
-        "version": "0.1.0"
-      },
+      "id": "FooBar_Baz@0.1.0",
       "precommands": {
         "private": [
           "private1"
@@ -890,7 +887,7 @@ For example, the form:
 is canonicalized to:
 
 ```json
-{"assets":[{"files":[{"checksum":{"sha256":"4bd73809eda4fb2bf7459d2e58d202282627bac816f59a848fc24b5ad6a7159e"},"path":"SHA256"},{"checksum":{"sha256":"0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"},"path":"SHA256.sig"}],"listing_unencrypted":{"name":"DkDistribution_Std.Asset","version":"2.4.202508011516-signed"}}],"forms":[{"function":{"args":["arg1"],"envmods":["envmod1"]},"id":{"name":"foo/bar/baz","version":"0.1.0"},"outputs":{"files":[{"paths":["outpath1"],"slots":["output1"]}]},"precommands":{"private":["private1"],"public":["public1"]}}],"schema_version":{"major":1,"minor":0}}
+{"assets":[{"files":[{"checksum":{"sha256":"4bd73809eda4fb2bf7459d2e58d202282627bac816f59a848fc24b5ad6a7159e"},"path":"SHA256"},{"checksum":{"sha256":"0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"},"path":"SHA256.sig"}],"listing_unencrypted":{"name":"DkDistribution_Std.Asset","version":"2.4.202508011516-signed"}}],"forms":[{"function":{"args":["arg1"],"envmods":["envmod1"]},"id":"FooBar_Baz@0.1.0","outputs":{"files":[{"paths":["outpath1"],"slots":["output1"]}]},"precommands":{"private":["private1"],"public":["public1"]}}],"schema_version":{"major":1,"minor":0}}
 ```
 
 ## Graph

@@ -41,27 +41,8 @@
                 "additionalProperties": false,
                 "properties": {
                     "id": {
-                        "description": "The identifier for the form. Parts of the identifier is optional; if specified, the combination of package and name forms a MlFront_Core.ModuleId, and may be called from a MlFront script using the function call '<package.name>.form ()'.",
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "package": {
-                                "type": "string",
-                                "description": "The package the form belongs to. If specified, the package naming must conform to the MlFront_Core.PackageId specifications. Otherwise the package is inferred from the directory structure."
-                            },
-                            "name": {
-                                "type": "string",
-                                "description": "The local name of the form. The local name must conform to the MlFront_Core standard namespace term specifications."
-                            },
-                            "version": {
-                                "type": "string",
-                                "description": "The version of the form, which must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system."
-                            }
-                        },
-                        "required": [
-                            "name",
-                            "version"
-                        ]
+                        "description": "The identifier for the form, in the format 'PACKAGE.NAME@VERSION'. The PACKAGE is optional if the build system supplies an implicit package, but best practice is to supply it. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system. The form may be called from a MlFront script using the function call '<PACKAGE.NAME>.form ()'.",
+                        "type": "string"
                     },
                     "precommands": {
                         "description": "The commands used to fetch objects that must be available to execute the form. The commands are written in the Value Shell Language (VSL). For example, 'get-object VGKot5hBsd81kMupNCXHaqbhv3huEbxAFMLnpcX2hniwn File.Agnostic > gcc'.",
