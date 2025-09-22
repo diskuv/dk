@@ -778,15 +778,13 @@ The form is reconstructed as JSON exactly with the following keys (and only the 
 5. `assets.listing_unencrypted.version`
 6. `forms.function.args`
 7. `forms.function.envmods`
-8. `forms.id.name`
-9. `forms.id.package`
-10. `forms.id.version`
-11. `forms.outputs.files.paths`
-12. `forms.outputs.files.slots`
-13. `forms.precommands.private`
-14. `forms.precommands.public`
-15. `schema_version.major`
-16. `schema_version.minor`
+8. `forms.id`
+9. `forms.outputs.files.paths`
+10. `forms.outputs.files.slots`
+11. `forms.precommands.private`
+12. `forms.precommands.public`
+13. `schema_version.major`
+14. `schema_version.minor`
 
 with:
 
