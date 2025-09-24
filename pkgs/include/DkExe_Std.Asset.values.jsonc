@@ -33,11 +33,7 @@ will make the "dk-darwin_arm64" executable from version
   },
   "forms": [
     {
-      "id": {
-        "package": "DkSetup_Std",
-        "name": "Exe",
-        "version": "2.4.202508302258-signed"
-      },
+      "id": "DkSetup_Std.Exe@2.4.202508302258-signed",
       "precommands": {
         "private": [
           "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-darwin_arm64 -f ${SLOT.File.Darwin_arm64}/dk.exe",
@@ -67,11 +63,7 @@ will make the "dk-darwin_arm64" executable from version
   ],
   "assets": [
     {
-      "listing_unencrypted": {
-        "spec_version": 2,
-        "name": "DkExe_Std.Asset",
-        "version": "2.4.202508302258-signed"
-      },
+      "id": "DkExe_Std.Asset@2.4.202508302258-signed",
       "listing": {
         "origins": [
           {

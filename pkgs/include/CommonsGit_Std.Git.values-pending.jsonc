@@ -18,11 +18,7 @@ crossover lets anyone build the package.
   },
   "assets": [
     {
-      "listing_unencrypted": {
-        "name": "CommonsGit_Std.Git",
-        "spec_version": 2,
-        "version": "17.6.0"
-      },
+      "id": "CommonsGit_Std.Git@17.6.0",
       "listing": {
         "origins": []
       },

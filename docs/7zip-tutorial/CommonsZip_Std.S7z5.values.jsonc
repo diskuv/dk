@@ -6,11 +6,7 @@
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z5",
-        "name": "S7zExe",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z.S7zExe@25.1.0",
       "precommands": {
         "private": [
           // We'll make the executable name '7zz.exe' on all platforms so that

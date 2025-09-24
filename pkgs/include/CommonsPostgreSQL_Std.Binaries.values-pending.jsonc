@@ -4,11 +4,7 @@
   "schema_version": { "major": 1, "minor": 0 },
   "assets": [
     {
-      "listing_unencrypted": {
-        "name": "CommonsPostgreSQL_Std.Binaries",
-        "spec_version": 2,
-        "version": "17.6.0"
-      },
+      "id": "CommonsPostgreSQL_Std.Binaries@17.6.0",
       "listing": {
         "origins": []
       },

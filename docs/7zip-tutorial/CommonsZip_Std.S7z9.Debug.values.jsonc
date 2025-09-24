@@ -6,11 +6,7 @@
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z9",
-        "name": "Debug",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z9.Debug@25.1.0",
       "precommands": {
         "private": [
           // we'll use the community 7zip package, not the tutorial 7zip package

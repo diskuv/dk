@@ -26,11 +26,7 @@ All assets are stored in [CommonsZip_Std.S7z.Assets], which is defined in [Commo
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z",
-        "name": "MacLinux7zExe",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z.MacLinux7zExe@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7z.exe (7zr does not extract tar files)

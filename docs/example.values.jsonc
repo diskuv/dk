@@ -33,11 +33,7 @@ will make the "dk-darwin_arm64" executable from version
     },
     "forms": [
         {
-            "id": {
-                "package": "DkExe_Std.Asset",
-                "name": "Latest",
-                "version": "1.0.0"
-            },
+            "id": "DkExe_Std.Asset.Latest@1.0.202501010000",
             "precommands": {
                 // This list of commands is built automatically by
                 // `get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64`
@@ -107,11 +103,7 @@ will make the "dk-darwin_arm64" executable from version
     ],
     "assets": [
         {
-            "listing_unencrypted": {
-                "spec_version": 2,
-                "name": "DkExe_Std.Asset",
-                "version": "2.4.202508011516-signed"
-            },
+            "id": "DkExe_Std.Asset@2.4.202508011516-signed",
             "listing": {
                 "origins": [
                     {

@@ -522,11 +522,7 @@ Here is an example use of a pipe:
   },
   "assets": [
     {
-      "listing_unencrypted": {
-        "spec_version": 2,
-        "name": "MyAssets_Std.Scripts",
-        "version": "1.0.0"
-      },
+      "id": "MyAssets_Std.Scripts@1.0.0",
       "listing": {
         "origins": [ { "name": "project-tree", "mirrors": [ "." ] } ]
       },

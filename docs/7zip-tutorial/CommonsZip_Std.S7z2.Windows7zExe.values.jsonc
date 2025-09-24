@@ -6,11 +6,7 @@
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z2",
-        "name": "Windows7zExe",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z2.Windows7zExe@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe

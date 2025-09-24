@@ -3,12 +3,8 @@
   "schema_version": { "major": 1, "minor": 0 },  
   "assets": [
     {
-      "listing_unencrypted": {
-        "name": "CommonsZip_Std.S7z1a.Assets",
-        "spec_version": 2,
-        // 25.01
-        "version": "25.1.0"
-      },
+      // 25.01
+      "id": "CommonsZip_Std.S7z1a.Assets@25.1.0",
       "listing": {
         "origins": [
           {

@@ -3,11 +3,7 @@
   "schema_version": { "major": 1, "minor": 0 }, 
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z1b",
-        "name": "S7zr",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z1b.S7zr@25.1.0",
       "precommands": {
         "private": [
           "get-asset-file CommonsZip_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_arm}/7zr.exe",

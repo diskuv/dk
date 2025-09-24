@@ -6,11 +6,7 @@
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z4",
-        "name": "MacLinux7zExe",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z4.MacLinux7zExe@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7z.exe (7zr does not extract tar files)

@@ -6,11 +6,7 @@
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z3",
-        "name": "MacLinux7zTar",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe
