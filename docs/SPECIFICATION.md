@@ -36,6 +36,7 @@
     - [Object Slots](#object-slots)
   - [Values](#values)
     - [Value Shell Language (VSL)](#value-shell-language-vsl)
+    - [VSL Lexical Rules](#vsl-lexical-rules)
     - [Variables available in VSL](#variables-available-in-vsl)
       - [get-object ID -s REQUEST\_SLOT (-f FILE | -d DIR/)](#get-object-id--s-request_slot--f-file---d-dir)
       - [install-object ID -s REQUEST\_SLOT (-f FILE | -d DIR/)](#install-object-id--s-request_slot--f-file---d-dir)
@@ -398,8 +399,6 @@ There are two ways to run these shell commands:
    }
    ```
 
-When embedded as precommands in a values file, the command line (which is a JSON string) is split into arguments (a list of strings) using the [POSIX quoting rules at IEEE Std 1003.1-2024 / Shell & Utilities / Shell Command Language / 2.2 Quoting](https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html#tag_19_02). However, no Here-Documents are accepted. The splitting is similar to Python's [shlex.split](https://docs.python.org/3/library/shlex.html#shlex.split).
-
 All commands have a output path (ex. `-f echo.exe`). Most command have two forms:
 
 - `-f FILE` (ex. `-f echo.exe`)
@@ -411,6 +410,14 @@ The best practice is to use the forward slash (`/`) as directory separator in th
 However, when the directory is a UNC path on Windows (ex. `\\Server2\Share\Test\Foo.txt`) you should use backward slashes.
 
 For security, the commands may be evaluated in a sandbox or a chroot environment. Do not use `..` path segments or they may fail to resolve in sandboxes.
+
+### VSL Lexical Rules
+
+When embedded as precommands in a values file, the command line (which is a JSON string) is split into arguments (a list of strings) using the [POSIX quoting rules at IEEE Std 1003.1-2024 / Shell & Utilities / Shell Command Language / 2.2 Quoting](https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html#tag_19_02). However, no Here-Documents are accepted. The splitting is similar to Python's [shlex.split](https://docs.python.org/3/library/shlex.html#shlex.split).
+
+The `` ` `` (backtick, aka. grave accent) is the escape character. *Backticks were chosen for compatibility with Windows paths and familiarity with PowerShell; carets `^` were rejected since in Windows Batch the caret has complex rules.*
+
+The `$` is a special character which introduces variables (described next section). There are no other special characters. So `` `${HOME} `` is expanded to `${HOME}` and `` `n `` is expanded to `n`.
 
 ### Variables available in VSL
 
