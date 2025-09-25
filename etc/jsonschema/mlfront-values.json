@@ -217,11 +217,11 @@
                                 },
                                 "path": {
                                     "type": "string",
-                                    "description": "The relative subpath from the origin's base URL"
+                                    "description": "The relative subpath from the origin's base URL."
                                 },
                                 "size": {
                                     "type": "integer",
-                                    "description": "The file size of the asset file. This field is optional only for canonicalization (comparison purposes); in all other contexts this field is required."
+                                    "description": "The file size of the asset file."
                                 },
                                 "checksum": {
                                     "type": "object",
@@ -238,6 +238,7 @@
                             },
                             "required": [
                                 "path",
+                                "size",
                                 "checksum"
                             ]
                         }

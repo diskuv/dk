@@ -781,16 +781,17 @@ The form is reconstructed as JSON exactly with the following keys (and only the 
 1. `assets.files.checksum.sha1`
 2. `assets.files.checksum.sha256`
 3. `assets.files.path`
-4. `assets.id`
-5. `forms.function.args`
-6. `forms.function.envmods`
-7. `forms.id`
-8. `forms.outputs.files.paths`
-9. `forms.outputs.files.slots`
-10. `forms.precommands.private`
-11. `forms.precommands.public`
-12. `schema_version.major`
-13. `schema_version.minor`
+4. `assets.files.size`
+5. `assets.id`
+6. `forms.function.args`
+7. `forms.function.envmods`
+8. `forms.id`
+9. `forms.outputs.files.paths`
+10. `forms.outputs.files.slots`
+11. `forms.precommands.private`
+12. `forms.precommands.public`
+13. `schema_version.major`
+14. `schema_version.minor`
 
 with:
 
@@ -801,9 +802,9 @@ with:
 
 The above canonicalization should conform to [RFC 8785]; if there are any ambiguities [RFC 8785] must be followed.
 
-Of particular note is that the `assets.listing.origins`, `assets.files.origin`
-and `assets.files.size` fields are not present in the canonicalization since
-the asset path and checksum uniquely identifiy an asset file. In other words,
+Of particular note is that the `assets.listing.origins` and `assets.files.origin`
+fields are not present in the canonicalization since
+the asset path, checksum and size uniquely identifiy an asset file. In other words,
 if you have a locally cached file with the same checksum as a remote asset,
 you can substitute the locally cached file without changing identifiers
 in the value store.
@@ -971,11 +972,17 @@ An example *before* removing whitespace as per [JSON Canonicalization](#json-can
 
 ```json
 {
-  "listing_unencrypted": {
-    "spec_version": 2,
-    "name": "DkDistribution_Std.Asset",
-    "version": "2.4.202508011516-signed"
-  },
+  "files": [
+    {
+      "checksum": {
+        "sha256": "0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"
+      },
+      "origin": "github-release",
+      "path": "SHA256.sig",
+      "size": 151
+    }
+  ],
+  "id": "DkDistribution_Std.Asset@2.4.202508011516-signed",
   "listing": {
     "origins": [
       {
@@ -985,17 +992,7 @@ An example *before* removing whitespace as per [JSON Canonicalization](#json-can
         ]
       }
     ]
-  },
-  "files": [
-    {
-      "origin": "github-release",
-      "path": "SHA256.sig",
-      "size": 151,
-      "checksum": {
-        "sha256": "0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"
-      }
-    }
-  ]
+  }
 }
 ```
 
