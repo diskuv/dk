@@ -43,20 +43,23 @@ All assets are stored in [CommonsZip_Std.S7z.Assets], which is defined in [Commo
       },
       "function": {
         "args": [
-          // extract assetfile [7z2501-arm.exe] with [7zr.exe] to the output directory
-          // for slot [File.Windows_arm], etc.
+          // with [7zr.exe] ...
           "bin/${SLOTNAME.request}/7zr.exe",
+          // e(x)tract files into directory tree
           "x",
+          // to output directory for slot [File.Windows_arm] (etc.)
           "-o${SLOT.request}",
+          // from the asset file [7z2501-arm.exe] renamed [7z-File.Windows_arm.exe] (etc.)
           "7z-${SLOTNAME.request}.exe",
-          // extract only the '7z.exe' executable
-          "7z.exe"
+          // extract only the '7z.exe' executable and 'LICENSE' file
+          "7z.exe",
+          "License.txt"
         ]
       },
       "outputs": {
         "files": [
           {
-            "paths": ["7z.exe"],
+            "paths": ["7z.exe", "License.txt"],
             "slots": [
               "File.Windows_arm",
               "File.Windows_arm64",

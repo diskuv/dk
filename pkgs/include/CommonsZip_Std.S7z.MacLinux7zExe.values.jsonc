@@ -49,40 +49,44 @@ All assets are stored in [CommonsZip_Std.S7z.Assets], which is defined in [Commo
           }
         ],
         "args": [
-          // extract object [7z2501-mac.tar] with [7z.exe] to the output directory
+          // e(x)tract object [7z2501-mac.tar] with [7z.exe] to the output directory
           // for slot [File.Darwin_arm64], etc.
+          // with [7z.exe] ...
           "bin/File.Windows_x86/7z.exe",
           "x",
+          // to output directory for slot [File.Darwin_arm64] (etc.)
           "-o${SLOT.request}",
+          // from the objects installed in tarballs/ [7z-File.Darwin_arm64.tar] (etc.)
           "tarballs/7z-${SLOTNAME.request}.tar",
-          // extract only the '7zz' executable
-          "7zz"
+          // extract only the '7zz' executable and 'License.txt' file
+          "7zz",
+          "License.txt"
         ]
       },
       "outputs": {
         "files": [
           {
-            "paths": ["7zz"],
+            "paths": ["7zz", "License.txt"],
             "slots": ["File.Darwin_arm64"]
           },
           {
-            "paths": ["7zz"],
+            "paths": ["7zz", "License.txt"],
             "slots": ["File.Darwin_x86_64"]
           },
           {
-            "paths": ["7zz"],
+            "paths": ["7zz", "License.txt"],
             "slots": ["File.Linux_arm"]
           },
           {
-            "paths": ["7zz"],
+            "paths": ["7zz", "License.txt"],
             "slots": ["File.Linux_arm64"]
           },
           {
-            "paths": ["7zz"],
+            "paths": ["7zz", "License.txt"],
             "slots": ["File.Linux_x86"]
           },
           {
-            "paths": ["7zz"],
+            "paths": ["7zz", "License.txt"],
             "slots": ["File.Linux_x86_64"]
           }
         ]
