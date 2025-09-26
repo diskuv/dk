@@ -6,6 +6,8 @@ If you have a Linux application you could choose `nix` or Docker, but outside of
 
 We'll use the software behind `dk` itself as an example of easy-to-fail, average-complexity software. `dk`'s scripting functionality requires a runtime environment and platform development kits are downloaded on-demand. We want our users (ex. you) to install and get started *quickly*. Users copy-and-paste the text blocks below on Windows. Go ahead and copy-and-paste yourself if you want to try the `dk` cross-compiling scripting environment, or skip past it to learn about the `dk` build tool:
 
+<!-- Windows updates: dk Ml.Use -- .\maintenance\010-PROJECTROOT-README.sh -->
+
 <!-- $MDX skip -->
 ```sh
 # Install a standalone executable. And available for macOS and Linux.
@@ -338,7 +340,7 @@ Let's review the command line options:
 | ------------------------------------ | ----------------------------------------------------------- |
 | `dk0/mlfront-shell`                  | The build tool. Eventually it will just be `dk`             |
 | `-I 7zip-project`                    | The folders containing `*.values.jsonc` files               |
-| `-x 7zip-org:subpath:`               | Invalidate all files with the `origin: "7zip-org"`          |
+| `-x 7zip-org:subpath:`               | Invalidate all asset files with the `origin: "7zip-org"`    |
 | `--`                                 | Separate `dk0/mlfront-shell` options from the command after |
 | `get-asset-file`                     | Command to get the named asset file                         |
 | `CommonsZip_Std.S7z1a.Assets@25.1.0` | The name and version in `.values.json`                      |
@@ -416,11 +418,7 @@ We'll create a new JSON file containing the form.
   "schema_version": { "major": 1, "minor": 0 }, 
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z1b",
-        "name": "S7zr",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z1b.S7zr@25.1.0",
       "precommands": {
         "private": [
           "get-asset-file CommonsZip_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_arm}/7zr.exe",
@@ -520,7 +518,7 @@ when you forgot to declare files or you declare too many files.
 We'll use `get-object` to submit our new form. With that we get:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: --autofix -- get-object 'CommonsZip_Std.S7z1b.S7zr@25.1.0' -s File.Windows_x86_64 -d target/7zr-win64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'CommonsZip_Std.S7z1b.S7zr@25.1.0' -s File.Windows_x86_64 -d target/7zr-win64
 [up-to-date] CommonsZip_Std.S7z1b.S7zr@25.1.0+bn-20250101000000 -s File.Windows_x86_64
 ```
 
@@ -565,11 +563,7 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
   },  
   "assets": [
     {
-      "listing_unencrypted": {
-        "name": "CommonsZip_Std.S7z1c.Assets",
-        "spec_version": 2,
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z1c.Assets@25.1.0",
       "listing": {
         "origins": [
           {
@@ -595,7 +589,7 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
           "checksum": {
             "sha256": "c14b51d97ff644c49dcfc83ab000537ba806ebc7003359d7afc362e2af83f890"
           },
-          "size": 16547840
+          "size": 1658315
         },
         {
           "origin": "7zip-org",
@@ -603,7 +597,7 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
           "checksum": {
             "sha256": "6365c7c44e217b9c1009e065daf9f9aa37454e64315b4aaa263f7f8f060755dc"
           },
-          "size": 15728640
+          "size": 1588203
         },
         {
           "origin": "7zip-org",
@@ -611,7 +605,7 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
           "checksum": {
             "sha256": "f5b498a55ab1bb2adb2690f7ad629022b5e52f159a95e7d71be6c5049db0696e"
           },
-          "size": 12124160
+          "size": 1212764
         },
         {
           "origin": "7zip-org",
@@ -619,7 +613,7 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
           "checksum": {
             "sha256": "39c5140f02ce4436599303c59a149f654cb1bbc47cdc105a942120d747ae040d"
           },
-          "size": 13271040
+          "size": 1326736
         },
         {
           "origin": "7zip-org",
@@ -627,7 +621,7 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
           "checksum": {
             "sha256": "4ca3b7c6f2f67866b92622818b58233dc70367be2f36b498eb0bdeaaa44b53f4"
           },
-          "size": 15308800
+          "size": 1571044
         },
         {
           "origin": "7zip-org",
@@ -635,7 +629,7 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
           "checksum": {
             "sha256": "62a47626eb9ce2886de3fec6f201f6a4210f14ba61b30a16141b953aed705207"
           },
-          "size": 16793600
+          "size": 1721924
         },
         {
           "origin": "7zip-org",
@@ -643,7 +637,7 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
           "checksum": {
             "sha256": "26aa75bc262bb10bf0805617b95569c3035c2c590a99f7db55c7e9607b2685e0"
           },
-          "size": 18841600
+          "size": 1876264
         },
         {
           "origin": "7zip-org",
@@ -651,7 +645,7 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
           "checksum": {
             "sha256": "78afa2a1c773caf3cf7edf62f857d2a8a5da55fb0fff5da416074c0d28b2b55f"
           },
-          "size": 15728640
+          "size": 1643509
         }
       ]
     }
@@ -677,7 +671,7 @@ We'll be using a new command `get-asset`.
 With that we get:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: --autofix -- get-asset 'CommonsZip_Std.S7z1c.Assets@25.1.0' -d target/7zr-assets
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset 'CommonsZip_Std.S7z1c.Assets@25.1.0' -d target/7zr-assets
 [up-to-date] CommonsZip_Std.S7z1c.Assets@25.1.0+bn-20250101000000
 ```
 
@@ -724,7 +718,7 @@ What happens if we output the asset to a file rather than a directory.
 That is, what if we replaced `-d target/7zr-assets` with `-f target/7zr-file`?
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: --autofix -- get-asset 'CommonsZip_Std.S7z1c.Assets@25.1.0' -f target/7zr-file
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset 'CommonsZip_Std.S7z1c.Assets@25.1.0' -f target/7zr-file
 [up-to-date] CommonsZip_Std.S7z1c.Assets@25.1.0+bn-20250101000000
 ```
 
@@ -768,11 +762,7 @@ Whenever we run a command we need a form with a `function`.
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z2",
-        "name": "Windows7zExe",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z2.Windows7zExe@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe
@@ -872,7 +862,7 @@ But for now we can submit the form if we are on Windows. We'll submit the `File.
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: --autofix -- get-object 'CommonsZip_Std.S7z2.Windows7zExe@25.1.0' -s File.Windows_arm64 -d target/7zexe-winarm64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'CommonsZip_Std.S7z2.Windows7zExe@25.1.0' -s File.Windows_arm64 -d target/7zexe-winarm64
 [up-to-date] CommonsZip_Std.S7z2.Windows7zExe@25.1.0+bn-20250101000000 -s File.Windows_arm64
 ```
 
@@ -914,11 +904,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z3",
-        "name": "MacLinux7zTar",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe
@@ -987,7 +973,7 @@ The use of `7zr.exe` means we can only run this step on Windows hardware, even t
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: --autofix -- get-object 'CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0' -s File.Linux_arm64 -d target/7ztar-linuxarm64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0' -s File.Linux_arm64 -d target/7ztar-linuxarm64
 [up-to-date] CommonsZip_Std.S7z3.MacLinux7zTar@25.1.0+bn-20250101000000 -s File.Linux_arm64
 ```
 
@@ -1019,11 +1005,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z4",
-        "name": "MacLinux7zExe",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z4.MacLinux7zExe@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7z.exe (7zr does not extract tar files)
@@ -1093,7 +1075,7 @@ The use of `7z.exe` means we can only run this step on Windows hardware, even th
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: --autofix -- get-object 'CommonsZip_Std.S7z4.MacLinux7zExe@25.1.0' -s File.Darwin_x86_64 -d target/7zexe-macintel
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'CommonsZip_Std.S7z4.MacLinux7zExe@25.1.0' -s File.Darwin_x86_64 -d target/7zexe-macintel
 [up-to-date] CommonsZip_Std.S7z4.MacLinux7zExe@25.1.0+bn-20250101000000 -s File.Darwin_x86_64
 ```
 
@@ -1130,11 +1112,7 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z5",
-        "name": "S7zExe",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z5.S7zExe@25.1.0",
       "precommands": {
         "private": [
           // We'll make the executable name '7zz.exe' on all platforms so that
@@ -1182,7 +1160,7 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
 With that our users can grab the `7zz.exe` executable for any operating system and CPU architecture:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: --autofix -- get-object 'CommonsZip_Std.S7z5.S7zExe@25.1.0' -s File.Linux_x86_64 -d target/7z-linux64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'CommonsZip_Std.S7z5.S7zExe@25.1.0' -s File.Linux_x86_64 -d target/7z-linux64
 [up-to-date] CommonsZip_Std.S7z5.S7zExe@25.1.0+bn-20250101000000 -s File.Linux_x86_64
 ```
 
@@ -1196,7 +1174,7 @@ target/7z-linux64/7zz.exe: ELF 64-bit LSB pie executable, x86-64, version 1 (SYS
 Since `7zz.exe` is a standalone executable that doesn't need any DLLs or `.so` (except standard GLIBC system libraries on Linux), we can use the `-m MEMBER` option to directly fetch the `7zz.exe` executable:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: --autofix -- get-object 'CommonsZip_Std.S7z5.S7zExe@25.1.0' -s File.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'CommonsZip_Std.S7z5.S7zExe@25.1.0' -s File.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
 [up-to-date] CommonsZip_Std.S7z5.S7zExe@25.1.0+bn-20250101000000 -s File.Linux_x86_64
 $ file target/7zz.exe
 target/7zz.exe: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=7a6c7a136fc4e7df4ddcd80d2aae72bc658ef822, for GNU/Linux 3.2.0, stripped
@@ -1331,11 +1309,7 @@ The always-failing form is the following (you don't need to create your own copy
   },
   "forms": [
     {
-      "id": {
-        "package": "CommonsZip_Std.S7z9",
-        "name": "Debug",
-        "version": "25.1.0"
-      },
+      "id": "CommonsZip_Std.S7z9.Debug@25.1.0",
       "precommands": {
         "private": [
           // we'll use the community 7zip package, not the tutorial 7zip package

@@ -19,11 +19,11 @@ cd "$(dirname "$0")/.."
 # Follow steps in https://github.com/realworldocaml/mdx ...
 opam show mdx || opam install mdx
 
-# Hack for mlfront-shell until 2.4.2.8 is built
-# if [ -x ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe ]; then
-#     echo "SECURITY WARNING: Using local build of mlfront-shell" >&2
-#     install -v ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe "$LOCALAPPDATA/Programs/mlfront-shell/mlfront-shellexe-2.4.2.5-windows_x86_64/mlfshell.exe"
-# fi
+# Hack mlfront-shell 2.4.2.12 until 2.4.2.13 is built
+if [ -x ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe ]; then
+    echo "SECURITY WARNING: Using local build of mlfront-shell" >&2
+    install -v ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe "$LOCALAPPDATA/Programs/mlfront-shell/mlfront-shellexe-2.4.2.12-windows_x86_64/mlfshell.exe"
+fi
 
 rm -rf dk0/
 rm -rf 7zip-project/

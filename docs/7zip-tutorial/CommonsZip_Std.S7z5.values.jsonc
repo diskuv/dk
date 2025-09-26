@@ -6,7 +6,7 @@
   },
   "forms": [
     {
-      "id": "CommonsZip_Std.S7z.S7zExe@25.1.0",
+      "id": "CommonsZip_Std.S7z5.S7zExe@25.1.0",
       "precommands": {
         "private": [
           // We'll make the executable name '7zz.exe' on all platforms so that
