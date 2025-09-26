@@ -1,0 +1,55 @@
+// Testing:
+//  get-object CommonsUutils_Std.Coreutils.Exe@0.2.2 -s File.Darwin_arm64 -d target\coreutils-tarmacarm64
+//  dk0/mlfront-shell -I .\pkgs\include\ -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: -- get-object CommonsUutils_Std.Coreutils.Exe@0.2.2 -s File.Darwin_arm64 -d target\coreutils-exe-macarm64
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "forms": [
+    {
+      "id": "CommonsUutils_Std.Coreutils.Exe@0.2.2",
+      "precommands": {
+        "private": [
+          // need bin/<architecture>/7z.exe (7zr does not extract tar files)
+          "get-object CommonsZip_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_x86 -d bin/File.Windows_x86",
+          // need macOS and Linux tar files. since same destination directory need [install-object]
+          "install-object CommonsUutils_Std.Coreutils.Tar@0.2.2 -s File.Darwin_arm64 -d tarballs",
+          "install-object CommonsUutils_Std.Coreutils.Tar@0.2.2 -s File.Darwin_x86_64 -d tarballs",
+          "install-object CommonsUutils_Std.Coreutils.Tar@0.2.2 -s File.Linux_arm64_gnu -d tarballs",
+          "install-object CommonsUutils_Std.Coreutils.Tar@0.2.2 -s File.Linux_arm64 -d tarballs",
+          "install-object CommonsUutils_Std.Coreutils.Tar@0.2.2 -s File.Linux_arm32 -d tarballs",
+          "install-object CommonsUutils_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86_gnu -d tarballs",
+          "install-object CommonsUutils_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86 -d tarballs",
+          "install-object CommonsUutils_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86_64 -d tarballs",
+          "install-object CommonsUutils_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86_64 -d tarballs"
+        ]
+      },
+      "function": {
+        "execution": [
+          // 7z.exe only runs on Windows
+          {
+            "name": "OSFamily",
+            "value": "windows"
+          }
+        ],
+        "args": [
+          // with [7z.exe] ...
+          "bin/File.Windows_x86/7z.exe",
+          // (e)xtract all files into a single flat directory
+          "e",
+          // to output directory for slot [File.Darwin_arm64] (etc.)
+          "-o${SLOT.request}",
+          // from the object [coreutils.File.Darwin_arm64.tar] (etc.)
+          "tarballs/coreutils.${SLOTNAME.request}.tar"
+        ]
+      },
+      "outputs": {
+        "files": [
+          {
+            "paths": ["coreutils", "LICENSE", "README.package.md", "README.md"],
+            "slots": ["File.Darwin_arm64", "File.Darwin_x86_64", "File.Linux_arm64_gnu", "File.Linux_arm64", "File.Linux_arm32", "File.Linux_x86_gnu", "File.Linux_x86", "File.Linux_x86_64"]
+          }
+        ]
+      }
+    }
+  ]
+}

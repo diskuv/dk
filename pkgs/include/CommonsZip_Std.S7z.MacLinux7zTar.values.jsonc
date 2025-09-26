@@ -51,8 +51,11 @@ All assets are stored in [CommonsZip_Std.S7z.Assets], which is defined in [Commo
         "args": [
           // uncompress assetfile [7z2501-mac.tar.xz] with [7zr.exe] to the output directory
           // for slot [File.Darwin_arm64], etc.
+          // with [7zr.exe] ...
           "bin/File.Windows_x86/7zr.exe",
+          // uncompress
           "x",
+          // to output directory for slot [File.Darwin_arm64] (etc.)
           "-o${SLOT.request}",
           "7z-${SLOTNAME.request}.tar.xz",
           "7z-${SLOTNAME.request}.tar"
