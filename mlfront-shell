@@ -23,14 +23,14 @@ set -euf
 
 # Update within dksdk-coder:
 #   f_mlfrontshell() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/mlfrontshell-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/$ver/mlfront-shell-$i$extexe"; done }
-#   f_mlfrontshell 2.4.2.9
+#   f_mlfrontshell 2.4.2.12
 #   shasum -a 256 build/mlfrontshell-* | awk 'BEGIN{FS="[ /-]"} {printf "cksum256_%s=%s\n", $5, $1}' | sort
 # -------------------------------------
-majminpat_ver=2.4.2.9
-cksum256_darwin_arm64=7a9dcb38d82e025e5754cdf787d5a7e7f4f8dd4d17e94d39a8fffa3300528c18
-cksum256_darwin_x86_64=147556387ee443e20a8eb2954637250c5cfab50cfc59a84af8efdc36dcf6fdba
-cksum256_linux_x86_64=e020a49a4a1ebc67e9304c2661534cb0ce51ec6c32c1129912d2821be0dd7035
-cksum256_linux_x86=d5aae0299040ef29c7085bc09205f3cf7e08ba6a3593d882a41d9ec9bf18eb41
+majminpat_ver=2.4.2.12
+cksum256_darwin_arm64=ace0a9e202e0ab943aa7e2f32250d3bac3724ed7b36193fe18e1209ef1fece63
+cksum256_darwin_x86_64=3e25f17958d20aabae8e12e6b53d8f115675df3247b41c304109a017742d5f6f
+cksum256_linux_x86_64=c99323089760290f18c29e37c8b41d91b91f126b276109e18875f8efeae494e2
+cksum256_linux_x86=801ccf4b678556bca64a5c002cc7ea6f6fddfd83668e47d95661d6100c6db471
 
 dk_pwd=$PWD
 
