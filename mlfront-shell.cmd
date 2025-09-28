@@ -41,14 +41,14 @@ SET DKCODER_PWD=%CD%
 
 REM Update within dksdk-coder:
 REM   f_mlfrontshell() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/mlfrontshell-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/$ver/mlfront-shell-$i$extexe"; done }
-REM   f_mlfrontshell 2.4.2.12
+REM   f_mlfrontshell 2.4.2.13
 REM   shasum -a 256 build/mlfrontshell-* | awk 'BEGIN{FS="[ /-]"} {printf "SET DK_CKSUM_%s=%s\n", toupper($5), $1}' |  sort
 REM
 REM   Empty value if the architecture is not supported.
 REM -------------------------------------
-SET DK_VER=2.4.2.12
-SET DK_CKSUM_WINDOWS_X86_64=f0c387d0c68e736c3df101898acedd2a398ee9b760c4d652ca328d6c9fee0643
-SET DK_CKSUM_WINDOWS_X86=50e9a4e60636453fbe935624850d7b2b1631d20ef1ee171396cd0fe97ff2fd99
+SET DK_VER=2.4.2.13
+SET DK_CKSUM_WINDOWS_X86_64=308d10cc3b86f7046b5168a95ff540c7f4edecb04d834cc429a35eaa288b3214
+SET DK_CKSUM_WINDOWS_X86=509b3f3f14c8ed801877157004c615cad5be5bf111b75e4bdbf6be6c906a9fe9
 
 REM --------- Quiet Detection ---------
 SET DK_QUIET=0
