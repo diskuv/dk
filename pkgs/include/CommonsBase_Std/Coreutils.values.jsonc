@@ -1,6 +1,6 @@
 // Testing:
 //  get-object CommonsBase_Std.Coreutils@0.2.2 -s File.Windows_x86 -d target\coreutilswin64
-//  mlfront-shell -I .\pkgs\include\ -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -- get-object CommonsBase_Std.Coreutils@0.2.2 -s File.Darwin_arm64 -d target\coreutils-macarm64
+//  mlfront-shell -I .\pkgs\include\CommonsBase_Std -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -- get-object CommonsBase_Std.Coreutils@0.2.2 -s File.Darwin_arm64 -d target\coreutils-macarm64
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
@@ -16,7 +16,7 @@
           "get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Darwin_x86_64 -m ./coreutils -f ${SLOT.File.Darwin_x86_64}/coreutils.exe",
           "get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Linux_arm64_gnu -m ./coreutils -f ${SLOT.File.Linux_arm64_gnu}/coreutils.exe",
           "get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Linux_arm64 -m ./coreutils -f ${SLOT.File.Linux_arm64}/coreutils.exe",
-          "get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Linux_arm32 -m ./coreutils -f ${SLOT.File.Linux_arm32}/coreutils.exe",
+          "get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Linux_arm -m ./coreutils -f ${SLOT.File.Linux_arm}/coreutils.exe",
           "get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Linux_x86_gnu -m ./coreutils -f ${SLOT.File.Linux_x86_gnu}/coreutils.exe",
           "get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Linux_x86 -m ./coreutils -f ${SLOT.File.Linux_x86}/coreutils.exe",
           "get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Linux_x86_64 -m ./coreutils -f ${SLOT.File.Linux_x86_64}/coreutils.exe",
@@ -33,7 +33,7 @@
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.File.Darwin_x86_64}/LICENSE",
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.File.Linux_arm64_gnu}/LICENSE",
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.File.Linux_arm64}/LICENSE",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.File.Linux_arm32}/LICENSE",
+          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.File.Linux_arm}/LICENSE",
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.File.Linux_x86}/LICENSE",
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.File.Linux_x86_gnu}/LICENSE",
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.File.Linux_x86_64}/LICENSE",
@@ -52,7 +52,7 @@
               "File.Darwin_x86_64",
               "File.Linux_arm64_gnu",
               "File.Linux_arm64",
-              "File.Linux_arm32",
+              "File.Linux_arm",
               "File.Linux_x86",
               "File.Linux_x86_gnu",
               "File.Linux_x86_64",

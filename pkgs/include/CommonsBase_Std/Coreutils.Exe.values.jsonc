@@ -1,6 +1,6 @@
 // Testing:
 //  get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Darwin_arm64 -d target\coreutils-tarmacarm64
-//  dk0/mlfront-shell -I .\pkgs\include\ -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: -- get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Darwin_arm64 -d target\coreutils-exe-macarm64
+//  dk0/mlfront-shell -I .\pkgs\include\CommonsBase_Std -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: -- get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Darwin_arm64 -d target\coreutils-exe-macarm64
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
@@ -16,11 +16,11 @@
           "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Darwin_x86_64 -d tarballs",
           "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_arm64_gnu -d tarballs",
           "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_arm64 -d tarballs",
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_arm32 -d tarballs",
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_arm -d tarballs",
           "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86_gnu -d tarballs",
           "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86 -d tarballs",
           "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86_64 -d tarballs",
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86_64 -d tarballs"
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86_64_gnu -d tarballs"
         ]
       },
       "function": {
@@ -45,8 +45,23 @@
       "outputs": {
         "files": [
           {
-            "paths": ["coreutils", "LICENSE", "README.package.md", "README.md"],
-            "slots": ["File.Darwin_arm64", "File.Darwin_x86_64", "File.Linux_arm64_gnu", "File.Linux_arm64", "File.Linux_arm32", "File.Linux_x86_gnu", "File.Linux_x86", "File.Linux_x86_64"]
+            "paths": [
+              "coreutils",
+              "LICENSE",
+              "README.package.md",
+              "README.md"
+            ],
+            "slots": [
+              "File.Darwin_arm64",
+              "File.Darwin_x86_64",
+              "File.Linux_arm64_gnu",
+              "File.Linux_arm64",
+              "File.Linux_arm",
+              "File.Linux_x86_gnu",
+              "File.Linux_x86",
+              "File.Linux_x86_64",
+              "File.Linux_x86_64_gnu"
+            ]
           }
         ]
       }

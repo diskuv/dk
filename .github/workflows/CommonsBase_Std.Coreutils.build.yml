@@ -1,0 +1,132 @@
+name: CommonsBase_Std.Coreutils # we'll build this object
+env:
+  LIBRARY_VERSION: 0.2.2        # we'll build this version
+on:
+  push:              # build on every commit
+  workflow_dispatch: # allow manual triggering from GitHub page
+  workflow_call:     # allow other workflows to call this workflow
+
+jobs:
+    windows-dependencies: # job to build dependencies that only run on Windows (until we have first-class GitHub Actions support)
+        runs-on: windows-2022
+        steps:
+            - name: Checkout # get dk0/mlfront-shell
+              uses: actions/checkout@v4
+              with: { repository: diskuv/dk, path: dk0, ref: V2_4 }
+
+            - name: Cache dk data stores and build keys
+              uses: actions/cache@v4
+              with:
+                  # The data stores and build keys are safe to share between Windows, macOS and Linux
+                  enableCrossOsArchive: true
+                  path: |
+                      target/data/dk/val.1
+                      target/data/dk/cts.1.*
+                      target/config/dk/build.pub
+                      target/config/dk/build.sec
+                  restore-keys: dk-stores-and-keys             # use latest cache
+                  key: dk-stores-and-keys-${{ github.run_id }} # update cache on every run
+
+            - name: Build Windows objects              
+              env:
+                  # Cross-platform CI caches behave best when the cached data is under the project directory
+                  XDG_CONFIG_HOME: ${{ github.workspace }}/target/config
+                  XDG_DATA_HOME: ${{ github.workspace }}/target/data
+              run: |
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object 'CommonsBase_Std.S7z@25.1.0' -s File.Windows_x86 -d target/ignore
+
+            - name: Build ${{ github.workflow }} on Windows
+              env:
+                  # Cross-platform CI caches behave best when the cached data is under the project directory
+                  XDG_CONFIG_HOME: ${{ github.workspace }}/target/config
+                  XDG_DATA_HOME: ${{ github.workspace }}/target/data
+              run: |
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_arm64        -m ./LICENSE       -f target/LICENSE
+
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_arm64        -m ./coreutils.exe -f target/File.Darwin_arm64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_x86_64       -m ./coreutils.exe -f target/File.Darwin_x86_64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm64_gnu     -m ./coreutils.exe -f target/File.Linux_arm64_gnu.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm64         -m ./coreutils.exe -f target/File.Linux_arm64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm           -m ./coreutils.exe -f target/File.Linux_arm.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86           -m ./coreutils.exe -f target/File.Linux_x86.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_gnu       -m ./coreutils.exe -f target/File.Linux_x86_gnu.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_64        -m ./coreutils.exe -f target/File.Linux_x86_64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_64_gnu    -m ./coreutils.exe -f target/File.Linux_x86_64_gnu.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_arm64       -m ./coreutils.exe -f target/File.Windows_arm64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86         -m ./coreutils.exe -f target/File.Windows_x86.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86_64      -m ./coreutils.exe -f target/File.Windows_x86_64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86_64_gnu  -m ./coreutils.exe -f target/File.Windows_x86_64_gnu.coreutils.exe
+
+    build:
+        runs-on: ubuntu-22.04
+        env:
+          TEST_SLOT: File.Linux_x86_64 # we'll test the build on this slot
+        needs: windows-dependencies
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v5
+            
+            - name: Checkout # get dk0/mlfront-shell
+              uses: actions/checkout@v5
+              with: { repository: diskuv/dk, path: dk0, ref: V2_4 }
+
+            - name: Cache dk data stores and build keys
+              uses: actions/cache@v4
+              with:
+                  # The data stores and build keys are safe to share between Windows, macOS and Linux
+                  enableCrossOsArchive: true
+                  path: |
+                      target/data/dk/val.1
+                      target/data/dk/cts.1.*
+                      target/config/dk/build.pub
+                      target/config/dk/build.sec
+                  restore-keys: dk-stores-and-keys             # use latest cache
+                  key: dk-stores-and-keys-${{ github.run_id }} # update cache on every run
+
+            # We built these on Windows, but we redo build on Linux to verify that dependencies are in
+            # tracestore and valuestore, and to extra Linux coreutils.exe for testing.
+            - name: Build ${{ github.workflow }}
+              env:
+                  # Cross-platform CI caches behave best when the cached data is under the project directory
+                  XDG_CONFIG_HOME: ${{ github.workspace }}/target/config
+                  XDG_DATA_HOME: ${{ github.workspace }}/target/data
+              run: |
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_arm64        -m ./LICENSE       -f target/LICENSE
+
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_arm64        -m ./coreutils.exe -f target/File.Darwin_arm64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_x86_64       -m ./coreutils.exe -f target/File.Darwin_x86_64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm64_gnu     -m ./coreutils.exe -f target/File.Linux_arm64_gnu.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm64         -m ./coreutils.exe -f target/File.Linux_arm64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm           -m ./coreutils.exe -f target/File.Linux_arm.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86           -m ./coreutils.exe -f target/File.Linux_x86.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_gnu       -m ./coreutils.exe -f target/File.Linux_x86_gnu.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_64        -m ./coreutils.exe -f target/File.Linux_x86_64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_64_gnu    -m ./coreutils.exe -f target/File.Linux_x86_64_gnu.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_arm64       -m ./coreutils.exe -f target/File.Windows_arm64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86         -m ./coreutils.exe -f target/File.Windows_x86.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86_64      -m ./coreutils.exe -f target/File.Windows_x86_64.coreutils.exe
+                dk0/mlfront-shell -I dk0/pkgs/include/CommonsBase_Std --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86_64_gnu  -m ./coreutils.exe -f target/File.Windows_x86_64_gnu.coreutils.exe
+
+            - name: Test ${{ github.workflow }}
+              run: target/${{ env.TEST_SLOT }}.coreutils.exe --help
+
+            # Create release if and only if tag is pushed
+            - name: Release ${{ github.workflow }}
+              uses: softprops/action-gh-release@v2
+              if: github.ref_type == 'tag'
+              with:
+                files: |
+                  target/LICENSE
+                  target/File.Darwin_arm64.coreutils.exe
+                  target/File.Darwin_x86_64.coreutils.exe
+                  target/File.Linux_arm64_gnu.coreutils.exe
+                  target/File.Linux_arm64.coreutils.exe
+                  target/File.Linux_arm.coreutils.exe
+                  target/File.Linux_x86.coreutils.exe
+                  target/File.Linux_x86_gnu.coreutils.exe
+                  target/File.Linux_x86_64.coreutils.exe
+                  target/File.Linux_x86_64_gnu.coreutils.exe
+                  target/File.Windows_arm64.coreutils.exe
+                  target/File.Windows_x86.coreutils.exe
+                  target/File.Windows_x86_64.coreutils.exe
+                  target/File.Windows_x86_64_gnu.coreutils.exe

@@ -1,6 +1,6 @@
 // Testing:
 //  get-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Darwin_arm64 -d target\coreutils-tarmacarm64
-//  dk0/mlfront-shell -I .\pkgs\include\ -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: -- get-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Darwin_arm64 -d target\coreutils-tarmacarm64
+//  dk0/mlfront-shell -I .\pkgs\include\CommonsBase_Std -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: -- get-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Darwin_arm64 -d target\coreutils-tarmacarm64
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
@@ -16,10 +16,11 @@
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-apple-darwin.tar.gz -f coreutils.File.Darwin_x86_64.tar.gz",
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-aarch64-unknown-linux-gnu.tar.gz -f coreutils.File.Linux_arm64_gnu.tar.gz",
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-aarch64-unknown-linux-musl.tar.gz -f coreutils.File.Linux_arm64.tar.gz",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-arm-unknown-linux-gnueabihf.tar.gz -f coreutils.File.Linux_arm32.tar.gz",
+          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-arm-unknown-linux-gnueabihf.tar.gz -f coreutils.File.Linux_arm.tar.gz",
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-unknown-linux-gnu.tar.gz -f coreutils.File.Linux_x86_gnu.tar.gz",
           "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-unknown-linux-musl.tar.gz -f coreutils.File.Linux_x86.tar.gz",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-unknown-linux-musl.tar.gz -f coreutils.File.Linux_x86_64.tar.gz"
+          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-unknown-linux-musl.tar.gz -f coreutils.File.Linux_x86_64.tar.gz",
+          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-unknown-linux-gnu.tar.gz -f coreutils.File.Linux_x86_64_gnu.tar.gz"
         ]
       },
       "function": {
@@ -61,8 +62,8 @@
             "slots": ["File.Linux_arm64"]
           },
           {
-            "paths": ["coreutils.File.Linux_arm32.tar"],
-            "slots": ["File.Linux_arm32"]
+            "paths": ["coreutils.File.Linux_arm.tar"],
+            "slots": ["File.Linux_arm"]
           },
           {
             "paths": ["coreutils.File.Linux_x86_gnu.tar"],
@@ -75,6 +76,10 @@
           {
             "paths": ["coreutils.File.Linux_x86_64.tar"],
             "slots": ["File.Linux_x86_64"]
+          },
+          {
+            "paths": ["coreutils.File.Linux_x86_64_gnu.tar"],
+            "slots": ["File.Linux_x86_64_gnu"]
           }
         ]
       }
