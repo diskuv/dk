@@ -3,11 +3,11 @@
 Getting the latest version of dk
 ---------------------------------
 
-The object DkExe_Std.Asset.Latest will build (ie. fetch) the
+The object DkExe_Std.Form will build (ie. fetch) the
 "private" and "public" asset files listed below. Running the
 following command with `mlfront-shell` or within your own "precommands":
 
-  get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64 -d dir-darwin_arm64
+  get-object DkExe_Std.Form@1.0.202501010000 -s File.Darwin_arm64 -d dir-darwin_arm64
 
 will make the "dk-darwin_arm64" executable available to you as the file
 "dk-darwin_arm64".
@@ -26,160 +26,209 @@ will make the "dk-darwin_arm64" executable from version
 
 */
 {
-    "$schema": "../etc/jsonschema/mlfront-values.json",
-    "schema_version": {
-        "major": 1,
-        "minor": 0
-    },
-    "forms": [
+  "$schema": "../etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "distributions": [
+    {
+      "id": "DkExe_Std@1.0.0",
+      // If a user accepts a pubkey (or it is included in the -I path), then _the_ accompanying
+      // continuation is accepted (once, and never overwritten) ... and _the_ accompanying
+      // build is accepted ... and _all_ builds with packages that share the major + minor parts
+      // of the accompaying build are accepted.
+      "producer": {
+        "openbsd-signify": { "pubkey": "..." },
+        // https://github.blog/enterprise-software/devsecops/enhance-build-security-and-reach-slsa-level-3-with-github-artifact-attestations/
+        "slsa-v1-l3-github": { "signer-workflow": "<owner>/<repository>/.github/workflows/sign-artifact.yml" }
+        // https://docs.gitlab.com/ci/runners/configure_runners/#artifact-provenance-metadata
+        // only Level 1 since GitLab has no in-toto attestations. That means no verification (kinda useless!)
+        // and even query with https://docs.github.com/en/rest/orgs/artifact-metadata?apiVersion=2022-11-28#list-artifact-storage-records
+        // is still Level 1. Confer: https://gitlab.com/groups/gitlab-org/-/epics/15859#note_2540189548 and its parent
+        // would be: "slsa-v1-l1-gitlab": {}
+      },
+      // optional. If specified, and the license text has not been accepted, it will be asked.
+      "license": { "text": "..." },
+      // Optional so that only the initial public keys needs to be registered. Same way that openbsd public keys are prepublished.
+      "continuations": {
+        "attestation": {
+          "openbsd-signify": {
+            // sign(pubkey, sha256({continuations:{...}}))
+            "signature": "blahblah"
+          },
+          // attestation must include path "continuations" that is canonical JSON of `continuations` below
+          "slsa-v1-l3-github": { "attestation-doc": "..." },
+          // (tbd) https://gitlab.com/groups/gitlab-org/-/epics/15858
+          // would be: "slsa-v1-l1-gitlab": { "attestation-doc": "..." }
+        },
+        "continuations": {
+          // optional next minor version (ie. 1.1.0, or 1.2.0 if you use even numbers, etc.)
+          "1.1.0": "...producer...",
+          // optional next major version (ie. 2.0.0)
+          "2.0.0": "...producer..."
+        }
+      },
+      "builds": [
         {
-            "id": "DkExe_Std.Asset.Latest@1.0.202501010000",
-            "precommands": {
-                // This list of commands is built automatically by
-                // `get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64`
-                // (and File.Windows_x86_64, etc.).
-                "private": [
-                    "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_arm64 -f ${SLOT.File.Darwin_arm64}/dk",
-                    "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_x86_64 -f ${SLOT.File.Darwin_x86_64}/dk",
-                    "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86_64 -f ${SLOT.File.Linux_x86_64}/dk",
-                    "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86 -f ${SLOT.File.Linux_x86}/dk",
-                    "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86_64.exe -f ${SLOT.File.Windows_x86_64}/dk.exe",
-                    "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86.exe -f ${SLOT.File.Windows_x86}/dk.exe"
-                ]
+          "attestation": {
+            "openbsd-signify": {
+              // sign(pubkey,sha256({build:[...]}))
+              "signature": "blahblah"
             },
-            "outputs": {
-                "files": [
-                    {
-                        "slots": [
-                            "File.Darwin_arm64"
-                        ],
-                        "paths": [
-                            "dk"
-                        ]
-                    },
-                    {
-                        "slots": [
-                            "File.Darwin_x86_64"
-                        ],
-                        "paths": [
-                            "dk"
-                        ]
-                    },
-                    {
-                        "slots": [
-                            "File.Linux_x86_64"
-                        ],
-                        "paths": [
-                            "dk"
-                        ]
-                    },
-                    {
-                        "slots": [
-                            "File.Linux_x86"
-                        ],
-                        "paths": [
-                            "dk"
-                        ]
-                    },
-                    {
-                        "slots": [
-                            "File.Windows_x86_64"
-                        ],
-                        "paths": [
-                            "dk.exe"
-                        ]
-                    },
-                    {
-                        "slots": [
-                            "File.Windows_x86"
-                        ],
-                        "paths": [
-                            "dk.exe"
-                        ]
-                    }
-                ]
+            // the asset files (asset_id + [traces.path, values.path]) must be attested
+            "slsa-v1-l3-github": { "attestation-doc": "..." }
+          },
+          "build": {
+            // All packages must belong to the distribution library `id` in the grandparent above. But the
+            // package versions can be anything, unrelated to the distribution `id` version.
+            "packages": ["DkExe_Std.Form@1.0.202501010000"],
+            // 1. Use CI like GitHub Actions to publish an asset
+            "asset_id": "DkExe_Std.Asset@2.4.202508011516-signed",
+            // Outside of CI, verify the asset and adds its canonical ID here (nit: need a tool to compute this)
+            // Then sign the entire builds:[] with your public key in `signature` above
+            "asset_id_canonical": "...",
+            "traces": [{ "tag": "oc414_wd64", "path": "oc414_wd64.traces" }],
+            "values": {
+              // A .zip file of some or all of the value store. Entries must be ./{value_id}
+              // The following values must be present:
+              // - the "v" values file for any values.json with a form or asset having a library identical to the distribution library `id`
+              // - the "w" parsed values ast for any values.json with a form or asset having a library identical to the distribution library `id`
+              // - the "o" object file for any object having a library identical to the distribution library `id`
+              // The following values will be ignored if present:
+              // - the "c" constants
+              // A unoptimal implementation can simply zip up the value store directory, but done frequently
+              // that leads to wasted bandwidth, storage and lengthier builds.
+              // An optimal implementation only includes the necessary values.
+              "path": "valuestore.zip"
             }
+          }
         }
-    ],
-    "assets": [
-        {
-            "id": "DkExe_Std.Asset@2.4.202508011516-signed",
-            "listing": {
-                "origins": [
-                    {
-                        "name": "github-release",
-                        "mirrors": [
-                            "https://github.com/diskuv/dk/releases/download/2.4.202508011516-signed"
-                        ]
-                    }
-                ]
-            },
-            "files": [
-                {
-                    "origin": "github-release",
-                    "path": "SHA256.sig",
-                    "size": 151,
-                    "checksum": {
-                        "sha256": "0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"
-                    }
-                },
-                {
-                    "origin": "github-release",
-                    "path": "SHA256",
-                    "size": 559,
-                    "checksum": {
-                        "sha256": "4bd73809eda4fb2bf7459d2e58d202282627bac816f59a848fc24b5ad6a7159e"
-                    }
-                },
-                {
-                    "origin": "github-release",
-                    "path": "dk-darwin_arm64",
-                    "size": 8810960,
-                    "checksum": {
-                        "sha256": "aedc1831f3dc4af8c3fd9eefcf4fd2edf9b0f47e3534e382e20368ff15857393"
-                    }
-                },
-                {
-                    "origin": "github-release",
-                    "path": "dk-darwin_x86_64",
-                    "size": 9056048,
-                    "checksum": {
-                        "sha256": "f6e8d64c16757a7ceb9c16f3d65d4a8a1464cf33182966d1e8a135fcfd104449"
-                    }
-                },
-                {
-                    "origin": "github-release",
-                    "path": "dk-linux_x86",
-                    "size": 17966992,
-                    "checksum": {
-                        "sha256": "c6a46d60ab4c567ef3c2d9c0287a42e098a1776d725f3659555c2ebe3e0e73b7"
-                    }
-                },
-                {
-                    "origin": "github-release",
-                    "path": "dk-linux_x86_64",
-                    "size": 19399768,
-                    "checksum": {
-                        "sha256": "b7f75cc9993c3e024a41777eff32f79a6aee687e39ee2878dcdf4a1dfec0141b"
-                    }
-                },
-                {
-                    "origin": "github-release",
-                    "path": "dk-windows_x86.exe",
-                    "size": 7853568,
-                    "checksum": {
-                        "sha256": "4719f427122c9696a286c0aefa17c5ab284e0856e149f01ad75d676f2a0c8cc8"
-                    }
-                },
-                {
-                    "origin": "github-release",
-                    "path": "dk-windows_x86_64.exe",
-                    "size": 8732160,
-                    "checksum": {
-                        "sha256": "68514ecd6d4ba6508acab15745473f2a00a51e09a78e1d72fa284d68704093d7"
-                    }
-                }
+      ]
+    }
+  ],
+  "forms": [
+    {
+      "id": "DkExe_Std.Form@1.0.202501010000",
+      "precommands": {
+        "private": [
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_arm64 -f ${SLOT.File.Darwin_arm64}/dk",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_x86_64 -f ${SLOT.File.Darwin_x86_64}/dk",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86_64 -f ${SLOT.File.Linux_x86_64}/dk",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86 -f ${SLOT.File.Linux_x86}/dk",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86_64.exe -f ${SLOT.File.Windows_x86_64}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86.exe -f ${SLOT.File.Windows_x86}/dk.exe"
+        ]
+      },
+      "outputs": {
+        "files": [
+          {
+            "slots": ["File.Darwin_arm64"],
+            "paths": ["dk"]
+          },
+          {
+            "slots": ["File.Darwin_x86_64"],
+            "paths": ["dk"]
+          },
+          {
+            "slots": ["File.Linux_x86_64"],
+            "paths": ["dk"]
+          },
+          {
+            "slots": ["File.Linux_x86"],
+            "paths": ["dk"]
+          },
+          {
+            "slots": ["File.Windows_x86_64"],
+            "paths": ["dk.exe"]
+          },
+          {
+            "slots": ["File.Windows_x86"],
+            "paths": ["dk.exe"]
+          }
+        ]
+      }
+    }
+  ],
+  "assets": [
+    {
+      "id": "DkExe_Std.Asset@2.4.202508011516-signed",
+      "listing": {
+        "origins": [
+          {
+            "name": "github-release",
+            "mirrors": [
+              "https://github.com/diskuv/dk/releases/download/2.4.202508011516-signed"
             ]
+          }
+        ]
+      },
+      "files": [
+        {
+          "origin": "github-release",
+          "path": "SHA256.sig",
+          "size": 151,
+          "checksum": {
+            "sha256": "0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "SHA256",
+          "size": 559,
+          "checksum": {
+            "sha256": "4bd73809eda4fb2bf7459d2e58d202282627bac816f59a848fc24b5ad6a7159e"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-darwin_arm64",
+          "size": 8810960,
+          "checksum": {
+            "sha256": "aedc1831f3dc4af8c3fd9eefcf4fd2edf9b0f47e3534e382e20368ff15857393"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-darwin_x86_64",
+          "size": 9056048,
+          "checksum": {
+            "sha256": "f6e8d64c16757a7ceb9c16f3d65d4a8a1464cf33182966d1e8a135fcfd104449"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-linux_x86",
+          "size": 17966992,
+          "checksum": {
+            "sha256": "c6a46d60ab4c567ef3c2d9c0287a42e098a1776d725f3659555c2ebe3e0e73b7"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-linux_x86_64",
+          "size": 19399768,
+          "checksum": {
+            "sha256": "b7f75cc9993c3e024a41777eff32f79a6aee687e39ee2878dcdf4a1dfec0141b"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-windows_x86.exe",
+          "size": 7853568,
+          "checksum": {
+            "sha256": "4719f427122c9696a286c0aefa17c5ab284e0856e149f01ad75d676f2a0c8cc8"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-windows_x86_64.exe",
+          "size": 8732160,
+          "checksum": {
+            "sha256": "68514ecd6d4ba6508acab15745473f2a00a51e09a78e1d72fa284d68704093d7"
+          }
         }
-    ]
+      ]
+    }
+  ]
 }
