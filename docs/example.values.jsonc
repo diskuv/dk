@@ -1,30 +1,3 @@
-/* 
-
-Getting the latest version of dk
----------------------------------
-
-The object DkExe_Std.Form will build (ie. fetch) the
-"private" and "public" asset files listed below. Running the
-following command with `mlfront-shell` or within your own "precommands":
-
-  get-object DkExe_Std.Form@1.0.202501010000 -s File.Darwin_arm64 -d dir-darwin_arm64
-
-will make the "dk-darwin_arm64" executable available to you as the file
-"dk-darwin_arm64".
-
-Getting a historical version of dk
----------------------------------
-
-All historical versions are/will be available as assets in this file as
-well. Running the following command with `mlfront-shell` or within your
-own "precommands":
-
-  get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_arm64 -f dk-darwin_arm64
-
-will make the "dk-darwin_arm64" executable from version
-`2.4.202508011516-signed` available to you as the file "dk-darwin_arm64".
-
-*/
 {
   "$schema": "../etc/jsonschema/mlfront-values.json",
   "schema_version": {
@@ -34,14 +7,10 @@ will make the "dk-darwin_arm64" executable from version
   "distributions": [
     {
       "id": "DkExe_Std@1.0.0",
-      // If a user accepts a pubkey (or it is included in the -I path), then _the_ accompanying
-      // continuation is accepted (once, and never overwritten) ... and _the_ accompanying
-      // build is accepted ... and _all_ builds with packages that share the major + minor parts
-      // of the accompaying build are accepted.
       "producer": {
-        "openbsd_signify": { "pubkey": "..." },
+        "openbsd_signify": { "public_key": "..." },
         // https://github.blog/enterprise-software/devsecops/enhance-build-security-and-reach-slsa-level-3-with-github-artifact-attestations/
-        "slsa_v1_l3_github": {
+        "github_slsa_v1_l3": {
           "signer-workflow": "<owner>/<repository>/.github/workflows/sign-artifact.yml"
         }
         // https://docs.gitlab.com/ci/runners/configure_runners/#artifact-provenance-metadata
@@ -51,72 +20,61 @@ will make the "dk-darwin_arm64" executable from version
         // would be: "slsa-v1-l1-gitlab": {}
       },
       // optional. If specified, and the license text has not been accepted, it will be asked with appropriate levels of caution
-      // based on the blueoak level at https://blueoakcouncil.org/list. Gold and Silver are not asked at all.
+      // based on the blueoak level at https://blueoakcouncil.org/list. Model, Gold and Silver are not asked at all.
       // just because a producer has been accepted, it does not mean the license will be blindly accepted. producers and
       // sha256(license.text) are independent.
-      "license": { "text": "...", "spdx_id": "Apache-2.0" },
+      "license": { "plaintext": "...", "spdx": "Apache-2.0" },
       // Optional so that only the initial public keys needs to be registered. Same way that openbsd public keys are prepublished.
       "continuations": {
         "attestation": {
+          // only signify has the continuations concept so far
           "openbsd_signify": {
-            // sign(pubkey, sha256({continuations:{...}}))
-            "signature": "blahblah"
-          },
-          // attestation must include path "continuations" that is canonical JSON of `continuations` below
-          "slsa_v1_l3_github": { "attestation-doc": "..." }
-          // (tbd) https://gitlab.com/groups/gitlab-org/-/epics/15858
-          // would be: "slsa-v1-l1-gitlab": { "attestation-doc": "..." }
+            // sign(pubkey, sha256({continuations_to_sign:{...}}))
+            "signature": "untrusted comment: signature from signify secret key\nRWTAeKJJ1MTF3UpxzBCu6NaM6HPJNTj5CZ+M5XNJKNeEHBLQSsstzHGbSo8rPYNgw3Z98pN7WKiIwBIyRrKuIdKBRA6qlaci6wI="
+          }
         },
-        "continuations": {
+        "continuations_to_sign": {
           // optional next minor version (ie. 1.1.0, or 1.2.0 if you use even numbers, etc.)
-          "1.1.0": "...producer...",
+          "1.1": { "openbsd_signify": { "public_key": "..." } },
           // optional next major version (ie. 2.0.0)
-          "2.0.0": "...producer..."
+          "2.0": { "openbsd_signify": { "public_key": "..." } }
         }
       },
-      "builds": [
-        {
-          "attestation": {
-            "openbsd_signify": {
-              // sign(pubkey,sha256({producer_accepts:[],build:[...]}))
-              "signature": "blahblah"
-            },
-            // the asset files (asset_id + [traces.path, values.path]) must be attested
-            "slsa_v1_l3_github": { "attestation-doc": "..." }
+      "build": {
+        "attestation": {
+          "openbsd_signify": {
+            // sign(pubkey,sha256({build_to_sign:[...]}))
+            "signature": "untrusted comment: signature from signify secret key\nRWTAeKJJ1MTF3UpxzBCu6NaM6HPJNTj5CZ+M5XNJKNeEHBLQSsstzHGbSo8rPYNgw3Z98pN7WKiIwBIyRrKuIdKBRA6qlaci6wI="
           },
-          // `producer_accepts` are all non-Gold/Silver licenses that the producer has accepted, since most non-permissive licensees
+          // the asset files (asset_id + [traces.path, values.path]) must be attested
+          "github_slsa_v1_l3": {
+            "attestation-doc": {
+              /* ... */
+            }
+          }
+        },
+        "build_to_sign": {
+          // `producer_accepts` are all non-Model/Gold/Silver licenses that the producer has accepted, since most non-permissive licensees
           // have limits on redistribution and many Bronze/Lead licenses require limits on promotion or require attribution.
           // GNU licenses require source code redistribution, etc. So if a downstream package uses a
           // license that the producer has not accepted, the build will be rejected. eventually we may distinguish between
           // "private" and runtime ("public") dependencies, but for now the reference implementation considers all the
           // direct dependencies (the precommands) of all the build.packages.
           "producer_accepts": ["sha256(text)", "spdx-id"],
-          "build": {
-            // All packages must belong to the distribution library `id` in the grandparent above. But the
-            // package versions can be anything, unrelated to the distribution `id` version.
-            "packages": ["DkExe_Std.Form@1.0.202501010000"],
-            // 1. Use CI like GitHub Actions to publish an asset
-            "asset_id": "DkExe_Std.Asset@2.4.202508011516-signed",
-            // Outside of CI, verify the asset and adds its canonical ID here (nit: need a tool to compute this)
-            // Then sign the entire builds:[] with your public key in `signature` above
-            "asset_id_canonical": "...",
-            "traces": [{ "tag": "oc414_wd64", "path": "oc414_wd64.traces" }],
-            "values": {
-              // A .zip file of some or all of the value store. Entries must be ./{value_id}
-              // The following values must be present:
-              // - the "v" values file for any values.json with a form or asset having a library identical to the distribution library `id`
-              // - the "w" parsed values ast for any values.json with a form or asset having a library identical to the distribution library `id`
-              // - the "o" object file for any object having a library identical to the distribution library `id`
-              // The following values will be ignored if present:
-              // - the "c" constants
-              // A unoptimal implementation can simply zip up the value store directory, but done frequently
-              // that leads to wasted bandwidth, storage and lengthier builds.
-              // An optimal implementation only includes the necessary values.
-              "path": "valuestore.zip"
-            }
+          // All packages must belong to the distribution library `id` in the grandparent above. But the
+          // package versions can be anything, unrelated to the distribution `id` version.
+          "packages": ["DkExe_Std.Form@1.0.202501010000"],
+          // 1. Use CI like GitHub Actions to publish an asset
+          "asset_id": "DkExe_Std.Asset@2.4.202508011516-signed",
+          // Outside of CI, verify the asset and adds its canonical ID here (nit: need a tool to compute this)
+          // Then sign the entire builds:[] with your public key in `signature` above
+          "asset_id_canonical": "...",
+          "traces": [{ "tag": "oc414_wd64", "path": "oc414_wd64.traces" }],
+          "values": {
+            "path": "valuestore.zip"
           }
         }
-      ]
+      }
     }
   ],
   "forms": [
@@ -147,6 +105,7 @@ will make the "dk-darwin_arm64" executable from version
           //    long-flag: --name (iff JSON value is true; error otherwise) (for GNU)
           //    short-flag: -name (iff JSON value is true; error otherwise) (for POSIX or PowerShell)
           //    dos-flag: /name (iff JSON value is true; error otherwise) (for Windows cmd.exe)
+          //    arg: stringified_json_value (positional argument; use `group` to manipulate position)
           // `nargs` is allowed for "long-opt" and "short-opt" and "dos-opt":
           //    "1" (default): if JSON value is an array, repeat the option for each element
           //    "+": if JSON value is an array, the option is given once with all elements

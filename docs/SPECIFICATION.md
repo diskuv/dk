@@ -49,6 +49,11 @@
       - [Object ID with Build Metadata](#object-id-with-build-metadata)
     - [JSON Files](#json-files)
     - [JSON Canonicalization](#json-canonicalization)
+  - [Distributions](#distributions)
+    - [Distributed Value Stores](#distributed-value-stores)
+    - [OpenBSD signify keys](#openbsd-signify-keys)
+    - [GitHub SLSA Level 2](#github-slsa-level-2)
+    - [GitHub SLSA Level 3](#github-slsa-level-3)
   - [Graph](#graph)
     - [Nodes](#nodes)
       - [V256 - SHA256 of Values File](#v256---sha256-of-values-file)
@@ -897,6 +902,154 @@ is canonicalized to:
 ```json
 {"assets":[{"files":[{"checksum":{"sha256":"4bd73809eda4fb2bf7459d2e58d202282627bac816f59a848fc24b5ad6a7159e"},"path":"SHA256"},{"checksum":{"sha256":"0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"},"path":"SHA256.sig"}],"id":"DkDistribution_Std.Asset@2.4.202508011516-signed"}],"forms":[{"function":{"args":["arg1"],"envmods":["envmod1"]},"id":"FooBar_Baz@0.1.0","outputs":{"files":[{"paths":["outpath1"],"slots":["output1"]}]},"precommands":{"private":["private1"],"public":["public1"]}}],"schema_version":{"major":1,"minor":0}}
 ```
+
+## Distributions
+
+A **distribution** is a build that generates [values](#values). In the build system, metadata about distributions can be collected in the values.jsonc files along with *attestations*:
+
+- An *attestation* is a cryptographically verifiable statement (ex. "the build produced asset A at time T") that is signed by a human (ex. you) or a machine (ex. GitHub Actions).
+
+To increase supply chain security guarantees, the build system will reject assets and objects that are produced by humans or machines without attestations that you have explicitly trusted.
+
+The following sources of attestation are recognized by the reference implementation:
+
+- A human can sign a build by using an [OpenBSD signify key](https://www.openbsd.org/papers/bsdcan-signify.html).
+- GitHub Actions can sign a build using one of two [SLSA security levels](https://slsa.dev/spec/v1.0/levels):
+  - Level 2: <https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#generating-artifact-attestations-for-your-builds>
+  - Level 3: <https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/increase-security-rating>
+
+Unfortunately, GitLab does not yet provide a [minimal level of attestation](https://gitlab.com/groups/gitlab-org/-/epics/15859#note_2540189548).
+
+The build system maintains a *trust store*, with the dk OpenBSD signify key for the `CommonsBase_Std` packages as the only trusted entity by default.
+
+### Distributed Value Stores
+
+A distribution includes a `.zip` file of some or all of the value store. Entries in the zipfile must be `./{value_id}`;
+for example, `./vnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq`.
+
+The following values must be present:
+
+- the "v" values file for any values.json with a form or asset having a library identical to the distribution library `id`
+- the "w" parsed values ast for any values.json with a form or asset having a library identical to the distribution library `id`
+- the "o" object file for any object having a library identical to the distribution library `id`
+
+The following values will be ignored if present:
+
+- the "c" constants
+
+A unoptimal implementation can simply zip up the value store directory, but done frequently that leads to wasted bandwidth, storage and lengthier builds.
+
+An optimal implementation only includes the necessary values.
+
+### OpenBSD signify keys
+
+[Securing OpenBSD From Us To You]: https://www.openbsd.org/papers/bsdcan-signify.html
+
+The security policy is described in [Securing OpenBSD From Us To You].
+Signify builds keys are automatically created specific to the user (you) on a machine. The private keys should not be shared except among a small set of trusted co-signers (ex. your manager and a peer).
+
+Any OpenBSD signify key and any GitHub repository encountered by the build system is automatically denied.
+However, you are prompted if you want to accept or deny the key or repository, with the default as deny.
+
+When accepting an OpenBSD signify public key embedded in a values.json build file, the
+
+- accompanying continuations that were signed with the private key are accepted. These continuations are public keys for the next version, and imported once and never overwritten.
+- accompanying builds that were signed with the private key are accepted
+- *all* builds signed with the private key that with packages that share the major + minor parts of the accompanying build are accepted
+
+Once a major and minor component of a package has been signed, no lower versioned distribution key can claim:
+
+- that major and minor component
+- any later versions to that major and minor component
+
+That may be difficult to understand without an example. We'll use the Key Rottaion example from [Securing OpenBSD From Us To You], where OpenBSD is about to release OpenBSD version 5.6. They:
+
+- have an existing public/private key pair for version 5.6
+- have generated public/private key pairs for version 5.7 *before* 5.6 is released
+- have generated public/private key pairs for version 5.8 *before* 5.6 is released
+
+In the build system the version 5.6 would be a distribution; let's say `OpenBSD_Std@5.6.0`:
+
+```json
+{
+  "distributions": {
+    "id": "OpenBSD_Std@5.6.0",
+    "producer": {
+      "openbsd_signify": {
+        // key from https://ftp.eu.openbsd.org/pub/OpenBSD/signify/openbsd-56-base.pub
+        "public_key": "untrusted comment: openbsd 5.6 base public key\nRWR0EANmo9nqhpPbPUZDIBcRtrVcRwQxZ8UKGWY8Ui4RHi229KFL84wV"
+      }
+    },
+    "continuations": {
+      "attestation": {
+        "openbsd_signify": {
+          // this is a (fake) signature of SHA256(plaintext), where
+          // plaintext is `{"continuations":{"5.7":"...","5.8":"..."}}` (see below)
+          "signature": "untrusted comment: signature from signify secret key\nRWTAeKJJ1MTF3UpxzBCu6NaM6HPJNTj5CZ+M5XNJKNeEHBLQSsstzHGbSo8rPYNgw3Z98pN7WKiIwBIyRrKuIdKBRA6qlaci6wI="
+        }
+      },
+      "continuations": {
+        // https://ftp.eu.openbsd.org/pub/OpenBSD/signify/openbsd-57-base.pub
+        "5.7": "untrusted comment: openbsd 5.7 base public key\nRWSvUZXnw9gUb70PdeSNnpSmodCyIPJEGN1wWr+6Time1eP7KiWJ5eAM",
+        // https://ftp.eu.openbsd.org/pub/OpenBSD/signify/openbsd-58-base.pub
+        "5.8": "untrusted comment: openbsd 5.8 base public key\nRWQNNZXtC/MqP3Eiu+6FBz/qrxiWQwDhd+9Yljzp62UP4KzFmmvzVk60"
+      }
+    }
+  }
+}
+```
+
+In the same distribution in values.jsonc we also must have at least one build:
+
+```json
+{
+  "distributions": {
+    "id": "OpenBSD_Std@5.6.0",
+    "producer": { /* ... */ },
+    "continuations": { /* ... */ },
+    "build": {
+      "attestation": {
+        "openbsd_signify": "untrusted comment: signed by key c078a249d4c4c5dd\nRWTAeKJJ1MTF3UpxzBCu6NaM6HPJNTj5CZ+M5XNJKNeEHBLQSsstzHGbSo8rPYNgw3Z98pN7WKiIwBIyRrKuIdKBRA6qlaci6wI="
+      },
+      "build": {
+        "packages": ["DkExe_Std.Form@1.0.202501010000"],
+        /* other build fields described in the mlfront-values.json schema */
+      }
+    }
+  }
+}
+```
+
+The `OpenBSD_Std@5.6.0` public key has signed for `DkExe_Std.Form@1.0.202501010000`, but can also sign
+for any `DkExe_Std.Form@1.0.*` (and no others!) since those all share the major and minor number of the `DkExe_Std.Form` in values.jsonc.
+
+The `OpenBSD_Std@5.7.0` public key can sign for either `DkExe_Std.Form@1.0.*` or a later version (ex. `DkExe_Std.Form@1.1.*`), but
+cannot sign for both. That is, once a `OpenBSD_Std@5.7.0` public key is seen to accompany `DkExe_Std.Form@1.1.*`, the association `OpenBSD_Std@5.7.0 may-sign DkExe_Std.Form@1.1.*` is stored in the trust store, and it can no longer
+sign any other major + minor version.
+
+Most important, the `OpenBSD_Std@5.7.0` public key **cannot** sign for an earlier version (ex. `DkExe_Std.Form@0.7.*`) than `OpenBSD_Std@5.6.0`.
+
+The net effect is a tendency of the trust store to increase versions over time, so that these OpenBSD signify keys have an implicit rotation policy as these versions increase. You choose how many keys you want to keep alive at any time (the current key plus the number of keys in your `continuations`), and do a rotation by doing a new build using a key from one of your continuations.
+
+So, let's say you keep 2 continuations alive (plus the current key) like OpenBSD does. When you start using a key from one of your continuations (ex. `OpenBSD_Std@5.7.0`), you should will keep `N-1 = 1` keys in rotation (ex. "continuations" should contain `OpenBSD_Std@5.8.0` still) **and** create one new key (ex. "continuations" should have a new `OpenBSD_Std@5.9.0` key).
+
+### GitHub SLSA Level 2
+
+When accepting a GitHub repository (SLSA Level 2), the:
+
+- accompanying builds attested by GitHub are accepted
+- *all* builds attested by GitHub are accepted
+
+The build system will download the GitHub CLI (using the default trusted `CommonsBase_Std` library) to do verification of the builds.
+
+### GitHub SLSA Level 3
+
+When accepting a known, vetted GitHub Actions script (SLSA Level 3), the:
+
+- accompanying builds attested by GitHub are accepted
+- *all* builds produced by the GitHub Actions scripts that are attested by GitHub are accepted
+
+The build system will download the GitHub CLI (using the default trusted `CommonsBase_Std` library) to do verification of the builds.
 
 ## Graph
 

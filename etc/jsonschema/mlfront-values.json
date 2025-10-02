@@ -1,7 +1,75 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$schema": "https://json-schema.org/draft-07/schema",
     "id": "https://json.schemastore.org/mlfront-values.json",
     "title": "JSON schema for values.json, values.json, *.values.json and *.values.jsonc build files",
+    "definitions": {
+        "producer": {
+            "type": "object",
+            "description": "The human or machine signer of a build that produces values. The signer provides a form of \"attestation\": a cryptographically verifiable statement (ex. \"the build produced asset A and object O at time T\") that the producer signs.",
+            "additionalProperties": false,
+            "properties": {
+                "openbsd_signify": {
+                    "description": "The signify public key used to verify the distribution's signature.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "public_key": {
+                            "description": "The signify public key, in base64 format, including the comment line.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "public_key"
+                    ]
+                },
+                "github_slsa_v1_l2": {
+                    "description": "GitHub's SLSA v1 Level 2 provider that can attest there is no tampering of values after GitHub Actions finishes. Follow the guide at https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#generating-artifact-attestations-for-your-builds",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "repository": {
+                            "description": "The GitHub repository that produced the values. Ex. <owner>/<repository>",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "repository"
+                    ]
+                },
+                "github_slsa_v1_l3": {
+                    "description": "GitHub's SLSA v1 Level 3 provider that attests there is no tampering of values during a build produced by a known, vetted GitHub Actions script. Follow the guide at https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/increase-security-rating",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "signer-workflow": {
+                            "description": "The GitHub workflow path that produced the values. Ex. <owner>/<repository>/.github/workflows/sign-artifact.yml",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "signer-workflow"
+                    ]
+                }
+            },
+            "anyOf": [
+                {
+                    "required": [
+                        "openbsd_signify"
+                    ]
+                },
+                {
+                    "required": [
+                        "github_slsa_v1_l2"
+                    ]
+                },
+                {
+                    "required": [
+                        "github_slsa_v1_l3"
+                    ]
+                }
+            ]
+        }
+    },
     "type": "object",
     "additionalProperties": false,
     "properties": {
@@ -32,6 +100,251 @@
                 "major",
                 "minor"
             ]
+        },
+        "distributions": {
+            "description": "The distributions defined in this values document",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "id": {
+                        "description": "The identifier for the distribution, in the format 'LIBRARY@VERSION'. The identifier must be unique across the value store. The LIBRARY is the part of a package up to, but not including, the first dot (`.`). The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system. The distribution may be called from a MlFront script using the function call '<PACKAGE.NAME>.distribution ()'.",
+                        "type": "string"
+                    },
+                    "producer": {
+                        "$ref": "#/definitions/producer"
+                    },
+                    "license": {
+                        "type": "object",
+                        "description": "The license for the distribution. Model, Gold and Silver permissive licenses from the Blue Oak list (https://blueoakcouncil.org/list) do not prompt for license agreement. Depending on the build system implementation, all other licenses can require acceptance from the user.",
+                        "additionalProperties": false,
+                        "properties": {
+                            "plaintext": {
+                                "description": "The plaintext of the license for the distribution.",
+                                "type": "string"
+                            },
+                            "markdown": {
+                                "description": "The markdown text of the license for the distribution.",
+                                "type": "string"
+                            },
+                            "spdx": {
+                                "description": "The SPDX identifier of the license for the distribution from https://spdx.org/licenses/.",
+                                "type": "string"
+                            }
+                        },
+                        "anyOf": [
+                            {
+                                "required": [
+                                    "plaintext"
+                                ]
+                            },
+                            {
+                                "required": [
+                                    "markdown"
+                                ]
+                            },
+                            {
+                                "required": [
+                                    "spdx"
+                                ]
+                            }
+                        ]
+                    },
+                    "continuations": {
+                        "description": "The accepted future continuations of the build keys. A continuation is a new distribution that is a successor to this distribution. Continuations are optional, but if no continuations are specified, the distribution may need to be re-registered with new build keys.",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "attestation": {
+                                "description": "The attestation document that authorizes the next versions of the build keys. The attestation document is signed by the producer of the continuation and includes the SHA-256 hash of this distribution's ID and the SHA-256 hash of the continuation's ID.",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "openbsd_signify": {
+                                        "description": "The OpenBSD signify attestation (a signature) that proves the continued build keys are authorized.",
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "signature": {
+                                                "description": "The signature of the attestation document, in base64 format, including the comment line. The attestation document is the SHA-256 hex-encoded hash of the canonical (ie. whitespace removed) JSON document `{\"continuations_to_sign\":{...}}`.",
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "openbsd_signify"
+                                ]
+                            },
+                            "continuations_to_sign": {
+                                "description": "The next versions of the build keys that are authorized by the attestation. The property names are the next minor version (ie. 1.1) and/or the next major version (ie. 2.0). The property value is the producer. Currently the producer must be a `{\"openbsd_signify\":{\"public_key\":\"...\"}}` object.",
+                                "type": "object",
+                                "additionalProperties": {
+                                    "$ref": "#/definitions/producer"
+                                },
+                                "properties": {}
+                            }
+                        },
+                        "required": [
+                            "attestation"
+                        ]
+                    },
+                    "build": {
+                        "type": "object",
+                        "description": "A description of the build artifacts.",
+                        "additionalProperties": false,
+                        "properties": {
+                            "attestation": {
+                                "description": "The attestation document that proves the build was performed by the producer. The attestation document is signed by the producer and includes the SHA-256 hash of this distribution's ID and the SHA-256 hashes of all the asset IDs and object IDs in this values document.",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "openbsd_signify": {
+                                        "description": "The OpenBSD signify attestation (a signature) that proves the build was performed by the producer.",
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "signature": {
+                                                "description": "The signature of the attestation document, in base64 format, including the comment line. The attestation document is the SHA-256 hex-encoded hash of the canonical (ie. whitespace removed) JSON document `{\"build_to_sign\":{...}}`.",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "signature"
+                                        ]
+                                    },
+                                    "github_slsa_v1_l2": {
+                                        "description": "GitHub's SLSA v1 Level 2 provider that can attest there is no tampering of values after GitHub Actions finishes. Follow the guide at https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#generating-artifact-attestations-for-your-builds",
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "attestation-doc": {
+                                                "description": "The SLSA v1 Level 2 attestation document as a JSON value, as generated by GitHub Actions.",
+                                                "type": "object"
+                                            }
+                                        },
+                                        "required": [
+                                            "attestation-doc"
+                                        ]
+                                    },
+                                    "github_slsa_v1_l3": {
+                                        "description": "GitHub's SLSA v1 Level 3 provider that attests there is no tampering of values during a build produced by a known, vetted GitHub Actions script. Follow the guide at https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/increase-security-rating",
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "attestation-doc": {
+                                                "description": "The SLSA v1 Level 3 attestation document as a JSON value, as generated by GitHub Actions.",
+                                                "type": "object"
+                                            }
+                                        },
+                                        "required": [
+                                            "attestation-doc"
+                                        ]
+                                    }
+                                },
+                                "anyOf": [
+                                    {
+                                        "required": [
+                                            "openbsd_signify"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "github_slsa_v1_l2"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "github_slsa_v1_l3"
+                                        ]
+                                    }
+                                ]
+                            },
+                            "build_to_sign": {
+                                "description": "The packages that are included in the distribution. All packages must belong to the distribution library `id`.",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "asset_id": {
+                                        "type": "string",
+                                        "description": "The identifier for the asset containing the trace and value stores, in the format 'PACKAGE.NAME@VERSION'. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system."
+                                    },
+                                    "packages": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "description": "The identifier for the package, in the format 'PACKAGE.NAME@VERSION'. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system."
+                                        }
+                                    },
+                                    "producer_accepts": {
+                                        "type": "array",
+                                        "description": "The list of licenses the producer has accepted. The list must at least include the direct dependencies of all `packages` (ie. the precommands for each package). Model, Gold and Silver permissive licenses from the Blue Oak list https://blueoakcouncil.org/list are implicitly accepted and should not be listed. Most other licenses, open-source or not, have limits on the producer's redistribution, promotion, or attribution. So if a package uses a license that the producer has not accepted (attribution in documentation, a link to source code, whatever), the build will be rejected.",
+                                        "items": {
+                                            "type": "string",
+                                            "description": "The SPDX identifier of the license from https://spdx.org/licenses/, or the lowercase hex-encoded SHA-256 of the license text."
+                                        }
+                                    },
+                                    "asset_id_canonical": {
+                                        "type": "string",
+                                        "description": "The canonical identifier for the asset, a lowercase hex-encoded SHA-256 of the critical fields of an asset JSON document."
+                                    },
+                                    "traces": {
+                                        "type": "array",
+                                        "description": "A snapshot of the tracestore(s) that were created/updated after the distributions' builds completed.",
+                                        "items": {
+                                            "type": "object",
+                                            "description": "The location in the asset of a tracestore.",
+                                            "properties": {
+                                                "tag": {
+                                                    "type": "string",
+                                                    "description": "The compatibility tag of the tracestore, like `oc414_wd64`."
+                                                },
+                                                "path": {
+                                                    "type": "string",
+                                                    "description": "The path within the asset to the tracestore."
+                                                }
+                                            },
+                                            "additionalProperties": false,
+                                            "required": [
+                                                "tag",
+                                                "path"
+                                            ]
+                                        }
+                                    },
+                                    "values": {
+                                        "type": "object",
+                                        "description": "A zip snapshot of the valuestore that was populated after the distributions' builds completed. Entries in the zipfile must be `./{value_id}` like `./vnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq`.",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "path": {
+                                                "type": "string",
+                                                "description": "The path within the asset to the zipped value store."
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "producer_accepts",
+                                    "asset_id",
+                                    "asset_id_canonical",
+                                    "traces",
+                                    "packages"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "attestation",
+                            "build_to_sign"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "producer",
+                    "build"
+                ]
+            }
         },
         "forms": {
             "description": "The forms defined in this values document",
