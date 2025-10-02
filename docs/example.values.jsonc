@@ -39,26 +39,31 @@ will make the "dk-darwin_arm64" executable from version
       // build is accepted ... and _all_ builds with packages that share the major + minor parts
       // of the accompaying build are accepted.
       "producer": {
-        "openbsd-signify": { "pubkey": "..." },
+        "openbsd_signify": { "pubkey": "..." },
         // https://github.blog/enterprise-software/devsecops/enhance-build-security-and-reach-slsa-level-3-with-github-artifact-attestations/
-        "slsa-v1-l3-github": { "signer-workflow": "<owner>/<repository>/.github/workflows/sign-artifact.yml" }
+        "slsa_v1_l3_github": {
+          "signer-workflow": "<owner>/<repository>/.github/workflows/sign-artifact.yml"
+        }
         // https://docs.gitlab.com/ci/runners/configure_runners/#artifact-provenance-metadata
         // only Level 1 since GitLab has no in-toto attestations. That means no verification (kinda useless!)
         // and even query with https://docs.github.com/en/rest/orgs/artifact-metadata?apiVersion=2022-11-28#list-artifact-storage-records
         // is still Level 1. Confer: https://gitlab.com/groups/gitlab-org/-/epics/15859#note_2540189548 and its parent
         // would be: "slsa-v1-l1-gitlab": {}
       },
-      // optional. If specified, and the license text has not been accepted, it will be asked.
-      "license": { "text": "..." },
+      // optional. If specified, and the license text has not been accepted, it will be asked with appropriate levels of caution
+      // based on the blueoak level at https://blueoakcouncil.org/list. Gold and Silver are not asked at all.
+      // just because a producer has been accepted, it does not mean the license will be blindly accepted. producers and
+      // sha256(license.text) are independent.
+      "license": { "text": "...", "spdx_id": "Apache-2.0" },
       // Optional so that only the initial public keys needs to be registered. Same way that openbsd public keys are prepublished.
       "continuations": {
         "attestation": {
-          "openbsd-signify": {
+          "openbsd_signify": {
             // sign(pubkey, sha256({continuations:{...}}))
             "signature": "blahblah"
           },
           // attestation must include path "continuations" that is canonical JSON of `continuations` below
-          "slsa-v1-l3-github": { "attestation-doc": "..." },
+          "slsa_v1_l3_github": { "attestation-doc": "..." }
           // (tbd) https://gitlab.com/groups/gitlab-org/-/epics/15858
           // would be: "slsa-v1-l1-gitlab": { "attestation-doc": "..." }
         },
@@ -72,13 +77,20 @@ will make the "dk-darwin_arm64" executable from version
       "builds": [
         {
           "attestation": {
-            "openbsd-signify": {
-              // sign(pubkey,sha256({build:[...]}))
+            "openbsd_signify": {
+              // sign(pubkey,sha256({producer_accepts:[],build:[...]}))
               "signature": "blahblah"
             },
             // the asset files (asset_id + [traces.path, values.path]) must be attested
-            "slsa-v1-l3-github": { "attestation-doc": "..." }
+            "slsa_v1_l3_github": { "attestation-doc": "..." }
           },
+          // `producer_accepts` are all non-Gold/Silver licenses that the producer has accepted, since most non-permissive licensees
+          // have limits on redistribution and many Bronze/Lead licenses require limits on promotion or require attribution.
+          // GNU licenses require source code redistribution, etc. So if a downstream package uses a
+          // license that the producer has not accepted, the build will be rejected. eventually we may distinguish between
+          // "private" and runtime ("public") dependencies, but for now the reference implementation considers all the
+          // direct dependencies (the precommands) of all the build.packages.
+          "producer_accepts": ["sha256(text)", "spdx-id"],
           "build": {
             // All packages must belong to the distribution library `id` in the grandparent above. But the
             // package versions can be anything, unrelated to the distribution `id` version.
@@ -110,6 +122,80 @@ will make the "dk-darwin_arm64" executable from version
   "forms": [
     {
       "id": "DkExe_Std.Form@1.0.202501010000",
+      // the parameters are supplied to the `function` or a precommand `get-object` as a JSON document.
+      //
+      // *types* the JSON document may have its type validated upstream of being given to the function;
+      // ie. a Pkl document can be validated against a Pkl schema, and then converted to a JSON document.
+      // that is done at the CST level so that a .values.jsonc does no type validation while
+      // a hypothetical .values.pkl might.
+      //
+      // *command line*. the `parameters` field below describe how to "splat" a JSON document into
+      // command line arguments.
+      //
+      // *get-object*. how to lift a command line into a JSON document? use the https://www.w3.org/TR/html-json-forms/ spec.
+      // so `get-object DkExe_Std.Form@1.0.202501010000 -s File.Darwin_arm64 -f dk.exe -- pet[species]=dog pet[name]=fido` would
+      // pass `{"pet":{"species":"dog","name":"fido"}}` to the form (which would be interpreted by the `parameters` field below).
+      //
+      // the "+field=jsonfile" syntax is an extension to the JSON forms spec that reads the JSON file `jsonfile` and sets
+      // the `field` to the JSON value from the file.
+      "parameters": {
+        "fields": {
+          // `type` can be:
+          //    long-opt: --name stringified_json_value (for GNU)
+          //    short-opt: -name stringified_json_value (for POSIX or PowerShell)
+          //    dos-opt: /name:stringified_json_value (for Windows cmd.exe)
+          //    long-flag: --name (iff JSON value is true; error otherwise) (for GNU)
+          //    short-flag: -name (iff JSON value is true; error otherwise) (for POSIX or PowerShell)
+          //    dos-flag: /name (iff JSON value is true; error otherwise) (for Windows cmd.exe)
+          // `nargs` is allowed for "long-opt" and "short-opt" and "dos-opt":
+          //    "1" (default): if JSON value is an array, repeat the option for each element
+          //    "+": if JSON value is an array, the option is given once with all elements
+          //         (ex. --name elem1 elem2 elem3) (for PowerShell)
+          // `name` is optional. If not specified, the field name is used as the option name.
+          // `doc` is optional documentation for the parameter.
+          // `group` is optional. If specified and between 0 and 9, it is the index into the `groups` array.
+          "arg1": {
+            "type": "long-opt",
+            "doc": "An example parameter",
+            "group": 0
+          }
+        },
+        // Sometimes command line options have to be separated with `--`, and sometimes a
+        // global option must come before a subcommand. the command line is constructed as
+        // follows:
+        // 1. parameters without any `group` are listed first
+        // 2. `groups[0]` are listed next (if any)
+        // 3. parameters with `group: 0` are listed next (if any)
+        // 4. `groups[1]` are listed next (if any)
+        // 5. parameters with `group: 1` are listed next (if any)
+        // ... and so on
+        "groups": [["--", "subcommand"]],
+        // optional. If specified, _all_ parameters above (but not the document argument below)
+        // will be written to a response file.
+        // (for MSVC cl.exe; https://learn.microsoft.com/en-us/cpp/build/reference/at-specify-a-compiler-response-file?view=msvc-170)
+        // the responsefile argument will be added to the command line as the last argument.
+        "responsefile": {
+          // must be relative subpath
+          // creates argument: `@my_msvc_cl_options.rsp`
+          "path": "my_msvc_cl_options.rsp",
+          // "windows" or "posix"; same as `clang --rsp-quoting`
+          "quoting": {
+            "default": "posix",
+            "windows": ["File.Windows_x86_64"]
+          },
+          // optional. If specified, the response file will only be created if
+          // the command line length exceeds this value. but all options that
+          // preceeded the limit will still be passed on the command line, so
+          // visual command line is simple in the common case.
+          "if_greater_than": 1024
+        },
+        // optional. If specified, the form will add the full JSON document to the command line.
+        "document": {
+          "type": "long-opt",
+          // ex. `--doc-file path-to-JSON-file`
+          "name": "doc-file"
+        }
+      },
       "precommands": {
         "private": [
           "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_arm64 -f ${SLOT.File.Darwin_arm64}/dk",
@@ -117,7 +203,14 @@ will make the "dk-darwin_arm64" executable from version
           "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86_64 -f ${SLOT.File.Linux_x86_64}/dk",
           "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86 -f ${SLOT.File.Linux_x86}/dk",
           "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86_64.exe -f ${SLOT.File.Windows_x86_64}/dk.exe",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86.exe -f ${SLOT.File.Windows_x86}/dk.exe"
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86.exe -f ${SLOT.File.Windows_x86}/dk.exe",
+          // This is an example where we've passed JSON down from the user into a precommand without loss of information
+          // and without exposing unnecessary data to the precommand.
+          // `get-object` expands any `+field=jsonfile` into the contents of the file. So when `get-object`
+          // creates the JSON document, it looks like:
+          //   {"arg1":"value1","arg2":...}
+          // where "..." is the toplevel JSON field of the input JSON document.
+          "get-object DkExe_Std.SubForm@1.0.202501010000 -s ${SLOT.File} -- arg1=value1 +arg2=${PARAMFILE.arg3}"
         ]
       },
       "outputs": {
