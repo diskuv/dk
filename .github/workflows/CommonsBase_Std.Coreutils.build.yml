@@ -11,7 +11,7 @@ jobs:
         runs-on: windows-2022
         steps:
             - name: Checkout # get dk0/mlfront-shell
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
               with: { repository: diskuv/dk, path: dk0, ref: V2_4 }
 
             - name: Cache dk data stores and build keys

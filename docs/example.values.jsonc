@@ -56,14 +56,14 @@
         "build_to_sign": {
           // `producer_accepts` are all non-Model/Gold/Silver licenses that the producer has accepted, since most non-permissive licensees
           // have limits on redistribution and many Bronze/Lead licenses require limits on promotion or require attribution.
-          // GNU licenses require source code redistribution, etc. So if a downstream package uses a
+          // GNU licenses require source code redistribution, etc. So if a downstream module uses a
           // license that the producer has not accepted, the build will be rejected. eventually we may distinguish between
           // "private" and runtime ("public") dependencies, but for now the reference implementation considers all the
-          // direct dependencies (the precommands) of all the build.packages.
+          // direct dependencies (the precommands) of all the build_to_sign.modules.
           "producer_accepts": ["sha256(text)", "spdx-id"],
-          // All packages must belong to the distribution library `id` in the grandparent above. But the
-          // package versions can be anything, unrelated to the distribution `id` version.
-          "packages": ["DkExe_Std.Form@1.0.202501010000"],
+          // All modules must belong to the distribution library `id` in the grandparent above. But the
+          // module versions can be anything, unrelated to the distribution `id` version.
+          "modules": ["DkExe_Std.Form@1.0.202501010000"],
           // 1. Use CI like GitHub Actions to publish an asset
           "asset_id": "DkExe_Std.Asset@2.4.202508011516-signed",
           // Outside of CI, verify the asset and adds its canonical ID here (nit: need a tool to compute this)

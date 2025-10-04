@@ -262,7 +262,7 @@
                                 ]
                             },
                             "build_to_sign": {
-                                "description": "The packages that are included in the distribution. All packages must belong to the distribution library `id`.",
+                                "description": "The modules and stores that are included in the distribution.",
                                 "type": "object",
                                 "additionalProperties": false,
                                 "properties": {
@@ -270,7 +270,7 @@
                                         "type": "string",
                                         "description": "The identifier for the asset containing the trace and value stores, in the format 'PACKAGE.NAME@VERSION'. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system."
                                     },
-                                    "packages": {
+                                    "modules": {
                                         "type": "array",
                                         "items": {
                                             "type": "string",
@@ -329,7 +329,7 @@
                                     "asset_id",
                                     "asset_id_canonical",
                                     "traces",
-                                    "packages"
+                                    "modules"
                                 ]
                             }
                         },
