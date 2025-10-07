@@ -171,7 +171,7 @@
                                         "additionalProperties": false,
                                         "properties": {
                                             "signature": {
-                                                "description": "The signature of the attestation document, in base64 format, including the comment line. The attestation document is the SHA-256 hex-encoded hash of the canonical (ie. whitespace removed) JSON document `{\"continuations_to_sign\":{...}}`.",
+                                                "description": "The signature of the attestation document, in base64 format, including the comment line. The attestation document is the SHA-256 hex-encoded hash of the canonical (ie. whitespace removed) JSON document `{\"1.0\":...,\"1.1\":...,...}`.",
                                                 "type": "string"
                                             }
                                         }
@@ -210,7 +210,7 @@
                                         "additionalProperties": false,
                                         "properties": {
                                             "signature": {
-                                                "description": "The signature of the attestation document, in base64 format, including the comment line. The attestation document is the SHA-256 hex-encoded hash of the canonical (ie. whitespace removed) JSON document `{\"build_to_sign\":{...}}`.",
+                                                "description": "The signature of the attestation document, in base64 format, including the comment line. The attestation document is the SHA-256 hex-encoded hash of the canonical (ie. whitespace removed) JSON document `{\"asset_id\":...,\"asset_id_canonical\":...,...}`.",
                                                 "type": "string"
                                             }
                                         },

@@ -1107,7 +1107,7 @@ In the build system the version 5.6 would be a distribution; let's say `OpenBSD_
       "attestation": {
         "openbsd_signify": {
           // this is a (fake) signature of SHA256(plaintext), where
-          // plaintext is `{"continuations":{"5.7":"...","5.8":"..."}}` (see below)
+          // plaintext is `{"5.7":"...","5.8":"..."}` (see below)
           "signature": "untrusted comment: signature from signify secret key\nRWTAeKJJ1MTF3UpxzBCu6NaM6HPJNTj5CZ+M5XNJKNeEHBLQSsstzHGbSo8rPYNgw3Z98pN7WKiIwBIyRrKuIdKBRA6qlaci6wI="
         }
       },
@@ -1132,10 +1132,12 @@ In the same distribution in values.jsonc we also must have at least one build:
     "continuations": { /* ... */ },
     "build": {
       "attestation": {
+        // this is a (fake) signature of SHA256(plaintext), where
+        // plaintext is `{"modules":...,...}` (see below)
         "openbsd_signify": "untrusted comment: signed by key c078a249d4c4c5dd\nRWTAeKJJ1MTF3UpxzBCu6NaM6HPJNTj5CZ+M5XNJKNeEHBLQSsstzHGbSo8rPYNgw3Z98pN7WKiIwBIyRrKuIdKBRA6qlaci6wI="
       },
-      "build": {
-        "packages": ["DkExe_Std.Form@1.0.202501010000"],
+      "build_to_sign": {
+        "modules": ["DkExe_Std.Form@1.0.202501010000"],
         /* other build fields described in the mlfront-values.json schema */
       }
     }
