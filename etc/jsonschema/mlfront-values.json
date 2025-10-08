@@ -51,6 +51,7 @@
                         }
                     },
                     "required": [
+                        "organization",
                         "signer-workflow"
                     ]
                 }

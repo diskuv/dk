@@ -11,6 +11,7 @@
         "openbsd_signify": { "public_key": "..." },
         // https://github.blog/enterprise-software/devsecops/enhance-build-security-and-reach-slsa-level-3-with-github-artifact-attestations/
         "github_slsa_v1_l3": {
+          "organization": "<owner>",
           "signer-workflow": "<owner>/<repository>/.github/workflows/sign-artifact.yml"
         }
         // https://docs.gitlab.com/ci/runners/configure_runners/#artifact-provenance-metadata
