@@ -190,10 +190,7 @@
                                 },
                                 "properties": {}
                             }
-                        },
-                        "required": [
-                            "attestation"
-                        ]
+                        }
                     },
                     "build": {
                         "type": "object",
@@ -343,7 +340,6 @@
                             }
                         },
                         "required": [
-                            "attestation",
                             "build_to_sign"
                         ]
                     }

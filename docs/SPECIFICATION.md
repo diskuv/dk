@@ -1085,7 +1085,7 @@ Once a major and minor component of a package has been signed, no lower versione
 - that major and minor component
 - any later versions to that major and minor component
 
-That may be difficult to understand without an example. We'll use the Key Rottaion example from [Securing OpenBSD From Us To You], where OpenBSD is about to release OpenBSD version 5.6. They:
+That may be difficult to understand without an example. We'll use the Key Rotation example from [Securing OpenBSD From Us To You], where OpenBSD is about to release OpenBSD version 5.6. They:
 
 - have an existing public/private key pair for version 5.6
 - have generated public/private key pairs for version 5.7 *before* 5.6 is released
