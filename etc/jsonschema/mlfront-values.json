@@ -45,14 +45,44 @@
                             "description": "The GitHub organization that produced the values. Ex. <owner>",
                             "type": "string"
                         },
+                        "repository": {
+                            "description": "The GitHub repository that produced the values. Ex. <owner>/<repository>",
+                            "type": "string"
+                        },
+                        "signer_repository": {
+                            "description": "The re-usable GitHub repository that does the signing. Ex. <signing-owner>/<signing-repository>",
+                            "type": "string"
+                        },
                         "signer_workflow": {
-                            "description": "The re-usable GitHub workflow path that produced the values. Ex. <owner>/<repository>/.github/workflows/sign-artifact.yml",
+                            "description": "The re-usable GitHub workflow path that does the signing. Ex. <signing-owner>/<signing-repository>/.github/workflows/sign-artifact.yml",
                             "type": "string"
                         }
                     },
-                    "required": [
-                        "organization",
-                        "signer_workflow"
+                    "oneOf": [
+                        {
+                            "required": [
+                                "organization",
+                                "signer_repository"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "repository",
+                                "signer_repository"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "organization",
+                                "signer_workflow"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "repository",
+                                "signer_workflow"
+                            ]
+                        }
                     ]
                 }
             },
