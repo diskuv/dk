@@ -1,0 +1,34 @@
+{
+  "continuations": {
+    "attestation": {
+      "openbsd_signify": {
+        "signature": "untrusted comment: signed by key a8b1f2829cd08138\nRWSosfKCnNCBOLeKcxXJrnY7NBW0lzCt0zYXo/FYPyGDq4mOL7eE2SS65Tz0pbJfq+wvULlSYBFgDyc2YLLa5RVvX4chSvbubA8=\n"
+      }
+    },
+    "continuations_to_sign": {
+      "2.5": {
+        "openbsd_signify": {
+          "public_key": "untrusted comment: CommonsBase_Std-2.5\nRWSa6lZ/sS9zsFYrSJfdKGD9af09Mbz/G69BBPtDMp3ZP2nCPzy/cqRV\n"
+        }
+      },
+      "2.6": {
+        "openbsd_signify": {
+          "public_key": "untrusted comment: CommonsBase_Std-2.6\nRWTwEvOUItYe0u6ALvOER15EmRBMzwb9DEEJrCiJ25gMRzqHhpxtxa5a\n"
+        }
+      },
+      "3.0": {
+        "openbsd_signify": {
+          "public_key": "untrusted comment: CommonsBase_Std-3.0\nRWTzxNnZQeugZoU4+2DgxxktaEJKGlEprALP67bac7HPQxAK4ee1WCxk\n"
+        }
+      }
+    }
+  },
+  "id": "CommonsBase_Std@2.4.0",
+  "license": { "spdx": "Apache-2.0" },
+  "producer": {
+    "github_slsa_v1_l2": { "repository": "diskuv/dk" },
+    "openbsd_signify": {
+      "public_key": "untrusted comment: CommonsBase_Std-2.4\nRWSosfKCnNCBOIYVnoJMLwGKyImGd6YMrWSjj929hv087OMmR4pvf0pe\n"
+    }
+  }
+}
