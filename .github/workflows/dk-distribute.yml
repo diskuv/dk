@@ -1,0 +1,57 @@
+name: CommonsBase_Std   # we'll build this library
+on:
+  push:              # build on every commit
+    tags:
+      - '*'          # but only if tag is pushed
+  workflow_dispatch: # allow manual triggering from GitHub page
+
+jobs:
+    build:
+        runs-on: windows-2022
+        # runs-on: ubuntu-22.04
+        if: github.ref_type == 'tag'
+        permissions:
+          id-token: write
+          contents: read
+          attestations: write
+        # The secrets created by `dk0/mlfront-shell -- prepare-version --ci github VERSION`
+        # are tied to this environment only.
+        environment: dk-distribution
+        steps:
+            # - name: Harden Runner # Optional but recommended
+            #   uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+            #   with: { egress-policy: audit }
+            - name: Checkout project
+              uses: actions/checkout@v5
+
+            - name: Distribute Modules
+              uses: diskuv/dk-distribute@v1
+              with:
+                  id: CommonsBase_Std@${{ github.ref_name }}
+                  options: -I pkgs/include -d parsetrace # todo: canonical is etc/dk/v
+                  pubkey: ${{ secrets.distribute_2_4_pubkey }}
+                  seckey: ${{ secrets.distribute_2_4_seckey }}
+                  slots: |
+                    Release.Windows_x86
+                    Release.Windows_x86_64
+                    Release.Darwin_arm64
+                    Release.Darwin_x86_64
+                    Release.Linux_x86
+                    Release.Linux_x86_64
+                  forms: |
+                    CommonsBase_Std.S7z@25.1.0
+                    CommonsBase_Std.Coreutils@0.2.2
+                  use-cache: true
+                  experimental-mlfront-ref: HEAD
+
+            - name: Generate artifact attestation
+              id: attest
+              uses: actions/attest-build-provenance@v3
+              with: { subject-path: dk-dist/* }
+            - name: Release ${{ github.workflow }}
+              uses: softprops/action-gh-release@v2
+              with: # TODO: remove *.values.json during/before `combine` step so this is just dk-dist/*
+                files: |
+                  dk-dist/values.json
+                  dk-dist/*.tracestore
+                  dk-dist/*.valuestore.zip
