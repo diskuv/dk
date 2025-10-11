@@ -118,8 +118,8 @@ For unpacking the 7zip executables, we'll submit a form several times (each time
 ```sh
 $ git clone https://github.com/diskuv/dk.git dk0
 Cloning into 'dk0'...
-$ dk0/mlfront-shell -- get-object 'CommonsBase_Std.S7z@25.1.0' -s File.Darwin_x86_64 -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
-[up-to-date] CommonsBase_Std.S7z@25.1.0+bn-20250101000000 -s File.Darwin_x86_64
+$ dk0/mlfront-shell -- get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_x86_64 -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
+[up-to-date] CommonsBase_Std.S7z@25.1.0+bn-20250101000000 -s Release.Darwin_x86_64
 ```
 
 which *builds* the desired files into our desired "target" directory:
@@ -146,8 +146,8 @@ so you can see the concepts in action:
 | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | **Assets**            | ![7zip 25.01 GitHub Releases](docs/images/7zip-25-01-github-releases.png)                                            |
 | **Submitting Forms**  | ![Using a form with the CLI](docs/images/7zip-apply-form.png)                                                        |
-| **Generated Objects** | `Y:\a\target\pid\500\bnrtauvvz5kvhwd5\out\File.Windows_x86`:<br>![7z.exe object](docs/images/7zip-object-7z-exe.png) |
-|                       | `Y:\a\target\pid\500\wtqhxi4flrfk6sab\out\File.Darwin_arm64`:<br>![7z tar](docs/images/7zip-object-tar.png)          |
+| **Generated Objects** | `Y:\a\target\pid\500\bnrtauvvz5kvhwd5\out\Release.Windows_x86`:<br>![7z.exe object](docs/images/7zip-object-7z-exe.png) |
+|                       | `Y:\a\target\pid\500\wtqhxi4flrfk6sab\out\Release.Darwin_arm64`:<br>![7z tar](docs/images/7zip-object-tar.png)          |
 
 The objects you see above are intermediate folders, so this might be the first and only time you see them. Normally you pull files out of objects into your own target directories, like was done when we submitted the form with `dk0/mlfront-shell ... -f target/Darwin_x86_64.7zz.exe`.
 
@@ -421,10 +421,10 @@ We'll create a new JSON file containing the form.
       "id": "TeachMe_Std.S7z1b.S7zr@25.1.0",
       "precommands": {
         "private": [
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_arm}/7zr.exe",
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_arm64}/7zr.exe",
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_x86}/7zr.exe",
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_x86_64}/7zr.exe"
+          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm}/7zr.exe",
+          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm64}/7zr.exe",
+          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86}/7zr.exe",
+          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86_64}/7zr.exe"
         ]
       },
       "outputs": {
@@ -432,10 +432,10 @@ We'll create a new JSON file containing the form.
           {
             "paths": ["7zr.exe"],
             "slots": [
-              "File.Windows_arm",
-              "File.Windows_arm64",
-              "File.Windows_x86",
-              "File.Windows_x86_64"
+              "Release.Windows_arm",
+              "Release.Windows_arm64",
+              "Release.Windows_x86",
+              "Release.Windows_x86_64"
             ]
           }
         ]
@@ -468,10 +468,10 @@ The name of a slot is one or more dot-separated *namespace terms*, but otherwise
 
 We chose:
 
-- `File.Windows_arm`
-- `File.Windows_arm64`
-- `File.Windows_x86`
-- `File.Windows_x86_64`
+- `Release.Windows_arm`
+- `Release.Windows_arm64`
+- `Release.Windows_x86`
+- `Release.Windows_x86_64`
 
 because 7zip has four different Windows installers.
 
@@ -483,7 +483,7 @@ Choose slots that correspond to the natural split among your assets:
 - Executables are naturally split by what platforms (ABI, operating system architecture, etc.) the executables run on.
 - Multimedia assets are naturally split by dimension (high, medium, low res) and by media type (PNG, JPEG, etc.).
 
-If you only have one asset, your one slot is conventionally called `File.Agnostic`.
+If you only have one asset, your one slot is conventionally called `Release.Agnostic`.
 
 What are the **precommands**? Precommands are a set of commands that run when the form is submitted.
 You have already seen the `get-asset-file` command that you ran from the `dk0/mlfront-shell` command line in the
@@ -501,15 +501,15 @@ And that form can then run precommands, which can then submit more forms. And so
 
 In the JSON document, we also see our first variables:
 
-- `${SLOT.File.Windows_arm}`
-- `${SLOT.File.Windows_arm64}`
-- `${SLOT.File.Windows_x86}`
-- `${SLOT.File.Windows_x86_64}`
+- `${SLOT.Release.Windows_arm}`
+- `${SLOT.Release.Windows_arm64}`
+- `${SLOT.Release.Windows_x86}`
+- `${SLOT.Release.Windows_x86_64}`
 
 When a form is submitted with `get-object FORM -s SLOT`, these variables are *output* directories specific to the named slot.
 
 The [Precommands section of the specification](docs/SPECIFICATION.md#precommands) describes some optimizations
-that are allowed. Most important is that if you ask for `get-object FORM -s Windows_arm`, the precommand for the unrelated slot `get-asset-file ... -f ${SLOT.File.Windows_x86_64}/7zr.exe` can be skipped.
+that are allowed. Most important is that if you ask for `get-object FORM -s Windows_arm`, the precommand for the unrelated slot `get-asset-file ... -f ${SLOT.Release.Windows_x86_64}/7zr.exe` can be skipped.
 
 The final piece of the form are the `outputs`. You must declare which files your form in the `${SLOT.*}`
 output directories. Don't worry ... the `dk` build system will give you an error and tell you a hint to fix it
@@ -518,8 +518,8 @@ when you forgot to declare files or you declare too many files.
 We'll use `get-object` to submit our new form. With that we get:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z1b.S7zr@25.1.0' -s File.Windows_x86_64 -d target/7zr-win64
-[up-to-date] TeachMe_Std.S7z1b.S7zr@25.1.0+bn-20250101000000 -s File.Windows_x86_64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z1b.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/7zr-win64
+[up-to-date] TeachMe_Std.S7z1b.S7zr@25.1.0+bn-20250101000000 -s Release.Windows_x86_64
 ```
 
 If we inspect the target directory, we see all the files from the object in Unix:
@@ -766,15 +766,15 @@ Whenever we run a command we need a form with a `function`.
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s File.Windows_arm -d bin/File.Windows_arm",
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s File.Windows_arm64 -d bin/File.Windows_arm64",
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s File.Windows_x86 -d bin/File.Windows_x86",
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s File.Windows_x86_64 -d bin/File.Windows_x86_64",
+          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_arm -d bin/Release.Windows_arm",
+          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_arm64 -d bin/Release.Windows_arm64",
+          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
+          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86_64 -d bin/Release.Windows_x86_64",
           // need Windows installers
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-File.Windows_arm.exe",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-File.Windows_arm64.exe",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-File.Windows_x86.exe",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-File.Windows_x86_64.exe"
+          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-Release.Windows_arm.exe",
+          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-Release.Windows_arm64.exe",
+          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86.exe",
+          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86_64.exe"
         ]
       },
       "function": {
@@ -787,7 +787,7 @@ Whenever we run a command we need a form with a `function`.
         ],
         "args": [
           // extract assetfile [7z2501-arm.exe] with [7zr.exe] to the output directory
-          // for slot [File.Windows_arm], etc.
+          // for slot [Release.Windows_arm], etc.
           "bin/${SLOTNAME.request}/7zr.exe",
           "x",
           "-o${SLOT.request}",
@@ -801,17 +801,17 @@ Whenever we run a command we need a form with a `function`.
           {
             "paths": ["7z.exe"],
             "slots": [
-              "File.Windows_arm",
-              "File.Windows_arm64",
-              "File.Windows_x86",
-              "File.Windows_x86_64",
-              "File.Agnostic",
-              "File.Darwin_arm64",
-              "File.Darwin_x86_64",
-              "File.Linux_arm",
-              "File.Linux_arm64",
-              "File.Linux_x86",
-              "File.Linux_x86_64"
+              "Release.Windows_arm",
+              "Release.Windows_arm64",
+              "Release.Windows_x86",
+              "Release.Windows_x86_64",
+              "Release.Agnostic",
+              "Release.Darwin_arm64",
+              "Release.Darwin_x86_64",
+              "Release.Linux_arm",
+              "Release.Linux_arm64",
+              "Release.Linux_x86",
+              "Release.Linux_x86_64"
             ]
           }
         ]
@@ -832,16 +832,16 @@ bin/${SLOTNAME.request}/7zr.exe x -o${SLOT.request} 7z-${SLOTNAME.request}.exe 7
 
 But remember we defined a slot as a parameter to a form.
 
-So if we were to submit this form with `get-object FORM -s File.Windows_x86_64`, the
+So if we were to submit this form with `get-object FORM -s Release.Windows_x86_64`, the
 following command would be run:
 
 <!-- $MDX skip -->
 ```sh
-bin/File.Windows_x86_64/7zr.exe x -o${SLOT.File.Windows_x86_64} 7z-File.Windows_x86_64.exe 7z.exe
+bin/Release.Windows_x86_64/7zr.exe x -o${SLOT.Release.Windows_x86_64} 7z-Release.Windows_x86_64.exe 7z.exe
 ```
 
-`${SLOTNAME.request}` expanded to `File.Windows_x86_64`, and `${SLOT.request}`
-expanded to `${SLOT.File.Windows_x86_64}`.
+`${SLOTNAME.request}` expanded to `Release.Windows_x86_64`, and `${SLOT.request}`
+expanded to `${SLOT.Release.Windows_x86_64}`.
 
 All that means is that regardless of which slot is submitted with the form, the
 correct Windows installer is extracted.
@@ -858,12 +858,12 @@ We need to do three things to solve that problem:
 2. Provide the full list of slots in the `outputs` section.
 3. Make sure (in a later form) that we don't submit this Windows-only form on non-Windows hardware.
 
-But for now we can submit the form if we are on Windows. We'll submit the `File.Windows_arm64` slot:
+But for now we can submit the form if we are on Windows. We'll submit the `Release.Windows_arm64` slot:
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z2.Windows7zExe@25.1.0' -s File.Windows_arm64 -d target/7zexe-winarm64
-[up-to-date] TeachMe_Std.S7z2.Windows7zExe@25.1.0+bn-20250101000000 -s File.Windows_arm64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z2.Windows7zExe@25.1.0' -s Release.Windows_arm64 -d target/7zexe-winarm64
+[up-to-date] TeachMe_Std.S7z2.Windows7zExe@25.1.0+bn-20250101000000 -s Release.Windows_arm64
 ```
 
 If we inspect the target directory, we see all the files from the object on Windows:
@@ -908,14 +908,14 @@ This is a new form with a function that will call `7z.exe` with the right parame
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s File.Windows_x86 -d bin/File.Windows_x86",
+          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux installers
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-File.Linux_arm.tar.xz",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-File.Linux_arm64.tar.xz",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-File.Linux_x86.tar.xz",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-File.Linux_x86_64.tar.xz",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-File.Darwin_x86_64.tar.xz",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-File.Darwin_arm64.tar.xz"
+          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
+          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
+          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-Release.Linux_x86.tar.xz",
+          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-Release.Linux_x86_64.tar.xz",
+          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_x86_64.tar.xz",
+          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_arm64.tar.xz"
         ]
       },
       "function": {
@@ -928,8 +928,8 @@ This is a new form with a function that will call `7z.exe` with the right parame
         ],
         "args": [
           // uncompress assetfile [7z2501-mac.tar.xz] with [7zr.exe] to the output directory
-          // for slot [File.Darwin_arm64], etc.
-          "bin/File.Windows_x86/7zr.exe",
+          // for slot [Release.Darwin_arm64], etc.
+          "bin/Release.Windows_x86/7zr.exe",
           "x",
           "-o${SLOT.request}",
           "7z-${SLOTNAME.request}.tar.xz",
@@ -939,28 +939,28 @@ This is a new form with a function that will call `7z.exe` with the right parame
       "outputs": {
         "files": [
           {
-            "paths": ["7z-File.Darwin_arm64.tar"],
-            "slots": ["File.Darwin_arm64"]
+            "paths": ["7z-Release.Darwin_arm64.tar"],
+            "slots": ["Release.Darwin_arm64"]
           },
           {
-            "paths": ["7z-File.Darwin_x86_64.tar"],
-            "slots": ["File.Darwin_x86_64"]
+            "paths": ["7z-Release.Darwin_x86_64.tar"],
+            "slots": ["Release.Darwin_x86_64"]
           },
           {
-            "paths": ["7z-File.Linux_arm.tar"],
-            "slots": ["File.Linux_arm"]
+            "paths": ["7z-Release.Linux_arm.tar"],
+            "slots": ["Release.Linux_arm"]
           },
           {
-            "paths": ["7z-File.Linux_arm64.tar"],
-            "slots": ["File.Linux_arm64"]
+            "paths": ["7z-Release.Linux_arm64.tar"],
+            "slots": ["Release.Linux_arm64"]
           },
           {
-            "paths": ["7z-File.Linux_x86.tar"],
-            "slots": ["File.Linux_x86"]
+            "paths": ["7z-Release.Linux_x86.tar"],
+            "slots": ["Release.Linux_x86"]
           },
           {
-            "paths": ["7z-File.Linux_x86_64.tar"],
-            "slots": ["File.Linux_x86_64"]
+            "paths": ["7z-Release.Linux_x86_64.tar"],
+            "slots": ["Release.Linux_x86_64"]
           }
         ]
       }
@@ -969,12 +969,12 @@ This is a new form with a function that will call `7z.exe` with the right parame
 }
 ```
 
-The use of `7zr.exe` means we can only run this step on Windows hardware, even though we produce output for non-Windows slots like `File.Linux_arm64`:
+The use of `7zr.exe` means we can only run this step on Windows hardware, even though we produce output for non-Windows slots like `Release.Linux_arm64`:
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z3.MacLinux7zTar@25.1.0' -s File.Linux_arm64 -d target/7ztar-linuxarm64
-[up-to-date] TeachMe_Std.S7z3.MacLinux7zTar@25.1.0+bn-20250101000000 -s File.Linux_arm64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z3.MacLinux7zTar@25.1.0' -s Release.Linux_arm64 -d target/7ztar-linuxarm64
+[up-to-date] TeachMe_Std.S7z3.MacLinux7zTar@25.1.0+bn-20250101000000 -s Release.Linux_arm64
 ```
 
 and the target directory has:
@@ -984,7 +984,7 @@ and the target directory has:
 
 Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
--a---            1/1/1980 12:00 AM        5863936 7z-File.Linux_arm64.tar
+-a---            1/1/1980 12:00 AM        5863936 7z-Release.Linux_arm64.tar
 ```
 
 ### 7zip step 4 - extract 7zz from Unix tar
@@ -1009,14 +1009,14 @@ This is a new form with a function that will call `7z.exe` with the right parame
       "precommands": {
         "private": [
           // need bin/<architecture>/7z.exe (7zr does not extract tar files)
-          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s File.Windows_x86 -d bin/File.Windows_x86",
+          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux tar files. since same destination directory need [install-object]
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Linux_arm -d tarballs",
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Linux_arm64 -d tarballs",
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Linux_x86 -d tarballs",
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Linux_x86_64 -d tarballs",
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Darwin_arm64 -d tarballs",
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s File.Darwin_x86_64 -d tarballs"
+          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm -d tarballs",
+          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm64 -d tarballs",
+          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_x86 -d tarballs",
+          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_x86_64 -d tarballs",
+          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Darwin_arm64 -d tarballs",
+          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Darwin_x86_64 -d tarballs"
         ]
       },
       "function": {
@@ -1029,8 +1029,8 @@ This is a new form with a function that will call `7z.exe` with the right parame
         ],
         "args": [
           // extract object [7z2501-mac.tar] with [7z.exe] to the output directory
-          // for slot [File.Darwin_arm64], etc.
-          "bin/File.Windows_x86/7z.exe",
+          // for slot [Release.Darwin_arm64], etc.
+          "bin/Release.Windows_x86/7z.exe",
           "x",
           "-o${SLOT.request}",
           "tarballs/7z-${SLOTNAME.request}.tar",
@@ -1042,27 +1042,27 @@ This is a new form with a function that will call `7z.exe` with the right parame
         "files": [
           {
             "paths": ["7zz"],
-            "slots": ["File.Darwin_arm64"]
+            "slots": ["Release.Darwin_arm64"]
           },
           {
             "paths": ["7zz"],
-            "slots": ["File.Darwin_x86_64"]
+            "slots": ["Release.Darwin_x86_64"]
           },
           {
             "paths": ["7zz"],
-            "slots": ["File.Linux_arm"]
+            "slots": ["Release.Linux_arm"]
           },
           {
             "paths": ["7zz"],
-            "slots": ["File.Linux_arm64"]
+            "slots": ["Release.Linux_arm64"]
           },
           {
             "paths": ["7zz"],
-            "slots": ["File.Linux_x86"]
+            "slots": ["Release.Linux_x86"]
           },
           {
             "paths": ["7zz"],
-            "slots": ["File.Linux_x86_64"]
+            "slots": ["Release.Linux_x86_64"]
           }
         ]
       }
@@ -1071,12 +1071,12 @@ This is a new form with a function that will call `7z.exe` with the right parame
 }
 ```
 
-The use of `7z.exe` means we can only run this step on Windows hardware, even though we produce output for non-Windows slots like `File.Darwin_x86_64`:
+The use of `7z.exe` means we can only run this step on Windows hardware, even though we produce output for non-Windows slots like `Release.Darwin_x86_64`:
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z4.MacLinux7zExe@25.1.0' -s File.Darwin_x86_64 -d target/7zexe-macintel
-[up-to-date] TeachMe_Std.S7z4.MacLinux7zExe@25.1.0+bn-20250101000000 -s File.Darwin_x86_64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z4.MacLinux7zExe@25.1.0' -s Release.Darwin_x86_64 -d target/7zexe-macintel
+[up-to-date] TeachMe_Std.S7z4.MacLinux7zExe@25.1.0+bn-20250101000000 -s Release.Darwin_x86_64
 ```
 
 and the target directory has:
@@ -1119,18 +1119,18 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
           // end-users don't have to have complicated logic based on the platform.
 
           // Windows. 7z.exe -> 7zz.exe
-          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s File.Windows_arm -m ./7z.exe -f ${SLOT.File.Windows_arm}/7zz.exe",
-          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s File.Windows_arm64 -m ./7z.exe -f ${SLOT.File.Windows_arm64}/7zz.exe",
-          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s File.Windows_x86 -m ./7z.exe -f ${SLOT.File.Windows_x86}/7zz.exe",
-          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s File.Windows_x86_64 -m ./7z.exe -f ${SLOT.File.Windows_x86_64}/7zz.exe",
+          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s Release.Windows_arm -m ./7z.exe -f ${SLOT.Release.Windows_arm}/7zz.exe",
+          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s Release.Windows_arm64 -m ./7z.exe -f ${SLOT.Release.Windows_arm64}/7zz.exe",
+          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86 -m ./7z.exe -f ${SLOT.Release.Windows_x86}/7zz.exe",
+          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86_64 -m ./7z.exe -f ${SLOT.Release.Windows_x86_64}/7zz.exe",
 
           // Unix. 7zz -> 7zz.exe
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s File.Darwin_arm64 -m ./7zz -f ${SLOT.File.Darwin_arm64}/7zz.exe",
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s File.Darwin_x86_64 -m ./7zz -f ${SLOT.File.Darwin_x86_64}/7zz.exe",
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s File.Linux_arm -m ./7zz -f ${SLOT.File.Linux_arm}/7zz.exe",
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s File.Linux_arm64 -m ./7zz -f ${SLOT.File.Linux_arm64}/7zz.exe",
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s File.Linux_x86 -m ./7zz -f ${SLOT.File.Linux_x86}/7zz.exe",
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s File.Linux_x86_64 -m ./7zz -f ${SLOT.File.Linux_x86_64}/7zz.exe"
+          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./7zz -f ${SLOT.Release.Darwin_arm64}/7zz.exe",
+          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Darwin_x86_64 -m ./7zz -f ${SLOT.Release.Darwin_x86_64}/7zz.exe",
+          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_arm -m ./7zz -f ${SLOT.Release.Linux_arm}/7zz.exe",
+          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_arm64 -m ./7zz -f ${SLOT.Release.Linux_arm64}/7zz.exe",
+          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_x86 -m ./7zz -f ${SLOT.Release.Linux_x86}/7zz.exe",
+          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_x86_64 -m ./7zz -f ${SLOT.Release.Linux_x86_64}/7zz.exe"
         ]
       },
       "outputs": {
@@ -1138,16 +1138,16 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
           {
             "paths": ["7zz.exe"],
             "slots": [
-              "File.Windows_arm",
-              "File.Windows_arm64",
-              "File.Windows_x86",
-              "File.Windows_x86_64",
-              "File.Darwin_arm64",
-              "File.Darwin_x86_64",
-              "File.Linux_arm",
-              "File.Linux_arm64",
-              "File.Linux_x86",
-              "File.Linux_x86_64"
+              "Release.Windows_arm",
+              "Release.Windows_arm64",
+              "Release.Windows_x86",
+              "Release.Windows_x86_64",
+              "Release.Darwin_arm64",
+              "Release.Darwin_x86_64",
+              "Release.Linux_arm",
+              "Release.Linux_arm64",
+              "Release.Linux_x86",
+              "Release.Linux_x86_64"
             ]
           }
         ]
@@ -1160,8 +1160,8 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
 With that our users can grab the `7zz.exe` executable for any operating system and CPU architecture:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z5.S7zExe@25.1.0' -s File.Linux_x86_64 -d target/7z-linux64
-[up-to-date] TeachMe_Std.S7z5.S7zExe@25.1.0+bn-20250101000000 -s File.Linux_x86_64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -d target/7z-linux64
+[up-to-date] TeachMe_Std.S7z5.S7zExe@25.1.0+bn-20250101000000 -s Release.Linux_x86_64
 ```
 
 ```sh
@@ -1174,8 +1174,8 @@ target/7z-linux64/7zz.exe: ELF 64-bit LSB pie executable, x86-64, version 1 (SYS
 Since `7zz.exe` is a standalone executable that doesn't need any DLLs or `.so` (except standard GLIBC system libraries on Linux), we can use the `-m MEMBER` option to directly fetch the `7zz.exe` executable:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z5.S7zExe@25.1.0' -s File.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
-[up-to-date] TeachMe_Std.S7z5.S7zExe@25.1.0+bn-20250101000000 -s File.Linux_x86_64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
+[up-to-date] TeachMe_Std.S7z5.S7zExe@25.1.0+bn-20250101000000 -s Release.Linux_x86_64
 $ file target/7zz.exe
 target/7zz.exe: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=7a6c7a136fc4e7df4ddcd80d2aae72bc658ef822, for GNU/Linux 3.2.0, stripped
 ```
@@ -1203,7 +1203,7 @@ jobs:
         # Your job will be different, but this job needs Windows since CommonsBase_Std.S7z.MacLinux7zExe has OSFamily=windows.
         runs-on: windows-2022
         env:
-          TEST_SLOT: File.Windows_x86_64 # we'll test the build on this slot
+          TEST_SLOT: Release.Windows_x86_64 # we'll test the build on this slot
         steps:
             - name: Checkout
               uses: actions/checkout@v5
@@ -1231,16 +1231,16 @@ jobs:
                   XDG_CONFIG_HOME: ${{ github.workspace }}/target/config
                   XDG_DATA_HOME: ${{ github.workspace }}/target/data
               run: |
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_arm64   -m ./LICENSE -f target/LICENSE
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_arm64   -m ./LICENSE -f target/LICENSE
 
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_arm64   -m ./7zz.exe -f target/File.Darwin_arm64.7zz.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_x86_64  -m ./7zz.exe -f target/File.Darwin_x86_64.7zz.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm      -m ./7zz.exe -f target/File.Linux_arm.7zz.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm64    -m ./7zz.exe -f target/File.Linux_arm64.7zz.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86      -m ./7zz.exe -f target/File.Linux_x86.7zz.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_64   -m ./7zz.exe -f target/File.Linux_x86_64.7zz.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86    -m ./7zz.exe -f target/File.Windows_x86.7zz.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86_64 -m ./7zz.exe -f target/File.Windows_x86_64.7zz.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_arm64   -m ./7zz.exe -f target/Release.Darwin_arm64.7zz.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_x86_64  -m ./7zz.exe -f target/Release.Darwin_x86_64.7zz.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm      -m ./7zz.exe -f target/Release.Linux_arm.7zz.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm64    -m ./7zz.exe -f target/Release.Linux_arm64.7zz.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86      -m ./7zz.exe -f target/Release.Linux_x86.7zz.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86_64   -m ./7zz.exe -f target/Release.Linux_x86_64.7zz.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86    -m ./7zz.exe -f target/Release.Windows_x86.7zz.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86_64 -m ./7zz.exe -f target/Release.Windows_x86_64.7zz.exe
 
             - name: Test ${{ github.workflow }}
               run: target/${{ env.TEST_SLOT }}.7zz.exe --help
@@ -1252,14 +1252,14 @@ jobs:
               with:
                 files: |
                   target/LICENSE
-                  target/File.Darwin_arm64.7zz.exe
-                  target/File.Darwin_x86_64.7zz.exe
-                  target/File.Linux_arm.7zz.exe
-                  target/File.Linux_arm64.7zz.exe
-                  target/File.Linux_x86.7zz.exe
-                  target/File.Linux_x86_64.7zz.exe
-                  target/File.Windows_x86.7zz.exe
-                  target/File.Windows_x86_64.7zz.exe
+                  target/Release.Darwin_arm64.7zz.exe
+                  target/Release.Darwin_x86_64.7zz.exe
+                  target/Release.Linux_arm.7zz.exe
+                  target/Release.Linux_arm64.7zz.exe
+                  target/Release.Linux_x86.7zz.exe
+                  target/Release.Linux_x86_64.7zz.exe
+                  target/Release.Windows_x86.7zz.exe
+                  target/Release.Windows_x86_64.7zz.exe
 ```
 
 It uses the community 7zip package (links provided in the next section) rather than the one we built in this tutorial.
@@ -1325,10 +1325,10 @@ The always-failing form is the following (you don't need to create your own copy
       "precommands": {
         "private": [
           // we'll use the community 7zip package, not the tutorial 7zip package
-          "get-object TeachMe_Std.S7z.S7zExe@25.1.0 -s File.Linux_arm -d linuxarm_stuff",
-          "get-object TeachMe_Std.S7z.S7zExe@25.1.0 -s File.Windows_x86 -d win32_stuff",
+          "get-object TeachMe_Std.S7z.S7zExe@25.1.0 -s Release.Linux_arm -d linuxarm_stuff",
+          "get-object TeachMe_Std.S7z.S7zExe@25.1.0 -s Release.Windows_x86 -d win32_stuff",
           // all forms, even ones designed to fail, must have at least one slot
-          "get-object TeachMe_Std.S7z.S7zExe@25.1.0 -s File.Linux_arm64 -d ${SLOT.File.Linux_arm64}"
+          "get-object TeachMe_Std.S7z.S7zExe@25.1.0 -s Release.Linux_arm64 -d ${SLOT.Release.Linux_arm64}"
         ]
       },
       "function": {
@@ -1341,7 +1341,7 @@ The always-failing form is the following (you don't need to create your own copy
         "files": [
           {
             "paths": ["7zz.exe"],
-            "slots": ["File.Linux_arm64"]
+            "slots": ["Release.Linux_arm64"]
           }
         ]
       }
@@ -1354,38 +1354,38 @@ Enter the form with:
 
 <!-- $MDX skip -->
 ```sh
-$ dk0/mlfront-shell -I dk0/docs/7zip-tutorial -x 7zip-org:subpath: -- enter-object 'TeachMe_Std.S7z9.Debug@25.1.0' -s File.Linux_arm64
+$ dk0/mlfront-shell -I dk0/docs/7zip-tutorial -x 7zip-org:subpath: -- enter-object 'TeachMe_Std.S7z9.Debug@25.1.0' -s Release.Linux_arm64
 
-PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s File.Linux_arm64> 
+PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> 
 
-PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s File.Linux_arm64> dir -recurse
-    Directory: target\pid\480\lsgbf44nuuwajzjh\fn\File.Linux_arm64
+PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> dir -recurse
+    Directory: target\pid\480\lsgbf44nuuwajzjh\fn\Release.Linux_arm64
 
 Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
 d----           9/18/2025  8:00 AM                linuxarm_stuff
 d----           9/18/2025  8:00 AM                win32_stuff
 
-    Directory: target\pid\480\lsgbf44nuuwajzjh\fn\File.Linux_arm64\linuxarm_stuff
+    Directory: target\pid\480\lsgbf44nuuwajzjh\fn\Release.Linux_arm64\linuxarm_stuff
 
 Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
 -a---            1/1/1980 12:00 AM        1548480 7zz.exe
 
-    Directory: target\pid\480\lsgbf44nuuwajzjh\fn\File.Linux_arm64\win32_stuff
+    Directory: target\pid\480\lsgbf44nuuwajzjh\fn\Release.Linux_arm64\win32_stuff
 
 Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
 -a---            1/1/1980 12:00 AM         575488 7zz.exe
 
-PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s File.Linux_arm64> dir $env:SHELL_SLOT
-    Directory: target\pid\480\lsgbf44nuuwajzjh\out\File.Linux_arm64
+PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> dir $env:SHELL_SLOT
+    Directory: target\pid\480\lsgbf44nuuwajzjh\out\Release.Linux_arm64
 
 Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
 -a---            1/1/1980 12:00 AM        2456896 7zz.exe
 
-PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s File.Linux_arm64> exit
+PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> exit
 ```
 
 The Unix shell is similar.

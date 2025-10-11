@@ -6,10 +6,10 @@
       "id": "TeachMe_Std.S7z1b.S7zr@25.1.0",
       "precommands": {
         "private": [
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_arm}/7zr.exe",
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_arm64}/7zr.exe",
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_x86}/7zr.exe",
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.File.Windows_x86_64}/7zr.exe"
+          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm}/7zr.exe",
+          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm64}/7zr.exe",
+          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86}/7zr.exe",
+          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86_64}/7zr.exe"
         ]
       },
       "outputs": {
@@ -17,10 +17,10 @@
           {
             "paths": ["7zr.exe"],
             "slots": [
-              "File.Windows_arm",
-              "File.Windows_arm64",
-              "File.Windows_x86",
-              "File.Windows_x86_64"
+              "Release.Windows_arm",
+              "Release.Windows_arm64",
+              "Release.Windows_x86",
+              "Release.Windows_x86_64"
             ]
           }
         ]

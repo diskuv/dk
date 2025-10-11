@@ -33,7 +33,7 @@ jobs:
                   XDG_CONFIG_HOME: ${{ github.workspace }}/target/config
                   XDG_DATA_HOME: ${{ github.workspace }}/target/data
               run: |
-                dk0/mlfront-shell --verbose -- get-object 'CommonsBase_Std.S7z@25.1.0' -s File.Windows_x86 -d target/ignore
+                dk0/mlfront-shell --verbose -- get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Windows_x86 -d target/ignore
 
             - name: Build ${{ github.workflow }} on Windows
               env:
@@ -41,26 +41,26 @@ jobs:
                   XDG_CONFIG_HOME: ${{ github.workspace }}/target/config
                   XDG_DATA_HOME: ${{ github.workspace }}/target/data
               run: |
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_arm64        -m ./LICENSE       -f target/LICENSE
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_arm64        -m ./LICENSE       -f target/LICENSE
 
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_arm64        -m ./coreutils.exe -f target/File.Darwin_arm64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_x86_64       -m ./coreutils.exe -f target/File.Darwin_x86_64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm64_gnu     -m ./coreutils.exe -f target/File.Linux_arm64_gnu.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm64         -m ./coreutils.exe -f target/File.Linux_arm64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm           -m ./coreutils.exe -f target/File.Linux_arm.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86           -m ./coreutils.exe -f target/File.Linux_x86.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_gnu       -m ./coreutils.exe -f target/File.Linux_x86_gnu.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_64        -m ./coreutils.exe -f target/File.Linux_x86_64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_64_gnu    -m ./coreutils.exe -f target/File.Linux_x86_64_gnu.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_arm64       -m ./coreutils.exe -f target/File.Windows_arm64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86         -m ./coreutils.exe -f target/File.Windows_x86.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86_64      -m ./coreutils.exe -f target/File.Windows_x86_64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86_64_gnu  -m ./coreutils.exe -f target/File.Windows_x86_64_gnu.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_arm64        -m ./coreutils.exe -f target/Release.Darwin_arm64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_x86_64       -m ./coreutils.exe -f target/Release.Darwin_x86_64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm64_gnu     -m ./coreutils.exe -f target/Release.Linux_arm64_gnu.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm64         -m ./coreutils.exe -f target/Release.Linux_arm64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm           -m ./coreutils.exe -f target/Release.Linux_arm.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86           -m ./coreutils.exe -f target/Release.Linux_x86.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86_gnu       -m ./coreutils.exe -f target/Release.Linux_x86_gnu.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86_64        -m ./coreutils.exe -f target/Release.Linux_x86_64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86_64_gnu    -m ./coreutils.exe -f target/Release.Linux_x86_64_gnu.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_arm64       -m ./coreutils.exe -f target/Release.Windows_arm64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86         -m ./coreutils.exe -f target/Release.Windows_x86.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86_64      -m ./coreutils.exe -f target/Release.Windows_x86_64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86_64_gnu  -m ./coreutils.exe -f target/Release.Windows_x86_64_gnu.coreutils.exe
 
     build:
         runs-on: ubuntu-22.04
         env:
-          TEST_SLOT: File.Linux_x86_64 # we'll test the build on this slot
+          TEST_SLOT: Release.Linux_x86_64 # we'll test the build on this slot
         needs: windows-dependencies
         steps:
             - name: Checkout
@@ -91,21 +91,21 @@ jobs:
                   XDG_CONFIG_HOME: ${{ github.workspace }}/target/config
                   XDG_DATA_HOME: ${{ github.workspace }}/target/data
               run: |
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_arm64        -m ./LICENSE       -f target/LICENSE
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_arm64        -m ./LICENSE       -f target/LICENSE
 
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_arm64        -m ./coreutils.exe -f target/File.Darwin_arm64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Darwin_x86_64       -m ./coreutils.exe -f target/File.Darwin_x86_64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm64_gnu     -m ./coreutils.exe -f target/File.Linux_arm64_gnu.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm64         -m ./coreutils.exe -f target/File.Linux_arm64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_arm           -m ./coreutils.exe -f target/File.Linux_arm.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86           -m ./coreutils.exe -f target/File.Linux_x86.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_gnu       -m ./coreutils.exe -f target/File.Linux_x86_gnu.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_64        -m ./coreutils.exe -f target/File.Linux_x86_64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Linux_x86_64_gnu    -m ./coreutils.exe -f target/File.Linux_x86_64_gnu.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_arm64       -m ./coreutils.exe -f target/File.Windows_arm64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86         -m ./coreutils.exe -f target/File.Windows_x86.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86_64      -m ./coreutils.exe -f target/File.Windows_x86_64.coreutils.exe
-                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s File.Windows_x86_64_gnu  -m ./coreutils.exe -f target/File.Windows_x86_64_gnu.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_arm64        -m ./coreutils.exe -f target/Release.Darwin_arm64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_x86_64       -m ./coreutils.exe -f target/Release.Darwin_x86_64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm64_gnu     -m ./coreutils.exe -f target/Release.Linux_arm64_gnu.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm64         -m ./coreutils.exe -f target/Release.Linux_arm64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm           -m ./coreutils.exe -f target/Release.Linux_arm.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86           -m ./coreutils.exe -f target/Release.Linux_x86.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86_gnu       -m ./coreutils.exe -f target/Release.Linux_x86_gnu.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86_64        -m ./coreutils.exe -f target/Release.Linux_x86_64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86_64_gnu    -m ./coreutils.exe -f target/Release.Linux_x86_64_gnu.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_arm64       -m ./coreutils.exe -f target/Release.Windows_arm64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86         -m ./coreutils.exe -f target/Release.Windows_x86.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86_64      -m ./coreutils.exe -f target/Release.Windows_x86_64.coreutils.exe
+                dk0/mlfront-shell --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86_64_gnu  -m ./coreutils.exe -f target/Release.Windows_x86_64_gnu.coreutils.exe
 
             - name: Test ${{ github.workflow }}
               run: target/${{ env.TEST_SLOT }}.coreutils.exe --help
@@ -117,16 +117,16 @@ jobs:
               with:
                 files: |
                   target/LICENSE
-                  target/File.Darwin_arm64.coreutils.exe
-                  target/File.Darwin_x86_64.coreutils.exe
-                  target/File.Linux_arm64_gnu.coreutils.exe
-                  target/File.Linux_arm64.coreutils.exe
-                  target/File.Linux_arm.coreutils.exe
-                  target/File.Linux_x86.coreutils.exe
-                  target/File.Linux_x86_gnu.coreutils.exe
-                  target/File.Linux_x86_64.coreutils.exe
-                  target/File.Linux_x86_64_gnu.coreutils.exe
-                  target/File.Windows_arm64.coreutils.exe
-                  target/File.Windows_x86.coreutils.exe
-                  target/File.Windows_x86_64.coreutils.exe
-                  target/File.Windows_x86_64_gnu.coreutils.exe
+                  target/Release.Darwin_arm64.coreutils.exe
+                  target/Release.Darwin_x86_64.coreutils.exe
+                  target/Release.Linux_arm64_gnu.coreutils.exe
+                  target/Release.Linux_arm64.coreutils.exe
+                  target/Release.Linux_arm.coreutils.exe
+                  target/Release.Linux_x86.coreutils.exe
+                  target/Release.Linux_x86_gnu.coreutils.exe
+                  target/Release.Linux_x86_64.coreutils.exe
+                  target/Release.Linux_x86_64_gnu.coreutils.exe
+                  target/Release.Windows_arm64.coreutils.exe
+                  target/Release.Windows_x86.coreutils.exe
+                  target/Release.Windows_x86_64.coreutils.exe
+                  target/Release.Windows_x86_64_gnu.coreutils.exe

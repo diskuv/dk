@@ -5,15 +5,15 @@ Steps
 
 0. [CommonsBase_Std.S7z.Assets] See "Binary assets" in CommonsBase_Std.S7z.Assets.
 1. [CommonsBase_Std.S7z.S7zr] Obtain 7zr.exe that only works on Windows.
-   Test with: `get-object 'CommonsBase_Std.S7z.S7zr@25.1.0' -s File.Windows_x86_64 -d target/s7zr`
+   Test with: `get-object 'CommonsBase_Std.S7z.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/s7zr`
 2. [CommonsBase_Std.S7z.Windows7zExe] Use 7zr.exe to extract the Window-specific binaries from the installers.
-   Test with: `get-object 'CommonsBase_Std.S7z.Windows7zExe@25.1.0' -s File.Windows_x86_64 -d target/win7z`
+   Test with: `get-object 'CommonsBase_Std.S7z.Windows7zExe@25.1.0' -s Release.Windows_x86_64 -d target/win7z`
 3. [CommonsBase_Std.S7z.MacLinux7zTar] Use 7zr.exe to extract the Mac and Linux-specific tar files from the installers.
-   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zTar@25.1.0' -s File.Darwin_arm64 -d target/mactar`
+   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zTar@25.1.0' -s Release.Darwin_arm64 -d target/mactar`
 4. [CommonsBase_Std.S7z.MacLinux7zExe] Use Windows 7z.exe to extract the Mac and Linux-specific binaries from the tar files.
-   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zExe@25.1.0' -s File.Darwin_arm64 -d target/macexe`
+   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zExe@25.1.0' -s Release.Darwin_arm64 -d target/macexe`
 5. [CommonsBase_Std.S7z] Rename all extracted executables to '7zz.exe' for consistency.
-   Test with: `get-object 'CommonsBase_Std.S7z@25.1.0' -s File.Darwin_arm64 -d target/s7zexe`
+   Test with: `get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_arm64 -d target/s7zexe`
 
 All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [CommonsBase_Std.S7z.Assets].
 
@@ -34,30 +34,30 @@ All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [Comm
           // - 'LICENSE' as the dk conventional filename for the main license file
 
           // Windows. 7z.exe -> 7zz.exe
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_arm -m ./7z.exe -f ${SLOT.File.Windows_arm}/7zz.exe",
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_arm64 -m ./7z.exe -f ${SLOT.File.Windows_arm64}/7zz.exe",
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_x86 -m ./7z.exe -f ${SLOT.File.Windows_x86}/7zz.exe",
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_x86_64 -m ./7z.exe -f ${SLOT.File.Windows_x86_64}/7zz.exe",
+          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_arm -m ./7z.exe -f ${SLOT.Release.Windows_arm}/7zz.exe",
+          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_arm64 -m ./7z.exe -f ${SLOT.Release.Windows_arm64}/7zz.exe",
+          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -m ./7z.exe -f ${SLOT.Release.Windows_x86}/7zz.exe",
+          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86_64 -m ./7z.exe -f ${SLOT.Release.Windows_x86_64}/7zz.exe",
 
           // Unix. 7zz -> 7zz.exe
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Darwin_arm64 -m ./7zz -f ${SLOT.File.Darwin_arm64}/7zz.exe",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Darwin_x86_64 -m ./7zz -f ${SLOT.File.Darwin_x86_64}/7zz.exe",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Linux_arm -m ./7zz -f ${SLOT.File.Linux_arm}/7zz.exe",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Linux_arm64 -m ./7zz -f ${SLOT.File.Linux_arm64}/7zz.exe",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Linux_x86 -m ./7zz -f ${SLOT.File.Linux_x86}/7zz.exe",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Linux_x86_64 -m ./7zz -f ${SLOT.File.Linux_x86_64}/7zz.exe",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./7zz -f ${SLOT.Release.Darwin_arm64}/7zz.exe",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Darwin_x86_64 -m ./7zz -f ${SLOT.Release.Darwin_x86_64}/7zz.exe",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Linux_arm -m ./7zz -f ${SLOT.Release.Linux_arm}/7zz.exe",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Linux_arm64 -m ./7zz -f ${SLOT.Release.Linux_arm64}/7zz.exe",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Linux_x86 -m ./7zz -f ${SLOT.Release.Linux_x86}/7zz.exe",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Linux_x86_64 -m ./7zz -f ${SLOT.Release.Linux_x86_64}/7zz.exe",
 
           // Windows and Unix. License.txt -> LICENSE
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_x86 -m ./License.txt -f ${SLOT.File.Windows_arm}/LICENSE",
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_x86 -m ./License.txt -f ${SLOT.File.Windows_arm64}/LICENSE",
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_x86 -m ./License.txt -f ${SLOT.File.Windows_x86}/LICENSE",
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_x86 -m ./License.txt -f ${SLOT.File.Windows_x86_64}/LICENSE",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Darwin_arm64 -m ./License.txt -f ${SLOT.File.Darwin_arm64}/LICENSE",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Darwin_arm64 -m ./License.txt -f ${SLOT.File.Darwin_x86_64}/LICENSE",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Darwin_arm64 -m ./License.txt -f ${SLOT.File.Linux_arm}/LICENSE",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Darwin_arm64 -m ./License.txt -f ${SLOT.File.Linux_arm64}/LICENSE",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Darwin_arm64 -m ./License.txt -f ${SLOT.File.Linux_x86}/LICENSE",
-          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s File.Darwin_arm64 -m ./License.txt -f ${SLOT.File.Linux_x86_64}/LICENSE"
+          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -m ./License.txt -f ${SLOT.Release.Windows_arm}/LICENSE",
+          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -m ./License.txt -f ${SLOT.Release.Windows_arm64}/LICENSE",
+          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -m ./License.txt -f ${SLOT.Release.Windows_x86}/LICENSE",
+          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -m ./License.txt -f ${SLOT.Release.Windows_x86_64}/LICENSE",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./License.txt -f ${SLOT.Release.Darwin_arm64}/LICENSE",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./License.txt -f ${SLOT.Release.Darwin_x86_64}/LICENSE",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./License.txt -f ${SLOT.Release.Linux_arm}/LICENSE",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./License.txt -f ${SLOT.Release.Linux_arm64}/LICENSE",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./License.txt -f ${SLOT.Release.Linux_x86}/LICENSE",
+          "get-object CommonsBase_Std.S7z.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./License.txt -f ${SLOT.Release.Linux_x86_64}/LICENSE"
         ]
       },
       "outputs": {
@@ -65,16 +65,16 @@ All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [Comm
           {
             "paths": ["7zz.exe", "LICENSE"],
             "slots": [
-              "File.Windows_arm",
-              "File.Windows_arm64",
-              "File.Windows_x86",
-              "File.Windows_x86_64",
-              "File.Darwin_arm64",
-              "File.Darwin_x86_64",
-              "File.Linux_arm",
-              "File.Linux_arm64",
-              "File.Linux_x86",
-              "File.Linux_x86_64"
+              "Release.Windows_arm",
+              "Release.Windows_arm64",
+              "Release.Windows_x86",
+              "Release.Windows_x86_64",
+              "Release.Darwin_arm64",
+              "Release.Darwin_x86_64",
+              "Release.Linux_arm",
+              "Release.Linux_arm64",
+              "Release.Linux_x86",
+              "Release.Linux_x86_64"
             ]
           }
         ]

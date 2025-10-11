@@ -7,7 +7,7 @@ The object DkExe_Std.Asset.Latest will build (ie. fetch) the
 "private" and "public" asset files listed below. Running the
 following command with `mlfront-shell` or within your own "precommands":
 
-  get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s File.Darwin_arm64 -d dir-darwin_arm64
+  get-object DkExe_Std.Asset.Latest@1.0.202501010000 -s Release.Darwin_arm64 -d dir-darwin_arm64
 
 will make the "dk-darwin_arm64" executable available to you as the file
 "dk-darwin_arm64".
@@ -36,24 +36,24 @@ will make the "dk-darwin_arm64" executable from version
       "id": "DkSetup_Std.Exe@2.4.202508302258-signed",
       "precommands": {
         "private": [
-          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-darwin_arm64 -f ${SLOT.File.Darwin_arm64}/dk.exe",
-          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-darwin_x86_64 -f ${SLOT.File.Darwin_x86_64}/dk.exe",
-          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-linux_x86_64 -f ${SLOT.File.Linux_x86_64}/dk.exe",
-          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-linux_x86 -f ${SLOT.File.Linux_x86}/dk.exe",
-          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-windows_x86_64.exe -f ${SLOT.File.Windows_x86_64}/dk.exe",
-          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-windows_x86.exe -f ${SLOT.File.Windows_x86}/dk.exe"
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-darwin_arm64 -f ${SLOT.Release.Darwin_arm64}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-darwin_x86_64 -f ${SLOT.Release.Darwin_x86_64}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-linux_x86_64 -f ${SLOT.Release.Linux_x86_64}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-linux_x86 -f ${SLOT.Release.Linux_x86}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-windows_x86_64.exe -f ${SLOT.Release.Windows_x86_64}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508302258-signed -p dk-windows_x86.exe -f ${SLOT.Release.Windows_x86}/dk.exe"
         ]
       },
       "outputs": {
         "files": [
           {
             "slots": [
-              "File.Darwin_arm64",
-              "File.Darwin_x86_64",
-              "File.Linux_x86_64",
-              "File.Linux_x86",
-              "File.Windows_x86_64",
-              "File.Windows_x86"
+              "Release.Darwin_arm64",
+              "Release.Darwin_x86_64",
+              "Release.Linux_x86_64",
+              "Release.Linux_x86",
+              "Release.Windows_x86_64",
+              "Release.Windows_x86"
             ],
             "paths": ["dk.exe"]
           }

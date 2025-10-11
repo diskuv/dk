@@ -1,6 +1,6 @@
 // Testing:
-//  get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Darwin_arm64 -d target\coreutils-tarmacarm64
-//  dk0/mlfront-shell -I .\pkgs\include\CommonsBase_Std -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: -- get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s File.Darwin_arm64 -d target\coreutils-exe-macarm64
+//  get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s Release.Darwin_arm64 -d target\coreutils-tarmacarm64
+//  dk0/mlfront-shell -I .\pkgs\include\CommonsBase_Std -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: -- get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s Release.Darwin_arm64 -d target\coreutils-exe-macarm64
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
@@ -10,17 +10,17 @@
       "precommands": {
         "private": [
           // need bin/<architecture>/7z.exe (7zr does not extract tar files)
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s File.Windows_x86 -d bin/File.Windows_x86",
+          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux tar files. since same destination directory need [install-object]
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Darwin_arm64 -d tarballs",
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Darwin_x86_64 -d tarballs",
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_arm64_gnu -d tarballs",
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_arm64 -d tarballs",
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_arm -d tarballs",
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86_gnu -d tarballs",
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86 -d tarballs",
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86_64 -d tarballs",
-          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s File.Linux_x86_64_gnu -d tarballs"
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Darwin_arm64 -d tarballs",
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Darwin_x86_64 -d tarballs",
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Linux_arm64_gnu -d tarballs",
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Linux_arm64 -d tarballs",
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Linux_arm -d tarballs",
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Linux_x86_gnu -d tarballs",
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Linux_x86 -d tarballs",
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Linux_x86_64 -d tarballs",
+          "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Linux_x86_64_gnu -d tarballs"
         ]
       },
       "function": {
@@ -33,12 +33,12 @@
         ],
         "args": [
           // with [7z.exe] ...
-          "bin/File.Windows_x86/7z.exe",
+          "bin/Release.Windows_x86/7z.exe",
           // (e)xtract all files into a single flat directory
           "e",
-          // to output directory for slot [File.Darwin_arm64] (etc.)
+          // to output directory for slot [Release.Darwin_arm64] (etc.)
           "-o${SLOT.request}",
-          // from the object [coreutils.File.Darwin_arm64.tar] (etc.)
+          // from the object [coreutils.Release.Darwin_arm64.tar] (etc.)
           "tarballs/coreutils.${SLOTNAME.request}.tar"
         ]
       },
@@ -52,15 +52,15 @@
               "README.md"
             ],
             "slots": [
-              "File.Darwin_arm64",
-              "File.Darwin_x86_64",
-              "File.Linux_arm64_gnu",
-              "File.Linux_arm64",
-              "File.Linux_arm",
-              "File.Linux_x86_gnu",
-              "File.Linux_x86",
-              "File.Linux_x86_64",
-              "File.Linux_x86_64_gnu"
+              "Release.Darwin_arm64",
+              "Release.Darwin_x86_64",
+              "Release.Linux_arm64_gnu",
+              "Release.Linux_arm64",
+              "Release.Linux_arm",
+              "Release.Linux_x86_gnu",
+              "Release.Linux_x86",
+              "Release.Linux_x86_64",
+              "Release.Linux_x86_64_gnu"
             ]
           }
         ]

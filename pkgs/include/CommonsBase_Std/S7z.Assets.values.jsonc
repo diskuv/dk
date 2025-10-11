@@ -5,15 +5,15 @@ Steps
 
 0. [CommonsBase_Std.S7z.Assets] See "Binary assets".
 1. [CommonsBase_Std.S7z.S7zr] Obtain 7zr.exe that only works on Windows.
-   Test with: `get-object 'CommonsBase_Std.S7z.S7zr@25.1.0' -s File.Windows_x86_64 -d target/s7zr`
+   Test with: `get-object 'CommonsBase_Std.S7z.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/s7zr`
 2. [CommonsBase_Std.S7z.Windows7zExe] Use 7zr.exe to extract the Window-specific binaries from the installers.
-   Test with: `get-object 'CommonsBase_Std.S7z.Windows7zExe@25.1.0' -s File.Windows_x86_64 -d target/win7z`
+   Test with: `get-object 'CommonsBase_Std.S7z.Windows7zExe@25.1.0' -s Release.Windows_x86_64 -d target/win7z`
 3. [CommonsBase_Std.S7z.MacLinux7zExe] Use 7zr.exe to extract the Mac and Linux-specific tar files from the installers.
-   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zTar@25.1.0' -s File.Darwin_arm64 -d target/mactar`
+   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zTar@25.1.0' -s Release.Darwin_arm64 -d target/mactar`
 4. [CommonsBase_Std.S7z.MacLinux7zExe] Use Windows 7z.exe to extract the Mac and Linux-specific binaries from the tar files.
-   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zExe@25.1.0' -s File.Darwin_arm64 -d target/macexe`
+   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zExe@25.1.0' -s Release.Darwin_arm64 -d target/macexe`
 5. [CommonsBase_Std.S7z] Rename all extracted executables to '7zz.exe' for consistency.
-   Test with: `get-object 'CommonsBase_Std.S7z@25.1.0' -s File.Darwin_arm64 -d target/s7zexe`
+   Test with: `get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_arm64 -d target/s7zexe`
 
 ===================================================
 Binary assets for 7zip and p7zip command line tools
