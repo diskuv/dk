@@ -1,4 +1,4 @@
-name: CommonsBase_Std   # we'll build this library
+name: CommonsBase_Std 2.4  # we'll build this library
 on:
   push:
     tags:
@@ -6,9 +6,9 @@ on:
   workflow_dispatch: # allow manual triggering from GitHub page
 
 jobs:
-    build:
+    distribute:
         runs-on: windows-2022
-        if: github.ref_type == 'tag'
+        if: github.ref_type == 'tag' && startsWith(github.ref_name, '2.4.')
         permissions:
           id-token: write
           contents: write # for action-gh-release
