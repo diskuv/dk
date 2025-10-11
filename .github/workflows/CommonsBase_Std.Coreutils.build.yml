@@ -111,22 +111,22 @@ jobs:
               run: target/${{ env.TEST_SLOT }}.coreutils.exe --help
 
             # Create release if and only if tag is pushed
-            - name: Release ${{ github.workflow }}
-              uses: softprops/action-gh-release@v2
-              if: github.ref_type == 'tag'
-              with:
-                files: |
-                  target/LICENSE
-                  target/Release.Darwin_arm64.coreutils.exe
-                  target/Release.Darwin_x86_64.coreutils.exe
-                  target/Release.Linux_arm64_gnu.coreutils.exe
-                  target/Release.Linux_arm64.coreutils.exe
-                  target/Release.Linux_arm.coreutils.exe
-                  target/Release.Linux_x86.coreutils.exe
-                  target/Release.Linux_x86_gnu.coreutils.exe
-                  target/Release.Linux_x86_64.coreutils.exe
-                  target/Release.Linux_x86_64_gnu.coreutils.exe
-                  target/Release.Windows_arm64.coreutils.exe
-                  target/Release.Windows_x86.coreutils.exe
-                  target/Release.Windows_x86_64.coreutils.exe
-                  target/Release.Windows_x86_64_gnu.coreutils.exe
+            # - name: Release ${{ github.workflow }}
+            #   uses: softprops/action-gh-release@v2
+            #   if: github.ref_type == 'tag'
+            #   with:
+            #     files: |
+            #       target/LICENSE
+            #       target/Release.Darwin_arm64.coreutils.exe
+            #       target/Release.Darwin_x86_64.coreutils.exe
+            #       target/Release.Linux_arm64_gnu.coreutils.exe
+            #       target/Release.Linux_arm64.coreutils.exe
+            #       target/Release.Linux_arm.coreutils.exe
+            #       target/Release.Linux_x86.coreutils.exe
+            #       target/Release.Linux_x86_gnu.coreutils.exe
+            #       target/Release.Linux_x86_64.coreutils.exe
+            #       target/Release.Linux_x86_64_gnu.coreutils.exe
+            #       target/Release.Windows_arm64.coreutils.exe
+            #       target/Release.Windows_x86.coreutils.exe
+            #       target/Release.Windows_x86_64.coreutils.exe
+            #       target/Release.Windows_x86_64_gnu.coreutils.exe
