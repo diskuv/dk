@@ -54,17 +54,17 @@ jobs:
               run: target/${{ env.TEST_SLOT }}.7zz.exe --help
 
             # Create release if and only if tag is pushed
-            - name: Release ${{ github.workflow }}
-              uses: softprops/action-gh-release@v2
-              if: github.ref_type == 'tag'
-              with:
-                files: |
-                  target/LICENSE
-                  target/Release.Darwin_arm64.7zz.exe
-                  target/Release.Darwin_x86_64.7zz.exe
-                  target/Release.Linux_arm.7zz.exe
-                  target/Release.Linux_arm64.7zz.exe
-                  target/Release.Linux_x86.7zz.exe
-                  target/Release.Linux_x86_64.7zz.exe
-                  target/Release.Windows_x86.7zz.exe
-                  target/Release.Windows_x86_64.7zz.exe
+            # - name: Release ${{ github.workflow }}
+            #   uses: softprops/action-gh-release@v2
+            #   if: github.ref_type == 'tag'
+            #   with:
+            #     files: |
+            #       target/LICENSE
+            #       target/Release.Darwin_arm64.7zz.exe
+            #       target/Release.Darwin_x86_64.7zz.exe
+            #       target/Release.Linux_arm.7zz.exe
+            #       target/Release.Linux_arm64.7zz.exe
+            #       target/Release.Linux_x86.7zz.exe
+            #       target/Release.Linux_x86_64.7zz.exe
+            #       target/Release.Windows_x86.7zz.exe
+            #       target/Release.Windows_x86_64.7zz.exe
