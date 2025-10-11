@@ -146,7 +146,7 @@ SET "DK_QUIET="
 SET "_DK_PATH="
 SET "_XCOPY_SWITCHES="
 REM     Then run it
-"%DK_EXE%" %_DKEXE_OPTIONS% -I "%DK_PROJECT_DIR%\pkgs\include" %*
+"%DK_EXE%" %_DKEXE_OPTIONS% -I "%DK_PROJECT_DIR%\etc\dk\v" %*
 EXIT /B %ERRORLEVEL%
 
 REM ------ SUBROUTINE [downloadFile]

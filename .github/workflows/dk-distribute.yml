@@ -1,8 +1,8 @@
 name: CommonsBase_Std   # we'll build this library
 on:
-  push:              # build on every commit
+  push:
     tags:
-      - '*'          # but only if tag is pushed
+      - '*'          # build if tag is pushed
   workflow_dispatch: # allow manual triggering from GitHub page
 
 jobs:
@@ -18,9 +18,9 @@ jobs:
         # are tied to this environment only.
         environment: dk-distribution
         steps:
-            # - name: Harden Runner # Optional but recommended
-            #   uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
-            #   with: { egress-policy: audit }
+            - name: Harden Runner # Optional but recommended
+              uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+              with: { egress-policy: audit }
             - name: Checkout project
               uses: actions/checkout@v5
 
@@ -28,7 +28,6 @@ jobs:
               uses: diskuv/dk-distribute@v1
               with:
                   id: CommonsBase_Std@${{ github.ref_name }}
-                  options: -I pkgs/include # todo: canonical is etc/dk/v
                   pubkey: ${{ secrets.distribute_2_4_pubkey }}
                   seckey: ${{ secrets.distribute_2_4_seckey }}
                   slots: |

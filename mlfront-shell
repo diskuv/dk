@@ -649,4 +649,4 @@ export DKCODER_ARG0="$0"
 export DKCODER_PWD="$dk_pwd"
 export DK_PROJECT_DIR
 #   shellcheck disable=SC2086
-exec "$DK_EXE" $_DKEXE_OPTIONS -I "$DK_PROJECT_DIR/pkgs/include" "$@"
+exec "$DK_EXE" $_DKEXE_OPTIONS -I "$DK_PROJECT_DIR/etc/dk/v" "$@"
