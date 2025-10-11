@@ -1,8 +1,8 @@
-name: CommonsBase_Std 2.4  # we'll build this library
+name: CommonsBase_Std@2.4.x  # we'll build this library
 on:
   push:
     tags:
-      - '*'          # build if tag is pushed
+      - '2.4.*' # build if tag is pushed
   workflow_dispatch: # allow manual triggering from GitHub page
 
 jobs:
