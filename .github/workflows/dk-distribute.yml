@@ -8,12 +8,12 @@ on:
 jobs:
     build:
         runs-on: windows-2022
-        # runs-on: ubuntu-22.04
         if: github.ref_type == 'tag'
         permissions:
           id-token: write
-          contents: read
+          contents: write # for action-gh-release
           attestations: write
+
         # The secrets created by `dk0/mlfront-shell -- prepare-version --ci github VERSION`
         # are tied to this environment only.
         environment: dk-distribution
@@ -28,7 +28,7 @@ jobs:
               uses: diskuv/dk-distribute@v1
               with:
                   id: CommonsBase_Std@${{ github.ref_name }}
-                  options: -I pkgs/include -d parsetrace # todo: canonical is etc/dk/v
+                  options: -I pkgs/include # todo: canonical is etc/dk/v
                   pubkey: ${{ secrets.distribute_2_4_pubkey }}
                   seckey: ${{ secrets.distribute_2_4_seckey }}
                   slots: |
@@ -49,9 +49,5 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
             - name: Release ${{ github.workflow }}
-              uses: softprops/action-gh-release@v2
-              with: # TODO: remove *.values.json during/before `combine` step so this is just dk-dist/*
-                files: |
-                  dk-dist/values.json
-                  dk-dist/*.tracestore
-                  dk-dist/*.valuestore.zip
+              uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
+              with: { files: dk-dist/* }
