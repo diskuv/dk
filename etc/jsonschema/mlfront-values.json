@@ -522,7 +522,7 @@
                         }
                     },
                     "precommands": {
-                        "description": "The commands used to fetch objects that must be available to execute the form. The commands are written in the Value Shell Language (VSL). For example, 'get-object VGKot5hBsd81kMupNCXHaqbhv3huEbxAFMLnpcX2hniwn File.Agnostic > gcc'.",
+                        "description": "The commands used to fetch objects that must be available to execute the form. The commands are written in the Value Shell Language (VSL). For example, 'get-object VGKot5hBsd81kMupNCXHaqbhv3huEbxAFMLnpcX2hniwn Release.Agnostic > gcc'.",
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
@@ -548,7 +548,7 @@
                         "additionalProperties": false,
                         "properties": {
                             "args": {
-                                "description": "The command line arguments to the executable. All form variables (ex. ${SLOT.File.Agnostic}) may be used.",
+                                "description": "The command line arguments to the executable. All form variables (ex. ${SLOT.Release.Agnostic}) may be used.",
                                 "type": "array",
                                 "items": {
                                     "type": "string"

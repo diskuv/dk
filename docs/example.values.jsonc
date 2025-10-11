@@ -90,7 +90,7 @@
       // command line arguments.
       //
       // *get-object*. how to lift a command line into a JSON document? use the https://www.w3.org/TR/html-json-forms/ spec.
-      // so `get-object DkExe_Std.Form@1.0.202501010000 -s File.Darwin_arm64 -f dk.exe -- pet[species]=dog pet[name]=fido` would
+      // so `get-object DkExe_Std.Form@1.0.202501010000 -s Release.Darwin_arm64 -f dk.exe -- pet[species]=dog pet[name]=fido` would
       // pass `{"pet":{"species":"dog","name":"fido"}}` to the form (which would be interpreted by the `options` field below).
       //
       // the "+field=jsonfile" syntax is an extension to the JSON forms spec that reads the JSON file `jsonfile` and sets
@@ -130,7 +130,7 @@
           // "windows" or "posix"; same as `clang --rsp-quoting`
           "quoting": {
             "default": "posix",
-            "windows_slots": ["File.Windows_x86_64"]
+            "windows_slots": ["Release.Windows_x86_64"]
           },
           // optional. If specified, the response file will only be created if
           // the command line length exceeds this value. but all options that
@@ -147,12 +147,12 @@
       },
       "precommands": {
         "private": [
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_arm64 -f ${SLOT.File.Darwin_arm64}/dk",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_x86_64 -f ${SLOT.File.Darwin_x86_64}/dk",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86_64 -f ${SLOT.File.Linux_x86_64}/dk",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86 -f ${SLOT.File.Linux_x86}/dk",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86_64.exe -f ${SLOT.File.Windows_x86_64}/dk.exe",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86.exe -f ${SLOT.File.Windows_x86}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_arm64 -f ${SLOT.Release.Darwin_arm64}/dk",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_x86_64 -f ${SLOT.Release.Darwin_x86_64}/dk",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86_64 -f ${SLOT.Release.Linux_x86_64}/dk",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86 -f ${SLOT.Release.Linux_x86}/dk",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86_64.exe -f ${SLOT.Release.Windows_x86_64}/dk.exe",
+          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86.exe -f ${SLOT.Release.Windows_x86}/dk.exe",
           // This is an example where we've passed JSON down from the user into a precommand without loss of information
           // and without exposing unnecessary data to the precommand.
           // `get-object` expands any `+field=jsonfile` into the contents of the file. So when `get-object`
@@ -165,27 +165,27 @@
       "outputs": {
         "files": [
           {
-            "slots": ["File.Darwin_arm64"],
+            "slots": ["Release.Darwin_arm64"],
             "paths": ["dk"]
           },
           {
-            "slots": ["File.Darwin_x86_64"],
+            "slots": ["Release.Darwin_x86_64"],
             "paths": ["dk"]
           },
           {
-            "slots": ["File.Linux_x86_64"],
+            "slots": ["Release.Linux_x86_64"],
             "paths": ["dk"]
           },
           {
-            "slots": ["File.Linux_x86"],
+            "slots": ["Release.Linux_x86"],
             "paths": ["dk"]
           },
           {
-            "slots": ["File.Windows_x86_64"],
+            "slots": ["Release.Windows_x86_64"],
             "paths": ["dk.exe"]
           },
           {
-            "slots": ["File.Windows_x86"],
+            "slots": ["Release.Windows_x86"],
             "paths": ["dk.exe"]
           }
         ]

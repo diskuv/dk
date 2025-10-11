@@ -5,15 +5,15 @@ Steps
 
 0. [CommonsBase_Std.S7z.Assets] See "Binary assets" in CommonsBase_Std.S7z.Assets.
 1. [CommonsBase_Std.S7z.S7zr] Obtain 7zr.exe that only works on Windows.
-   Test with: `get-object 'CommonsBase_Std.S7z.S7zr@25.1.0' -s File.Windows_x86_64 -d target/s7zr`
+   Test with: `get-object 'CommonsBase_Std.S7z.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/s7zr`
 2. [CommonsBase_Std.S7z.Windows7zExe] Use 7zr.exe to extract the Window-specific binaries from the installers.
-   Test with: `get-object 'CommonsBase_Std.S7z.Windows7zExe@25.1.0' -s File.Windows_x86_64 -d target/win7z`
+   Test with: `get-object 'CommonsBase_Std.S7z.Windows7zExe@25.1.0' -s Release.Windows_x86_64 -d target/win7z`
 3. [CommonsBase_Std.S7z.MacLinux7zExe] Use 7zr.exe to extract the Mac and Linux-specific tar files from the installers.
-   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zTar@25.1.0' -s File.Darwin_arm64 -d target/mactar`
+   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zTar@25.1.0' -s Release.Darwin_arm64 -d target/mactar`
 4. [CommonsBase_Std.S7z.MacLinux7zExe] Use Windows 7z.exe to extract the Mac and Linux-specific binaries from the tar files.
-   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zExe@25.1.0' -s File.Darwin_arm64 -d target/macexe`
+   Test with: `get-object 'CommonsBase_Std.S7z.MacLinux7zExe@25.1.0' -s Release.Darwin_arm64 -d target/macexe`
 5. [CommonsBase_Std.S7z] Rename all extracted executables to '7zz.exe' for consistency.
-   Test with: `get-object 'CommonsBase_Std.S7z@25.1.0' -s File.Darwin_arm64 -d target/s7zexe`
+   Test with: `get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_arm64 -d target/s7zexe`
 
 All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [CommonsBase_Std.S7z.Assets].
 
@@ -30,15 +30,15 @@ All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [Comm
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe
-          "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s File.Windows_arm -d bin/File.Windows_arm",
-          "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s File.Windows_arm64 -d bin/File.Windows_arm64",
-          "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s File.Windows_x86 -d bin/File.Windows_x86",
-          "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s File.Windows_x86_64 -d bin/File.Windows_x86_64",
+          "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_arm -d bin/Release.Windows_arm",
+          "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_arm64 -d bin/Release.Windows_arm64",
+          "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
+          "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_x86_64 -d bin/Release.Windows_x86_64",
           // need Windows installers
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-File.Windows_arm.exe",
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-File.Windows_arm64.exe",
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-File.Windows_x86.exe",
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-File.Windows_x86_64.exe"
+          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-Release.Windows_arm.exe",
+          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-Release.Windows_arm64.exe",
+          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86.exe",
+          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86_64.exe"
         ]
       },
       "function": {
@@ -47,9 +47,9 @@ All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [Comm
           "bin/${SLOTNAME.request}/7zr.exe",
           // e(x)tract files into directory tree
           "x",
-          // to output directory for slot [File.Windows_arm] (etc.)
+          // to output directory for slot [Release.Windows_arm] (etc.)
           "-o${SLOT.request}",
-          // from the asset file [7z2501-arm.exe] renamed [7z-File.Windows_arm.exe] (etc.)
+          // from the asset file [7z2501-arm.exe] renamed [7z-Release.Windows_arm.exe] (etc.)
           "7z-${SLOTNAME.request}.exe",
           // extract only the '7z.exe' executable and 'LICENSE' file
           "7z.exe",
@@ -61,23 +61,23 @@ All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [Comm
           {
             "paths": ["7z.exe", "License.txt"],
             "slots": [
-              "File.Windows_arm",
-              "File.Windows_arm64",
-              "File.Windows_x86",
-              "File.Windows_x86_64",
+              "Release.Windows_arm",
+              "Release.Windows_arm64",
+              "Release.Windows_x86",
+              "Release.Windows_x86_64",
               // Other architectures depend on this form, but this form needs to run on Windows.
               // Whenever we use ${SLOT.request} the output slots determine the dependencies allowed,
               // so we list all possible architectures here.
               // You can verify with '-d task' to see that tasks are created per output slot.
               // If you forget one, you'll get an error like the following (but you'll also get a hint):
-              //   Could not find `CommonsBase_Std.S7z.Windows7zExe@25.1.0+bn-20250101000000 -s File.Windows_x86`
-              "File.Agnostic",
-              "File.Darwin_arm64",
-              "File.Darwin_x86_64",
-              "File.Linux_arm",
-              "File.Linux_arm64",
-              "File.Linux_x86",
-              "File.Linux_x86_64"
+              //   Could not find `CommonsBase_Std.S7z.Windows7zExe@25.1.0+bn-20250101000000 -s Release.Windows_x86`
+              "Release.Agnostic",
+              "Release.Darwin_arm64",
+              "Release.Darwin_x86_64",
+              "Release.Linux_arm",
+              "Release.Linux_arm64",
+              "Release.Linux_x86",
+              "Release.Linux_x86_64"
             ]
           }
         ]

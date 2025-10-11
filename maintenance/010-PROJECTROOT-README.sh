@@ -37,7 +37,7 @@ if [ -n "${COMSPEC:-}" ]; then
     CMD=.cmd
 fi
 
-# dkx/mlfront-shell$CMD -- get-object DkSetup_Std.Exe@2.4.202508302258-signed -s File.Windows_x86_64 -d target/
+# dkx/mlfront-shell$CMD -- get-object DkSetup_Std.Exe@2.4.202508302258-signed -s Release.Windows_x86_64 -d target/
 
 # nit: Why doesn't CRLF work with ocaml-mdx?
 if [ -n "${COMSPEC:-}" ]; then

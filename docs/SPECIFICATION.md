@@ -175,19 +175,19 @@ The output directory for the form function for the slot named `SlotName`.
 
 Output directories for the build system in install mode are the end-user installation directories, while for other modes the output directory may be a sandbox temporary directory.
 
-Expressions are only evaluated if *all* the output types the expression uses are valid for the build system. For example, an expression that uses the output directory `${SLOT.File.Darwin_arm64}` will be skipped by the build system in install mode if the end-user machine's ABI is not `darwin_arm64`.
+Expressions are only evaluated if *all* the output types the expression uses are valid for the build system. For example, an expression that uses the output directory `${SLOT.Release.Darwin_arm64}` will be skipped by the build system in install mode if the end-user machine's ABI is not `darwin_arm64`.
 
 More generally:
 
 | Type                        | Expression Evaluated? | Immediate Thunk Controller |
 | --------------------------- | --------------------- | -------------------------- |
-| `${SLOT.File.Agnostic}`     | Always                | A sandbox directory        |
-| `${SLOT.File.Darwin_arm64}` | Always                | A sandbox directory        |
+| `${SLOT.Release.Agnostic}`     | Always                | A sandbox directory        |
+| `${SLOT.Release.Darwin_arm64}` | Always                | A sandbox directory        |
 
 | Type                        | Expression Evaluated?              | Install Thunk Controller |
 | --------------------------- | ---------------------------------- | ------------------------ |
-| `${SLOT.File.Agnostic}`     | Always                             | The install directory    |
-| `${SLOT.File.Darwin_arm64}` | Only if the end-user machine's ABI | The install directory    |
+| `${SLOT.Release.Agnostic}`     | Always                             | The install directory    |
+| `${SLOT.Release.Darwin_arm64}` | Only if the end-user machine's ABI | The install directory    |
 |                             | is `darwin_arm64`                  |                          |
 
 #### ${MOREINCLUDES}
@@ -267,11 +267,11 @@ The following optimizations are allowed:
 
 - Precommands may be run in parallel.
 - Precommands may be skipped if the requested slot does not match the precommand output slot.
-  For example, let's say you issue the command `get-object THE_ID -s File.Agnostic`.
+  For example, let's say you issue the command `get-object THE_ID -s Release.Agnostic`.
   Let's also say `THE_ID` object has two precommands:
-  1. `get-asset-file ... -f ${SLOT.File.Agnostic}`
+  1. `get-asset-file ... -f ${SLOT.Release.Agnostic}`
   2. `get-object ... -d ${SLOT.Something.Else}`
-  Then the second precommand may be skipped because the requested slot `File.Agnostic` does not match `Something.Else`.
+  Then the second precommand may be skipped because the requested slot `Release.Agnostic` does not match `Something.Else`.
 
 ### Environment Modifications
 
@@ -346,7 +346,7 @@ There is an **alpha conversion** procedure to avoid name collisions:
 1. The set of *more* form ids and *more* asset ids that are defined is assigned to the set `DEFINED_MODULES`.
 2. The set of *more* form ids and *more* asset ids that are referenced is assigned to the set `REFERENCED_MODULES`.
 3. The set `BOUND_MODULES` is calculated as `REFERENCED_MODULES - DEFINED_MODULES`.
-4. A deterministic *more* namespace term is created from a hash of the form id, form slot and the form document. For example, the form id `SomeForm_Std.Example@1.0.0` and the form slot `File.Agnostic` and the form document `{"username":"nobody"}` are SHA-256 hashed together and base32 encoded to create a *more* namespace term like `LMBnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq` (it is allowed to be shorter, but must start with `LMB` representing anonynmous lambda functions).
+4. A deterministic *more* namespace term is created from a hash of the form id, form slot and the form document. For example, the form id `SomeForm_Std.Example@1.0.0` and the form slot `Release.Agnostic` and the form document `{"username":"nobody"}` are SHA-256 hashed together and base32 encoded to create a *more* namespace term like `LMBnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq` (it is allowed to be shorter, but must start with `LMB` representing anonynmous lambda functions).
 5. Each *more* form id and each *more* asset id that is *not* in `BOUND_MODULES` is appended with the *more* namespace term in memory (ex. `SomeForm_Std.Example@1.0.0` becomes `SomeForm_Std.Example.Hnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq@1.0.0`).
 6. The converted `.*.values.json` files are written to a cached directory and imported into the value store.
 
@@ -416,7 +416,7 @@ the build system can give the second shell command a symlink to the first direct
 
 Each object has one or more slots. Each slot is a container for the object's files.
 
-There are no built-in slots. However, `File.Agnostic` is the conventional slot for files that are ABI-agnostic.
+There are no built-in slots. However, `Release.Agnostic` is the conventional slot for files that are ABI-agnostic.
 
 The names of the slots are period-separated "MlFront standard namespace terms". Each of these terms:
 
@@ -435,21 +435,21 @@ There is a POSIX shell styled language to query for objects and assets.
 For example, the "command":
 
 ```sh
-get-object OurStd_Std.Build.Clang@1.0.0 -s File.Agnostic -f clang.exe
+get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -f clang.exe
 ```
 
 will get the object with the id `OurStd_Std.Build.Clang@1.0.0` and place it in the `clang.exe` file.
 
 There are two ways to run these shell commands:
 
-1. Directly from the command line with the efficient `dk` implementation or the reference implementation `mlfront-shell`. For example, `dk get-object OurStd_Std.Build.Clang@1.0.0 -s File.Agnostic -f clang.exe`.
+1. Directly from the command line with the efficient `dk` implementation or the reference implementation `mlfront-shell`. For example, `dk get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -f clang.exe`.
 2. Embedded as "precommands" in a values file. For example,
 
    ```json
    { // ...
     "precommands": {
       "private": [
-        "get-object OurStd_Std.Build.Clang@1.0.0 -s File.Agnostic -f clang.exe"
+        "get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -f clang.exe"
       ]
     },
     // ...
@@ -572,10 +572,10 @@ Here is an example use of a pipe:
     "minor": 0
   },
   "precommands": [
-    "install-object SomeScripting_Minimal.Env -s File.Agnostic -d usr/"
-    "get-asset-file MyAssets_Std.Scripts@1.0.0 -p script/get-size.cmd -s File.Agnostic -f get-size.cmd",
-    "get-asset-file MyAssets_Std.Scripts@1.0.0 -p script/get-size.sh  -s File.Agnostic -f get-size.sh",
-    "pipe-object    SomeContent_Std.DataFile -s File.Agnostic -x data-file-pipe"
+    "install-object SomeScripting_Minimal.Env -s Release.Agnostic -d usr/"
+    "get-asset-file MyAssets_Std.Scripts@1.0.0 -p script/get-size.cmd -s Release.Agnostic -f get-size.cmd",
+    "get-asset-file MyAssets_Std.Scripts@1.0.0 -p script/get-size.sh  -s Release.Agnostic -f get-size.sh",
+    "pipe-object    SomeContent_Std.DataFile -s Release.Agnostic -x data-file-pipe"
   ],
   "function": {
     "args": [
@@ -588,7 +588,7 @@ Here is an example use of a pipe:
       "get-size.sh",
       "--",
       "${PIPE.data-file-pipe}",
-      "${SLOT.File.Agnostic}"
+      "${SLOT.Release.Agnostic}"
     ]
   },
   "assets": [
@@ -613,7 +613,7 @@ Here is an example use of a pipe:
           } } ] }
   ],
   "outputs": [
-    { "slots": ["File.Agnostic"], "paths": ["size.txt"] }
+    { "slots": ["Release.Agnostic"], "paths": ["size.txt"] }
   ]
 }
 ```
