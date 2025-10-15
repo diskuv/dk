@@ -107,7 +107,7 @@ An **object** is a folder that the form produces.
 
 Again: You submit *forms* that produce *objects* created from *assets*.
 
-Finally, we introduce our fourth (4th) word: **value**. A value is any asset, form or object.
+Finally, we introduce our fourth (4th) word: **value**. A value is any bundle, form or object.
 
 Let's relate these concepts to a build activity: our task is to unpack a 7zip executable (`7zz` on Unix or `7z.exe` on Windows) from official, platform-specific 7zip installers.
 
@@ -153,7 +153,7 @@ The objects you see above are intermediate folders, so this might be the first a
 
 **Values** have unique identifiers. We used one when we submitted the form: `CommonsBase_Std.S7z@25.1.0`.
 
-These identifiers contain versions like `25.1.0`. Making a change to a value means creating a new value with the same name but with an increased version. For example, if the text of your 2025-09-04 privacy policy is in the asset `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904`, an end-of-year update to the privacy policy could be `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20251231`. These *semantic* versions offer a lot of flexibility and are industry-standard: [external link: semver 2.0](https://semver.org/). The important point is that **values do not change; versions do**.
+These identifiers contain versions like `25.1.0`. Making a change to a value means creating a new value with the same name but with an increased version. For example, if the text of your 2025-09-04 privacy policy is in the bundle `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904`, an end-of-year update to the privacy policy could be `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20251231`. These *semantic* versions offer a lot of flexibility and are industry-standard: [external link: semver 2.0](https://semver.org/). The important point is that **values do not change; versions do**.
 
 ### Theory
 
@@ -172,7 +172,7 @@ The *don't be stupid* goal, combined with avoiding README-itis, are the reasons 
 1. SHA-256 checksums on all assets, including source code, except local file assets may optionally have SHA-1 checksums. SHA-1 checksums provide interoperability with tools like `git` and Meta's `watchman`.
    With OpenBSD signify signing of the SHA-256 checksums enforced for the `dk` registry (the 3rd control), we gain an assertion that a trusted human authored a source code change.
    That will not stop social engineering attacks like the [xz backdoor](https://www.akamai.com/blog/security-research/critical-linux-backdoor-xz-utils-discovered-what-to-know), but it is an improvement over blindly trusting git commmits.
-2. No tiny packages; that improves asset quality and eases auditing. Initially it may be that you can't submit a package whose binary size is under 1MB.
+2. No tiny packages; that improves bundle quality and eases auditing. Initially it may be that you can't submit a package whose binary size is under 1MB.
 3. OpenBSD signify-based keys to identify software. The reference implementation generates build keys on first build, and they can be cached in CI if you trust your CI vendor:
 
    <!-- $MDX skip -->
@@ -321,7 +321,7 @@ Some of JSON file is fairly straightforward, but let's go through six (6) fields
 
 1. The `$schema` is a reserved field for VS Code to store the location of the JSON schema. You get auto-complete and documentation from the JSON schema. Use it!
 2. The `assets.listing_unencrypted.spec_version` must be 2 unless there is a change to the [specification](docs/SPECIFICATION.md).
-3. The `assets.listing_unencrypted.name` field gives *part* of a unique identifier for the `7zr.exe` asset file. It has syntax borrowed and hacked from the OCaml programming language.
+3. The `assets.listing_unencrypted.name` field gives *part* of a unique identifier for the `7zr.exe` asset. It has syntax borrowed and hacked from the OCaml programming language.
 
    The first part of the name, before the first period, is the **library identifier**. For example, `TeachMe_Std` is the library identifier for `TeachMe_Std.S7z.Assets`. The library id visually has at least three bumps, with an underscore separating the second and third bump. It was designed to be visually recognizable (and recognizable from a lexer) while different enough from other identifiers that there was no accidental overlap. The following picture may help you remember the `BumpBump_Bump` shape:
 
@@ -340,9 +340,9 @@ Let's review the command line options:
 | --------------------------------- | ----------------------------------------------------------- |
 | `dk0/mlfront-shell`               | The build tool. Eventually it will just be `dk`             |
 | `-I 7zip-project`                 | The folders containing `*.values.jsonc` files               |
-| `-x 7zip-org:subpath:`            | Invalidate all asset files with the `origin: "7zip-org"`    |
+| `-x 7zip-org:subpath:`            | Invalidate all bundle files with the `origin: "7zip-org"`    |
 | `--`                              | Separate `dk0/mlfront-shell` options from the command after |
-| `get-asset-file`                  | Command to get the named asset file                         |
+| `get-asset`                  | Command to get the named asset                         |
 | `TeachMe_Std.S7z1a.Assets@25.1.0` | The name and version in `.values.json`                      |
 | `-p 7zr.exe`                      | Identifies the file in `files:[{path:...},...]`             |
 | `-f target/7zr.exe`               | Send command output into the file                           |
@@ -354,14 +354,14 @@ and with that we do:
 # You should have done this already in earlier steps. If not, do it now:
 # $ git clone https://github.com/diskuv/dk.git dk0
 
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset-file 'TeachMe_Std.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
-[error 215565e4]: Could not get asset file.
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset 'TeachMe_Std.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+[error 215565e4]: Could not get asset.
 
     ╭──▶ 7zip-project/TeachMe_Std.S7z.S7zr0.values.jsonc:25.24-25.40
     │
  25 │            "sha256": "fill-me-in-later"
     •                       ┬───────────────
-    •                       ╰╸ Could not find asset file `TeachMe_Std.S7z1a.Assets@25.1.0+bn-20250101000000 -p 7zr.exe` because the computed SHA256 checksum `27cbe3d5804ad09e90bbcaa916da0d5c3b0be9462d0e0fb6cb54be5ed9030875` was unexpected.
+    •                       ╰╸ Could not find asset `TeachMe_Std.S7z1a.Assets@25.1.0+bn-20250101000000 -p 7zr.exe` because the computed SHA256 checksum `27cbe3d5804ad09e90bbcaa916da0d5c3b0be9462d0e0fb6cb54be5ed9030875` was unexpected.
     •
     │ Hint: This may have been a corrupted download, or an attempt to compromise security. Check the source `https://github.com/ip7z/7zip/releases/download/25.01`. If unsure how to proceed, contact your system or security administrator.
     │ Hint: [autofix] Replace `fill-me-in-later` with `27cbe3d5804ad09e90bbcaa916da0d5c3b0be9462d0e0fb6cb54be5ed9030875` only if the checksum is valid; use `--autofix` to automatically correct it.   
@@ -381,13 +381,13 @@ and we get:
 
 <!-- $MDX skip -->
 ```sh
-$ dk0/mlfront-shell --autofix -I 7zip-project -x 7zip-org:subpath: -- get-asset-file 'TeachMe_Std.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+$ dk0/mlfront-shell --autofix -I 7zip-project -x 7zip-org:subpath: -- get-asset 'TeachMe_Std.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 ...
 autofix applied to `7zip-project/TeachMe_Std.S7z1a.S7zr.values.jsonc`
 ```
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset-file 'TeachMe_Std.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset 'TeachMe_Std.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 [up-to-date] TeachMe_Std.S7z1a.Assets@25.1.0+bn-20250101000000 -p 7zr.exe
 ```
 
@@ -402,8 +402,8 @@ target/7zr.exe: PE32 executable (console) Intel 80386, for MS Windows, 6 section
 ### 7zip step 1b - hide 7zr.exe assets
 
 We saw in the [Concepts and Theory section](#concepts-and-theory) that there are complex dependencies between the 7zip assets.
-If a future version of 7zip changed those dependencies or changed the contents of a 7zip asset, any users of
-the 7zip package who used a `get-asset-file` command could have a broken command.
+If a future version of 7zip changed those dependencies or changed the contents of a 7zip bundle, any users of
+the 7zip package who used a `get-asset` command could have a broken command.
 
 In this step 1b, we'll use a form so that users of the 7zip package have a consistent interface to get `7zr.exe`,
 even if the 7zip assets change. **A consistent interface is a best practice for all packages that use assets**.
@@ -421,10 +421,10 @@ We'll create a new JSON file containing the form.
       "id": "TeachMe_Std.S7z1b.S7zr@25.1.0",
       "precommands": {
         "private": [
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm}/7zr.exe",
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm64}/7zr.exe",
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86}/7zr.exe",
-          "get-asset-file TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86_64}/7zr.exe"
+          "get-asset TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm}/7zr.exe",
+          "get-asset TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm64}/7zr.exe",
+          "get-asset TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86}/7zr.exe",
+          "get-asset TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86_64}/7zr.exe"
         ]
       },
       "outputs": {
@@ -483,10 +483,10 @@ Choose slots that correspond to the natural split among your assets:
 - Executables are naturally split by what platforms (ABI, operating system architecture, etc.) the executables run on.
 - Multimedia assets are naturally split by dimension (high, medium, low res) and by media type (PNG, JPEG, etc.).
 
-If you only have one asset, your one slot is conventionally called `Release.Agnostic`.
+If you only have one bundle, your one slot is conventionally called `Release.Agnostic`.
 
 What are the **precommands**? Precommands are a set of commands that run when the form is submitted.
-You have already seen the `get-asset-file` command that you ran from the `dk0/mlfront-shell` command line in the
+You have already seen the `get-asset` command that you ran from the `dk0/mlfront-shell` command line in the
 [download 7zr.exe section](#7zip-step-1---download-7zrexe). You also saw the `get-object` command that submitted
 the 7zip form in [Concepts and Theory](#concepts-and-theory). Commands we can execute from the `dk0/mlfront-shell`
 command line can also run inside your form. Later sections will introduce more commands.
@@ -509,7 +509,7 @@ In the JSON document, we also see our first variables:
 When a form is submitted with `get-object FORM -s SLOT`, these variables are *output* directories specific to the named slot.
 
 The [Precommands section of the specification](docs/SPECIFICATION.md#precommands) describes some optimizations
-that are allowed. Most important is that if you ask for `get-object FORM -s Windows_arm`, the precommand for the unrelated slot `get-asset-file ... -f ${SLOT.Release.Windows_x86_64}/7zr.exe` can be skipped.
+that are allowed. Most important is that if you ask for `get-object FORM -s Windows_arm`, the precommand for the unrelated slot `get-asset ... -f ${SLOT.Release.Windows_x86_64}/7zr.exe` can be skipped.
 
 The final piece of the form are the `outputs`. You must declare which files your form in the `${SLOT.*}`
 output directories. Don't worry ... the `dk` build system will give you an error and tell you a hint to fix it
@@ -544,12 +544,12 @@ Mode                 LastWriteTime         Length Name
 
 Notice that all of the dates are set to Jan 1, 1980 for reproducibility.
 
-Now we have indirection when the asset files change! We change the `get-asset-file ...` commands
+Now we have indirection when the bundle files change! We change the `get-asset ...` commands
 in the `precommands` once, and none of our users need to change their `get-object ...` commands.
 
 ### 7zip step 1c - add all assets
 
-Now that we have seen how to specify one asset file, let's do all of the Windows installer and Unix compress archive asset files.
+Now that we have seen how to specify one asset, let's do all of the Windows installer and Unix compress archive bundle files.
 
 **Save the following file** as `7zip-project/TeachMe_Std.S7z1c.S7zr.values.jsonc`.
 
@@ -653,9 +653,9 @@ Now that we have seen how to specify one asset file, let's do all of the Windows
 }
 ```
 
-Previously we had used `get-asset-file`. Since we have so many asset files, it is easier
+Previously we had used `get-asset`. Since we have so many bundle files, it is easier
 if we checked them all at once.
-We'll be using a new command `get-asset`.
+We'll be using a new command `get-bundle`.
 
 | Argument                          | What                                                        |
 | --------------------------------- | ----------------------------------------------------------- |
@@ -664,18 +664,18 @@ We'll be using a new command `get-asset`.
 | `-x 7zip-org:subpath:`            | Invalidate all files with the `origin: "7zip-org"`          |
 | `--autofix`                       | Fix any invalid checksums                                   |
 | `--`                              | Separate `dk0/mlfront-shell` options from the command after |
-| `get-asset`                       | Command to get all members of the named asset               |
+| `get-bundle`                       | Command to get all members of the named bundle               |
 | `TeachMe_Std.S7z1a.Assets@25.1.0` | The name and version in `.values.json`                      |
 | `-d target/7zr-assets`            | Send command output into the directory                      |
 
 With that we get:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset 'TeachMe_Std.S7z1c.Assets@25.1.0' -d target/7zr-assets
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-bundle 'TeachMe_Std.S7z1c.Assets@25.1.0' -d target/7zr-assets
 [up-to-date] TeachMe_Std.S7z1c.Assets@25.1.0+bn-20250101000000
 ```
 
-If we inspect the target directory, we see all the files from the asset in Unix:
+If we inspect the target directory, we see all the files from the bundle in Unix:
 
 <!-- $MDX os_type<>Win32 -->
 ```sh
@@ -714,11 +714,11 @@ Mode                 LastWriteTime         Length Name
 
 Notice that all of the dates are set to Jan 1, 1980 for reproducibility.
 
-What happens if we output the asset to a file rather than a directory.
+What happens if we output the bundle to a file rather than a directory.
 That is, what if we replaced `-d target/7zr-assets` with `-f target/7zr-file`?
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset 'TeachMe_Std.S7z1c.Assets@25.1.0' -f target/7zr-file
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-bundle 'TeachMe_Std.S7z1c.Assets@25.1.0' -f target/7zr-file
 [up-to-date] TeachMe_Std.S7z1c.Assets@25.1.0+bn-20250101000000
 ```
 
@@ -742,7 +742,7 @@ Archive:  target/7zr-file
  13199847                     9 files
 ```
 
-However, for performance, you should use `get-asset-file` when you need individual asset files.
+However, for performance, you should use `get-asset` when you need individual bundle files.
 
 ### 7zip step 2 - extract 7z.exe from Windows installers
 
@@ -771,10 +771,10 @@ Whenever we run a command we need a form with a `function`.
           "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86_64 -d bin/Release.Windows_x86_64",
           // need Windows installers
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-Release.Windows_arm.exe",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-Release.Windows_arm64.exe",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86.exe",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86_64.exe"
+          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-Release.Windows_arm.exe",
+          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-Release.Windows_arm64.exe",
+          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86.exe",
+          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86_64.exe"
         ]
       },
       "function": {
@@ -910,12 +910,12 @@ This is a new form with a function that will call `7z.exe` with the right parame
           // need bin/<architecture>/7zr.exe
           "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux installers
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-Release.Linux_x86.tar.xz",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-Release.Linux_x86_64.tar.xz",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_x86_64.tar.xz",
-          "get-asset-file TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_arm64.tar.xz"
+          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
+          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
+          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-Release.Linux_x86.tar.xz",
+          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-Release.Linux_x86_64.tar.xz",
+          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_x86_64.tar.xz",
+          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_arm64.tar.xz"
         ]
       },
       "function": {
@@ -1272,8 +1272,8 @@ Today, there is no mechanism to pull the data from GitHub Actions into your loca
 
 We introduced the following commands:
 
-- `get-asset-file`
 - `get-asset`
+- `get-bundle`
 - `get-object`
 
 and explained how to specify:

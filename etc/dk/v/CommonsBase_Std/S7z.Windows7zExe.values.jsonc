@@ -35,10 +35,10 @@ All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [Comm
           "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_x86_64 -d bin/Release.Windows_x86_64",
           // need Windows installers
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-Release.Windows_arm.exe",
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-Release.Windows_arm64.exe",
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86.exe",
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86_64.exe"
+          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-Release.Windows_arm.exe",
+          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-Release.Windows_arm64.exe",
+          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86.exe",
+          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86_64.exe"
         ]
       },
       "function": {
@@ -49,7 +49,7 @@ All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [Comm
           "x",
           // to output directory for slot [Release.Windows_arm] (etc.)
           "-o${SLOT.request}",
-          // from the asset file [7z2501-arm.exe] renamed [7z-Release.Windows_arm.exe] (etc.)
+          // from the asset [7z2501-arm.exe] renamed [7z-Release.Windows_arm.exe] (etc.)
           "7z-${SLOTNAME.request}.exe",
           // extract only the '7z.exe' executable and 'LICENSE' file
           "7z.exe",

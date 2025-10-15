@@ -43,8 +43,8 @@
     - [enter-object MODULE@VERSION -s REQUEST\_SLOT -- CLI\_FORM\_DOC](#enter-object-moduleversion--s-request_slot----cli_form_doc)
     - [install-object MODULE@VERSION -s REQUEST\_SLOT (-f FILE | -d DIR/) -- CLI\_FORM\_DOC](#install-object-moduleversion--s-request_slot--f-file---d-dir----cli_form_doc)
     - [pipe-object MODULE@VERSION -s REQUEST\_SLOT -x PIPE](#pipe-object-moduleversion--s-request_slot--x-pipe)
-    - [get-asset-file MODULE@VERSION FILE\_PATH (-f FILE | -d DIR/)](#get-asset-file-moduleversion-file_path--f-file---d-dir)
-    - [get-asset ID (-f FILE | -d DIR/)](#get-asset-id--f-file---d-dir)
+    - [get-asset MODULE@VERSION FILE\_PATH (-f FILE | -d DIR/)](#get-asset-moduleversion-file_path--f-file---d-dir)
+    - [get-bundle ID (-f FILE | -d DIR/)](#get-bundle-id--f-file---d-dir)
     - [Options: -f FILE and -d DIR](#options--f-file-and--d-dir)
     - [Option: \[-n STRIP\]](#option--n-strip)
     - [Option: \[-m MEMBER\]](#option--m-member)
@@ -61,7 +61,7 @@
   - [Graph](#graph)
     - [Nodes](#nodes)
       - [V256 - SHA256 of Values File](#v256---sha256-of-values-file)
-      - [P256 - SHA256 of Asset File](#p256---sha256-of-asset-file)
+      - [P256 - SHA256 of Asset](#p256---sha256-of-asset)
       - [Z256 - SHA256 of Zip Archive File](#z256---sha256-of-zip-archive-file)
       - [CT - Compatibility Tag](#ct---compatibility-tag)
       - [VCI - Values Canonical ID](#vci---values-canonical-id)
@@ -82,11 +82,11 @@ An **object** is a folder that the form produces.
 
 ---
 
-We use the generic term **value** to mean an asset, a form or an object.
+We use the generic term **value** to mean an bundle, a form or an object.
 
-All values have names like `YourLibrary_Std.YourPackage.YourThing`. Think of the name as if it were a serial number, as the name uniquely identifies each asset, form and object.
+All values have names like `YourLibrary_Std.YourPackage.YourThing`. Think of the name as if it were a serial number, as the name uniquely identifies each bundle, form and object.
 
-All values also have versions like `1.0.0`. Making a change to a value means creating a new value with the same name but with an increased version. For example, if the text of your 2025-09-04 privacy policy is in the asset `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904`, an end-of-year update to the privacy policy could be `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20251231`. These *semantic* versions offer a lot of flexibility and are industry-standard: [external link: semver 2.0](https://semver.org/). The important point is that values do not change; versions do.
+All values also have versions like `1.0.0`. Making a change to a value means creating a new value with the same name but with an increased version. For example, if the text of your 2025-09-04 privacy policy is in the bundle `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904`, an end-of-year update to the privacy policy could be `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20251231`. These *semantic* versions offer a lot of flexibility and are industry-standard: [external link: semver 2.0](https://semver.org/). The important point is that values do not change; versions do.
 
 ### Early Limitations
 
@@ -101,7 +101,7 @@ As these limits are removed, this specification document may be updated.
 
 Assets are remote or local files that are inputs to a build. All assets have SHA-256 checksums.
 
-Assets are accessed with the [get-asset](#get-asset-id--f-file---d-dir) and [get-asset-file](#get-asset-file-moduleversion-file_path--f-file---d-dir) commands described in a later section of the document.
+Assets are accessed with the [get-bundle](#get-bundle-id--f-file---d-dir) and [get-asset](#get-asset-moduleversion-file_path--f-file---d-dir) commands described in a later section of the document.
 
 ### Local Paths
 
@@ -132,14 +132,14 @@ A path, if it starts with `https://` or `http://` is a *remote* path.
 
 ### Saving Assets
 
-When a value shell command reads an asset and saves it to a file (ex.
-[get-asset -f FILE](#get-asset-id--f-file---d-dir)),
-the members of the asset are zipped and the zip archive bytes are copied directly to the file.
+When a value shell command reads an bundle and saves it to a file (ex.
+[get-bundle -f FILE](#get-bundle-id--f-file---d-dir)),
+the members of the bundle are zipped and the zip archive bytes are copied directly to the file.
 The standards of [Zip Archive Reproducibility](#zip-archive-reproducibility) will be followed.
 
-When a value shell command reads an asset and saves it to a directory (ex.
-[get-asset -d DIR](#get-asset-id--f-file---d-dir)),
-the members of the asset are copied into the directory tree.
+When a value shell command reads an bundle and saves it to a directory (ex.
+[get-bundle -d DIR](#get-bundle-id--f-file---d-dir)),
+the members of the bundle are copied into the directory tree.
 
 That sounds inefficient, but the build system is allowed to optimize a set of value shell commands.
 For example, if one shell command saves output into a directory,
@@ -161,13 +161,13 @@ All variables are available in `.forms.function.args` and `.forms.function.envmo
 
 The output directory for the *request slot*. The `-s REQUEST_SLOT` option (ex. `get-object MODULE@VERSION -s REQUEST_SLOT`) is the request slot.
 
-If the command has no request slot (ex. `get-asset MODULE@VERSION`) and you use `${SLOT.request}`, an error is reported.
+If the command has no request slot (ex. `get-bundle MODULE@VERSION`) and you use `${SLOT.request}`, an error is reported.
 
 #### ${SLOTNAME.request}
 
 The name of the *request slot*. The `-s REQUEST_SLOT` option (ex. `get-object MODULE@VERSION -s REQUEST_SLOT`) is the request slot.
 
-If the command has no request slot (ex. `get-asset MODULE@VERSION`) and you use `${SLOT.request}`, an error is reported.
+If the command has no request slot (ex. `get-bundle MODULE@VERSION`) and you use `${SLOT.request}`, an error is reported.
 
 #### ${SLOT.SlotName}
 
@@ -269,7 +269,7 @@ The following optimizations are allowed:
 - Precommands may be skipped if the requested slot does not match the precommand output slot.
   For example, let's say you issue the command `get-object THE_ID -s Release.Agnostic`.
   Let's also say `THE_ID` object has two precommands:
-  1. `get-asset-file ... -f ${SLOT.Release.Agnostic}`
+  1. `get-asset ... -f ${SLOT.Release.Agnostic}`
   2. `get-object ... -d ${SLOT.Something.Else}`
   Then the second precommand may be skipped because the requested slot `Release.Agnostic` does not match `Something.Else`.
 
@@ -328,11 +328,11 @@ The trace and value store are updated as normal during the MORECOMMANDS, so if t
 
 ### Dynamic Functions
 
-Use the [MOREINCLUDES](#moreincludes) and [MORECOMMANDS](#morecommands) to create a function which perform `get-object`, `get-asset` and other commands dynamically.
+Use the [MOREINCLUDES](#moreincludes) and [MORECOMMANDS](#morecommands) to create a function which perform `get-object`, `get-bundle` and other commands dynamically.
 You'll want to do this in the following scenarios:
 
-1. (lazy evaluation) All `precommands` are executed, modulo some optimizations specific to the [object slot](#object-slots), and they can be expensive. Using a dynamic function you can do an expensive `get-object` or `get-asset-file` based on the function inputs.
-2. (language builds) Many languages have a lock file which can be parsed and executed to build a project: npm and cargo lockfiles, etc. Using a dynamic function means you don't have to model that language in the dk build system. Instead, write a dynamic function that can read the lock file (use a `get-asset-file` in the precommand to grab a language parser) and create a [values.json](#json-files) from that lock file. You'll get incremental language builds cheaply.
+1. (lazy evaluation) All `precommands` are executed, modulo some optimizations specific to the [object slot](#object-slots), and they can be expensive. Using a dynamic function you can do an expensive `get-object` or `get-asset` based on the function inputs.
+2. (language builds) Many languages have a lock file which can be parsed and executed to build a project: npm and cargo lockfiles, etc. Using a dynamic function means you don't have to model that language in the dk build system. Instead, write a dynamic function that can read the lock file (use a `get-asset` in the precommand to grab a language parser) and create a [values.json](#json-files) from that lock file. You'll get incremental language builds cheaply.
 3. (huge build graphs) You can shrink a build graph by delegating large parts of it to dynamic functions. The entire build graph (minus dynamic functions) must be kept in memory so using a dynamic function gives you a knob so you don't have to increase the memory. *nit: this requires garbage collection / cache eviction of dynamic functions from the in-memory trace store, which is not implemented yet in the reference implementation*
 
 Any function, including dynamic functions, must enumerate all the output files it produces. This limits dynamic functions in (we believe) a good way: you must know the outputs before you run the dynamic function. This design choice was influenced by Buck2.
@@ -343,11 +343,11 @@ The rest of this section is the implementation. It requires a basic knowledge of
 
 There is an **alpha conversion** procedure to avoid name collisions:
 
-1. The set of *more* form ids and *more* asset ids that are defined is assigned to the set `DEFINED_MODULES`.
-2. The set of *more* form ids and *more* asset ids that are referenced is assigned to the set `REFERENCED_MODULES`.
+1. The set of *more* form ids and *more* bundle ids that are defined is assigned to the set `DEFINED_MODULES`.
+2. The set of *more* form ids and *more* bundle ids that are referenced is assigned to the set `REFERENCED_MODULES`.
 3. The set `BOUND_MODULES` is calculated as `REFERENCED_MODULES - DEFINED_MODULES`.
 4. A deterministic *more* namespace term is created from a hash of the form id, form slot and the form document. For example, the form id `SomeForm_Std.Example@1.0.0` and the form slot `Release.Agnostic` and the form document `{"username":"nobody"}` are SHA-256 hashed together and base32 encoded to create a *more* namespace term like `LMBnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq` (it is allowed to be shorter, but must start with `LMB` representing anonynmous lambda functions).
-5. Each *more* form id and each *more* asset id that is *not* in `BOUND_MODULES` is appended with the *more* namespace term in memory (ex. `SomeForm_Std.Example@1.0.0` becomes `SomeForm_Std.Example.Hnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq@1.0.0`).
+5. Each *more* form id and each *more* bundle id that is *not* in `BOUND_MODULES` is appended with the *more* namespace term in memory (ex. `SomeForm_Std.Example@1.0.0` becomes `SomeForm_Std.Example.Hnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq@1.0.0`).
 6. The converted `.*.values.json` files are written to a cached directory and imported into the value store.
 
 The above procedure is the conventional alpha conversion from lambda calculus.
@@ -573,8 +573,8 @@ Here is an example use of a pipe:
   },
   "precommands": [
     "install-object SomeScripting_Minimal.Env -s Release.Agnostic -d usr/"
-    "get-asset-file MyAssets_Std.Scripts@1.0.0 -p script/get-size.cmd -s Release.Agnostic -f get-size.cmd",
-    "get-asset-file MyAssets_Std.Scripts@1.0.0 -p script/get-size.sh  -s Release.Agnostic -f get-size.sh",
+    "get-asset MyAssets_Std.Scripts@1.0.0 -p script/get-size.cmd -s Release.Agnostic -f get-size.cmd",
+    "get-asset MyAssets_Std.Scripts@1.0.0 -p script/get-size.sh  -s Release.Agnostic -f get-size.sh",
     "pipe-object    SomeContent_Std.DataFile -s Release.Agnostic -x data-file-pipe"
   ],
   "function": {
@@ -704,34 +704,34 @@ size=$(wc -c "$datafile")
 echo "Size of data file is $size bytes" > "$outputfile"
 ```
 
-### get-asset-file MODULE@VERSION FILE_PATH (-f FILE | -d DIR/)
+### get-asset MODULE@VERSION FILE_PATH (-f FILE | -d DIR/)
 
-Get the contents of the asset file at `FILE_PATH` for the asset `MODULE@VERSION`.
+Get the contents of the asset at `FILE_PATH` for the bundle `MODULE@VERSION`.
 
 | Option      | Description                                                                       |
 | ----------- | --------------------------------------------------------------------------------- |
-| `-f FILE`   | Place asset file in `FILE`                                                        |
-| `-d DIR/`   | The asset file must be a zip archive, and its contents are extracted into `DIR/`. |
+| `-f FILE`   | Place asset in `FILE`                                                        |
+| `-d DIR/`   | The asset must be a zip archive, and its contents are extracted into `DIR/`. |
 | `-n STRIP`  | See [Option: [-n STRIP]](#option--n-strip)                                        |
 | `-m MEMBER` | See [Option: [-m MEMBER](#option--m-member)]                                      |
 
 See [Options: -f FILE and -d DIR](#options--f-file-and--d-dir) for output path restrictions.
 
-### get-asset ID (-f FILE | -d DIR/)
+### get-bundle ID (-f FILE | -d DIR/)
 
-Get the archive file for the asset with `MODULE@VERSION`.
+Get the archive file for the bundle with `MODULE@VERSION`.
 
 | Option     | Description                                                                       |
 | ---------- | --------------------------------------------------------------------------------- |
-| `-f FILE`  | Place asset in `FILE`. `FILE` will be a zip archive with **all** the asset files. |
-| `-d DIR/`  | **All** the asset files will be extracted into `DIR/`.                            |
+| `-f FILE`  | Place bundle in `FILE`. `FILE` will be a zip archive with **all** the bundle files. |
+| `-d DIR/`  | **All** the bundle files will be extracted into `DIR/`.                            |
 | `-n STRIP` | See [Option: [-n STRIP]](#option--n-strip)                                        |
 
 See [Options: -f FILE and -d DIR](#options--f-file-and--d-dir) for output path restrictions.
 
 *What about the `-m MEMBER` option?*
 
-Use [get-asset-file](#get-asset-file-moduleversion-file_path--f-file---d-dir) to get a specific asset file.
+Use [get-asset](#get-asset-moduleversion-file_path--f-file---d-dir) to get a specific asset.
 Having a `-m MEMBER` option would be equivalent but redundant and slightly confusing since
 not much about assets implies they are stored as archives.
 
@@ -739,8 +739,8 @@ not much about assets implies they are stored as archives.
 
 No command may write to the same file. Specifically:
 
-- It is an error to have more than one `get-object` or `get-asset` or `get-asset-file` or `resume-object` or `install-object` use the same `FILE`.
-- It is an error to have more than one `get-object` or `get-asset` or `get-asset-file` or `resume-object` use the same `DIR` or otherwise overlap the same `DIR`. Overlapping means one command can't write to the subdirectory of another command's `DIR`.
+- It is an error to have more than one `get-object` or `get-bundle` or `get-asset` or `resume-object` or `install-object` use the same `FILE`.
+- It is an error to have more than one `get-object` or `get-bundle` or `get-asset` or `resume-object` use the same `DIR` or otherwise overlap the same `DIR`. Overlapping means one command can't write to the subdirectory of another command's `DIR`.
 
 Use [`install-object`](#install-
 --s-request_slot--f-file---d-dir----cli_form_doc) when you want to write into the same directory.
@@ -763,7 +763,7 @@ To leave the directory structure as-is, set `STRIP` to `0`. To strip away the to
 
 ### Option: [-m MEMBER]
 
-Gets the zip file member from the object or asset file, which must be a zip archive.
+Gets the zip file member from the object or asset, which must be a zip archive.
 
 ### Object ID with Build Metadata
 
@@ -939,8 +939,8 @@ The above canonicalization should conform to [RFC 8785]; if there are any ambigu
 
 Of particular note is that the `assets.listing.origins` and `assets.files.origin`
 fields are not present in the canonicalization since
-the asset path, checksum and size uniquely identifiy an asset file. In other words,
-if you have a locally cached file with the same checksum as a remote asset,
+the bundle path, checksum and size uniquely identifiy an asset. In other words,
+if you have a locally cached file with the same checksum as a remote bundle,
 you can substitute the locally cached file without changing identifiers
 in the value store.
 
@@ -986,7 +986,7 @@ For example, the form:
   ],
   "assets": [
     {
-      "id": "DkDistribution_Std.Asset@2.4.202508011516-signed",
+      "id": "DkDistribution_Std.Bundle@2.4.202508011516-signed",
       "listing": {
         "origins": [
           {
@@ -1023,14 +1023,14 @@ For example, the form:
 is canonicalized to:
 
 ```json
-{"assets":[{"files":[{"checksum":{"sha256":"4bd73809eda4fb2bf7459d2e58d202282627bac816f59a848fc24b5ad6a7159e"},"path":"SHA256"},{"checksum":{"sha256":"0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"},"path":"SHA256.sig"}],"id":"DkDistribution_Std.Asset@2.4.202508011516-signed"}],"forms":[{"function":{"args":["arg1"],"envmods":["envmod1"]},"id":"FooBar_Baz@0.1.0","outputs":{"files":[{"paths":["outpath1"],"slots":["output1"]}]},"precommands":{"private":["private1"],"public":["public1"]}}],"schema_version":{"major":1,"minor":0}}
+{"assets":[{"files":[{"checksum":{"sha256":"4bd73809eda4fb2bf7459d2e58d202282627bac816f59a848fc24b5ad6a7159e"},"path":"SHA256"},{"checksum":{"sha256":"0d281c9fe4a336b87a07e543be700e906e728becd7318fa17377d37c33be0f75"},"path":"SHA256.sig"}],"id":"DkDistribution_Std.Bundle@2.4.202508011516-signed"}],"forms":[{"function":{"args":["arg1"],"envmods":["envmod1"]},"id":"FooBar_Baz@0.1.0","outputs":{"files":[{"paths":["outpath1"],"slots":["output1"]}]},"precommands":{"private":["private1"],"public":["public1"]}}],"schema_version":{"major":1,"minor":0}}
 ```
 
 ## Distributions
 
 A **distribution** is a build that generates [values](#values). In the build system, metadata about distributions can be collected in the values.jsonc files along with *attestations*:
 
-- An *attestation* is a cryptographically verifiable statement (ex. "the build produced asset A at time T") that is signed by a human (ex. you) or a machine (ex. GitHub Actions).
+- An *attestation* is a cryptographically verifiable statement (ex. "the build produced bundle A at time T") that is signed by a human (ex. you) or a machine (ex. GitHub Actions).
 
 To increase supply chain security guarantees, the build system will reject assets and objects that are produced by humans or machines without attestations that you have explicitly trusted.
 
@@ -1052,8 +1052,8 @@ for example, `./vnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq`.
 
 The following values must be present:
 
-- the "v" values file for any values.json with a form or asset having a library identical to the distribution library `id`
-- the "w" parsed values ast for any values.json with a form or asset having a library identical to the distribution library `id`
+- the "v" values file for any values.json with a form or bundle having a library identical to the distribution library `id`
+- the "w" parsed values ast for any values.json with a form or bundle having a library identical to the distribution library `id`
 - the "o" object file for any object having a library identical to the distribution library `id`
 
 The following values will be ignored if present:
@@ -1191,8 +1191,8 @@ Each node in the graph has a key, a value id, a value sha256 and the value itsel
     | Value Type | What                | Docs                      |
     | ---------- | ------------------- | ------------------------- |
     | `o`        | object              | [Objects](#objects)       |
-    | `a`        | asset               | [Assets](#assets)         |
-    | `p`        | asset file          | [Assets](#assets)         |
+    | `a`        | bundle               | [Assets](#assets)         |
+    | `p`        | asset          | [Assets](#assets)         |
     | `f`        | form                | [Forms](#forms)           |
     | `v`        | values file         | [JSON Files](#json-files) |
     | `w`        | values (parsed AST) | [JSON Files](#json-files) |
@@ -1201,23 +1201,23 @@ Each node in the graph has a key, a value id, a value sha256 and the value itsel
 
     All value types are *lowercase* for support on case-insensitive file systems.
 
-- A **value** is a file whose content matches the value type. A values file is a `value.json` build file itself. An object is a zip archive of the output of a [form](#forms). Form, asset and asset file value are serialized parsed abstract syntax trees.
+- A **value** is a file whose content matches the value type. A values file is a `value.json` build file itself. An object is a zip archive of the output of a [form](#forms). Form, bundle and asset value are serialized parsed abstract syntax trees.
 - A **value sha256** is a SHA-256 hex-encoded string of the value. That is, if you ran `certutil` (Windows), `sha256sum` (Linux) or `shasum -a 256` (macOS) on the value file, the *value sha256* is what you would see.
 
 | Value Type | Key                                   | Value Id before SHA256 and base32          | Value                                     |
 | ---------- | ------------------------------------- | ------------------------------------------ | ----------------------------------------- |
 | `v`        | [V256](#v256---sha256-of-values-file) | [V256](#v256---sha256-of-values-file)      | json `{schema_version:,forms:,assets:}`   |
 | `w`        | [VCI](#vci---values-canonical-id)     | [VCK](#vck---values-checksum)              | parsed `{schema_version:,forms:,assets:}` |
-| `o`        | asset file                            | [P256](#p256---sha256-of-asset-file)       | contents of asset file                    |
-| `o`        | form, asset                           | [Z256](#z256---sha256-of-zip-archive-file) | contents of zip archive file              |
+| `o`        | asset                            | [P256](#p256---sha256-of-asset)       | contents of asset                    |
+| `o`        | form, bundle                           | [Z256](#z256---sha256-of-zip-archive-file) | contents of zip archive file              |
 
 #### V256 - SHA256 of Values File
 
-The SHA-256 (raw, not hex-encoded) of the `values.json` file that contains the asset (or form or asset file).
+The SHA-256 (raw, not hex-encoded) of the `values.json` file that contains the bundle (or form or asset).
 
-#### P256 - SHA256 of Asset File
+#### P256 - SHA256 of Asset
 
-The hex-encoded SHA-256 of the asset file. It is the `checksum.sha256` in the following asset file:
+The hex-encoded SHA-256 of the asset. It is the `checksum.sha256` in the following asset:
 
 ```json
 {
@@ -1235,7 +1235,7 @@ The hex-encoded SHA-256 of the asset file. It is the `checksum.sha256` in the fo
 The hex-encoded SHA-256 of the zip archive generated from either:
 
 - the output directory of a form
-- the asset directory for one or more asset files
+- the bundle directory for one or more bundle files
 
 #### CT - Compatibility Tag
 
@@ -1257,9 +1257,9 @@ The stripping of carriage returns occurs before the CST and AST parsing, so that
 
 | Value Type From | Value Type To | Why                                                     |
 | --------------- | ------------- | ------------------------------------------------------- |
-| `a`             | `v`           | Rebuild asset if contents of `values.json` changes      |
-| `a`             | `w`           | Rebuild asset if parsed `values.json` changes           |
+| `a`             | `v`           | Rebuild bundle if contents of `values.json` changes      |
+| `a`             | `w`           | Rebuild bundle if parsed `values.json` changes           |
 | `f`             | `v`           | Rebuild form if contents of `values.json` changes       |
 | `f`             | `w`           | Rebuild form if parsed `values.json` changes            |
-| `p`             | `v`           | Rebuild asset file if contents of `values.json` changes |
-| `p`             | `w`           | Rebuild asset file if parsed `values.json` changes      |
+| `p`             | `v`           | Rebuild asset if contents of `values.json` changes |
+| `p`             | `w`           | Rebuild asset if parsed `values.json` changes      |

@@ -75,10 +75,10 @@ The complication is that we need 7z to extract the macOS 7z binary.
       "id": "CommonsBase_Std.S7z.S7zr@25.1.0",
       "precommands": {
         "private": [
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm}/7zr.exe",
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm64}/7zr.exe",
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86}/7zr.exe",
-          "get-asset-file CommonsBase_Std.S7z.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86_64}/7zr.exe"
+          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm}/7zr.exe",
+          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm64}/7zr.exe",
+          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86}/7zr.exe",
+          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86_64}/7zr.exe"
         ]
       },
       "outputs": {

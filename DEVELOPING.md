@@ -97,7 +97,7 @@ $DKSDK_ASSET_VERSION = "..."
 
 mkdir "$env:TEMP\manifest"
 iwr -OutFile "$env:TEMP\manifest\dk-windows_x86_64.exe" https://diskuv.com/a/dk-exe/$DKSDK_ASSET_VERSION/dk-windows_x86_64.exe
-#   This is the version of the distribution (stdexport archive) not the dk.exe asset version. Run it to make sure it works.
+#   This is the version of the distribution (stdexport archive) not the dk.exe bundle version. Run it to make sure it works.
 & "$env:TEMP\manifest\dk-windows_x86_64.exe" --version
 
 mt.exe -inputresource:"$env:TEMP\manifest\dk-windows_x86_64.exe;1" -out:"$env:TEMP\manifest\extracted.manifest" -validate_manifest

@@ -5,7 +5,7 @@
     "definitions": {
         "producer": {
             "type": "object",
-            "description": "The human or machine signer of a build that produces values. The signer provides a form of \"attestation\": a cryptographically verifiable statement (ex. \"the build produced asset A and object O at time T\") that the producer signs.",
+            "description": "The human or machine signer of a build that produces values. The signer provides a form of \"attestation\": a cryptographically verifiable statement (ex. \"the build produced bundle A and object O at time T\") that the producer signs.",
             "additionalProperties": false,
             "properties": {
                 "openbsd_signify": {
@@ -291,7 +291,7 @@
                                 "properties": {
                                     "asset_id": {
                                         "type": "string",
-                                        "description": "The identifier for the asset containing the trace and value stores, in the format 'PACKAGE.NAME@VERSION'. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system."
+                                        "description": "The identifier for the bundle containing the trace and value stores, in the format 'PACKAGE.NAME@VERSION'. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system."
                                     },
                                     "modules": {
                                         "type": "array",
@@ -310,14 +310,14 @@
                                     },
                                     "asset_id_canonical": {
                                         "type": "string",
-                                        "description": "The canonical identifier for the asset, a lowercase hex-encoded SHA-256 of the critical fields of an asset JSON document."
+                                        "description": "The canonical identifier for the bundle, a lowercase hex-encoded SHA-256 of the critical fields of an bundle JSON document."
                                     },
                                     "traces": {
                                         "type": "array",
                                         "description": "A snapshot of the tracestore(s) that were created/updated after the distributions' builds completed.",
                                         "items": {
                                             "type": "object",
-                                            "description": "The location in the asset of a tracestore.",
+                                            "description": "The location in the bundle of a tracestore.",
                                             "properties": {
                                                 "tag": {
                                                     "type": "string",
@@ -325,7 +325,7 @@
                                                 },
                                                 "path": {
                                                     "type": "string",
-                                                    "description": "The path within the asset to the tracestore."
+                                                    "description": "The path within the bundle to the tracestore."
                                                 }
                                             },
                                             "additionalProperties": false,
@@ -345,7 +345,7 @@
                                             "properties": {
                                                 "path": {
                                                     "type": "string",
-                                                    "description": "The path within the asset to the zipped value store."
+                                                    "description": "The path within the bundle to the zipped value store."
                                                 }
                                             }
                                         }
@@ -626,7 +626,7 @@
                 "additionalProperties": false,
                 "properties": {
                     "id": {
-                        "description": "The identifier for the asset, in the format 'PACKAGE.NAME@VERSION'. It must be unique across the value store. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system. The asset may be called from a MlFront script using the function call '<PACKAGE.NAME>.asset ()'.",
+                        "description": "The identifier for the bundle, in the format 'PACKAGE.NAME@VERSION'. It must be unique across the value store. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system. The bundle may be called from a MlFront script using the function call '<PACKAGE.NAME>.bundle ()'.",
                         "type": "string"
                     },
                     "listing_unencrypted": {
@@ -645,7 +645,7 @@
                         ]
                     },
                     "listing": {
-                        "description": "The metadata for the asset that may be encrypted in future versions of the asset spec.",
+                        "description": "The metadata for the bundle that may be encrypted in future versions of the bundle spec.",
                         "type": "object",
                         "properties": {
                             "origins": {
@@ -659,7 +659,7 @@
                                         },
                                         "mirrors": {
                                             "type": "array",
-                                            "description": "The base URL of each source site. The base URL combined with the path in the [files] section become the full URL used to download the asset file when the file is not cached.",
+                                            "description": "The base URL of each source site. The base URL combined with the path in the [files] section become the full URL used to download the asset when the file is not cached.",
                                             "items": {
                                                 "type": "string"
                                             },
@@ -681,7 +681,7 @@
                             "properties": {
                                 "origin": {
                                     "type": "string",
-                                    "description": "The name of the origin that is the source of the asset file. This field is optional only for canonicalization (comparison purposes); in all other contexts this field is required."
+                                    "description": "The name of the origin that is the source of the asset. This field is optional only for canonicalization (comparison purposes); in all other contexts this field is required."
                                 },
                                 "path": {
                                     "type": "string",
@@ -689,14 +689,14 @@
                                 },
                                 "size": {
                                     "type": "integer",
-                                    "description": "The file size of the asset file."
+                                    "description": "The file size of the asset."
                                 },
                                 "checksum": {
                                     "type": "object",
                                     "properties": {
                                         "sha256": {
                                             "type": "string",
-                                            "description": "The SHA-256 checksum of the asset file, in lowercase hexadecimal."
+                                            "description": "The SHA-256 checksum of the asset, in lowercase hexadecimal."
                                         }
                                     },
                                     "required": [

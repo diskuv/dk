@@ -3,11 +3,11 @@
 Getting the latest version of the dk distribution
 -------------------------------------------------
 
-The object DkDistribution_Std.Asset.Latest will build (ie. fetch) the
-"private" and "public" asset files listed below. Running the
+The object DkDistribution_Std.Bundle.Latest will build (ie. fetch) the
+"private" and "public" bundle files listed below. Running the
 following command with `mlfront-shell` or within your own "precommands":
 
-  get-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s Release.Darwin_arm64 -d dir-darwin_arm64
+  get-object DkDistribution_Std.Bundle.Latest@1.0.202501010000 -s Release.Darwin_arm64 -d dir-darwin_arm64
 
 will make the "dk-darwin_arm64" executable available to you as the file
 "dk-darwin_arm64".
@@ -19,7 +19,7 @@ All historical versions are/will be available as assets in this file as
 well. Running the following command with `mlfront-shell` or within your
 own "precommands":
 
-  get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p dk-darwin_arm64 -f dk-darwin_arm64
+  get-asset DkDistribution_Std.Bundle@2.4.202508011515 -p dk-darwin_arm64 -f dk-darwin_arm64
 
 will make the "dk-darwin_arm64" executable from version
 `2.4.202508011516-signed` available to you as the file "dk-darwin_arm64".
@@ -33,18 +33,18 @@ will make the "dk-darwin_arm64" executable from version
   },
   "forms": [
     {
-      "id": "DkDistribution_Std.Asset.Latest@0.1.0",
+      "id": "DkDistribution_Std.Bundle.Latest@0.1.0",
       "precommands": {
         // This list of commands is built automatically by
-        // `get-object DkDistribution_Std.Asset.Latest@1.0.202501010000 -s Release.Darwin_arm64`
+        // `get-object DkDistribution_Std.Bundle.Latest@1.0.202501010000 -s Release.Darwin_arm64`
         // (and Release.Windows_x86_64, etc.).
         "private": [
-          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-darwin_arm64.zip -d ${SLOT.Release.Darwin_arm64}",
-          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-darwin_x86_64.zip -d ${SLOT.Release.Darwin_x86_64}",
-          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-linux_x86_64.zip -d ${SLOT.Release.Linux_x86_64}",
-          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-linux_x86.zip -d ${SLOT.Release.Linux_x86}",
-          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-windows_x86_64.zip -d ${SLOT.Release.Windows_x86_64}",
-          "get-asset-file DkDistribution_Std.Asset@2.4.202508011515 -p stdexport-windows_x86.zip -d ${SLOT.Release.Windows_x86}"
+          "get-asset DkDistribution_Std.Bundle@2.4.202508011515 -p stdexport-darwin_arm64.zip -d ${SLOT.Release.Darwin_arm64}",
+          "get-asset DkDistribution_Std.Bundle@2.4.202508011515 -p stdexport-darwin_x86_64.zip -d ${SLOT.Release.Darwin_x86_64}",
+          "get-asset DkDistribution_Std.Bundle@2.4.202508011515 -p stdexport-linux_x86_64.zip -d ${SLOT.Release.Linux_x86_64}",
+          "get-asset DkDistribution_Std.Bundle@2.4.202508011515 -p stdexport-linux_x86.zip -d ${SLOT.Release.Linux_x86}",
+          "get-asset DkDistribution_Std.Bundle@2.4.202508011515 -p stdexport-windows_x86_64.zip -d ${SLOT.Release.Windows_x86_64}",
+          "get-asset DkDistribution_Std.Bundle@2.4.202508011515 -p stdexport-windows_x86.zip -d ${SLOT.Release.Windows_x86}"
         ]
       },
       "outputs": {
@@ -103,7 +103,7 @@ will make the "dk-darwin_arm64" executable from version
   ],
   "assets": [
     {
-      "id": "DkDistribution_Std.Asset@2.4.202508011515",
+      "id": "DkDistribution_Std.Bundle@2.4.202508011515",
       "listing": {
         "origins": [
           {

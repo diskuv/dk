@@ -12,15 +12,15 @@
           // need bin/<architecture>/7z.exe (7zr does not extract tar files)
           "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux tar.gz files
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-aarch64-apple-darwin.tar.gz -f coreutils.Release.Darwin_arm64.tar.gz",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-apple-darwin.tar.gz -f coreutils.Release.Darwin_x86_64.tar.gz",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-aarch64-unknown-linux-gnu.tar.gz -f coreutils.Release.Linux_arm64_gnu.tar.gz",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-aarch64-unknown-linux-musl.tar.gz -f coreutils.Release.Linux_arm64.tar.gz",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-arm-unknown-linux-gnueabihf.tar.gz -f coreutils.Release.Linux_arm.tar.gz",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-unknown-linux-gnu.tar.gz -f coreutils.Release.Linux_x86_gnu.tar.gz",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-unknown-linux-musl.tar.gz -f coreutils.Release.Linux_x86.tar.gz",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-unknown-linux-musl.tar.gz -f coreutils.Release.Linux_x86_64.tar.gz",
-          "get-asset-file CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-unknown-linux-gnu.tar.gz -f coreutils.Release.Linux_x86_64_gnu.tar.gz"
+          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-aarch64-apple-darwin.tar.gz -f coreutils.Release.Darwin_arm64.tar.gz",
+          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-apple-darwin.tar.gz -f coreutils.Release.Darwin_x86_64.tar.gz",
+          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-aarch64-unknown-linux-gnu.tar.gz -f coreutils.Release.Linux_arm64_gnu.tar.gz",
+          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-aarch64-unknown-linux-musl.tar.gz -f coreutils.Release.Linux_arm64.tar.gz",
+          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-arm-unknown-linux-gnueabihf.tar.gz -f coreutils.Release.Linux_arm.tar.gz",
+          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-unknown-linux-gnu.tar.gz -f coreutils.Release.Linux_x86_gnu.tar.gz",
+          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-unknown-linux-musl.tar.gz -f coreutils.Release.Linux_x86.tar.gz",
+          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-unknown-linux-musl.tar.gz -f coreutils.Release.Linux_x86_64.tar.gz",
+          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-unknown-linux-gnu.tar.gz -f coreutils.Release.Linux_x86_64_gnu.tar.gz"
         ]
       },
       "function": {
@@ -38,7 +38,7 @@
           "x",
           // to output directory for slot [Release.Darwin_arm64] (etc.)
           "-o${SLOT.request}",
-          // from the asset file [coreutils.Release.Darwin_arm64.tar.gz] (etc.)
+          // from the asset [coreutils.Release.Darwin_arm64.tar.gz] (etc.)
           "coreutils.${SLOTNAME.request}.tar.gz",
           "coreutils.${SLOTNAME.request}.tar"
         ]

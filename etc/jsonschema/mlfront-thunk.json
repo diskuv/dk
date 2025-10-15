@@ -127,7 +127,7 @@
                 "additionalProperties": false,
                 "properties": {
                     "listing_unencrypted": {
-                        "description": "The name and version of the asset must be unique across the object storage",
+                        "description": "The name and version of the bundle must be unique across the object storage",
                         "type": "object",
                         "properties": {
                             "spec_version": {
@@ -151,7 +151,7 @@
                         ]
                     },
                     "listing": {
-                        "description": "The metadata for the asset that may be encrypted in future versions of the asset spec.",
+                        "description": "The metadata for the bundle that may be encrypted in future versions of the bundle spec.",
                         "type": "object",
                         "properties": {
                             "origins": {
@@ -165,7 +165,7 @@
                                         },
                                         "mirrors": {
                                             "type": "array",
-                                            "description": "The base URL of each source site. The base URL combined with the path in the [files] section become the full URL used to download the asset file when the file is not cached.",
+                                            "description": "The base URL of each source site. The base URL combined with the path in the [files] section become the full URL used to download the asset when the file is not cached.",
                                             "items": {
                                                 "type": "string"
                                             },
@@ -187,7 +187,7 @@
                             "properties": {
                                 "origin": {
                                     "type": "string",
-                                    "description": "The name of the origin that is the source of the asset file. This field is optional only for canonicalization (comparison purposes); in all other contexts this field is required."
+                                    "description": "The name of the origin that is the source of the asset. This field is optional only for canonicalization (comparison purposes); in all other contexts this field is required."
                                 },
                                 "path": {
                                     "type": "string",
@@ -195,14 +195,14 @@
                                 },
                                 "size": {
                                     "type": "integer",
-                                    "description": "The file size of the asset file. This field is optional only for canonicalization (comparison purposes); in all other contexts this field is required."
+                                    "description": "The file size of the asset. This field is optional only for canonicalization (comparison purposes); in all other contexts this field is required."
                                 },
                                 "checksum": {
                                     "type": "object",
                                     "properties": {
                                         "sha256": {
                                             "type": "string",
-                                            "description": "The SHA-256 checksum of the asset file, in lowercase hexadecimal."
+                                            "description": "The SHA-256 checksum of the asset, in lowercase hexadecimal."
                                         }
                                     },
                                     "required": [

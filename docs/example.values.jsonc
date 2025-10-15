@@ -47,7 +47,7 @@
             // sign(pubkey,sha256({build_to_sign:[...]}))
             "signature": "untrusted comment: signature from signify secret key\nRWTAeKJJ1MTF3UpxzBCu6NaM6HPJNTj5CZ+M5XNJKNeEHBLQSsstzHGbSo8rPYNgw3Z98pN7WKiIwBIyRrKuIdKBRA6qlaci6wI="
           },
-          // the asset files (asset_id + [traces.path, values.path]) must be attested
+          // the bundle files (asset_id + [traces.path, values.path]) must be attested
           "github_slsa_v1_l3": {
             "doc": {
               /* ... */
@@ -65,9 +65,9 @@
           // All modules must belong to the distribution library `id` in the grandparent above. But the
           // module versions can be anything, unrelated to the distribution `id` version.
           "modules": ["DkExe_Std.Form@1.0.202501010000"],
-          // 1. Use CI like GitHub Actions to publish an asset
-          "asset_id": "DkExe_Std.Asset@2.4.202508011516-signed",
-          // Outside of CI, verify the asset and adds its canonical ID here (nit: need a tool to compute this)
+          // 1. Use CI like GitHub Actions to publish an bundle
+          "asset_id": "DkExe_Std.Bundle@2.4.202508011516-signed",
+          // Outside of CI, verify the bundle and adds its canonical ID here (nit: need a tool to compute this)
           // Then sign the entire builds:[] with your public key in `signature` above
           "asset_id_canonical": "...",
           "traces": [{ "tag": "oc414_wd64", "path": "oc414_wd64.traces" }],
@@ -147,12 +147,12 @@
       },
       "precommands": {
         "private": [
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_arm64 -f ${SLOT.Release.Darwin_arm64}/dk",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-darwin_x86_64 -f ${SLOT.Release.Darwin_x86_64}/dk",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86_64 -f ${SLOT.Release.Linux_x86_64}/dk",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-linux_x86 -f ${SLOT.Release.Linux_x86}/dk",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86_64.exe -f ${SLOT.Release.Windows_x86_64}/dk.exe",
-          "get-asset-file DkExe_Std.Asset@2.4.202508011516-signed -p dk-windows_x86.exe -f ${SLOT.Release.Windows_x86}/dk.exe",
+          "get-asset DkExe_Std.Bundle@2.4.202508011516-signed -p dk-darwin_arm64 -f ${SLOT.Release.Darwin_arm64}/dk",
+          "get-asset DkExe_Std.Bundle@2.4.202508011516-signed -p dk-darwin_x86_64 -f ${SLOT.Release.Darwin_x86_64}/dk",
+          "get-asset DkExe_Std.Bundle@2.4.202508011516-signed -p dk-linux_x86_64 -f ${SLOT.Release.Linux_x86_64}/dk",
+          "get-asset DkExe_Std.Bundle@2.4.202508011516-signed -p dk-linux_x86 -f ${SLOT.Release.Linux_x86}/dk",
+          "get-asset DkExe_Std.Bundle@2.4.202508011516-signed -p dk-windows_x86_64.exe -f ${SLOT.Release.Windows_x86_64}/dk.exe",
+          "get-asset DkExe_Std.Bundle@2.4.202508011516-signed -p dk-windows_x86.exe -f ${SLOT.Release.Windows_x86}/dk.exe",
           // This is an example where we've passed JSON down from the user into a precommand without loss of information
           // and without exposing unnecessary data to the precommand.
           // `get-object` expands any `+field=jsonfile` into the contents of the file. So when `get-object`
@@ -194,7 +194,7 @@
   ],
   "assets": [
     {
-      "id": "DkExe_Std.Asset@2.4.202508011516-signed",
+      "id": "DkExe_Std.Bundle@2.4.202508011516-signed",
       "listing": {
         "origins": [
           {
