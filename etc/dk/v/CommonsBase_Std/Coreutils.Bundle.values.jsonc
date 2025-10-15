@@ -3,7 +3,7 @@
   "schema_version": { "major": 1, "minor": 0 },
   "assets": [
     {
-      "id": "CommonsBase_Std.Coreutils.Assets@0.2.2",
+      "id": "CommonsBase_Std.Coreutils.Bundle@0.2.2",
       "listing": {
         "origins": [
           {

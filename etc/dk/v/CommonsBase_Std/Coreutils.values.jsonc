@@ -23,25 +23,25 @@
           "get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s Release.Linux_x86_64_gnu -m ./coreutils -f ${SLOT.Release.Linux_x86_64_gnu}/coreutils.exe",
 
           // Windows coreutils.exe. The Windows assets are zip files are supported natively by dk.
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-aarch64-pc-windows-msvc.zip -m coreutils-0.2.2-aarch64-pc-windows-msvc/coreutils.exe -f ${SLOT.Release.Windows_arm64}/coreutils.exe",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/coreutils.exe -f ${SLOT.Release.Windows_x86}/coreutils.exe",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-pc-windows-msvc.zip -m coreutils-0.2.2-x86_64-pc-windows-msvc/coreutils.exe -f ${SLOT.Release.Windows_x86_64}/coreutils.exe",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-x86_64-pc-windows-gnu.zip -m coreutils-0.2.2-x86_64-pc-windows-gnu/coreutils.exe -f ${SLOT.Release.Windows_x86_64_gnu}/coreutils.exe",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-aarch64-pc-windows-msvc.zip -m coreutils-0.2.2-aarch64-pc-windows-msvc/coreutils.exe -f ${SLOT.Release.Windows_arm64}/coreutils.exe",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/coreutils.exe -f ${SLOT.Release.Windows_x86}/coreutils.exe",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-x86_64-pc-windows-msvc.zip -m coreutils-0.2.2-x86_64-pc-windows-msvc/coreutils.exe -f ${SLOT.Release.Windows_x86_64}/coreutils.exe",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-x86_64-pc-windows-gnu.zip -m coreutils-0.2.2-x86_64-pc-windows-gnu/coreutils.exe -f ${SLOT.Release.Windows_x86_64_gnu}/coreutils.exe",
 
           // Windows, macOS and Linux LICENSE file
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Darwin_arm64}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Darwin_x86_64}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_arm64_gnu}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_arm64}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_arm}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_x86}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_x86_gnu}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_x86_64}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_x86_64_gnu}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Windows_arm64}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Windows_x86}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Windows_x86_64}/LICENSE",
-          "get-asset CommonsBase_Std.Coreutils.Assets@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Windows_x86_64_gnu}/LICENSE"
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Darwin_arm64}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Darwin_x86_64}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_arm64_gnu}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_arm64}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_arm}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_x86}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_x86_gnu}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_x86_64}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Linux_x86_64_gnu}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Windows_arm64}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Windows_x86}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Windows_x86_64}/LICENSE",
+          "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-i686-pc-windows-msvc.zip -m coreutils-0.2.2-i686-pc-windows-msvc/LICENSE -f ${SLOT.Release.Windows_x86_64_gnu}/LICENSE"
         ]
       },
       "outputs": {

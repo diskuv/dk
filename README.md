@@ -323,11 +323,11 @@ Some of JSON file is fairly straightforward, but let's go through six (6) fields
 2. The `assets.listing_unencrypted.spec_version` must be 2 unless there is a change to the [specification](docs/SPECIFICATION.md).
 3. The `assets.listing_unencrypted.name` field gives *part* of a unique identifier for the `7zr.exe` asset. It has syntax borrowed and hacked from the OCaml programming language.
 
-   The first part of the name, before the first period, is the **library identifier**. For example, `TeachMe_Std` is the library identifier for `TeachMe_Std.S7z.Assets`. The library id visually has at least three bumps, with an underscore separating the second and third bump. It was designed to be visually recognizable (and recognizable from a lexer) while different enough from other identifiers that there was no accidental overlap. The following picture may help you remember the `BumpBump_Bump` shape:
+   The first part of the name, before the first period, is the **library identifier**. For example, `TeachMe_Std` is the library identifier for `TeachMe_Std.S7z.Bundle`. The library id visually has at least three bumps, with an underscore separating the second and third bump. It was designed to be visually recognizable (and recognizable from a lexer) while different enough from other identifiers that there was no accidental overlap. The following picture may help you remember the `BumpBump_Bump` shape:
 
    ![Camels and Library Identifiers](docs/images/pascal-case-from-camels.jpg)
 
-   The parts after the first period, like `S7z` and `Assets` in `TeachMe_Std.S7z.Assets` are called **namespace terms**. They must start with a capital letter, and contain only the characters `A-Za-z0-9_`.
+   The parts after the first period, like `S7z` and `Assets` in `TeachMe_Std.S7z.Bundle` are called **namespace terms**. They must start with a capital letter, and contain only the characters `A-Za-z0-9_`.
 
 4. The `assets.listing_unencrypted.version` field is not the original 7zip version "25.01". Instead, `dk` uses the [semver 2.0](https://semver.org/) versioning specification. So "25.01" was translated into "25.1.0".
 5. The `assets.files.origin` field must be the name of one of the `assets.listing.origins`.
@@ -1292,7 +1292,7 @@ And we saw how to leverage an operating system (in our example Windows) to provi
 
 Finally, the community 7zip package is available for comparison at:
 
-- [etc/dk/v/CommonsBase_Std/S7z.Assets.values.jsonc](etc/dk/v/CommonsBase_Std/S7z.Assets.values.jsonc)
+- [etc/dk/v/CommonsBase_Std/S7z.Bundle.values.jsonc](etc/dk/v/CommonsBase_Std/S7z.Bundle.values.jsonc)
 - [etc/dk/v/CommonsBase_Std/S7z.S7zr.values.jsonc](etc/dk/v/CommonsBase_Std/S7z.S7zr.values.jsonc)
 - [etc/dk/v/CommonsBase_Std/S7z.Windows7zExe.values.jsonc](etc/dk/v/CommonsBase_Std/S7z.Windows7zExe.values.jsonc)
 - [etc/dk/v/CommonsBase_Std/S7z.MacLinux7zTar.values.jsonc](etc/dk/v/CommonsBase_Std/S7z.MacLinux7zTar.values.jsonc)

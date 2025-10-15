@@ -3,7 +3,7 @@
 Steps
 =============================================
 
-0. [CommonsBase_Std.S7z.Assets] See "Binary assets".
+0. [CommonsBase_Std.S7z.Bundle] See "Binary assets".
 1. [CommonsBase_Std.S7z.S7zr] Obtain 7zr.exe that only works on Windows.
    Test with: `get-object 'CommonsBase_Std.S7z.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/s7zr`
 2. [CommonsBase_Std.S7z.Windows7zExe] Use 7zr.exe to extract the Window-specific binaries from the installers.
@@ -15,7 +15,7 @@ Steps
 5. [CommonsBase_Std.S7z] Rename all extracted executables to '7zz.exe' for consistency.
    Test with: `get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_arm64 -d target/s7zexe`
 
-All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [CommonsBase_Std.S7z.Assets].
+All assets are stored in [CommonsBase_Std.S7z.Bundle], which is defined in [CommonsBase_Std.S7z.Bundle].
 
 */
 {
@@ -32,12 +32,12 @@ All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [Comm
           // need bin/<architecture>/7zr.exe
           "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux installers
-          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
-          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
-          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-Release.Linux_x86.tar.xz",
-          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-Release.Linux_x86_64.tar.xz",
-          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_x86_64.tar.xz",
-          "get-asset CommonsBase_Std.S7z.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_arm64.tar.xz"
+          "get-asset CommonsBase_Std.S7z.Bundle@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
+          "get-asset CommonsBase_Std.S7z.Bundle@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
+          "get-asset CommonsBase_Std.S7z.Bundle@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-Release.Linux_x86.tar.xz",
+          "get-asset CommonsBase_Std.S7z.Bundle@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-Release.Linux_x86_64.tar.xz",
+          "get-asset CommonsBase_Std.S7z.Bundle@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_x86_64.tar.xz",
+          "get-asset CommonsBase_Std.S7z.Bundle@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_arm64.tar.xz"
         ]
       },
       "function": {

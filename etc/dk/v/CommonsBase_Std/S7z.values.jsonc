@@ -3,7 +3,7 @@
 Steps
 =============================================
 
-0. [CommonsBase_Std.S7z.Assets] See "Binary assets" in CommonsBase_Std.S7z.Assets.
+0. [CommonsBase_Std.S7z.Bundle] See "Binary assets" in CommonsBase_Std.S7z.Bundle.
 1. [CommonsBase_Std.S7z.S7zr] Obtain 7zr.exe that only works on Windows.
    Test with: `get-object 'CommonsBase_Std.S7z.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/s7zr`
 2. [CommonsBase_Std.S7z.Windows7zExe] Use 7zr.exe to extract the Window-specific binaries from the installers.
@@ -15,7 +15,7 @@ Steps
 5. [CommonsBase_Std.S7z] Rename all extracted executables to '7zz.exe' for consistency.
    Test with: `get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_arm64 -d target/s7zexe`
 
-All assets are stored in [CommonsBase_Std.S7z.Assets], which is defined in [CommonsBase_Std.S7z.Assets].
+All assets are stored in [CommonsBase_Std.S7z.Bundle], which is defined in [CommonsBase_Std.S7z.Bundle].
 
 */
 {
