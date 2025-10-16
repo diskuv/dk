@@ -49,9 +49,9 @@
           },
           // the bundle files (bundle_id + [traces.path, values.path]) must be attested
           "github_slsa_v1_l3": {
-            "doc": {
+            "docs": [{
               /* ... */
-            }
+            }]
           }
         },
         "build_to_sign": {
