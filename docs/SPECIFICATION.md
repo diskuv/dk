@@ -60,6 +60,7 @@
     - [GitHub SLSA Level 3](#github-slsa-level-3)
   - [Graph](#graph)
     - [Nodes](#nodes)
+      - [Values Nodes](#values-nodes)
       - [V256 - SHA256 of Values File](#v256---sha256-of-values-file)
       - [P256 - SHA256 of Asset](#p256---sha256-of-asset)
       - [Z256 - SHA256 of Zip Archive File](#z256---sha256-of-zip-archive-file)
@@ -181,16 +182,16 @@ Expressions are only evaluated if *all* the output types the expression uses are
 
 More generally:
 
-| Type                        | Expression Evaluated? | Immediate Thunk Controller |
-| --------------------------- | --------------------- | -------------------------- |
+| Type                           | Expression Evaluated? | Immediate Thunk Controller |
+| ------------------------------ | --------------------- | -------------------------- |
 | `${SLOT.Release.Agnostic}`     | Always                | A sandbox directory        |
 | `${SLOT.Release.Darwin_arm64}` | Always                | A sandbox directory        |
 
-| Type                        | Expression Evaluated?              | Install Thunk Controller |
-| --------------------------- | ---------------------------------- | ------------------------ |
+| Type                           | Expression Evaluated?              | Install Thunk Controller |
+| ------------------------------ | ---------------------------------- | ------------------------ |
 | `${SLOT.Release.Agnostic}`     | Always                             | The install directory    |
 | `${SLOT.Release.Darwin_arm64}` | Only if the end-user machine's ABI | The install directory    |
-|                             | is `darwin_arm64`                  |                          |
+|                                | is `darwin_arm64`                  |                          |
 
 #### ${MOREINCLUDES}
 
@@ -710,12 +711,12 @@ echo "Size of data file is $size bytes" > "$outputfile"
 
 Get the contents of the asset at `FILE_PATH` for the bundle `MODULE@VERSION`.
 
-| Option      | Description                                                                       |
-| ----------- | --------------------------------------------------------------------------------- |
+| Option      | Description                                                                  |
+| ----------- | ---------------------------------------------------------------------------- |
 | `-f FILE`   | Place asset in `FILE`                                                        |
 | `-d DIR/`   | The asset must be a zip archive, and its contents are extracted into `DIR/`. |
-| `-n STRIP`  | See [Option: [-n STRIP]](#option--n-strip)                                        |
-| `-m MEMBER` | See [Option: [-m MEMBER](#option--m-member)]                                      |
+| `-n STRIP`  | See [Option: [-n STRIP]](#option--n-strip)                                   |
+| `-m MEMBER` | See [Option: [-m MEMBER](#option--m-member)]                                 |
 
 See [Options: -f FILE and -d DIR](#options--f-file-and--d-dir) for output path restrictions.
 
@@ -723,11 +724,11 @@ See [Options: -f FILE and -d DIR](#options--f-file-and--d-dir) for output path r
 
 Get the archive file for the bundle `MODULE@VERSION`.
 
-| Option     | Description                                                                       |
-| ---------- | --------------------------------------------------------------------------------- |
+| Option     | Description                                                                         |
+| ---------- | ----------------------------------------------------------------------------------- |
 | `-f FILE`  | Place bundle in `FILE`. `FILE` will be a zip archive with **all** the bundle files. |
-| `-d DIR/`  | **All** the bundle files will be extracted into `DIR/`.                            |
-| `-n STRIP` | See [Option: [-n STRIP]](#option--n-strip)                                        |
+| `-d DIR/`  | **All** the bundle files will be extracted into `DIR/`.                             |
+| `-n STRIP` | See [Option: [-n STRIP]](#option--n-strip)                                          |
 
 See [Options: -f FILE and -d DIR](#options--f-file-and--d-dir) for output path restrictions.
 
@@ -1193,13 +1194,12 @@ Each node in the graph has a key, a value id, a value sha256 and the value itsel
     | Value Type | What                | Docs                      |
     | ---------- | ------------------- | ------------------------- |
     | `o`        | object              | [Objects](#objects)       |
-    | `a`        | bundle               | [Assets](#assets)         |
-    | `p`        | asset          | [Assets](#assets)         |
-    | `f`        | form                | [Forms](#forms)           |
-    | `v`        | values file         | [JSON Files](#json-files) |
-    | `w`        | values (parsed AST) | [JSON Files](#json-files) |
+    | `b`        | bundle              | [Assets](#assets)         |
+    | `a`        | asset               | [Assets](#assets)         |
+    | `j`        | values.json file    | [JSON Files](#json-files) |
+    | `v`        | values (parsed AST) | [JSON Files](#json-files) |
     | `c`        | built-in constants  | [Objects](#objects)       |
-    | `d`        | debug source file   | FILLMEIN                  |
+    | `s`        | source file         | FILLMEIN                  |
 
     All value types are *lowercase* for support on case-insensitive file systems.
 
@@ -1208,10 +1208,27 @@ Each node in the graph has a key, a value id, a value sha256 and the value itsel
 
 | Value Type | Key                                   | Value Id before SHA256 and base32          | Value                                     |
 | ---------- | ------------------------------------- | ------------------------------------------ | ----------------------------------------- |
-| `v`        | [V256](#v256---sha256-of-values-file) | [V256](#v256---sha256-of-values-file)      | json `{schema_version:,forms:,assets:}`   |
-| `w`        | [VCI](#vci---values-canonical-id)     | [VCK](#vck---values-checksum)              | parsed `{schema_version:,forms:,assets:}` |
-| `o`        | asset                            | [P256](#p256---sha256-of-asset)       | contents of asset                    |
-| `o`        | form, bundle                           | [Z256](#z256---sha256-of-zip-archive-file) | contents of zip archive file              |
+| `j`        | [V256](#v256---sha256-of-values-file) | [V256](#v256---sha256-of-values-file)      | json `{schema_version:,forms:,assets:}`   |
+| `v`        | [VCI](#vci---values-canonical-id)     | [VCK](#vck---values-checksum)              | parsed `{schema_version:,forms:,assets:}` |
+| `a`        | asset                                 | [P256](#p256---sha256-of-asset)            | contents of asset                         |
+| `b`        | bundle                                | [Z256](#z256---sha256-of-zip-archive-file) | contents of zip archive file              |
+
+#### Values Nodes
+
+A `values.json` is parsed into an AST, and the AST is persisted directly from OCaml memory blocks and signed with the local build key.
+
+The build system will verify the signature of the AST before loading the AST into memory.
+If the signature does not match the local build key, or if the AST is incompatible with the memory
+layout of the current process (see [compatibility tag](#ct---compatibility-tag)), the `j` values.json file
+is fetched and re-parsed into a new AST.
+
+Currently in the reference implementation the `v` AST is present in the distributable valuestore.
+Distribution is only beneficial when the memory layout of the remote build system is compatible with the memory layout of the local build system,
+and even then the parse time must be greater than the added download time.
+
+**Security Note**: Distributed parsed AST adds a direct entry point into the build system's memory layout.
+So other implementations and a future reference implementation should keep the AST in a local, non-distributable cache
+where the parsed AST can be generated on-demand. <https://github.com/diskuv/dk/issues/44>
 
 #### V256 - SHA256 of Values File
 
@@ -1257,11 +1274,11 @@ The stripping of carriage returns occurs before the CST and AST parsing, so that
 
 ### Dependencies
 
-| Value Type From | Value Type To | Why                                                     |
-| --------------- | ------------- | ------------------------------------------------------- |
-| `a`             | `v`           | Rebuild bundle if contents of `values.json` changes      |
-| `a`             | `w`           | Rebuild bundle if parsed `values.json` changes           |
-| `f`             | `v`           | Rebuild form if contents of `values.json` changes       |
-| `f`             | `w`           | Rebuild form if parsed `values.json` changes            |
-| `p`             | `v`           | Rebuild asset if contents of `values.json` changes |
-| `p`             | `w`           | Rebuild asset if parsed `values.json` changes      |
+| Value Type From | Value Type To | Why                                                 |
+| --------------- | ------------- | --------------------------------------------------- |
+| `a`             | `v`           | Rebuild bundle if contents of `values.json` changes |
+| `a`             | `w`           | Rebuild bundle if parsed `values.json` changes      |
+| `f`             | `v`           | Rebuild form if contents of `values.json` changes   |
+| `f`             | `w`           | Rebuild form if parsed `values.json` changes        |
+| `p`             | `v`           | Rebuild asset if contents of `values.json` changes  |
+| `p`             | `w`           | Rebuild asset if parsed `values.json` changes       |
