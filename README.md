@@ -277,9 +277,9 @@ The JSON build file must either be named one of:
 - `*.values.jsonc`
 
 We'll make a JSON file to download `7zr.exe`.
-**Save the following file** as `7zip-project/TeachMe_Std.S7z1a.S7zr.values.jsonc`.
+**Save the following file** as `7zip-project/OurZip_Demo.S7z1a.S7zr.values.jsonc`.
 
-<!-- $MDX skip file=docs/7zip-tutorial/TeachMe_Std.S7z1a.S7zr.values.jsonc -->
+<!-- $MDX skip file=docs/7zip-tutorial/OurZip_Demo.S7z1a.S7zr.values.jsonc -->
 ```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
@@ -287,7 +287,7 @@ We'll make a JSON file to download `7zr.exe`.
   "bundles": [
     {
       "listing_unencrypted": {
-        "name": "TeachMe_Std.S7z1a.Assets",
+        "name": "OurZip_Demo.S7z1a.Assets",
         "spec_version": 3,
         // 25.01
         "version": "25.1.0"
@@ -315,7 +315,7 @@ We'll make a JSON file to download `7zr.exe`.
 }
 ```
 
-Make a folder `7zip-project/` and **save the file** as `7zip-project/TeachMe_Std.S7z.S7zr0.values.jsonc`.
+Make a folder `7zip-project/` and **save the file** as `7zip-project/OurZip_Demo.S7z.S7zr0.values.jsonc`.
 
 Some of JSON file is fairly straightforward, but let's go through six (6) fields that deserve mention:
 
@@ -323,11 +323,11 @@ Some of JSON file is fairly straightforward, but let's go through six (6) fields
 2. The `assets.listing_unencrypted.spec_version` must be 3 unless there is a change to the [specification](docs/SPECIFICATION.md).
 3. The `assets.listing_unencrypted.name` field gives *part* of a unique identifier for the `7zr.exe` asset. It has syntax borrowed and hacked from the OCaml programming language.
 
-   The first part of the name, before the first period, is the **library identifier**. For example, `TeachMe_Std` is the library identifier for `TeachMe_Std.S7z.Bundle`. The library id visually has at least three bumps, with an underscore separating the second and third bump. It was designed to be visually recognizable (and recognizable from a lexer) while different enough from other identifiers that there was no accidental overlap. The following picture may help you remember the `BumpBump_Bump` shape:
+   The first part of the name, before the first period, is the **library identifier**. For example, `OurZip_Demo` is the library identifier for `OurZip_Demo.S7z.Bundle`. The library id visually has at least three bumps, with an underscore separating the second and third bump. It was designed to be visually recognizable (and recognizable from a lexer) while different enough from other identifiers that there was no accidental overlap. The following picture may help you remember the `BumpBump_Bump` shape:
 
    ![Camels and Library Identifiers](docs/images/pascal-case-from-camels.jpg)
 
-   The parts after the first period, like `S7z` and `Assets` in `TeachMe_Std.S7z.Bundle` are called **namespace terms**. They must start with a capital letter, and contain only the characters `A-Za-z0-9_`.
+   The parts after the first period, like `S7z` and `Assets` in `OurZip_Demo.S7z.Bundle` are called **namespace terms**. They must start with a capital letter, and contain only the characters `A-Za-z0-9_`.
 
 4. The `assets.listing_unencrypted.version` field is not the original 7zip version "25.01". Instead, `dk` uses the [semver 2.0](https://semver.org/) versioning specification. So "25.01" was translated into "25.1.0".
 5. The `assets.files.origin` field must be the name of one of the `assets.listing.origins`.
@@ -343,7 +343,7 @@ Let's review the command line options:
 | `-x 7zip-org:subpath:`            | Invalidate all bundle files with the `origin: "7zip-org"`    |
 | `--`                              | Separate `dk0/mlfront-shell` options from the command after |
 | `get-asset`                  | Command to get the named asset                         |
-| `TeachMe_Std.S7z1a.Assets@25.1.0` | The name and version in `.values.json`                      |
+| `OurZip_Demo.S7z1a.Assets@25.1.0` | The name and version in `.values.json`                      |
 | `-p 7zr.exe`                      | Identifies the file in `files:[{path:...},...]`             |
 | `-f target/7zr.exe`               | Send command output into the file                           |
 
@@ -354,14 +354,14 @@ and with that we do:
 # You should have done this already in earlier steps. If not, do it now:
 # $ git clone https://github.com/diskuv/dk.git dk0
 
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset 'TeachMe_Std.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 [error 215565e4]: Could not get asset.
 
-    ╭──▶ 7zip-project/TeachMe_Std.S7z.S7zr0.values.jsonc:25.24-25.40
+    ╭──▶ 7zip-project/OurZip_Demo.S7z.S7zr0.values.jsonc:25.24-25.40
     │
  25 │            "sha256": "fill-me-in-later"
     •                       ┬───────────────
-    •                       ╰╸ Could not find asset `TeachMe_Std.S7z1a.Assets@25.1.0+bn-20250101000000 -p 7zr.exe` because the computed SHA256 checksum `27cbe3d5804ad09e90bbcaa916da0d5c3b0be9462d0e0fb6cb54be5ed9030875` was unexpected.
+    •                       ╰╸ Could not find asset `OurZip_Demo.S7z1a.Assets@25.1.0+bn-20250101000000 -p 7zr.exe` because the computed SHA256 checksum `27cbe3d5804ad09e90bbcaa916da0d5c3b0be9462d0e0fb6cb54be5ed9030875` was unexpected.
     •
     │ Hint: This may have been a corrupted download, or an attempt to compromise security. Check the source `https://github.com/ip7z/7zip/releases/download/25.01`. If unsure how to proceed, contact your system or security administrator.
     │ Hint: [autofix] Replace `fill-me-in-later` with `27cbe3d5804ad09e90bbcaa916da0d5c3b0be9462d0e0fb6cb54be5ed9030875` only if the checksum is valid; use `--autofix` to automatically correct it.   
@@ -381,14 +381,14 @@ and we get:
 
 <!-- $MDX skip -->
 ```sh
-$ dk0/mlfront-shell --autofix -I 7zip-project -x 7zip-org:subpath: -- get-asset 'TeachMe_Std.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+$ dk0/mlfront-shell --autofix -I 7zip-project -x 7zip-org:subpath: -- get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 ...
-autofix applied to `7zip-project/TeachMe_Std.S7z1a.S7zr.values.jsonc`
+autofix applied to `7zip-project/OurZip_Demo.S7z1a.S7zr.values.jsonc`
 ```
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset 'TeachMe_Std.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
-[up-to-date] TeachMe_Std.S7z1a.Assets@25.1.0+bn-20250101000000 -p 7zr.exe
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+[up-to-date] OurZip_Demo.S7z1a.Assets@25.1.0+bn-20250101000000 -p 7zr.exe
 ```
 
 Let inspect the file. The `file` commands work only on Linux, but on Windows you can do a `7zr.exe --help`.
@@ -409,22 +409,22 @@ In this step 1b, we'll use a form so that users of the 7zip package have a consi
 even if the 7zip assets change. **A consistent interface is a best practice for all packages that use assets**.
 
 We'll create a new JSON file containing the form.
-**Save the following file** as `7zip-project/TeachMe_Std.S7z1b.S7zr.values.jsonc`.
+**Save the following file** as `7zip-project/OurZip_Demo.S7z1b.S7zr.values.jsonc`.
 
-<!-- $MDX file=docs/7zip-tutorial/TeachMe_Std.S7z1b.S7zr.values.jsonc -->
+<!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z1b.S7zr.values.jsonc -->
 ```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 }, 
   "forms": [
     {
-      "id": "TeachMe_Std.S7z1b.S7zr@25.1.0",
+      "id": "OurZip_Demo.S7z1b.S7zr@25.1.0",
       "precommands": {
         "private": [
-          "get-asset TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm}/7zr.exe",
-          "get-asset TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm64}/7zr.exe",
-          "get-asset TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86}/7zr.exe",
-          "get-asset TeachMe_Std.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86_64}/7zr.exe"
+          "get-asset OurZip_Demo.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm}/7zr.exe",
+          "get-asset OurZip_Demo.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_arm64}/7zr.exe",
+          "get-asset OurZip_Demo.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86}/7zr.exe",
+          "get-asset OurZip_Demo.S7z1a.Assets@25.1.0 -p 7zr.exe -f ${SLOT.Release.Windows_x86_64}/7zr.exe"
         ]
       },
       "outputs": {
@@ -445,9 +445,9 @@ We'll create a new JSON file containing the form.
 }
 ```
 
-The form identifier `TeachMe_Std.S7z.S7zr@25.1.0` is split into three fields (`package`, `name` and `version`):
+The form identifier `OurZip_Demo.S7z.S7zr@25.1.0` is split into three fields (`package`, `name` and `version`):
 
-- The *library identifier* `TeachMe_Std` and all the *namespace terms* except the last (`S7z`) belong in the `package` field.
+- The *library identifier* `OurZip_Demo` and all the *namespace terms* except the last (`S7z`) belong in the `package` field.
 - The last *namespace term* is the `name` field
 - The version is in the `version` field.
 
@@ -518,8 +518,8 @@ when you forgot to declare files or you declare too many files.
 We'll use `get-object` to submit our new form. With that we get:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z1b.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/7zr-win64
-[up-to-date] TeachMe_Std.S7z1b.S7zr@25.1.0+bn-20250101000000 -s Release.Windows_x86_64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z1b.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/7zr-win64
+[up-to-date] OurZip_Demo.S7z1b.S7zr@25.1.0+bn-20250101000000 -s Release.Windows_x86_64
 ```
 
 If we inspect the target directory, we see all the files from the object in Unix:
@@ -551,9 +551,9 @@ in the `precommands` once, and none of our users need to change their `get-objec
 
 Now that we have seen how to specify one asset, let's do all of the Windows installer and Unix compress archive bundle files.
 
-**Save the following file** as `7zip-project/TeachMe_Std.S7z1c.S7zr.values.jsonc`.
+**Save the following file** as `7zip-project/OurZip_Demo.S7z1c.S7zr.values.jsonc`.
 
-<!-- $MDX file=docs/7zip-tutorial/TeachMe_Std.S7z1c.S7zr.values.jsonc -->
+<!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z1c.S7zr.values.jsonc -->
 ```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
@@ -563,7 +563,7 @@ Now that we have seen how to specify one asset, let's do all of the Windows inst
   },  
   "bundles": [
     {
-      "id": "TeachMe_Std.S7z1c.Assets@25.1.0",
+      "id": "OurZip_Demo.S7z1c.Assets@25.1.0",
       "listing": {
         "origins": [
           {
@@ -665,14 +665,14 @@ We'll be using a new command `get-bundle`.
 | `--autofix`                       | Fix any invalid checksums                                   |
 | `--`                              | Separate `dk0/mlfront-shell` options from the command after |
 | `get-bundle`                       | Command to get all members of the named bundle               |
-| `TeachMe_Std.S7z1a.Assets@25.1.0` | The name and version in `.values.json`                      |
+| `OurZip_Demo.S7z1a.Assets@25.1.0` | The name and version in `.values.json`                      |
 | `-d target/7zr-assets`            | Send command output into the directory                      |
 
 With that we get:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-bundle 'TeachMe_Std.S7z1c.Assets@25.1.0' -d target/7zr-assets
-[up-to-date] TeachMe_Std.S7z1c.Assets@25.1.0+bn-20250101000000
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -d target/7zr-assets
+[up-to-date] OurZip_Demo.S7z1c.Assets@25.1.0+bn-20250101000000
 ```
 
 If we inspect the target directory, we see all the files from the bundle in Unix:
@@ -718,8 +718,8 @@ What happens if we output the bundle to a file rather than a directory.
 That is, what if we replaced `-d target/7zr-assets` with `-f target/7zr-file`?
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-bundle 'TeachMe_Std.S7z1c.Assets@25.1.0' -f target/7zr-file
-[up-to-date] TeachMe_Std.S7z1c.Assets@25.1.0+bn-20250101000000
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -f target/7zr-file
+[up-to-date] OurZip_Demo.S7z1c.Assets@25.1.0+bn-20250101000000
 ```
 
 The file is a zip archive per the [Saving Assets section of the specification](docs/SPECIFICATION.md#saving-assets).
@@ -750,9 +750,9 @@ In this section we want to run `7zr.exe` (the lightweight 7zip unzipper)
 to extract `7z.exe` (the full featured 7zip unzip/zipper) from the Windows installers.
 
 Whenever we run a command we need a form with a `function`.
-**Save the following file** as `7zip-project/TeachMe_Std.S7z2.Windows7zExe.values.jsonc`.
+**Save the following file** as `7zip-project/OurZip_Demo.S7z2.Windows7zExe.values.jsonc`.
 
-<!-- $MDX file=docs/7zip-tutorial/TeachMe_Std.S7z2.Windows7zExe.values.jsonc -->
+<!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z2.Windows7zExe.values.jsonc -->
 ```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
@@ -762,19 +762,19 @@ Whenever we run a command we need a form with a `function`.
   },
   "forms": [
     {
-      "id": "TeachMe_Std.S7z2.Windows7zExe@25.1.0",
+      "id": "OurZip_Demo.S7z2.Windows7zExe@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_arm -d bin/Release.Windows_arm",
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_arm64 -d bin/Release.Windows_arm64",
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86_64 -d bin/Release.Windows_x86_64",
+          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_arm -d bin/Release.Windows_arm",
+          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_arm64 -d bin/Release.Windows_arm64",
+          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
+          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_x86_64 -d bin/Release.Windows_x86_64",
           // need Windows installers
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-Release.Windows_arm.exe",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-Release.Windows_arm64.exe",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86.exe",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86_64.exe"
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-Release.Windows_arm.exe",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-Release.Windows_arm64.exe",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86.exe",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86_64.exe"
         ]
       },
       "function": {
@@ -862,8 +862,8 @@ But for now we can submit the form if we are on Windows. We'll submit the `Relea
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z2.Windows7zExe@25.1.0' -s Release.Windows_arm64 -d target/7zexe-winarm64
-[up-to-date] TeachMe_Std.S7z2.Windows7zExe@25.1.0+bn-20250101000000 -s Release.Windows_arm64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z2.Windows7zExe@25.1.0' -s Release.Windows_arm64 -d target/7zexe-winarm64
+[up-to-date] OurZip_Demo.S7z2.Windows7zExe@25.1.0+bn-20250101000000 -s Release.Windows_arm64
 ```
 
 If we inspect the target directory, we see all the files from the object on Windows:
@@ -892,9 +892,9 @@ In this section, we will use `7z.exe` to uncompress `7z2501-linux-x86.tar` from 
 
 This is a new form with a function that will call `7z.exe` with the right parameters.
 
-**Save the following file** as `7zip-project/TeachMe_Std.S7z3.MacLinux7zTar.values.jsonc`.
+**Save the following file** as `7zip-project/OurZip_Demo.S7z3.MacLinux7zTar.values.jsonc`.
 
-<!-- $MDX file=docs/7zip-tutorial/TeachMe_Std.S7z3.MacLinux7zTar.values.jsonc -->
+<!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z3.MacLinux7zTar.values.jsonc -->
 ```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
@@ -904,18 +904,18 @@ This is a new form with a function that will call `7z.exe` with the right parame
   },
   "forms": [
     {
-      "id": "TeachMe_Std.S7z3.MacLinux7zTar@25.1.0",
+      "id": "OurZip_Demo.S7z3.MacLinux7zTar@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
+          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux installers
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-Release.Linux_x86.tar.xz",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-Release.Linux_x86_64.tar.xz",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_x86_64.tar.xz",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_arm64.tar.xz"
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-Release.Linux_x86.tar.xz",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-Release.Linux_x86_64.tar.xz",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_x86_64.tar.xz",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_arm64.tar.xz"
         ]
       },
       "function": {
@@ -973,8 +973,8 @@ The use of `7zr.exe` means we can only run this step on Windows hardware, even t
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z3.MacLinux7zTar@25.1.0' -s Release.Linux_arm64 -d target/7ztar-linuxarm64
-[up-to-date] TeachMe_Std.S7z3.MacLinux7zTar@25.1.0+bn-20250101000000 -s Release.Linux_arm64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z3.MacLinux7zTar@25.1.0' -s Release.Linux_arm64 -d target/7ztar-linuxarm64
+[up-to-date] OurZip_Demo.S7z3.MacLinux7zTar@25.1.0+bn-20250101000000 -s Release.Linux_arm64
 ```
 
 and the target directory has:
@@ -993,9 +993,9 @@ In this section, we will use `7z.exe` to extract `7zz` from `7z2501-linux-x86.ta
 
 This is a new form with a function that will call `7z.exe` with the right parameters.
 
-**Save the following file** as `7zip-project/TeachMe_Std.S7z4.MacLinux7zExe.values.jsonc`.
+**Save the following file** as `7zip-project/OurZip_Demo.S7z4.MacLinux7zExe.values.jsonc`.
 
-<!-- $MDX file=docs/7zip-tutorial/TeachMe_Std.S7z4.MacLinux7zExe.values.jsonc -->
+<!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z4.MacLinux7zExe.values.jsonc -->
 ```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
@@ -1005,18 +1005,18 @@ This is a new form with a function that will call `7z.exe` with the right parame
   },
   "forms": [
     {
-      "id": "TeachMe_Std.S7z4.MacLinux7zExe@25.1.0",
+      "id": "OurZip_Demo.S7z4.MacLinux7zExe@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7z.exe (7zr does not extract tar files)
-          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
+          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux tar files. since same destination directory need [install-object]
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm -d tarballs",
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm64 -d tarballs",
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_x86 -d tarballs",
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_x86_64 -d tarballs",
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Darwin_arm64 -d tarballs",
-          "install-object TeachMe_Std.S7z3.MacLinux7zTar@25.1.0 -s Release.Darwin_x86_64 -d tarballs"
+          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm -d tarballs",
+          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm64 -d tarballs",
+          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_x86 -d tarballs",
+          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_x86_64 -d tarballs",
+          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Darwin_arm64 -d tarballs",
+          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Darwin_x86_64 -d tarballs"
         ]
       },
       "function": {
@@ -1075,8 +1075,8 @@ The use of `7z.exe` means we can only run this step on Windows hardware, even th
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z4.MacLinux7zExe@25.1.0' -s Release.Darwin_x86_64 -d target/7zexe-macintel
-[up-to-date] TeachMe_Std.S7z4.MacLinux7zExe@25.1.0+bn-20250101000000 -s Release.Darwin_x86_64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z4.MacLinux7zExe@25.1.0' -s Release.Darwin_x86_64 -d target/7zexe-macintel
+[up-to-date] OurZip_Demo.S7z4.MacLinux7zExe@25.1.0+bn-20250101000000 -s Release.Darwin_x86_64
 ```
 
 and the target directory has:
@@ -1100,9 +1100,9 @@ target/7zexe-macintel/7zz: Mach-O universal binary with 2 architectures: [x86_64
 
 We have not yet provided an overall interface for the 7zip package. Let's do this right now!
 
-**Save the following file** as `7zip-project/TeachMe_Std.S7z5.values.jsonc`.
+**Save the following file** as `7zip-project/OurZip_Demo.S7z5.values.jsonc`.
 
-<!-- $MDX file=docs/7zip-tutorial/TeachMe_Std.S7z5.values.jsonc -->
+<!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z5.values.jsonc -->
 ```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
@@ -1112,25 +1112,25 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
   },
   "forms": [
     {
-      "id": "TeachMe_Std.S7z5.S7zExe@25.1.0",
+      "id": "OurZip_Demo.S7z5.S7zExe@25.1.0",
       "precommands": {
         "private": [
           // We'll make the executable name '7zz.exe' on all platforms so that
           // end-users don't have to have complicated logic based on the platform.
 
           // Windows. 7z.exe -> 7zz.exe
-          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s Release.Windows_arm -m ./7z.exe -f ${SLOT.Release.Windows_arm}/7zz.exe",
-          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s Release.Windows_arm64 -m ./7z.exe -f ${SLOT.Release.Windows_arm64}/7zz.exe",
-          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86 -m ./7z.exe -f ${SLOT.Release.Windows_x86}/7zz.exe",
-          "get-object TeachMe_Std.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86_64 -m ./7z.exe -f ${SLOT.Release.Windows_x86_64}/7zz.exe",
+          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_arm -m ./7z.exe -f ${SLOT.Release.Windows_arm}/7zz.exe",
+          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_arm64 -m ./7z.exe -f ${SLOT.Release.Windows_arm64}/7zz.exe",
+          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86 -m ./7z.exe -f ${SLOT.Release.Windows_x86}/7zz.exe",
+          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86_64 -m ./7z.exe -f ${SLOT.Release.Windows_x86_64}/7zz.exe",
 
           // Unix. 7zz -> 7zz.exe
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./7zz -f ${SLOT.Release.Darwin_arm64}/7zz.exe",
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Darwin_x86_64 -m ./7zz -f ${SLOT.Release.Darwin_x86_64}/7zz.exe",
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_arm -m ./7zz -f ${SLOT.Release.Linux_arm}/7zz.exe",
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_arm64 -m ./7zz -f ${SLOT.Release.Linux_arm64}/7zz.exe",
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_x86 -m ./7zz -f ${SLOT.Release.Linux_x86}/7zz.exe",
-          "get-object TeachMe_Std.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_x86_64 -m ./7zz -f ${SLOT.Release.Linux_x86_64}/7zz.exe"
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./7zz -f ${SLOT.Release.Darwin_arm64}/7zz.exe",
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Darwin_x86_64 -m ./7zz -f ${SLOT.Release.Darwin_x86_64}/7zz.exe",
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_arm -m ./7zz -f ${SLOT.Release.Linux_arm}/7zz.exe",
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_arm64 -m ./7zz -f ${SLOT.Release.Linux_arm64}/7zz.exe",
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_x86 -m ./7zz -f ${SLOT.Release.Linux_x86}/7zz.exe",
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_x86_64 -m ./7zz -f ${SLOT.Release.Linux_x86_64}/7zz.exe"
         ]
       },
       "outputs": {
@@ -1160,8 +1160,8 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
 With that our users can grab the `7zz.exe` executable for any operating system and CPU architecture:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -d target/7z-linux64
-[up-to-date] TeachMe_Std.S7z5.S7zExe@25.1.0+bn-20250101000000 -s Release.Linux_x86_64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -d target/7z-linux64
+[up-to-date] OurZip_Demo.S7z5.S7zExe@25.1.0+bn-20250101000000 -s Release.Linux_x86_64
 ```
 
 ```sh
@@ -1174,8 +1174,8 @@ target/7z-linux64/7zz.exe: ELF 64-bit LSB pie executable, x86-64, version 1 (SYS
 Since `7zz.exe` is a standalone executable that doesn't need any DLLs or `.so` (except standard GLIBC system libraries on Linux), we can use the `-m MEMBER` option to directly fetch the `7zz.exe` executable:
 
 ```sh
-$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'TeachMe_Std.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
-[up-to-date] TeachMe_Std.S7z5.S7zExe@25.1.0+bn-20250101000000 -s Release.Linux_x86_64
+$ dk0/mlfront-shell -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
+[up-to-date] OurZip_Demo.S7z5.S7zExe@25.1.0+bn-20250101000000 -s Release.Linux_x86_64
 $ file target/7zz.exe
 target/7zz.exe: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=7a6c7a136fc4e7df4ddcd80d2aae72bc658ef822, for GNU/Linux 3.2.0, stripped
 ```
@@ -1246,20 +1246,20 @@ jobs:
               run: target/${{ env.TEST_SLOT }}.7zz.exe --help
 
             # Create release if and only if tag is pushed
-            - name: Release ${{ github.workflow }}
-              uses: softprops/action-gh-release@v2
-              if: github.ref_type == 'tag'
-              with:
-                files: |
-                  target/LICENSE
-                  target/Release.Darwin_arm64.7zz.exe
-                  target/Release.Darwin_x86_64.7zz.exe
-                  target/Release.Linux_arm.7zz.exe
-                  target/Release.Linux_arm64.7zz.exe
-                  target/Release.Linux_x86.7zz.exe
-                  target/Release.Linux_x86_64.7zz.exe
-                  target/Release.Windows_x86.7zz.exe
-                  target/Release.Windows_x86_64.7zz.exe
+            # - name: Release ${{ github.workflow }}
+            #   uses: softprops/action-gh-release@v2
+            #   if: github.ref_type == 'tag'
+            #   with:
+            #     files: |
+            #       target/LICENSE
+            #       target/Release.Darwin_arm64.7zz.exe
+            #       target/Release.Darwin_x86_64.7zz.exe
+            #       target/Release.Linux_arm.7zz.exe
+            #       target/Release.Linux_arm64.7zz.exe
+            #       target/Release.Linux_x86.7zz.exe
+            #       target/Release.Linux_x86_64.7zz.exe
+            #       target/Release.Windows_x86.7zz.exe
+            #       target/Release.Windows_x86_64.7zz.exe
 ```
 
 It uses the community 7zip package (links provided in the next section) rather than the one we built in this tutorial.
@@ -1311,7 +1311,7 @@ With that failed form we'll be able to inspect the 7zip packages.
 
 The always-failing form is the following (you don't need to create your own copy):
 
-<!-- $MDX file=docs/7zip-tutorial/TeachMe_Std.S7z9.Debug.values.jsonc -->
+<!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z9.Debug.values.jsonc -->
 ```jsonc
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
@@ -1321,14 +1321,14 @@ The always-failing form is the following (you don't need to create your own copy
   },
   "forms": [
     {
-      "id": "TeachMe_Std.S7z9.Debug@25.1.0",
+      "id": "OurZip_Demo.S7z9.Debug@25.1.0",
       "precommands": {
         "private": [
           // we'll use the community 7zip package, not the tutorial 7zip package
-          "get-object TeachMe_Std.S7z.S7zExe@25.1.0 -s Release.Linux_arm -d linuxarm_stuff",
-          "get-object TeachMe_Std.S7z.S7zExe@25.1.0 -s Release.Windows_x86 -d win32_stuff",
+          "get-object OurZip_Demo.S7z.S7zExe@25.1.0 -s Release.Linux_arm -d linuxarm_stuff",
+          "get-object OurZip_Demo.S7z.S7zExe@25.1.0 -s Release.Windows_x86 -d win32_stuff",
           // all forms, even ones designed to fail, must have at least one slot
-          "get-object TeachMe_Std.S7z.S7zExe@25.1.0 -s Release.Linux_arm64 -d ${SLOT.Release.Linux_arm64}"
+          "get-object OurZip_Demo.S7z.S7zExe@25.1.0 -s Release.Linux_arm64 -d ${SLOT.Release.Linux_arm64}"
         ]
       },
       "function": {
@@ -1354,11 +1354,11 @@ Enter the form with:
 
 <!-- $MDX skip -->
 ```sh
-$ dk0/mlfront-shell -I dk0/docs/7zip-tutorial -x 7zip-org:subpath: -- enter-object 'TeachMe_Std.S7z9.Debug@25.1.0' -s Release.Linux_arm64
+$ dk0/mlfront-shell -I dk0/docs/7zip-tutorial -x 7zip-org:subpath: -- enter-object 'OurZip_Demo.S7z9.Debug@25.1.0' -s Release.Linux_arm64
 
-PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> 
+PS OurZip_Demo.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64>
 
-PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> dir -recurse
+PS OurZip_Demo.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> dir -recurse
     Directory: target\pid\480\lsgbf44nuuwajzjh\fn\Release.Linux_arm64
 
 Mode                 LastWriteTime         Length Name
@@ -1378,14 +1378,14 @@ Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
 -a---            1/1/1980 12:00 AM         575488 7zz.exe
 
-PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> dir $env:SHELL_SLOT
+PS OurZip_Demo.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> dir $env:SHELL_SLOT
     Directory: target\pid\480\lsgbf44nuuwajzjh\out\Release.Linux_arm64
 
 Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
 -a---            1/1/1980 12:00 AM        2456896 7zz.exe
 
-PS TeachMe_Std.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> exit
+PS OurZip_Demo.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64> exit
 ```
 
 The Unix shell is similar.

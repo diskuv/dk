@@ -6,19 +6,19 @@
   },
   "forms": [
     {
-      "id": "TeachMe_Std.S7z2.Windows7zExe@25.1.0",
+      "id": "OurZip_Demo.S7z2.Windows7zExe@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_arm -d bin/Release.Windows_arm",
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_arm64 -d bin/Release.Windows_arm64",
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86_64 -d bin/Release.Windows_x86_64",
+          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_arm -d bin/Release.Windows_arm",
+          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_arm64 -d bin/Release.Windows_arm64",
+          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
+          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_x86_64 -d bin/Release.Windows_x86_64",
           // need Windows installers
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-Release.Windows_arm.exe",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-Release.Windows_arm64.exe",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86.exe",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86_64.exe"
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-arm.exe -f 7z-Release.Windows_arm.exe",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-arm64.exe -f 7z-Release.Windows_arm64.exe",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86.exe",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-x64.exe -f 7z-Release.Windows_x86_64.exe"
         ]
       },
       "function": {

@@ -6,18 +6,18 @@
   },
   "forms": [
     {
-      "id": "TeachMe_Std.S7z3.MacLinux7zTar@25.1.0",
+      "id": "OurZip_Demo.S7z3.MacLinux7zTar@25.1.0",
       "precommands": {
         "private": [
           // need bin/<architecture>/7zr.exe
-          "get-object TeachMe_Std.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
+          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux installers
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-Release.Linux_x86.tar.xz",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-Release.Linux_x86_64.tar.xz",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_x86_64.tar.xz",
-          "get-asset TeachMe_Std.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_arm64.tar.xz"
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-x86.tar.xz -f 7z-Release.Linux_x86.tar.xz",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-x64.tar.xz -f 7z-Release.Linux_x86_64.tar.xz",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_x86_64.tar.xz",
+          "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-mac.tar.xz -f 7z-Release.Darwin_arm64.tar.xz"
         ]
       },
       "function": {

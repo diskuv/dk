@@ -1,0 +1,51 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "forms": [
+    {
+      "id": "OurZip_Demo.S7z5.S7zExe@25.1.0",
+      "precommands": {
+        "private": [
+          // We'll make the executable name '7zz.exe' on all platforms so that
+          // end-users don't have to have complicated logic based on the platform.
+
+          // Windows. 7z.exe -> 7zz.exe
+          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_arm -m ./7z.exe -f ${SLOT.Release.Windows_arm}/7zz.exe",
+          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_arm64 -m ./7z.exe -f ${SLOT.Release.Windows_arm64}/7zz.exe",
+          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86 -m ./7z.exe -f ${SLOT.Release.Windows_x86}/7zz.exe",
+          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86_64 -m ./7z.exe -f ${SLOT.Release.Windows_x86_64}/7zz.exe",
+
+          // Unix. 7zz -> 7zz.exe
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Darwin_arm64 -m ./7zz -f ${SLOT.Release.Darwin_arm64}/7zz.exe",
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Darwin_x86_64 -m ./7zz -f ${SLOT.Release.Darwin_x86_64}/7zz.exe",
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_arm -m ./7zz -f ${SLOT.Release.Linux_arm}/7zz.exe",
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_arm64 -m ./7zz -f ${SLOT.Release.Linux_arm64}/7zz.exe",
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_x86 -m ./7zz -f ${SLOT.Release.Linux_x86}/7zz.exe",
+          "get-object OurZip_Demo.S7z4.MacLinux7zExe@25.1.0 -s Release.Linux_x86_64 -m ./7zz -f ${SLOT.Release.Linux_x86_64}/7zz.exe"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "paths": ["7zz.exe"],
+            "slots": [
+              "Release.Windows_arm",
+              "Release.Windows_arm64",
+              "Release.Windows_x86",
+              "Release.Windows_x86_64",
+              "Release.Darwin_arm64",
+              "Release.Darwin_x86_64",
+              "Release.Linux_arm",
+              "Release.Linux_arm64",
+              "Release.Linux_x86",
+              "Release.Linux_x86_64"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
