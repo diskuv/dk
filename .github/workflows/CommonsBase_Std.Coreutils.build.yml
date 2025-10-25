@@ -10,6 +10,9 @@ jobs:
     windows-dependencies: # job to build dependencies that only run on Windows (until we have first-class GitHub Actions support)
         runs-on: windows-2022
         steps:
+            - name: Checkout
+              uses: actions/checkout@v5
+
             - name: Checkout # get dk0/mlfront-shell
               uses: actions/checkout@v5
               with: { repository: diskuv/dk, path: dk0, ref: V2_4 }
