@@ -42,6 +42,7 @@ jobs:
                     CommonsBase_Std.Coreutils@0.2.2
                   use-cache: true
                   experimental-mlfront-ref: HEAD
+                  options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_Std: rebuild "system" modules
 
             - name: Generate artifact attestation
               id: attest
