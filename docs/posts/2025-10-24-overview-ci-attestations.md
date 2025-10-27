@@ -209,8 +209,8 @@ Disclosures: Except for GitLab, I am unaffliated with any company mentioned in t
 
 Also, if you work for / have influence with the following CI providers, please nudge them with:
 
-- GitHub: Please do not require `GITHUB_TOKEN` authentication to download attestations (Figure 2. Step 2). Use rate-limiting on a public REST API, etc. Signing into the GitHub CLI with a GITHUB_TOKEN is a major usability blocker for automated verification.
-- GitHub: Please make it so that attestations can be generated when the git tags are immutable. <https://github.com/actions/attest-build-provenance/issues/734>.
+- GitHub: Please do not require `GITHUB_TOKEN` authentication to download attestations (Figure 2. Step 2). Use rate-limiting on a public REST API, etc. Signing into the GitHub CLI with a GITHUB_TOKEN is a major usability blocker for automated verification. <https://github.com/cli/cli/issues/12030> (thumbs up to help get it prioritized)
+- GitHub: Please make it so that attestations can be generated when the git tags are immutable. <https://github.com/actions/attest-build-provenance/issues/734> (thumbs up to help get it prioritized)
 - GitLab: Please close the epics for SLSA Level 2.
 
 ## Technical References
@@ -240,7 +240,7 @@ Build Systems
 
 ## Log
 
-- 2025/10/27. Added this section. Added subsection titles to Technical References. Amended intro sentence to add reproducible builds as further reading. Added "Building Secure and Reliable Systems" and "SLSA Build Environment track" references.
+- 2025/10/27. Added this section. Added issue link for GitHub auth. Added subsection titles to Technical References. Amended intro sentence to add reproducible builds as further reading. Added "Building Secure and Reliable Systems" and "SLSA Build Environment track" references.
 - 2025/10/25. <https://lobste.rs/s/vflxfb/overview_attestations_ci>
 
 -- Jonah
