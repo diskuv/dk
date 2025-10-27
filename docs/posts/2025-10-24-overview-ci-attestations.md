@@ -87,7 +87,7 @@ In GitHub/GitLab the packaging of an upstream package looks like:
    └─────────────────────┘          └───────────────┘
 ```
 
-The attestation establishs that GitHub/GitLab observed
+The attestation establishes that GitHub/GitLab observed
 the artifacts (the valuestore, the tracestore and values.json)
 after the build and recorded their SHA-256 checksums.
 
