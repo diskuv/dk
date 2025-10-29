@@ -1055,7 +1055,7 @@ for example, `./vnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq`.
 
 The following values must be present:
 
-- the "v" values file for any values.json with a form or bundle having a library identical to the distribution library `id`
+- the "j" values file for any values.json with a form or bundle having a library identical to the distribution library `id`
 - the "w" parsed values ast for any values.json with a form or bundle having a library identical to the distribution library `id`
 - the "o" object file for any object having a library identical to the distribution library `id`
 
