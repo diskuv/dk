@@ -9,8 +9,6 @@
       "id": "CommonsBase_Std.Coreutils.Exe@0.2.2",
       "precommands": {
         "private": [
-          // need bin/<architecture>/7z.exe (7zr does not extract tar files)
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux tar files. since same destination directory need [install-object]
           "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Darwin_arm64 -d tarballs",
           "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Darwin_x86_64 -d tarballs",
@@ -33,7 +31,7 @@
         ],
         "args": [
           // with [7z.exe] ...
-          "bin/Release.Windows_x86/7z.exe",
+          "$(get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -d :)/7z.exe",
           // (e)xtract all files into a single flat directory
           "e",
           // to output directory for slot [Release.Darwin_arm64] (etc.)

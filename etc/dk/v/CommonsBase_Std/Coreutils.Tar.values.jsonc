@@ -9,8 +9,6 @@
       "id": "CommonsBase_Std.Coreutils.Tar@0.2.2",
       "precommands": {
         "private": [
-          // need bin/<architecture>/7z.exe (7zr does not extract tar files)
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux tar.gz files
           "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-aarch64-apple-darwin.tar.gz -f coreutils.Release.Darwin_arm64.tar.gz",
           "get-asset CommonsBase_Std.Coreutils.Bundle@0.2.2 -p coreutils-0.2.2-x86_64-apple-darwin.tar.gz -f coreutils.Release.Darwin_x86_64.tar.gz",
@@ -33,7 +31,7 @@
         ],
         "args": [
           // with [7z.exe] ...
-          "bin/Release.Windows_x86/7z.exe",
+          "$(get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -d :)/7z.exe",
           // uncompress
           "x",
           // to output directory for slot [Release.Darwin_arm64] (etc.)

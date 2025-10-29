@@ -907,8 +907,6 @@ This is a new form with a function that will call `7z.exe` with the right parame
       "id": "OurZip_Demo.S7z3.MacLinux7zTar@25.1.0",
       "precommands": {
         "private": [
-          // need bin/<architecture>/7zr.exe
-          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux installers
           "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
           "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
@@ -929,7 +927,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
         "args": [
           // uncompress asset [7z2501-mac.tar.xz] with [7zr.exe] to the output directory
           // for slot [Release.Darwin_arm64], etc.
-          "bin/Release.Windows_x86/7zr.exe",
+          "$(get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_x86 -d :)/7zr.exe",
           "x",
           "-o${SLOT.request}",
           "7z-${SLOTNAME.request}.tar.xz",
@@ -1008,8 +1006,6 @@ This is a new form with a function that will call `7z.exe` with the right parame
       "id": "OurZip_Demo.S7z4.MacLinux7zExe@25.1.0",
       "precommands": {
         "private": [
-          // need bin/<architecture>/7z.exe (7zr does not extract tar files)
-          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux tar files. since same destination directory need [install-object]
           "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm -d tarballs",
           "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm64 -d tarballs",
@@ -1030,7 +1026,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
         "args": [
           // extract object [7z2501-mac.tar] with [7z.exe] to the output directory
           // for slot [Release.Darwin_arm64], etc.
-          "bin/Release.Windows_x86/7z.exe",
+          "$(get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -d :)/7z.exe",
           "x",
           "-o${SLOT.request}",
           "tarballs/7z-${SLOTNAME.request}.tar",
