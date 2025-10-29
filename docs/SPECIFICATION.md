@@ -12,6 +12,7 @@
   - [Forms](#forms)
     - [Form Variables](#form-variables)
       - [Variable Availability](#variable-availability)
+      - [$(subcommand)](#subcommand)
       - [${SLOT.request}](#slotrequest)
       - [${SLOTNAME.request}](#slotnamerequest)
       - [${SLOT.SlotName}](#slotslotname)
@@ -159,6 +160,13 @@ the build system can give the second shell command a symlink to the first direct
 Some variables are available in the Value Shell Language (VSL); see [Variables available in VSL](#variables-available-in-vsl)
 
 All variables are available in `.forms.function.args` and `.forms.function.envmods`.
+
+#### $(subcommand)
+
+The result of a subcommand. The subcommand can be one of two things:
+
+- `get-object MODULE@VERSION -s REQUEST_SLOT (-f : | -d :) -- CLI_FORM_DOC` which is the same as a normal [get-object (described in the Values section)](#get-object-moduleversion--s-request_slot--f-file---d-dir----cli_form_doc) except the destination `-f` or `-d` is `:`.
+- `get-asset MODULE@VERSION FILE_PATH (-f : | -d :)` which is the same as a normal [get-asset (described in the Values section)](#get-asset-moduleversion-file_path--f-file---d-dir) except the destination `-f` or `-d` is `:`.
 
 #### ${SLOT.request}
 
@@ -318,14 +326,16 @@ like `PATH+=${CACHE}${/}bin` so the modification is portable across operating sy
 The order of processing is as follows:
 
 1. The form's precommands are executed, in parallel if supported by the build system.
-2. The form's function is executed.
-3. If [${MORECOMMANDS}](#morecommands) is part of the form's arguments or precommands, then:
+2. The form's subshells in the function `args` and `envmods` (if any) are executed, in parallel if supported by the build system.
+3. If there is a breakpoint from the `enter-object` command, a system shell (PowerShell, bash, etc.) is invoked.
+4. The form's function is executed.
+5. If [${MORECOMMANDS}](#morecommands) is part of the form's arguments or precommands, then:
    1. The [${MOREINCLUDES}](#moreincludes) directory is scanned for `values.json[c]` and `*.values.json[c]` values files. However, the values files are *not* imported in the value store.
    2. The [${MOREINCLUDES}](#moreincludes) values files are [alpha-converted](#dynamic-functions) and imported as `valuesfile` values.
    3. The module ids in the [${MORECOMMANDS}](#morecommands) are [alpha-converted](#dynamic-functions) using `BOUND_MODULES` from the last step.
    4. The alpha-converted shell commands in [${MORECOMMANDS}](#morecommands) are run.
-4. The form's output files are verified to exist.
-5. The [`${SLOT.slotname}`](#slotslotname) that are part of the form's arguments and precommands are made available to other forms.
+6. The form's output files are verified to exist.
+7. The [`${SLOT.slotname}`](#slotslotname) that are part of the form's arguments and precommands are made available to other forms.
 
 The trace and value store are updated as normal during the MORECOMMANDS, so if the same form id, form slot and form document are submitted the build system can re-use the cached values.
 
