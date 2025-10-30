@@ -165,8 +165,13 @@ All variables are available in `.forms.function.args` and `.forms.function.envmo
 
 The result of a subcommand. The subcommand can be one of two things:
 
-- `get-object MODULE@VERSION -s REQUEST_SLOT (-f : | -d :) -- CLI_FORM_DOC` which is the same as a normal [get-object (described in the Values section)](#get-object-moduleversion--s-request_slot--f-file---d-dir----cli_form_doc) except the destination `-f` or `-d` is `:`.
-- `get-asset MODULE@VERSION FILE_PATH (-f : | -d :)` which is the same as a normal [get-asset (described in the Values section)](#get-asset-moduleversion-file_path--f-file---d-dir) except the destination `-f` or `-d` is `:`.
+- `get-object MODULE@VERSION -s REQUEST_SLOT (-f : | -d :) -- CLI_FORM_DOC` which is the same as a normal [get-object (described in the Values section)](#get-object-moduleversion--s-request_slot--f-file---d-dir----cli_form_doc) except the destination `-f` or `-d` is `:`, or the destination `-f` is `:exe`.
+- `get-asset MODULE@VERSION FILE_PATH (-f : | -d :)` which is the same as a normal [get-asset (described in the Values section)](#get-asset-moduleversion-file_path--f-file---d-dir) except the destination `-f` or `-d` is `:`, or the destination `-f` is `:exe`.
+
+When the destination `-f` is `:exe`, the file that will be created will be executable:
+
+- it will have the executable bit set for running on Unix
+- it will end in a `.exe` for running on Windows
 
 #### ${SLOT.request}
 
@@ -749,6 +754,16 @@ Having a `-m MEMBER` option would be equivalent but redundant and slightly confu
 not much about assets implies they are stored as archives.
 
 ### Options: -f FILE and -d DIR
+
+FILEs in the format:
+
+- `*.exe`
+- `**/bin/*`
+- `**/sbin/*`
+- `bin/*`
+- `sbin/*`
+
+where the separator may be `/` or `\\` will all be written with a `chmod +x` (executable bit) on Unix.
 
 No command may write to the same file. Specifically:
 
