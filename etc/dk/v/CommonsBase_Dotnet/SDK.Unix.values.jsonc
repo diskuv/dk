@@ -60,9 +60,9 @@
         ]
       }
     },
-    // .Unpack: .tar -> extracted files
+    // Unix: .tar -> extracted files
     {
-      "id": "CommonsBase_Dotnet.SDK.Unix.Unpack@10.0.100-rc.2.25502.107",
+      "id": "CommonsBase_Dotnet.SDK.Unix@10.0.100-rc.2.25502.107",
       "precommands": {
         "private": [
           // need .tar files
