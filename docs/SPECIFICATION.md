@@ -39,6 +39,7 @@
   - [Values](#values)
     - [Value Shell Language (VSL)](#value-shell-language-vsl)
     - [VSL Lexical Rules](#vsl-lexical-rules)
+      - [Types of Words](#types-of-words)
     - [Variables available in VSL](#variables-available-in-vsl)
     - [get-object MODULE@VERSION -s REQUEST\_SLOT (-f FILE | -d DIR/) -- CLI\_FORM\_DOC](#get-object-moduleversion--s-request_slot--f-file---d-dir----cli_form_doc)
     - [enter-object MODULE@VERSION -s REQUEST\_SLOT -- CLI\_FORM\_DOC](#enter-object-moduleversion--s-request_slot----cli_form_doc)
@@ -165,8 +166,8 @@ All variables are available in `.forms.function.args` and `.forms.function.envmo
 
 The result of a subcommand. The subcommand can be one of two things:
 
-- `get-object MODULE@VERSION -s REQUEST_SLOT (-f : | -d :) -- CLI_FORM_DOC` which is the same as a normal [get-object (described in the Values section)](#get-object-moduleversion--s-request_slot--f-file---d-dir----cli_form_doc) except the destination `-f` or `-d` is `:`, or the destination `-f` is `:exe`.
-- `get-asset MODULE@VERSION FILE_PATH (-f : | -d :)` which is the same as a normal [get-asset (described in the Values section)](#get-asset-moduleversion-file_path--f-file---d-dir) except the destination `-f` or `-d` is `:`, or the destination `-f` is `:exe`.
+- `get-object MODULE@VERSION -s REQUEST_SLOT (-f :file | -f :exe | -d :) -- CLI_FORM_DOC` which is the same as a normal [get-object (described in the Values section)](#get-object-moduleversion--s-request_slot--f-file---d-dir----cli_form_doc) except the destination must be `-f :file` or `-f :exe` or `-d :`.
+- `get-asset MODULE@VERSION FILE_PATH (-f :file | -f :exe | -d :)` which is the same as a normal [get-asset (described in the Values section)](#get-asset-moduleversion-file_path--f-file---d-dir) except the destination must be `-f :file` or `-f :exe` or `-d :`.
 
 When the destination `-f` is `:exe`, the file that will be created will be executable:
 
@@ -449,7 +450,7 @@ The names of the slots are period-separated "MlFront standard namespace terms". 
 
 **All encodings of VSL are UTF-8 unless explicitly noted as different.**
 
-There is a POSIX shell styled language to query for objects and assets.
+There is a POSIX shell / PowerShell styled language to query for objects and assets.
 For example, the "command":
 
 ```sh
@@ -477,22 +478,109 @@ There are two ways to run these shell commands:
 All commands have a output path (ex. `-f echo.exe`). Most command have two forms:
 
 - `-f FILE` (ex. `-f echo.exe`)
-- `-d DIR/` or `-d DIR\\` (ex. `-d target/`)
+- `-d DIR` (ex. `-d target`)
 
-but some commands may only have the `-d DIR/` or `-d DIR\\` directory output.
+but some commands may only have the `-d DIR` directory output.
 
-The best practice is to use the forward slash (`/`) as directory separator in the output paths for readability (no escaping in JSON) and portability (forward slashes don't work on Unix).
-However, when the directory is a UNC path on Windows (ex. `\\Server2\Share\Test\Foo.txt`) you should use backward slashes.
+The best practice for relative paths is to use the forward slash (`/`) as directory separator in the output paths for readability (no escaping in JSON) and portability (backslashes don't work on Unix).
+However, when the path is an absolute directory, use the native format, including UNC paths on Windows (ex. `\\Server2\Share\Test\Foo.txt`).
 
 For security, the commands may be evaluated in a sandbox or a chroot environment. Do not use `..` path segments or they may fail to resolve in sandboxes.
 
 ### VSL Lexical Rules
 
-When embedded as precommands in a values file, the command line (which is a JSON string) is split into arguments (a list of strings) using the [POSIX quoting rules at IEEE Std 1003.1-2024 / Shell & Utilities / Shell Command Language / 2.2 Quoting](https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html#tag_19_02). However, no Here-Documents are accepted. The splitting is similar to Python's [shlex.split](https://docs.python.org/3/library/shlex.html#shlex.split).
+A value shell command is a **command line** that is split into **words**.
 
-The `` ` `` (backtick, aka. grave accent) is the escape character. *Backticks were chosen for compatibility with Windows paths and familiarity with PowerShell; carets `^` were rejected since in Windows Batch the caret has complex rules.*
+In a JSONC (JSON with comments) values file, each precommand is a command line:
 
-The `$` is a special character which introduces variables (described next section). There are no other special characters. So `` `${HOME} `` is expanded to `${HOME}` and `` `n `` is expanded to `n`.
+```json
+"precommands": {
+  "private": [
+    // command line 1
+    "get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -f clang.exe",
+    "...",
+    // command line N
+    "get-object OurStd_Std.Build.GCC@1.0.0 -s Release.Agnostic -f gcc.c"
+  ]
+}
+```
+
+The `get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -f clang.exe` command line has the words `get-object`, `OurStd_Std.Build.Clang@1.0.0`, `-s`, `Release.Agnostic`, `-f`, and `clang.exe`.
+
+Words are directly used in other places in the values file:
+
+```json
+"function": {
+    "args": [
+      // word 1
+      "sh",
+      // word 2
+      "-c",
+      // word 3
+      "\"find . > ${SLOT.Release.Agnostic}/some-file\""
+    ],
+    "envmods": [
+      // word 4: ${CACHE}/dkcoder
+      "+DKCODER_CTX_CACHE_DIR=${CACHE}/dkcoder"
+    ]
+}
+```
+
+so the individual words can be assembled into a command line.
+
+Each function argument in `args` and each environment modification value in `envmods` must be one value shell word.
+In word 3 we used double quotes to squash several words into one shell word. In the next section the different ways to form words are explained.
+
+#### Types of Words
+
+The `get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -f clang.exe` from the previous section had the words:
+
+- `get-object`
+- `OurStd_Std.Build.Clang@1.0.0`
+- `-s`
+- `Release.Agnostic`
+- `-f`
+- `clang.exe`
+
+These are examples of **bare words**; that is, words without any surrounding quotes.
+
+Each bare word is one or more of the following *components without any interleaving spaces*:
+
+- literals like `clang.exe`
+- variables like `${SLOT.Release.Agnostic}` that get expanded to the **string value** of the named variable from the next section [Variables available in VSL](#variables-available-in-vsl)
+- subshells like `$(get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -d :)` that get expanded to a **temporary file or directory** output of the subshell expression
+
+An example of a single bare word that has all three types of components is:
+
+```sh
+$(get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -d :)/clang${.exe}
+```
+
+which is compromised of a subshell which could expand to `some/dir/clang-1.0.0/bin`, the literal `/clang` and the variable `${.exe}` which could expand to `.exe`. That is, the bare word could expand to `some/dir/clang-1.0.0/bin/clang.exe`. No quotations were required.
+
+The lexical rules allow for a subshell to be nested in another subshell, although nested subshells should not be required until form parameters are added. For completeness, the bare word `$(get-asset MyAssets_Std.Bundle@1.0.0 -p $(get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -d :) -d :)` is valid, although nonsensical.
+
+VSL words can also have quotes surrounding them so that spaces can be handled. The three type of words are:
+
+1. Bare words (we've already covered these) with characters that are not whitespace, single quotes (`'`), double quotes (`"`) or backticks (`` ` ``).
+2. **Single-quoted** words like `'C:\My Documents'`
+3. **Double-quoted** words like `"${CONFIG}\Floor Plans\Master Bedroom.rvt"`
+
+Single-quoted words (`'...'`) evaluate *literally* to the text inside the single quotes, including any whitespace and newlines.
+
+Double-quoted words (`"..."`) squash many *bare* words into a single word by:
+
+- evaluating each "inner bare word" (each bare word inside the double-quotes) using the rules above. However, the inner bare words can contain single-quote (`'`) characters which are treated like any ordinary character.
+- keeping the whitespace *between* each inner bare words
+
+The inner bare words and the whitespace between the inner words are concatenated into a single word.
+
+Within double-quotes, you should escape:
+
+- all double-quote (`"`) characters using the `` ` `` (backtick, aka. grave accent) as the escape character
+- all backtick (`` ` ``) characters using the `` ` `` (backtick, aka. grave accent) as the escape character
+
+> *Historical reasoning: Backticks were chosen for compatibility with Windows paths and familiarity with PowerShell; carets `^` were rejected since in Windows Batch the caret has complex rules.*
 
 ### Variables available in VSL
 
@@ -674,7 +762,7 @@ if ($dataFile -match ("^\\\\([.]|[A-Za-z0-9][A-Za-z0-9.-]*)\\pipe\\.*")) {
       [Char[]]$buffer = new-object char[] 16384
       [int]$bytesRead = $reader.ReadBlock($buffer, 0, $buffer.Length)
       while ($bytesRead -gt 0)
-      {          
+      {
           [int]$bytesRead = $reader.ReadBlock($buffer, 0, $buffer.Length)
           Write-Host "[progress] read $bytesRead more bytes ..."
           $bytesTotal += $bytesRead
