@@ -14,8 +14,8 @@
       - [Variable Availability](#variable-availability)
       - [$(subcommand)](#subcommand)
       - [${SLOT.request}](#slotrequest)
-      - [${SLOTNAME.request}](#slotnamerequest)
       - [${SLOT.SlotName}](#slotslotname)
+      - [${SLOTNAME.\*}](#slotname)
       - [${MOREINCLUDES}](#moreincludes)
       - [${MORECOMMANDS}](#morecommands)
       - [${/} directory separator](#-directory-separator)
@@ -180,12 +180,6 @@ The output directory for the *request slot*. The `-s REQUEST_SLOT` option (ex. `
 
 If the command has no request slot (ex. `get-bundle MODULE@VERSION`) and you use `${SLOT.request}`, an error is reported.
 
-#### ${SLOTNAME.request}
-
-The name of the *request slot*. The `-s REQUEST_SLOT` option (ex. `get-object MODULE@VERSION -s REQUEST_SLOT`) is the request slot.
-
-If the command has no request slot (ex. `get-bundle MODULE@VERSION`) and you use `${SLOT.request}`, an error is reported.
-
 #### ${SLOT.SlotName}
 
 The output directory for the form function for the slot named `SlotName`.
@@ -206,6 +200,55 @@ More generally:
 | `${SLOT.Release.Agnostic}`     | Always                             | The install directory    |
 | `${SLOT.Release.Darwin_arm64}` | Only if the end-user machine's ABI | The install directory    |
 |                                | is `darwin_arm64`                  |                          |
+
+#### ${SLOTNAME.*}
+
+The name of the slot after the "SLOTNAME.", parts of which may contain *context variables*.
+
+`*` is a period-separated list of parts:
+
+- lowercase context variables, and/or
+- capitalized namespace terms
+
+The namespace terms and context variables can be combined in any order.
+
+For example, `${SLOTNAME.Release.execution_abi}` has two parts:
+
+1. `Release` is a namespace term.
+2. `execution_abi` is a context variable, which is expanded according to the table below.
+
+| Context Variable | Example Value    | Description                                                                    |
+| ---------------- | ---------------- | ------------------------------------------------------------------------------ |
+| execution_abi    | Windows_x86_64   | The ABI for the [execution platform](https://bazel.build/extending/platforms). |
+| request          | Release.Agnostic | The *request slot* from the `-s REQUEST_SLOT` command line option              |
+|                  |                  | (ex. `get-object MODULE@VERSION -s Release.Agnostic`)                          |
+
+If the command has no request slot (ex. `get-bundle MODULE@VERSION`) and you use the `request` context variable, an error is reported.
+
+In the example we have been using, `${SLOTNAME.Release.execution_abi}` will resolve to `Release.Windows_x86_64` if the build is executing on a Windows 64-bit [execution platform](https://bazel.build/extending/platforms).
+
+The list of `execution_abi` values is updated periodically from the `t_abi` enumeration (sum type) values in the [dkml-c-probe](https://github.com/diskuv/dkml-c-probe) project.
+At the time of writing, the list is:
+
+- `Android_arm32v7a`
+- `Android_arm64v8a`
+- `Android_x86`
+- `Android_x86_64`
+- `Darwin_arm64`
+- `Darwin_x86_64`
+- `DragonFly_x86_64`
+- `FreeBSD_x86_64`
+- `Linux_arm32v6`
+- `Linux_arm32v7`
+- `Linux_arm64`
+- `Linux_x86`
+- `Linux_x86_64`
+- `NetBSD_x86_64`
+- `OpenBSD_x86_64`
+- `Windows_arm32`
+- `Windows_arm64`
+- `Windows_x86`
+- `Windows_x86_64`
 
 #### ${MOREINCLUDES}
 
