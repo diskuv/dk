@@ -39,7 +39,7 @@
           "-DOTNET_EnableEventPipe",
           "-DOTNET_EventPipeOutputPath",
           "-DOTNET_EventPipeOutputStreaming",
-          "+DOTNET_ROOT=$(get-object CommonsBase_Dotnet.SDK@10.0.100-rc.2.25502.107 -s Release.Windows_x86_64 -d :)",
+          "+DOTNET_ROOT=$(get-object CommonsBase_Dotnet.SDK@10.0.100-rc.2.25502.107 -s ${SLOTNAME.Release.execution_abi} -d :)",
           "-DOTNET_ROOT(x86)",
           "-DOTNET_ROOT_X86",
           "-DOTNET_ROOT_X64",
@@ -105,22 +105,22 @@
           // : Seems unavoidable but irrelevant to reproducibility.
         ],
         "args": [
-          "$(get-object CommonsBase_Dotnet.SDK@10.0.100-rc.2.25502.107 -s Release.Windows_x86_64 -d :)/dotnet.exe",
+          "$(get-object CommonsBase_Dotnet.SDK@10.0.100-rc.2.25502.107 -s ${SLOTNAME.Release.execution_abi} -d :)/dotnet${.exe.execution}",
           "tool",
           "install",
           "PowerShell",
           "--tool-path",
-          "${SLOT.Release.Windows_x86_64}",
+          "${SLOT.request}",
           "--version",
           "7.5.4",
           "--configfile",
-          "$(get-asset CommonsBase_Shell.Pwsh.Bundles@7.5.4 -p NuGet.Config -f :)"
+          "$(get-asset CommonsBase_Shell.Pwsh.Bundles@7.5.4 -p NuGet.Config -f :file)"
         ]
       },
       "outputs": {
         "assets": [
           {
-            "slots": ["Release.Windows_x86_64"],
+            "slots": ["Release.Windows_x86_64", "Release.Windows_x86"],
             "paths": [
               ".store/powershell/7.5.4/powershell/7.5.4/.nupkg.metadata",
               ".store/powershell/7.5.4/powershell/7.5.4/.signature.p7s",

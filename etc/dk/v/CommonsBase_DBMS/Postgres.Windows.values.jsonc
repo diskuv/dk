@@ -15,7 +15,7 @@
           "rm",
           "-rf",
           "${SLOT.Release.Windows_x86_64}/pgsql/doc",
-          "${SLOT.Release.Windows_x86_64}/pgsql/pgAdmin 4"
+          "\"${SLOT.Release.Windows_x86_64}/pgsql/pgAdmin 4\""
         ]
       },
       "outputs": {
