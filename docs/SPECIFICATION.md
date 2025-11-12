@@ -32,7 +32,7 @@
       - [+NAME=VALUE](#namevalue)
       - [-NAME](#-name)
       - [\<NAME=VALUE](#namevalue-1)
-    - [Order of Processing](#order-of-processing)
+    - [Form Order of Processing](#form-order-of-processing)
     - [Dynamic Functions](#dynamic-functions)
   - [Objects](#objects)
     - [Saving and Loading Objects](#saving-and-loading-objects)
@@ -67,6 +67,9 @@
     - [OpenBSD signify keys](#openbsd-signify-keys)
     - [GitHub SLSA Level 2](#github-slsa-level-2)
     - [GitHub SLSA Level 3](#github-slsa-level-3)
+  - [Rules](#rules)
+    - [Lua Specification](#lua-specification)
+    - [Lua Rule Declarations](#lua-rule-declarations)
   - [Graph](#graph)
     - [Nodes](#nodes)
       - [Values Nodes](#values-nodes)
@@ -77,6 +80,7 @@
       - [VCI - Values Canonical ID](#vci---values-canonical-id)
       - [VCK - Values Checksum](#vck---values-checksum)
     - [Dependencies](#dependencies)
+  - [Evaluation](#evaluation)
 
 ## Introduction
 
@@ -452,7 +456,7 @@ For example, `PATH+=C:\Windows\system32` prepends `C:\Windows\system32;` to the 
 In this example, the Unix prepending does not make sense, which is why the best practice is to use [variables](#form-variables) for the `VALUE`
 like `PATH+=${CACHE}${/}bin` so the modification is portable across operating systems.
 
-### Order of Processing
+### Form Order of Processing
 
 The order of processing is as follows:
 
@@ -473,6 +477,7 @@ The trace and value store are updated as normal during the MORECOMMANDS, so if t
 ### Dynamic Functions
 
 > Dynamic functions have not been implemented in the reference implementation as of 2025-11-08.
+> They have been mostly been subsumed by [Lua rules](#rules), although the alpha conversion from this Dynamic Function section may eventually be ported to Lua rules.
 
 Use the [MOREINCLUDES](#moreincludes) and [MORECOMMANDS](#morecommands) to create a function which perform `get-object`, `get-bundle` and other commands dynamically.
 You'll want to do this in the following scenarios:
@@ -1473,6 +1478,46 @@ When accepting a known, vetted GitHub Actions script (SLSA Level 3), the:
 
 The build system will download the GitHub CLI (using the default trusted `CommonsBase_Std` library) to do verification of the builds.
 
+## Rules
+
+Rules are Lua functions that dynamically build other values.
+
+### Lua Specification
+
+Lua 2.5 is the version of Lua used for the specification.
+
+> Historical note: Lua 2.5 was published in 1996 and lacks several features of modern-day Lua: `for` loops, metaprogramming for metatables, modules and coroutines. However, rules are a form of configuration, and a full programming language makes hermetic, bounded-time builds difficult or impossible. So even if a future specification uses a later Lua version, several features will be disabled.
+
+The reference implementation uses a pure OCaml version of Lua (`lua-ml`) which has full type-safety, is re-entrant, and, if needed, can have Lua evaluations bounded in time and sandboxed to the project directories.
+
+### Lua Rule Declarations
+
+A `values.lua` file exports its own rules with the statements like the following:
+
+```lua
+MyRule = build.define_rule("MyLibrary_Std.MyRule@1.0.0", {
+    -- rule options (described later)
+})
+```
+
+and expresses dependencies in statements like the following:
+
+```lua
+SomeRule = build.import_rule("SomeLibrary_Std.SomeRule@1.0.0")
+```
+
+Both the `define_rule` and `import_rule` statements are **rule declarations** that participate in the task graph.
+Specifically, the `define_rule` establishes rule task nodes in the task graph, and `import_rule` establishes edges between rule task nodes in the task graph.
+
+`define_rule` can also establish edges to other task nodes (forms, bundles and assets), but these edges are added dynamically in a later phase.
+
+During the [`VALUESCAN` phase](#evaluation) the `values.lua` files are scanned for rule tasks with the following *fast* procedure:
+
+- create a Lua interpreter that has no globals except `build`. The `build` global (a Lua table) has entries for the `import_rule` and `define_rule` function that capture the rule identifiers (ex. `SomeLibrary_Std.SomeRule@1.0.0`) but do not evaluate options. For compilability, other `build` entries like `build.glob` are defined but are no-ops.
+- run the Lua interpreter on the `values.lua` file to collect the rule identifiers given to the `import_rule` and `define_rule` function
+
+The reference implementation has the `mlfront-shell inspect lua-file` command to show the rule declarations.
+
 ## Graph
 
 ### Nodes
@@ -1576,3 +1621,27 @@ The stripping of carriage returns occurs before the CST and AST parsing, so that
 | `f`             | `w`           | Rebuild form if parsed `values.json` changes        |
 | `p`             | `v`           | Rebuild asset if contents of `values.json` changes  |
 | `p`             | `w`           | Rebuild asset if parsed `values.json` changes       |
+
+## Evaluation
+
+| Phase        | What                                                |
+| ------------ | --------------------------------------------------- |
+| PRECONFIG    | (1) Resolve environment vars, directories and keys  |
+| TRACELOCK    | Exclusive writer lock on the trace store            |
+| TRACEREAD    | Read trace store                                    |
+|              | Do quick value store integrity checks               |
+| CONFIG       | (2) Create pid directory. And value store if needed |
+| COMMANDPARSE | Parse the get-object, etc. command                  |
+| STATERESTORE | (3) Initialize state from traces                    |
+| VALUESCAN    | Scan values.json/.lua in include dirs               |
+|              | Add parse-AST `v` tasks                             |
+|              | Add built-in tasks                                  |
+| VALUELOAD    | (4) Full value store integrity check.               |
+|              | Run `v` tasks.                                      |
+|              | From ASTs add `d`,`f`,`b`,`a` tasks                 |
+|              | Run `d` distribution tasks                          |
+| USER         | Find command in task graph. Run user task.          |
+| GRAPH        | Dump dependency/ancestor graphs if requested        |
+| STATESAVE    | Update trace store                                  |
+
+The number in parentheses is the classic phase number; those numbers are being phased out.
