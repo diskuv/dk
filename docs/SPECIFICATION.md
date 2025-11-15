@@ -78,6 +78,14 @@
       - [Lua Global Variable - type](#lua-global-variable---type)
       - [Lua Global Variable - assert](#lua-global-variable---assert)
       - [Lua Global Variable - error](#lua-global-variable---error)
+    - [Lua string library](#lua-string-library)
+      - [string.byte](#stringbyte)
+      - [string.find](#stringfind)
+      - [string.len](#stringlen)
+      - [string.lower](#stringlower)
+      - [string.rep](#stringrep)
+      - [string.sub](#stringsub)
+      - [string.upper](#stringupper)
     - [Lua Modules](#lua-modules)
     - [Lua Rules](#lua-rules)
   - [Graph](#graph)
@@ -1627,6 +1635,60 @@ This function issues an error message and terminates the last called function fr
 It never returns.
 
 Lua 5.1+ compatibility: The "level" argument in `error (message, [level])` is ignored.
+
+### Lua string library
+
+#### string.byte
+
+`string.byte (s [, i [, j]])`
+
+Returns the internal numeric codes of the characters `s[i]`, `s[i+1]`, ..., `s[j]`. The default value for `i` is 1; the default value for `j` is `i`. These indices are corrected following the same rules of function `string.sub`.
+
+Numeric codes are not necessarily portable across platforms.
+
+#### string.find
+
+`string.find (s, pattern [, init [, plain]])`
+
+Looks for the first match of pattern (see [§6.4.1](https://www.lua.org/manual/5.4/manual.html)) in the string s. If it finds a match, then find returns the indices of s where this occurrence starts and ends; otherwise, it returns fail. A third, optional numeric argument init specifies where to start the search; its default value is 1 and can be negative. A true as a fourth, optional argument plain turns off the pattern matching facilities, so the function does a plain "find substring" operation, with no characters in pattern being considered magic.
+
+If the pattern has captures, then in a successful match the captured values are also returned, after the two indices.
+
+#### string.len
+
+`string.len (s)`
+
+Receives a string and returns its length. The empty string `""` has length 0. Embedded zeros are counted, so `"a\000bc\000"` has length 5.
+
+*bug:* `string.len( "a\000bc000" )` is 9 in the reference implementation. <https://github.com/diskuv/dk/issues/54>
+
+#### string.lower
+
+`string.lower (s)`
+
+Receives a string and returns a copy of this string with all ASCII uppercase letters changed to lowercase. All other characters are left unchanged.
+
+#### string.rep
+
+`string.rep (s, n [, sep])`
+
+Returns a string that is the concatenation of `n` copies of the string `s` separated by the string `sep`. The default value for `sep` is the empty string (that is, no separator). Returns the empty string if `n` is not positive.
+
+(Note that it is very easy to exhaust the memory of your machine with a single call to this function.)
+
+#### string.sub
+
+`string.sub (s, i [, j])`
+
+Returns the substring of `s` that starts at `i` and continues until `j`; `i` and `j` can be negative. If `j` is absent, then it is assumed to be equal to `-1` (which is the same as the string length). In particular, the call `string.sub(s,1,j)` returns a prefix of s with length `j`, and `string.sub(s, -i)` (for a positive `i`) returns a suffix of `s` with length `i`.
+
+If, after the translation of negative indices, `i` is less than `1`, it is corrected to `1`. If `j` is greater than the string length, it is corrected to that length. If, after these corrections, `i` is greater than `j`, the function returns the empty string.
+
+#### string.upper
+
+`string.upper (s)`
+
+Receives a string and returns a copy of this string with all ASCII lowercase letters changed to uppercase. All other characters are left unchanged.
 
 ### Lua Modules
 
