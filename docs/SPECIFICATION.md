@@ -2041,7 +2041,7 @@ If `indent` is truthy then the JSON is pretty-printed.
 json.decode (str)
 
 -- or
-value, errmsg, sb, sl, sc, eb, el, ec = json.decode (str)
+value, errmsg, errrendered, sb, sl, sc, eb, el, ec = json.decode (str)
 ```
 
 Converts JSON to a Lua value:
@@ -2053,7 +2053,8 @@ If the JSON could be converted, the result is the first return value.
 Otherwise:
 
 - `value` is `nil`
-- `errmsg` is the error message
+- `errmsg` is a brief error message
+- `errrendered` is a prerendered error
 - `sb`, `sl`, and `sc` are the starting byte offset (zero-based), line and column (1-based)
 - `eb`, `el`, and `ec` are the ending byte offset (zero-based), line and column (1-based)
 
