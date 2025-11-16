@@ -73,6 +73,7 @@
       - [Lua Global Variable - next](#lua-global-variable---next)
       - [Lua Global Variable - tostring](#lua-global-variable---tostring)
       - [Lua Global Variable - print](#lua-global-variable---print)
+      - [Lua Global Variable - printf](#lua-global-variable---printf)
       - [Lua Global Variable - tonumber](#lua-global-variable---tonumber)
       - [Lua Global Variable - type](#lua-global-variable---type)
       - [Lua Global Variable - assert](#lua-global-variable---assert)
@@ -80,6 +81,9 @@
     - [Lua build library](#lua-build-library)
       - [build.new\_rules](#buildnew_rules)
       - [build.glob](#buildglob)
+    - [Lua package library](#lua-package-library)
+      - [require](#require)
+      - [package.registry\_key](#packageregistry_key)
     - [Lua string library](#lua-string-library)
       - [string.byte](#stringbyte)
       - [string.find](#stringfind)
@@ -115,9 +119,8 @@
       - [math.tointeger](#mathtointeger)
       - [math.type](#mathtype)
       - [math.ult](#mathult)
-    - [Lua package library](#lua-package-library)
-      - [require](#require)
-      - [package.registry\_key](#packageregistry_key)
+    - [Lua table library](#lua-table-library)
+      - [table.unpack](#tableunpack)
     - [Custom Lua Modules](#custom-lua-modules)
     - [Custom Lua Rules](#custom-lua-rules)
     - [Form Document](#form-document)
@@ -1618,6 +1621,25 @@ This function receives an argument of any type and converts it to a string in a 
 
 This function receives any number of arguments, and prints their values in a reasonable format. Each value is printed in a new line. This function is not intended for formatted output, but as a quick way to show a value, for instance for error messages or debugging. See Section 6.4 for functions for formatted output.
 
+#### Lua Global Variable - printf
+
+`printf("format", ...)`
+
+This function performs like its C counterpart, printing a formatted string.
+
+It is equivalent to this Lua code:
+
+```lua
+print(string.format(format, unpack(arg))
+```
+
+without the newline inserted by `print`.
+
+`format` is a formatting string containing C `printf()` style formatting codes.
+It is followed by a list of arguments to be substituted into the format string.
+
+> This function was borrowed from [Premake's printf](https://premake.github.io/docs/globals/printf/).
+
 #### Lua Global Variable - tonumber
 
 `tonumber (e)`
@@ -1677,6 +1699,45 @@ build.glob {
   [excludes = "...",]
 }
 ```
+
+### Lua package library
+
+The package library provides basic facilities for loading modules in Lua.
+It exports one function directly in the global environment: `require`.
+Everything else is exported in the `table` package.
+
+#### require
+
+`require (modname)`
+
+Loads the given module.
+
+If the `modname` is a **standard module id** (ex. `MyLibrary_Std.A.B.MyModule` - *tbd: document this*) a task is added to the [task graph](#graph) to search for it.
+The section [Custom Lua Modules](#custom-lua-modules) describes how to create your own modules.
+
+As of the writing of this specification, only standard modules may be loaded.
+
+Once imported with `require`, standard modules are enriched with constants as per
+[Lua 5.1 module() convention](https://www.lua.org/manual/5.1/manual.html#pdf-module) and
+[Lua module versioning conventions](http://lua-users.org/wiki/ModuleVersioning) and a `_build` field:
+
+| Field      | Example                                                               |
+| ---------- | --------------------------------------------------------------------- |
+| `_NAME`    | `MyModule._NAME` would be `MyLibrary_Std.A.B.MyModule`                |
+| `_PACKAGE` | `MyModule._PACKAGE` would be `MyLibrary_Std.A.B`                      |
+| `_VERSION` | `MyModule._VERSION` would be `1.0.0`                                  |
+| `_M`       | (may be removed) `MyModule._M` would be a Lua reference to `MyModule` |
+| `_build`   | *described later in [Custom Lua Rules](#custom-lua-rules)*            |
+
+> Historical note: Even though the implementation of `module()` is deprecated after Lua 5.1, its conventions were never deprecated.
+
+#### package.registry_key
+
+`package.registry_key`
+
+A opaque variable holding a key to an internal table of packages that are loaded.
+
+In the reference implementation, the internal table of packages is stored in an OCaml analog of the [Lua C registry](https://www.lua.org/manual/5.4/manual.html#4.3).
 
 ### Lua string library
 
@@ -1923,44 +1984,24 @@ Returns "integer" if x is an integer, "float" if it is a float, or fail if x is 
 
 Returns the string `t` (ie. a boolean `true`) if and only if integer `m` is below integer n when they are compared as unsigned integers.
 
-### Lua package library
+### Lua table library
 
-The package library provides basic facilities for loading modules in Lua.
-It exports one function directly in the global environment: `require`.
-Everything else is exported in the `table` package.
+This library provides generic functions for table manipulation. It provides all its functions inside the table table.
 
-#### require
+Remember that, whenever an operation needs the length of a table, all caveats about the length operator apply (see [§3.4.7](https://www.lua.org/manual/5.4/manual.html#3.4.7)).
+All functions ignore non-numeric keys in the tables given as arguments.
 
-`require (modname)`
+#### table.unpack
 
-Loads the given module.
+`table.unpack (list [, i [, j]])`
 
-If the `modname` is a **standard module id** (ex. `MyLibrary_Std.A.B.MyModule` - *tbd: document this*) a task is added to the [task graph](#graph) to search for it.
-The section [Custom Lua Modules](#custom-lua-modules) describes how to create your own modules.
+Returns the elements from the given list. This function is equivalent to
 
-As of the writing of this specification, only standard modules may be loaded.
+```lua
+     return list[i], list[i+1], ···, list[j]
+```
 
-Once imported with `require`, standard modules are enriched with constants as per
-[Lua 5.1 module() convention](https://www.lua.org/manual/5.1/manual.html#pdf-module) and
-[Lua module versioning conventions](http://lua-users.org/wiki/ModuleVersioning) and a `_build` field:
-
-| Field      | Example                                                               |
-| ---------- | --------------------------------------------------------------------- |
-| `_NAME`    | `MyModule._NAME` would be `MyLibrary_Std.A.B.MyModule`                |
-| `_PACKAGE` | `MyModule._PACKAGE` would be `MyLibrary_Std.A.B`                      |
-| `_VERSION` | `MyModule._VERSION` would be `1.0.0`                                  |
-| `_M`       | (may be removed) `MyModule._M` would be a Lua reference to `MyModule` |
-| `_build`   | *described later in [Custom Lua Rules](#custom-lua-rules)*            |
-
-> Historical note: Even though the implementation of `module()` is deprecated after Lua 5.1, its conventions were never deprecated.
-
-#### package.registry_key
-
-`package.registry_key`
-
-A opaque variable holding a key to an internal table of packages that are loaded.
-
-In the reference implementation, the internal table of packages is stored in an OCaml analog of the [Lua C registry](https://www.lua.org/manual/5.4/manual.html#4.3).
+By default, `i` is 1 and `j` is #list.
 
 ### Custom Lua Modules
 
