@@ -1801,12 +1801,41 @@ let () = print_endline "We ran this inside our executable."
 
 ### Script Phases
 
-A Lua script is executed twice:
+A Lua script is scanned once but evaluated (ie. interpreted) twice.
 
-- The script is read and executed in the [VALUESCAN](#evaluation) phase. This phase is intended to find the dependencies of the script that are declared in `require('a_dependency')` statements. The Lua script is evaluated in a sandbox with all functions (ex. `print()`) defined to return a sensible Lua value but do nothing, except:
-  - `require(dependency)` will capture the dependency
-  - `assert(...)` and `error(...)` continue to do Lua conventional error checking
-- The script is read and executed in the [VALUELOAD](#evaluation) phase. All Lua functions are defined to run as documented later in this specification.
+The first evaluation does a quick scan in a very restrictive sandbox to find which dependencies the script needs and what modules and rules the script exports.
+This first evaluation happens in the the [VALUESCAN](#evaluation) phase documented later in the specification.
+
+The second evaluation runs the script conventionally.
+This second evaluation happens in the the [VALUELOAD](#evaluation) phase documented later in the specification.
+All Lua functions behave as documented later in this specification.
+
+Care is needed so that the script completes without errors in the sandbox of the first *VALUESCAN* evaluation. The *VALUESCAN* sandbox does the following:
+
+1. `require(dependency).at(version)` will capture the name and version of the dependency, but not load the dependency.
+2. `assert(...)` and `error(...)` continue to do Lua conventional error checking
+3. `build.is_building` will return a false-y value (ie. `nil`, or `false` if the Lua implementation version is modern)
+4. All other functions (ex. `print()`, `table.unpack`) are defined to return a sensible Lua value but do nothing.
+
+The practical implications are that the global scope should only be used for:
+
+1. `require` function calls
+2. defining functions:
+
+   ```lua
+   M = {}
+   function M.somefunc() print('VALUESCAN does not execute code inside functions') end
+   ```
+
+3. the final `return` statement
+
+Anything that does not fit the above pattern should be guarded in a `build.is_building` condition:
+
+```lua
+if build.is_building then
+  -- VALUESCAN will not execute code inside this code block
+end
+```
 
 ### Lua Specification
 
@@ -2330,8 +2359,10 @@ The module above can be imported in another `values.lua` script as follows:
 ```lua
 MyModule = require('MyLibrary_Std.A.B.MyModule')
 MyModule = MyModule.at('1.0.0')
-MyModule.somefunc()
+if build.is_building then MyModule.somefunc() end
 ```
+
+See [Script Phases](#script-phases) for why `if build.is_building then ... end` is required to guard expressions.
 
 To avoid conflicts with other modules, an error will be raised if a field is exported that is
 a standard namespace term (ex. `SomeModule`).
