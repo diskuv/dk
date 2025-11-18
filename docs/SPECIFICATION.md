@@ -2,8 +2,11 @@
 
 - [Specification](#specification)
   - [Introduction](#introduction)
-    - [Concepts](#concepts)
-    - [Early Limitations](#early-limitations)
+    - [Composition by Precommands](#composition-by-precommands)
+    - [Composition by Subshells](#composition-by-subshells)
+    - [Composition by Rules](#composition-by-rules)
+    - [Composition by Distribution](#composition-by-distribution)
+    - [(pending re-organization) Concepts](#pending-re-organization-concepts)
   - [Assets](#assets)
     - [Local Paths](#local-paths)
     - [Zip Archive Reproducibility](#zip-archive-reproducibility)
@@ -68,6 +71,8 @@
     - [GitHub SLSA Level 2](#github-slsa-level-2)
     - [GitHub SLSA Level 3](#github-slsa-level-3)
   - [Scripts](#scripts)
+    - [Script Introduction](#script-introduction)
+    - [Script Phases](#script-phases)
     - [Lua Specification](#lua-specification)
     - [Lua Global Variables](#lua-global-variables)
       - [Lua Global Variable - next](#lua-global-variable---next)
@@ -143,32 +148,266 @@
 
 ## Introduction
 
-### Concepts
+This specification documents interoperable systems that use composition to build multi-language, repeatable software in a loosely federation of packages and implementations.
 
-In the `dk` build system, you submit *forms* that produce *objects* created from *assets*.
+- Interoperable systems: There is an open-source `mlfront-shell/dk0` *reference implementation* build system. The `dk` build system does not yet conform to this specification (as of 2025-11-17) but will change. Both are OCaml-based, and the hope is that other programming languages can have their own implementations.
+- Composition: This specification has four (4) different ways to take functionality provided by others and use them in your own builds (ie. composition).
+- Build multi-language, repeatable software: The domain is software that must be built with multiple programming languages. The goal is to have at least one implementation capable of opt-in, bit-by-bit reproducibility.
+- Loose federation of packages and implementations: There is a default, optional central registry of vendors who build packages themselves, using any specification-conforming implementation of the build system they desire. The registry is of vendors and their signing keys, not of the packages themselves.
 
-The **assets** are input materials. These are files and folders that may be remote: source code, data files, audio, image and video files.
+However, the build system is not:
 
-A **form** is a document with fields and a submit button. *Tip for engineers*: A form does not need to be entered on a graphical user interface. If you are comfortable with the DOS or Unix terminal, the document is a command line in your terminal. That is, you type the name of an executable followed by options like `--username` as the fields, and then you press ENTER to submit the form. The `dk` scripting system (doc: <https://github.com/diskuv/dk>) is a simple way to make standalone executables/forms.
+- a full package manager. Package managers can uninstall packages.
 
-An **object** is a folder that the form produces.
+The concepts will be introduced by explaining the four (4) compositions.
 
----
+### Composition by Precommands
+
+At the lowest level the build system operates on a JSON data model.
+Build configuration can be represented directly in JSON files or JSON with comments ("JSONC") files.
+
+Multiple build configurations can be composed through **precommands** that are linked by identifiers:
+
+```json
+// filename: producer.values.json
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "bundles": [
+    {
+      "id": "OurExample_Composition.SomeFiles@1.2.3",
+      "listing": {
+        "origins": [ {
+            "name": "github-release",
+            "mirrors": [
+              "https://github.com/diskuv/dk/releases/download/2.4.202508011516-signed"
+            ] } ]
+      },
+      "assets": [
+        {
+          "origin": "github-release",
+          "path": "dk-darwin_arm64",
+          "size": 8810960,
+          "checksum": {
+            "sha256": "aedc1831f3dc4af8c3fd9eefcf4fd2edf9b0f47e3534e382e20368ff15857393"
+          }
+        },
+        {
+          "origin": "github-release",
+          "path": "dk-windows_x86_64.exe",
+          "size": 8732160,
+          "checksum": {
+            "sha256": "68514ecd6d4ba6508acab15745473f2a00a51e09a78e1d72fa284d68704093d7"
+          } } ] } ]
+}
+```
+
+```json
+// filename: consumer.values.json
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "forms": [
+    {
+      "id": "OurExample_Composition.UseFiles@4.5.6",
+      "precommands": {
+        "private": [
+          "get-asset OurExample_Composition.SomeFiles@1.2.3 -p dk-darwin_arm64 -f ${SLOT.Release.Darwin_arm64}/dk",
+          "get-asset OurExample_Composition.SomeFiles@1.2.3 -p dk-windows_x86_64 -f ${SLOT.Release.Windows_x86_64}/dk.exe"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "slots": ["Release.Darwin_arm64"],
+            "paths": ["dk"]
+          },
+          {
+            "slots": ["Release.Windows_x86_64"],
+            "paths": ["dk.exe"]
+          } ] } } ]
+}
+```
+
+As a user, if you were to run:
+
+```sh
+get-object OurExample_Composition.UseFiles@4.5.6 -s Release.Darwin_arm64 -d target/
+```
+
+the macOS/Silicon executable `dk` would appear in the `target/` directory because
+`OurExample_Composition.UseFiles@4.5.6` uses `OurExample_Composition.SomeFiles@1.2.3`.
+
+In general:
+
+- You submit *forms* that produce *objects* created from *assets*.
+- The **assets** are input materials. These are files and folders that may be remote: source code, data files, audio, image and video files.
+- A **form** is a document with fields and a submit button. *Tip for engineers*: A form does not need to be entered on a graphical user interface. If you are comfortable with the DOS or Unix terminal, the document is a command line in your terminal. That is, you type the name of an executable followed by options like `--username` as the fields, and then you press ENTER to submit the form. The `dk` scripting system (doc: <https://github.com/diskuv/dk>) is a simple way to make standalone executables/forms.
+- An **object** is a folder that the form produces.
+
+The relevant sections of the specification are:
+
+- [Assets](#assets)
+- [Forms](#forms)
+- [Objects](#objects)
+- [Values](#values)
+
+### Composition by Subshells
+
+The [precommands we saw](#composition-by-precommands) were *value* shell commands:
+
+```sh
+get-asset OurExample_Composition.SomeFiles@1.2.3 -p dk-darwin_arm64 -f ${SLOT.Release.Darwin_arm64}/dk
+```
+
+These value shell commands can spawn other value shell commands by using the syntax `$(subcommand to spawn ...)`.
+
+Consider the following snippet from JSON build configuration that fetches PowerShell using a tool provided by `.NET`:
+
+```json
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "forms": [
+    {
+      "id": "CommonsBase_Shell.Pwsh@7.5.4",
+      "function": {
+        "execution": [
+          {
+            "name": "OSFamily",
+            "value": "$(get-asset CommonsBase_Shell.Pwsh.Lookup@1.0.0 -p osfamily -m ./${SLOTNAME.request})"
+          }
+        ],
+        "envmods": [
+          "+DOTNET_ROOT=$(get-object CommonsBase_Dotnet.SDK@10.0.100-rc.2.25502.107 -s ${SLOTNAME.Release.execution_abi} -d :)"
+        ],
+        "args": [
+          "$(get-object CommonsBase_Dotnet.SDK@10.0.100-rc.2.25502.107 -s ${SLOTNAME.Release.execution_abi} -d :)/dotnet${.exe.execution}",
+          "tool",
+          "install",
+          "PowerShell",
+          "--arch", "$(get-asset CommonsBase_Dotnet.Lookup@1.0.0 -p arch -m ./${SLOTNAME.request})",
+          "--tool-path", "${SLOT.request}",
+          "--version", "7.5.4",
+          "--configfile", "$(get-asset CommonsBase_Shell.Pwsh.Bundles@7.5.4 -p NuGet.Config -f :file)"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "slots": [
+              "Release.Windows_x86_64",
+              "Release.Darwin_arm64"
+            ],
+            "paths": [
+              ".store/powershell/7.5.4/powershell/7.5.4/.nupkg.metadata",
+              // ...
+              ".store/powershell/7.5.4/project.assets.json",
+              "pwsh.exe"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+The `.NET` tool (`dotnet.exe`) has many requirements that are satisfied using subshells:
+
+- *execution*: The build system must only run the Windows `dotnet.exe` on Windows, macOS `dotnet`, etc.
+- *envmods*: The subshell will do the install of the .NET runtime system, and set `DOTNET_ROOT` to the installation directory.
+- *args*: We want to run the dotnet.exe tool. A subshell gets us the path to `dotnet.exe`. And it helps set command line flags .NET needs.
+
+The relevant sections of the specification are:
+
+- [Assets](#assets)
+- [Forms](#forms)
+- [Objects](#objects)
+- [Values](#values)
+- [Subshells](#subshells)
+
+### Composition by Rules
+
+*pending*
+
+The relevant sections of the specification are:
+
+- [Assets](#assets)
+- [Forms](#forms)
+- [Objects](#objects)
+- [Values](#values)
+- [Scripts](#scripts)
+
+### Composition by Distribution
+
+The build system allows remote importing of both the JSON build configuration *and* the build artifacts.
+
+Anyone who wants to distribute a package can programmatically create a JSON build config with
+
+- *assets* containing the build artifacts and JSON build configuration
+- a *distribution* saying where the build artifacts were built
+
+For example:
+
+```json
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "bundles": [
+    {
+      "assets": [
+        // ... the build artifacts and JSON files
+      ],
+      "id": "CommonsBase_Std.Distribution@2.4.202510100005",
+      "listing": {
+        "origins": [
+          {
+            "name": "CommonsBase_Std",
+            "mirrors": [
+              "https://github.com/jonahbeckford/dk/releases/download/2.4.202510100005"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "distributions": [
+    {
+      "build": {
+        // details about the build
+      },
+      "id": "CommonsBase_Std@2.4.202510100005",
+      "license": { "spdx": "Apache-2.0" },
+      "producer": {
+        "github_slsa_v1_l2": { "repository": "diskuv/dk" },
+        "openbsd_signify": {
+          "public_key": "untrusted comment: CommonsBase_Std-2.4\nRWSosfKCnNCBOIYVnoJMLwGKyImGd6YMrWSjj929hv087OMmR4pvf0pe\n"
+        }
+      }
+    }
+  ]
+}
+```
+
+A full-example is <https://github.com/diskuv/dk/blob/V2_4/etc/dk/i/CommonsBase_Std.values.json>.
+
+The relevant sections of the specification are:
+
+- [Assets](#assets)
+- [Forms](#forms)
+- [Objects](#objects)
+- [Values](#values)
+- [Scripts](#scripts)
+- [Distributions](#distributions)
+
+### (pending re-organization) Concepts
 
 We use the generic term **value** to mean an bundle, a form or an object.
 
 All values have names like `YourLibrary_Std.YourPackage.YourThing`. Think of the name as if it were a serial number, as the name uniquely identifies each bundle, form and object.
 
 All values also have versions like `1.0.0`. Making a change to a value means creating a new value with the same name but with an increased version. For example, if the text of your 2025-09-04 privacy policy is in the bundle `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904`, an end-of-year update to the privacy policy could be `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20251231`. These *semantic* versions offer a lot of flexibility and are industry-standard: [external link: semver 2.0](https://semver.org/). The important point is that values do not change; versions do.
-
-### Early Limitations
-
-Practically speaking, the early versions of the `dk` build system have serious limitations:
-
-- only support forms with a single field (the slot field). Today that means you create new forms when you need more customization.
-- have no graphical user interface or web page for forms (yet!). Everything today must be done from the terminal.
-
-As these limits are removed, this specification document may be updated.
 
 ## Assets
 
@@ -1516,6 +1755,8 @@ The build system will download the GitHub CLI (using the default trusted `Common
 
 ## Scripts
 
+### Script Introduction
+
 The build system has first-class support for Lua as a scripting language.
 
 Lua scripts are processed by the build system in a couple places:
@@ -1557,6 +1798,15 @@ while embedded in an OCaml single-file script the Lua script is inside the `!dk`
 
 let () = print_endline "We ran this inside our executable."
 ```
+
+### Script Phases
+
+A Lua script is executed twice:
+
+- The script is read and executed in the [VALUESCAN](#evaluation) phase. This phase is intended to find the dependencies of the script that are declared in `require('a_dependency')` statements. The Lua script is evaluated in a sandbox with all functions (ex. `print()`) defined to return a sensible Lua value but do nothing, except:
+  - `require(dependency)` will capture the dependency
+  - `assert(...)` and `error(...)` continue to do Lua conventional error checking
+- The script is read and executed in the [VALUELOAD](#evaluation) phase. All Lua functions are defined to run as documented later in this specification.
 
 ### Lua Specification
 
@@ -2068,7 +2318,7 @@ The simplest module is:
 -- values.lua
 M = { id='MyLibrary_Std.A.B.MyModule@1.0.0' }
 function M.somefunc()
-  print('ok')
+  print('inside somefunc()')
 end
 return M
 ```
