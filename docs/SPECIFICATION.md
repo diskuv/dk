@@ -1799,6 +1799,12 @@ while embedded in an OCaml single-file script the Lua script is inside the `!dk`
 let () = print_endline "We ran this inside our executable."
 ```
 
+All scripts in a running build share the same Lua state, and Lua is interpreted serially.
+That means two things:
+
+- All Lua scripts must be fast. The "continuation" mechanism, described in a later subsection, lets scripts give parallelizable work to the build engine through [subshells](#subshells).
+- Lua scripts must be written to minimize use of global variables. The reference implementation does not yet enforce the complete removal of global variables but it [will in the future](https://github.com/diskuv/dk/issues/55).
+
 ### Script Phases
 
 A Lua script is scanned once but evaluated (ie. interpreted) twice.
@@ -1976,8 +1982,9 @@ end
 return M
 ```
 
-`build.new_rules(M)` creates a `rules` field inside the module table `M`. The field will be an empty table,
-and the empty table is returned.
+`build.new_rules(M)` creates a `rules` field inside the module table `M`.
+
+The `rules` field will be an empty table, and that empty table is returned.
 
 #### build.glob
 
