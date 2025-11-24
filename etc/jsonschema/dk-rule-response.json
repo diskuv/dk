@@ -1,0 +1,129 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema",
+    "id": "https://json.schemastore.org/dk-rule-response.json",
+    "title": "Schema for the response of a rule function to build system commands",
+    "type": "object",
+    "properties": {
+        "submit": {
+            "description": "The response to the build system command 'submit'. First the values in the [valuejson] field will be added to the valuestore. Then the [expressions] will be evaluated. Finally the [andthen] logic is performed.",
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "description": "The dk build system schema for responses from rule functions. Used by VS Code for auto-completions, but otherwise ignored.",
+                    "type": "string",
+                    "default": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/dk-rule-response.json"
+                },
+                "valuesjson": {
+                    "type": "object",
+                    "description": "Values to be added to the valuestore and to the task graph.",
+                    "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/dk-values.json"
+                },
+                "expressions": {
+                    "type": "object",
+                    "description": "Expressions (literal strings, variable references and/or subshells) to be evaluated after [valuejson] is added to the build system.",
+                    "properties": {
+                        "paths": {
+                            "type": "object",
+                            "description": "Expressions that should be evaluated as file and directory paths.",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        },
+                        "strings": {
+                            "type": "object",
+                            "description": "Expressions that should be evaluated as strings. This is rarely the right choice for subshells.",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "andthen": {
+                    "type": "object",
+                    "description": "Logic to be performed after the [valuesjson] have been added and the [expressions] evaluated. Either continue to the next state by specifying [continue_] or return a value with [return_].",
+                    "properties": {
+                        "continue_": {
+                            "type": "object",
+                            "description": "This choice tells the build system to transition to the next state.",
+                            "properties": {
+                                "state": {
+                                    "description": "The state to transition to.",
+                                    "type": "string"
+                                },
+                                "passthrough": {
+                                    "description": "Properties to pass through to the next state in its [request] parameter.",
+                                    "type": "object"
+                                }
+                            },
+                            "required": [
+                                "state"
+                            ]
+                        },
+                        "return_form": {
+                            "description": "The form value that will be returned from the rule function.",
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "description": "The MODULE@VERSION that will be returned from the rule function. The MODULE@VERSION may come from a sibling [valuesjson].",
+                                    "type": "string"
+                                },
+                                "slot": {
+                                    "description": "The slot of the form to return.",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "slot"
+                            ]
+                        },
+                        "return_asset": {
+                            "description": "The asset value that will be returned from the rule function.",
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "description": "The MODULE@VERSION that will be returned from the rule function. The MODULE@VERSION may come from a sibling [valuesjson].",
+                                    "type": "string"
+                                },
+                                "path": {
+                                    "description": "The path of the asset to return.",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "path"
+                            ]
+                        }
+                    },
+                    "oneOf": [
+                        {
+                            "required": [
+                                "continue_"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "return_form"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "return_asset"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "andthen"
+            ],
+            "additionalProperties": false
+        },
+        "schema": {
+            "description": "The response to the build system command 'schema' describing how the request JSON document maps to command line options, arguments and variables.",
+            "type": "object"
+        }
+    }
+}

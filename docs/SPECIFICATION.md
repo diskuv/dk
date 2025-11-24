@@ -84,11 +84,13 @@
       - [Lua Global Variable - assert](#lua-global-variable---assert)
       - [Lua Global Variable - error](#lua-global-variable---error)
     - [Lua build library](#lua-build-library)
-      - [build.new\_rules](#buildnew_rules)
-      - [build.glob](#buildglob)
+      - [build.newrules](#buildnewrules)
+      - [build.generateid](#buildgenerateid)
+    - [Lua project library](#lua-project-library)
+      - [project.glob](#projectglob)
     - [Lua package library](#lua-package-library)
       - [require](#require)
-      - [package.registry\_key](#packageregistry_key)
+      - [package.registrykey](#packageregistrykey)
     - [Lua string library](#lua-string-library)
       - [string.byte](#stringbyte)
       - [string.find](#stringfind)
@@ -129,21 +131,34 @@
     - [Lua json library](#lua-json-library)
       - [json.encode](#jsonencode)
       - [json.decode](#jsondecode)
+      - [json.null](#jsonnull)
     - [Custom Lua Modules](#custom-lua-modules)
-    - [Custom Lua Rules](#custom-lua-rules)
+    - [Introduction to Custom Lua Rules](#introduction-to-custom-lua-rules)
+    - [Free Rule Functions](#free-rule-functions)
+      - [rules - command argument](#rules---command-argument)
+      - [rules - request argument](#rules---request-argument)
+      - [rules - continue\_ argument](#rules---continue_-argument)
+    - [UI Rule Functions](#ui-rule-functions)
+      - [uirules - project argument](#uirules---project-argument)
+    - [Rule Request Documents](#rule-request-documents)
+      - [Embedding Fields](#embedding-fields)
+    - [Writing Lua Rules](#writing-lua-rules)
+      - [Rule Requirements](#rule-requirements)
+    - [Error Handling in Rules](#error-handling-in-rules)
     - [Form Document](#form-document)
       - [Form Command Line](#form-command-line)
       - [Option Groups](#option-groups)
-  - [Graph](#graph)
-    - [Nodes](#nodes)
-      - [Values Nodes](#values-nodes)
+  - [Data Flow](#data-flow)
+    - [Task Model](#task-model)
+    - [Trace Store](#trace-store)
+    - [Value Store](#value-store)
+      - [v - parsed values.json AST](#v---parsed-valuesjson-ast)
       - [V256 - SHA256 of Values File](#v256---sha256-of-values-file)
       - [P256 - SHA256 of Asset](#p256---sha256-of-asset)
       - [Z256 - SHA256 of Zip Archive File](#z256---sha256-of-zip-archive-file)
       - [CT - Compatibility Tag](#ct---compatibility-tag)
       - [VCI - Values Canonical ID](#vci---values-canonical-id)
       - [VCK - Values Checksum](#vck---values-checksum)
-    - [Dependencies](#dependencies)
   - [Evaluation](#evaluation)
 
 ## Introduction
@@ -157,7 +172,7 @@ This specification documents interoperable systems that use composition to build
 
 However, the build system is not:
 
-- a full package manager. Package managers can uninstall packages.
+- a full package manager. Package managers can uninstall packages. The only exception is the build system can act as a *Lua* package manager.
 
 The concepts will be introduced by explaining the four (4) compositions.
 
@@ -1042,7 +1057,7 @@ The object `ID` implicitly or explicitly contains build metadata; see [ID with B
 
 ### post-object MODULE@VERSION -- CLI_FORM_DOC
 
-Submit the JSON constructed from `CLI_FORM_DOC` to the [Lua rule](#custom-lua-rules) uniquely identified by `MODULE@VERSION`.
+Submit the JSON constructed from `CLI_FORM_DOC` to the [Lua rule](#introduction-to-custom-lua-rules) uniquely identified by `MODULE@VERSION`.
 
 | Option      | Description                                                                   |
 | ----------- | ----------------------------------------------------------------------------- |
@@ -1826,26 +1841,6 @@ Care is needed so that the script completes without errors in the sandbox of the
 6. The fallback for writing an unknown key to a table (ex. `a.b.some_unknown_field = 1`) is to return `nil` (conventionally it would error).
 7. The fallback for unknown functions (ex. `some_unknown_function()`) is a function that returns `nil` (conventionally it would error).
 
-The practical implications are that the global scope should only be used for:
-
-1. `require` function calls
-2. defining functions:
-
-   ```lua
-   M = {}
-   function M.somefunc() print('VALUESCAN does not execute code inside functions') end
-   ```
-
-3. the final `return` statement
-
-Anything that does not fit the above pattern should be guarded in a `build.is_building` condition:
-
-```lua
-if build.is_building then
-  -- VALUESCAN will not execute code inside this code block
-end
-```
-
 ### Lua Specification
 
 The overall design goal is to maintain conventional Lua behavior as much as possible. The end user, to the extent possible, should be able to use their favorite Lua IDEs to edit their Lua build scripts.
@@ -1976,14 +1971,14 @@ Lua 5.1+ compatibility: The "level" argument in `error (message, [level])` is ig
 
 ### Lua build library
 
-`build` is a Lua **object** with access to the project source code and the running build.
+`build` is a Lua table with access to the running build.
 
-#### build.new_rules
+#### build.newrules
 
 ```lua
 M = { id = '...' }
-rules = build.new_rules(M)
-function rules.SomeRule(command,options)
+rules = build.newrules(M)
+function rules.SomeRule(command,request)
   -- ...
 end
 return M
@@ -1991,34 +1986,104 @@ return M
 -- or if interactive user interface rules are needed ...
 
 M = { id = '...' }
-rules, ui_rules = build.new_rules(M)
-function rules.SomeRule(command,options)
+rules, uirules = build.newrules(M)
+function rules.SomeRule(command,request)
   -- ...
 end
-function ui_rules.SomeRuleThatCanTakeOverConsole(command,options)
+function uirules.SomeRuleThatCanTakeOverConsole(command,request)
   -- ...
 end
 return M
 ```
 
-`build.new_rules(M)` creates a `free_rules` and `ui_rules` field inside the module table `M`.
+`build.newrules(M)` creates a `free_rules` and `uirules` field inside the module table `M`.
 
-The `free_rules` and `ui_rules` fields will both be empty tables, and those empty tables are returned.
+The `free_rules` and `uirules` fields will both be empty tables, and those empty tables are returned.
 
 - `free_rules` are *free* rules that can be used in `values.json[c]` files or invoked by the end-user.
-- `ui_rules` are *interactive* rules that can only be invoked by the end-user.
+- `uirules` are *interactive* rules that can only be invoked by the end-user.
 
-See [Custom Lua Rules](#custom-lua-rules) for a longer explanation of the difference between `free_rules` and `ui_rules`.
+See [Custom Lua Rules](#introduction-to-custom-lua-rules) for a detailed explanation of the difference between `free_rules` and `uirules`.
 
-#### build.glob
+#### build.generateid
 
 ```lua
-build.glob {
+build.generateid(request, arg1, arg2, ...)
+```
+
+Generates a deterministic module identifier suitable as a standard namespace term. For example, it may generate  `MyLibrary_Std.A.B.MyModule.MyFreeRule.Zz12345678@1.0.0` from:
+
+- The namespace (ex. `MyLibrary_Std.A.B.MyModule.MyFreeRule`) comes from the `request`.
+- The namespace tail (ex. `Zz12345678`) is `Zz` followed by a base32-encoding of the BLAKE2B 256-bit digest of the arguments `request, arg1, arg2, ...`.
+- The version comes from the `request`.
+
+The `request` is expected to have the following internal fields:
+
+- `__rule_module_id`. The standard module id for the rule. Example: `MyLibrary_Std.A.B.MyModule.MyFreeRule`
+- `__rule_module_version`. The version of the rule. Example: `1.0.0`
+- `__rule_continue`. The current state of the continuation state machine. Example: `start`
+
+Each argument in `request, arg1, arg2, ...` must be either:
+
+- a number. Its digest is on the IEEE 754 double-precision float representation of the number (even for integers).
+- a string. Its digest is on the bytes of the string.
+- a table with string keys. The table values can be anything that satisfies this list of "argument" requirements. The keys are lexographically sorted, and the digest is on `KEY1 || VALUE1 || KEY2 || VALUE2 || ...`.
+
+### Lua project library
+
+`project` is a Lua table available only to [Custom UI Rules](#ui-rule-functions).
+
+#### project.glob
+
+```lua
+asset_id, asset = project.glob {
   origin = "...",
   patterns = "...",
   [excludes = "...",]
 }
 ```
+
+Creates an [asset](#assets) of files from a project source directory for use when constructing a `valuejson` inside a [Custom Lua Rule](#ui-rule-functions).
+
+Using the asset could look like the following, where the source code is given as an argument to a compiler:
+
+```lua
+function uirules.MyRule(command, request)
+  if command == "submit" and continue_ == "start" then
+    local form_id = build.generateid(request)
+    local source_code_asset_id, source_code_asset = project.glob {
+      patterns = "**/*.c"
+    }
+    return {
+      submit = {
+        valuesjson = {
+          forms = {
+            {
+              id = form_id,
+              -- ...
+              function_ = {
+                args = {
+                  "some-programming-language-compiler",
+                  -- ask compiler to compile everything in a directory
+                  "-c",
+                  "$(get-asset " .. source_code_asset_id .. " -d :)"
+                }
+              }
+            }
+          },
+          bundles = {
+            source_code_asset
+          }
+        },
+        andthen = {
+          return_ = form_id
+        }
+      }
+    }
+  end
+```
+
+or you could use [an get-asset "expression" in a continuation](#rules---continue_-argument) to inspect the files before doing something meaningful with them.
 
 ### Lua package library
 
@@ -2032,7 +2097,7 @@ Everything else is exported in the `table` package.
 
 Loads the given module.
 
-If the `modname` is a **standard module id** (ex. `MyLibrary_Std.A.B.MyModule` - *tbd: document this*) a task is added to the [task graph](#graph) to search for it.
+If the `modname` is a **standard module id** (ex. `MyLibrary_Std.A.B.MyModule` - *tbd: document this*) a task is added to the [task graph](#task-model) to search for it.
 The section [Custom Lua Modules](#custom-lua-modules) describes how to create your own modules.
 
 As of the writing of this specification, only standard modules may be loaded.
@@ -2041,19 +2106,19 @@ Once imported with `require`, standard modules are enriched with constants as pe
 [Lua 5.1 module() convention](https://www.lua.org/manual/5.1/manual.html#pdf-module) and
 [Lua module versioning conventions](http://lua-users.org/wiki/ModuleVersioning) and a `_build` field:
 
-| Field      | Example                                                               |
-| ---------- | --------------------------------------------------------------------- |
-| `_NAME`    | `MyModule._NAME` would be `MyLibrary_Std.A.B.MyModule`                |
-| `_PACKAGE` | `MyModule._PACKAGE` would be `MyLibrary_Std.A.B`                      |
-| `_VERSION` | `MyModule._VERSION` would be `1.0.0`                                  |
-| `_M`       | (may be removed) `MyModule._M` would be a Lua reference to `MyModule` |
-| `_build`   | *described later in [Custom Lua Rules](#custom-lua-rules)*            |
+| Field      | Example                                                                    |
+| ---------- | -------------------------------------------------------------------------- |
+| `_NAME`    | `MyModule._NAME` would be `MyLibrary_Std.A.B.MyModule`                     |
+| `_PACKAGE` | `MyModule._PACKAGE` would be `MyLibrary_Std.A.B`                           |
+| `_VERSION` | `MyModule._VERSION` would be `1.0.0`                                       |
+| `_M`       | (may be removed) `MyModule._M` would be a Lua reference to `MyModule`      |
+| `_build`   | *described later in [Custom Lua Rules](#introduction-to-custom-lua-rules)* |
 
 > Historical note: Even though the implementation of `module()` is deprecated after Lua 5.1, its conventions were never deprecated.
 
-#### package.registry_key
+#### package.registrykey
 
-`package.registry_key`
+`package.registrykey`
 
 A opaque variable holding a key to an internal table of packages that are loaded.
 
@@ -2331,12 +2396,11 @@ That keeps with the [design goal to maintain Lua conventions](#lua-specification
 #### json.encode
 
 ```lua
+json = require('json')
 tbl = {
   animals = { "dog", "cat", "aardvark" },
   instruments = { "violin", "trombone", "theremin" }
 }
-
-json = require('json')
 str = json.encode (tbl, { indent = true })
 
 -- or
@@ -2347,6 +2411,7 @@ str = json.encode (tbl)
 Converts a Lua value to JSON:
 
 - `nil` values are not printed
+- `json.null` values are encoded as JSON null
 
 If `indent` is truthy then the JSON is pretty-printed.
 
@@ -2354,6 +2419,7 @@ If `indent` is truthy then the JSON is pretty-printed.
 
 ```lua
 json = require('json')
+str = '{"animals":["dog","cat","aardvark"],"bugs":null}'
 json.decode (str)
 
 -- or
@@ -2364,6 +2430,7 @@ value, errmsg, errrendered, sb, sl, sc, eb, el, ec = json.decode (str)
 Converts JSON to a Lua value:
 
 - Large numbers are converted to floating-point numbers with a possible loss of precision. If outside the floating-point range, an error is raised.
+- JSON nulls are converted to `json.null` Lua values
 
 If the JSON could be converted, the result is the first return value.
 
@@ -2374,6 +2441,25 @@ Otherwise:
 - `errrendered` is a prerendered error
 - `sb`, `sl`, and `sc` are the starting byte offset (zero-based), line and column (1-based)
 - `eb`, `el`, and `ec` are the ending byte offset (zero-based), line and column (1-based)
+
+#### json.null
+
+```lua
+json = require('json')
+tbl = {
+  animals = { "dog", "cat", "aardvark" },
+  bugs = json.null,
+  trees = nil
+}
+str = json.encode (tbl)
+
+-- {
+--   "animals":["dog","cat","aardvark"],
+--   "bugs":null
+-- }
+```
+
+The `json.null` Lua value represents JSON null.
 
 ### Custom Lua Modules
 
@@ -2407,42 +2493,21 @@ a standard namespace term (ex. `SomeModule`).
 
 Keeping your exports lowercased (or at least the first letter is lowercase) is sufficient to satify this restriction.
 
-### Custom Lua Rules
+### Introduction to Custom Lua Rules
 
-Rules are Lua functions inside modules that dynamically build other values.
+Lua rules are Lua functions inside modules that dynamically build other values.
 
-The simplest rule is:
+A simple rule `MyRule` is:
 
 ```lua
 -- values.lua
-M = { id='MyLibrary_Std.A.B.MyModule@1.0.0', rules=rules }
-rules, _ignore_ui_rules = build.new_rules(M)
-function rules.MyRule(build, options)
+M = { id='MyLibrary_Std.A.B.MyModule@1.0.0' }
+rules, _ignore_ui_rules = build.newrules(M)
+function rules.MyRule(command, request, continue_)
   print('ok')
 end
 return M
 ```
-
-The `id` field is required for all modules.
-
-The `free_rules` field is populated by `build.new_rules`, and is required for all modules that export *free* rules.
-By convention the local variable is named "rules"
-
-Likewise, the `ui_rules` field is populated by `build.new_rules`, and is required for all modules that export *interactive* rules.
-
-Free rules (ie. `free_rules`) are rules that are free to be used everywhere: in `values.json` files and directly by the end-user.
-
-Interactive rules (ie. `ui_rules`) are rules that:
-
-- only an end-user can run these rules; using UI rules inside a `values.json[c]` file will fail the build
-- interact with the end-user through a console or a graphical user interface
-- only one UI rule may run at a time even if the build system implementation parallelizes noninteractive rules
-
-Rule names must be standard namespace terms so they can be appended to
-the module id to create a new, still-valid module id.
-
-> Keeping the rule names with the first letter capitalized and
-no underscores is sufficient to satify this restriction.
 
 The rule above can be run from the command line:
 
@@ -2455,9 +2520,13 @@ or from a subshell in a `values.json` build file:
 ```json
 {
   // ...
-  "args": [
-    "echo",
-    "$(post-object MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2)"
+  "forms": [
+    "function": {
+      "args": [
+        "echo",
+        "$(post-object MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2)"
+      ]
+    }
   ]
 }
 ```
@@ -2470,25 +2539,329 @@ MyRule = MyRule.at('1.0.0')
 MyRule.use { a=1, b=2 }
 ```
 
----
+### Free Rule Functions
+
+Free rules (ie. `M.free_rules`) are rules that are free to be used everywhere: in `values.json` files and directly by the end-user.
+
+Free rules should be *pure* functions (ie. repeat and get the same results on a different machine) so they do *not* have direct access to changeable project source code directories.
+
+The form of a free rule function named `YourFreeRule` is:
+
+```lua
+M = { id='MyLibrary_Std.A.B.MyModule@1.0.0' }
+rules = build.newrules(M)
+function rules.YourFreeRule(command, request, continue_)
+  -- your stuff here
+end
+return M
+```
+
+The response to a free rule function must match the [dk-rule-response.json schema](../etc/jsonschema/dk-rule-response.json).
+
+#### rules - command argument
+
+One of: `submit`, `ui`, `schema`
+
+`schema` is reserved for future expansion.
+
+`submit` is to submit a JSON request document to a rule.
+
+If the rule is a UI rule, then the final command will be `ui`.
+
+#### rules - request argument
+
+Initially the `request` field is the rule request document that has been translated from the arguments to `post-object`.
+The request document is described later in the [Rule Request Documents](#rule-request-documents) section.
+
+Internal fields that start with `__` added
+
+#### rules - continue_ argument
+
+Since rules block the build system, [rules must be fast](#rule-requirements) and often rules are broken into small steps using a state machine.
+
+The `continue_` argument is the state in the state machine. When `command='schema'` the `continue_` argument will be `nil`. When `command="submit"` the continue_ argument will start as `start`.
+
+For example, a rule may need to sort a large file. It would be terrible for performance if a build system capable of parallelism was blocked to sort a file. Instead, the following state machine can be used:
+
+```text
+       [start]
+          |
+          |
+          v
+   [have-sorted-file]
+          |
+          |
+          v
+       [done]
+```
+
+When the rule sees `continue_="start"`, it can return [subshell](#subshells) expression to the build system to fetch a `sort` tool from the [uutils coreutils](https://uutils.github.io/coreutils/docs/utils/sort.html) project. Something like:
+
+```lua
+if continue_ == "start" then
+  local form_id = build.generateid(request)
+  return {
+    "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/dk-rule-response.json",
+    submit = {
+      valuesjson = {
+        forms = {
+          {
+            id = form_id,
+            function_ = {
+              args = {
+                "$(get-object CommonsBase_Std.Coreutils@0.2.2 -s ${SLOTNAME.Release.execution_abi} -m ./coreutils.exe -f :exe)",
+                "sort",
+                "--output",
+                "${SLOT.request}/sorted-file",
+                -- provided by user or caller of the rule
+                options.filename
+              }
+            }
+          }
+        }
+      },
+      expressions = {
+        paths = {
+          sorted_file =
+            "$(get-object " .. form_id .. " -s ${SLOTNAME.Release.execution_abi} -m ./sorted-file -f :file)"
+        }
+      },
+      andthen = {
+        continue_ = {
+          state = "have-sorted-file",
+          passthrough = {
+            filename = options.filename -- provided by user
+          }
+        },
+      }
+    }
+  }
+end
+```
+
+Here, the build system will add the `valuesjson` as if it were a new `values.json` file, evaluate all the `expressions`, and then callback the rule (ie. `andthen`) with:
+
+```lua
+-- YourFreeRule(command, request, continue_)
+YourFreeRule(
+  -- command
+  "submit",
+  -- options
+  { 
+    -- anything in 'passthrough' is given literally to the rule
+    filename = "...user provided filename...",
+    -- anything in 'expressions.paths' and `expressions.strings`
+    -- is evaluated and their responses given to the rule
+    sorted_file = "...path to sorted-file..."
+  },
+  -- continue_
+  "have-sorted-file"
+)
+```
+
+When the rule sees `continue_ = "have-sorted-file"`, it should do something useful with the sorted file.
+For this example we just print the file.
+
+```lua
+if continue_ == "start" then
+  -- ...
+elseif continue_ == "have-sorted-file" then
+  printf("The sorted file is at: %s\n", request.sorted_file)
+  return {
+    -- an empty submit table means the rule is done.
+    -- alternative: continue using "andthen" to do more callbacks.
+    submit = { }
+  }
+end
+```
+
+### UI Rule Functions
+
+UI rules (ie. `uirules`) are rules that:
+
+- only an end-user can run these rules; using UI rules inside a `values.json[c]` file will fail the build
+- interact with the end-user through a console or a graphical user interface
+- only one UI rule may run at a time even if the build system implementation parallelizes noninteractive rules
+- have access to the project source code directories
+
+UI rules are *impure* functions that have outputs that are not reproducible because they direct access to changing project source code. Because they are impure, UI rules are never cached. With project library functions like [project.glob](#projectglob) these impure UI rules can take immutable snapshots of the project source code (ie. [assets](#assets)); these immutable assets can be used directly or passed to *pure* [free rules](#free-rule-functions).
+
+The form of a UI rule function named `YourUiRule` is:
+
+```lua
+M = { id='MyLibrary_Std.A.B.MyModule@1.0.0' }
+rules, uirules = build.newrules(M) -- uirules are separate from (free) rules
+function uirules.YourUiRule(command, request, continue_, project)
+  -- your stuff here. You have access to 'project' unlike free rules
+end
+return M
+```
+
+Please see [Free Rule Functions](#free-rule-functions) for a description of the `command`, `request` and `continue_` arguments.
+
+The response to a UI rule function must match the [dk-rule-response.json schema](../etc/jsonschema/dk-rule-response.json).
+
+#### uirules - project argument
+
+### Rule Request Documents
+
+The request to [Custom Lua Rules](#introduction-to-custom-lua-rules) is always a JSON document.
+
+In the introduction example of [Custom Lua Rules](#introduction-to-custom-lua-rules):
+
+```lua
+MyRule = require('MyLibrary_Std.A.B.MyModule.MyRule')
+MyRule = MyRule.at('1.0.0')
+MyRule.use { a=1, b=2 }
+```
+
+the JSON document was converted from the Lua table `{ a=1, b=2 }` and from the [embedding fields](#embedding-fields) into:
+
+```json
+{ "a": 1, "b": 2 }
+```
+
+See [json.encode](#jsonencode) for how Lua values are converted to JSON.
+However, for rule requests the `json.null` value is **never** encoded.
+That means a Lua `nil` is considered equivalent to a missing value.
+
+The introduction example also submitted a request to a rule through the command line:
+
+```sh
+mlfront-shell -- post-object MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2
+```
+
+Those command line arguments `a=1 b=2` get converted into the same JSON document as before:
+
+```json
+{ "a": 1, "b": 2 }
+```
+
+The conversion of command line arguments follows the withdrawn but still useful [W3C HTML JSON Forms specification]:
+
+- `... -- name=Jane` creates the request document `{"name":"Jane"}`
+- `... -- pet[species]=Dahut kids[0]=Ashley` creates the request document `{"pets":{"species":"Dahut"},"kids":["Ashley"]}`
+- `... -- +customer=customer.json` creates the request document `{"customer":...}` where the `...` is the JSON contents of `customer.json` (this is an extension to the [W3C HTML JSON Forms specification]). *Experimental. Likely to disappear since the trace store captures the entire request document in a trace. Instead use the `project` table given to UI rules to make an asset from a user path, and resolve with a get-asset subshell.*
+
+While the reference implementation does not do this, other build systems are free to accept the form document directly from a HTML form as defined in [W3C HTML JSON Forms specification] or directly from a JSON document.
+
+[W3C HTML JSON Forms specification]: https://www.w3.org/TR/html-json-forms
+
+#### Embedding Fields
+
+The request document will have the field:
+
+```json
+{
+  "singlefile_asset_id": "..."
+}
+```
+
+if the Lua script was embedded in a [single file script](#script-introduction).
+
+It can be used in a [subshell expression of a rule response](#free-rule-functions) like:
+
+```lua
+function rules.YourRule(command,request,continue_)
+  if command == "submit" and continue_ == "start" then
+    return {
+      submit = {
+        expressions = {
+          paths = {
+            singlefile = "$(get-asset " .. request.singlefile_asset_id .. " -p singlefile -f :)"
+          }
+        }
+      }
+    }
+  end
+end
+```
+
+to get the source code of the single file script.
+
+### Writing Lua Rules
+
+#### Rule Requirements
+
+A - RULE NAMING
+
+Rule names must be standard namespace terms so they can be appended to
+the module id to create a new, still-valid module id.
+
+> Keeping the rule names with the first letter capitalized and
+no underscores is sufficient to satify this restriction.
+
+B - RETURNED FIELDS
+
+The basic syntax for making a conventional Lua module is:
+
+```lua
+M = {}
+
+-- you: add things to "M". For example,
+--   rules, uirules = build.newrules(M)
+
+return M
+```
+
+The `M.id` field is required for all modules.
+
+The `M.free_rules` field is populated by [build.newrules](#buildnew_rules), and is required for all modules that export *free* rules.
+By convention the local variable is named "rules".
+
+Likewise, the `M.uirules` field is populated by [build.newrules](#buildnew_rules), and is required for all modules that export *interactive* rules.
+By convention the local variable is named "uirules".
+
+C - PERFORMANCE
 
 Rules **must be fast** as they block the build system. Use continuations to delegate all the I/O intensive work to the build system.
 
----
+D - LEXICAL STRUCTURE
 
-> todo: This section is out-of-date. It needs clarification that the `define_rule` equivalent (module with `id` and `rules`) are all that is needed since `import_rule` is done monadically (dynamically) just like a subshell.
+During the [`VALUESCAN` phase](#evaluation) the `values.lua` files are scanned for rules in the procedure described in the [Script Phases](#script-phases).
 
-Both the `define_rule` and `import_rule` statements are **rule declarations** that participate in the task graph.
-Specifically, the `define_rule` establishes rule task nodes in the task graph, and `import_rule` establishes edges between rule task nodes in the task graph.
+The practical implications are that the global scope should only be used for:
 
-`define_rule` can also establish edges to other task nodes (forms, bundles and assets), but these edges are added dynamically in a later phase.
+1. `require` function calls
+2. defining functions:
 
-During the [`VALUESCAN` phase](#evaluation) the `values.lua` files are scanned for rule tasks with the following *fast* procedure:
+   ```lua
+   M = {}
+   function M.somefunc() print('VALUESCAN does not execute code inside functions') end
+   ```
 
-- create a Lua interpreter that has no globals except `build`. The `build` global (a Lua table) has entries for the `import_rule` and `define_rule` function that capture the rule identifiers (ex. `SomeLibrary_Std.SomeRule@1.0.0`) but do not evaluate options. For compilability, other `build` entries like `build.glob` are defined but are no-ops.
-- run the Lua interpreter on the `values.lua` file to collect the rule identifiers given to the `import_rule` and `define_rule` function
+3. the final `return` statement
 
-The reference implementation has the `mlfront-shell -- inspect lua-file` command to show the rule declarations.
+Anything that does not fit the above pattern should be guarded in a `build.is_building` condition:
+
+```lua
+if build.is_building then
+  -- VALUESCAN will not execute code inside this code block
+end
+```
+
+**TIP**. The reference implementation has the `mlfront-shell -- lua --analysis somefile.lua` command to show the rules the build system thinks are defined in the Lua script.
+
+### Error Handling in Rules
+
+Lua has both [assert(condition)](#lua-global-variable---assert) and [error "message"](#lua-global-variable---error) to raise errors. While using these functions are okay, especially for serious errors, these will expose Lua stack traces to your end-user.
+
+The conventional way to indicate an error does not print a Lua stack trace. The convention is to return two values from a rule, the first of which is a `nil` and the second is the error message:
+
+```lua
+local M = {}
+rules = build.define_rules(M)
+function rules.MyRule(command,request)
+  -- an error happened
+  return nil, "this is the error message"
+end
+return M
+```
+
+Best Practices:
+
+- Use `nil, "error ..."` for errors where the user was at fault (the person who submitted a request to the rule). The user forgetting to provide a required field is an example.
+- Use `assert` and `error` defensively in preconditions, invariants and postconditions to catch programming errors. The resulting stack trace can be copy-pasted into a bug report by the user so you can fix the programmer error.
 
 ### Form Document
 
@@ -2498,15 +2871,7 @@ Information is supplied to a rule as a JSON document.
 
 The primary way today to supply this JSON document is through the command line syntax `post-object MODULE@VERSION -- CLI_FORM_DOC`, where **CLI_FORM_DOC** is a CLI-based recipe to construct a JSON document.
 
-The `CLI_FORM_DOC` is a command-line analog to <https://www.w3.org/TR/html-json-forms/>:
-
-- `... -- name=Jane` creates the form document `{"name":"Jane"}`
-- `... -- pet[species]=Dahut kids[0]=Ashley` creates the form document `{"pets":{"species":"Dahut"},"kids":["Ashley"]}`
-- `... -- +customer=customer.json` creates the form document `{"customer":...}` where the `...` is the JSON contents of `customer.json` (this is an extension to the W3C HTML JSON Forms specification)
-
-While the reference implementation does not do this, other build systems are free to accept the form document directly from a HTML form as defined in <https://www.w3.org/TR/html-json-forms/>, or directly from a JSON document.
-
-The form has a `options` JSON object to describe how the JSON document submitted to a form maps to command line options, arguments and variables.
+The form has a `options` JSON object to describe how the JSON document submitted to a form maps to command line options, arguments and variables. *nit: This should be "command=schema" given to rule ... it has nothing to do with the misnamed 'form' object in values.json!*
 
 The top-level fields of the form document are available in variables:
 
@@ -2552,31 +2917,102 @@ find /home/user -L -name "*.log" -type f -exec rm {} \;
 
 Since Windows especially but all operating systems have limits on the size of the command line arguments, the schema may specify a `responsefile` which consolidates all of the command line arguments at the end into a single file that can be read by the program (the first argument of the function `args`). Both MSVC and clang support these responsefiles.
 
-## Graph
+## Data Flow
 
-### Nodes
+### Task Model
 
-Each node in the graph has a key, a value id, a value sha256 and the value itself:
+The smallest unit of a build is a *task* identified by a *key* and, on successful build, resulting in a *value*.
 
-- The **key** is one of two types:
-  - A **module key** is what you -- the user -- specify in a shell command as the MODULE_ID and SLOT or PATH in the [Value Shell Language](#value-shell-language-vsl)
-  - A **checksum key** is the SHA-256 of some content
-- A **value id** is a string which is a *value type* (defined below) and a set of fields, concatenated together and then SHA-256 base32-encoded. The value id serves as a unique key for the value in a value store.
-  - The **value type** is a single letter that categorizes what the value is:
+The **keys** represent the parameters to [Value Shell Commands](#value-shell-language-vsl).
 
-    | Value Type | What                      | Docs                      |
-    | ---------- | ------------------------- | ------------------------- |
-    | `o`        | object                    | [Objects](#objects)       |
-    | `b`        | bundle                    | [Assets](#assets)         |
-    | `a`        | asset                     | [Assets](#assets)         |
-    | `j`        | values.json file          | [JSON Files](#json-files) |
-    | `v`        | (cache) parsed values AST | [JSON Files](#json-files) |
-    | `c`        | built-in constants        | [Objects](#objects)       |
-    | `s`        | source file               | FILLMEIN                  |
+The **values** are discussed in [Values](#values).
 
-    All value types are *lowercase* for support on case-insensitive file systems.
+**Tasks**, the computations that produce a value from a key, are all built into the build system except for [Custom Lua Rules](#introduction-to-custom-lua-rules).
 
-    Any value types with `(cache)` are stored in the local cache rather than the valuestore.
+A task may depend on zero or more keys. For example, the form task `CommonsBase_Shell.Pwsh@7.5.4` defined by:
+
+```json
+{
+  "forms": [
+    {
+      "id": "CommonsBase_Shell.Pwsh@7.5.4",
+      "function": {
+        "args": [
+            "$(get-object CommonsBase_Dotnet.SDK@10.0.100-rc.2.25502.107 -s ${SLOTNAME.Release.execution_abi} -d :)/dotnet${.exe.execution}",
+            "tool",
+            "install",
+            "PowerShell",
+            //...
+        ]
+      }
+    }
+  ]
+}
+```
+
+depends on the object key `CommonsBase_Dotnet.SDK@10.0.100-rc.2.25502.107`.
+
+We say that the object key `CommonsBase_Dotnet.SDK@10.0.100-rc.2.25502.107` is an immediate dependency of object key `CommonsBase_Shell.Pwsh@7.5.4`.
+
+The tasks and their dependencies form a **task graph**.
+
+The shape of the task graph is:
+
+1. *optional layer*. the incoming nodes of the task graph are impure rules ([UI rules](#ui-rule-functions)). These nodes may depend on nodes in a lower layer.
+2. *optional layers*. the interior nodes of the task graph are [objects](#objects) and **pure** rules (ie. [free rules](#free-rule-functions)). These nodes may depend on nodes in the same layer or below.
+3. the leaf nodes of the task graph are the immutable [bundles and assets](#assets). These nodes have no dependencies.
+
+That shape is enforced through the edges (the dependencies) allowed in the task graph (todo: incomplete, inaccurate):
+
+| Value Type From | Value Type To | Why                                                 |
+| --------------- | ------------- | --------------------------------------------------- |
+| `a`             | `j`           | Rebuild bundle if contents of `values.json` changes |
+| `a`             | `v`           | Rebuild bundle if parsed `values.json` changes      |
+| `o`             | `j`           | Rebuild form if contents of `values.json` changes   |
+| `o`             | `v`           | Rebuild form if parsed `values.json` changes        |
+| `p`             | `j`           | Rebuild asset if contents of `values.json` changes  |
+| `p`             | `v`           | Rebuild asset if parsed `values.json` changes       |
+
+### Trace Store
+
+Each time a task is executed, the following items are captured into a single **trace**:
+
+- the key of the task
+- the successful [value](#values) of the task
+- the keys of the task's immediate dependencies
+- a SHA256 digest of the values of the task's immediate dependencies
+
+The *key* is one of two types:
+
+- A *module key* is what you -- the user -- specify in a shell command as the MODULE_ID and SLOT or PATH in the [Value Shell Language](#value-shell-language-vsl). The module key can be large for `post-object` since its parameters includes a JSON request.
+- A *checksum key* is the SHA-256 of some content
+
+The *value* is not directly stored in the trace. Instead, an identifier (the **value id**)
+is stored in the trace, and the potentially large value is stored in the value store (more on that next section).
+
+### Value Store
+
+The value store is a key-value table stored on disk.
+
+The *value id* is a string which is a *value type* (defined below) and a set of fields, concatenated together and then SHA-256 base32-encoded.
+The value id serves as a unique key for the value in a value store.
+
+The **value type** is a single letter that categorizes what the value is:
+
+| Value Type | What                      | Docs                      |
+| ---------- | ------------------------- | ------------------------- |
+| `o`        | object                    | [Objects](#objects)       |
+| `b`        | bundle                    | [Assets](#assets)         |
+| `a`        | asset                     | [Assets](#assets)         |
+| `j`        | values.json file          | [JSON Files](#json-files) |
+| `l`        | values.lua file           | [Lua Scripts](#scripts)   |
+| `v`        | (cache) parsed values AST | [JSON Files](#json-files) |
+| `c`        | built-in constants        | [Objects](#objects)       |
+| `s`        | source file               | FILLMEIN                  |
+
+All value types are *lowercase* for support on case-insensitive file systems.
+
+Any value types with `(cache)` are stored in the local cache rather than the valuestore.
 
 - A **value** is a file whose content matches the value type. A values file is a `value.json` build file itself. An object is a zip archive of the output of a [form](#forms). Form, bundle and asset value are serialized parsed abstract syntax trees.
 - A **value sha256** is a SHA-256 hex-encoded string of the value. That is, if you ran `certutil` (Windows), `sha256sum` (Linux) or `shasum -a 256` (macOS) on the value file, the *value sha256* is what you would see.
@@ -2594,16 +3030,14 @@ TODO: Combine the following with earlier table. These are from BuildCore.
 | ---------- | ----------- | -------------- |
 | `j`        | ChecksumKey | ValuesJsonFile |
 
-#### Values Nodes
+#### v - parsed values.json AST
 
 A `values.json` is parsed into an AST, and the AST is persisted directly from OCaml memory blocks and signed with the local build key.
 
 The build system will verify the signature of the AST before loading the AST into memory.
-If the signature does not match the local build key, or if the AST is incompatible with the memory
-layout of the current process (see [compatibility tag](#ct---compatibility-tag)), the `j` values.json file
-is fetched and re-parsed into a new AST.
+If the signature does not match the local build key, or if the AST is incompatible with the memory layout of the current process (see [compatibility tag](#ct---compatibility-tag)), the `j` values.json file is fetched and re-parsed into a new AST.
 
-Currently in the reference implementation the `v` AST is present in the distributable valuestore.
+<https://github.com/diskuv/dk/issues/44>: *This is fixed*. Currently in the reference implementation the `v` AST is present in the distributable valuestore.
 Distribution is only beneficial when the memory layout of the remote build system is compatible with the memory layout of the local build system,
 and even then the parse time must be greater than the added download time.
 
@@ -2652,17 +3086,6 @@ The hex-encoded SHA256 of the `values.json` *canonicalized* JSON, stripped of al
 The hex-encoded SHA256 of the marshalled AST of the carriage-return-stripped `values.json`.
 
 The stripping of carriage returns occurs before the CST and AST parsing, so that any serialized AST uses the byte positions of the Unix-encoded JSON.
-
-### Dependencies
-
-| Value Type From | Value Type To | Why                                                 |
-| --------------- | ------------- | --------------------------------------------------- |
-| `a`             | `v`           | Rebuild bundle if contents of `values.json` changes |
-| `a`             | `w`           | Rebuild bundle if parsed `values.json` changes      |
-| `f`             | `v`           | Rebuild form if contents of `values.json` changes   |
-| `f`             | `w`           | Rebuild form if parsed `values.json` changes        |
-| `p`             | `v`           | Rebuild asset if contents of `values.json` changes  |
-| `p`             | `w`           | Rebuild asset if parsed `values.json` changes       |
 
 ## Evaluation
 
