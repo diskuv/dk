@@ -46,10 +46,9 @@
       - [Types of Words](#types-of-words)
     - [Variables available in VSL](#variables-available-in-vsl)
     - [get-object MODULE@VERSION -s REQUEST\_SLOT (-f FILE | -d DIR/)](#get-object-moduleversion--s-request_slot--f-file---d-dir)
-    - [post-object MODULE@VERSION -- CLI\_FORM\_DOC](#post-object-moduleversion----cli_form_doc)
+    - [post-object MODULE@VERSION (-f FILE | -d DIR/) -- CLI\_FORM\_DOC](#post-object-moduleversion--f-file---d-dir----cli_form_doc)
     - [enter-object MODULE@VERSION -s REQUEST\_SLOT -- CLI\_FORM\_DOC](#enter-object-moduleversion--s-request_slot----cli_form_doc)
     - [install-object MODULE@VERSION -s REQUEST\_SLOT (-f FILE | -d DIR/)](#install-object-moduleversion--s-request_slot--f-file---d-dir)
-    - [pipe-object MODULE@VERSION -s REQUEST\_SLOT -x PIPE](#pipe-object-moduleversion--s-request_slot--x-pipe)
     - [get-asset MODULE@VERSION FILE\_PATH (-f FILE | -d DIR/)](#get-asset-moduleversion-file_path--f-file---d-dir)
     - [get-bundle MODULE@VERSION (-f FILE | -d DIR/)](#get-bundle-moduleversion--f-file---d-dir)
     - [Options: -f FILE and -d DIR](#options--f-file-and--d-dir)
@@ -1055,7 +1054,7 @@ See [Options: -f FILE and -d DIR](#options--f-file-and--d-dir) for output path r
 
 The object `ID` implicitly or explicitly contains build metadata; see [ID with Build Metadata](#object-id-with-build-metadata).
 
-### post-object MODULE@VERSION -- CLI_FORM_DOC
+### post-object MODULE@VERSION (-f FILE | -d DIR/) -- CLI_FORM_DOC
 
 Submit the JSON constructed from `CLI_FORM_DOC` to the [Lua rule](#introduction-to-custom-lua-rules) uniquely identified by `MODULE@VERSION`.
 
@@ -1100,177 +1099,6 @@ Install the contents of the slot `REQUEST_SLOT` for the object uniquely identifi
 See [Options: -f FILE and -d DIR](#options--f-file-and--d-dir) for output path restrictions.
 
 The object `MODULE@VERSION` implicitly or explicitly contains build metadata; see [ID with Build Metadata](#object-id-with-build-metadata).
-
-### pipe-object MODULE@VERSION -s REQUEST_SLOT -x PIPE
-
-> Deprecated. This command will be replaced by dynamic tasks.
-
-Write the contents of the slot `REQUEST_SLOT` for the object uniquely identified by `MODULE@VERSION` to the pipe named `PIPE`.
-
-| Option      | Description                                  |
-| ----------- | -------------------------------------------- |
-| `-m MEMBER` | See [Option: [-m MEMBER](#option--m-member)] |
-
-The object `MODULE@VERSION` implicitly or explicitly contains build metadata; see [ID with Build Metadata](#object-id-with-build-metadata).
-
-No two `pipe-object` commands may write to the same pipe `PIPE`.
-
-The location of the pipe is available using the variable `${PIPE.name}`.
-
-Typically, the pipe given to the form function will be a PIPE_ACCESS_OUTBOUND named pipe server on Windows (ex. `\\ServerName\pipe\SomePipe`) and a write-only fifo pipe on Unix. To be portable, you should:
-
-- read from the pipe zero or one time. Do not re-read from the pipe.
-- read the data sequentially from the pipe. Do not use random access read in the pipe.
-- expect the read from the pipe, especially the first byte, to take a long time.
-- use PowerShell or a library in your favorite language to detect and read from the named pipe on Windows
-
-Piping is an **optimization**. If the build system does not support threading, the pipe *will* be a regular file. However, if pipeline is supported, then the build system only has to kick off the build of the form function dependency `ID SLOT` when you *first access the pipe*.
-
-Key Optimization: If you don't access the pipe at all in your form function, then you have saved the cost (clock time, compute, space) of the build for your dependency `ID SLOT`.
-
-So in situations where the content is conditional (ie. read by the form function only in certain situations) and expensive (ie. the `ID SLOT` is large or has a time-consuming build), use `pipe-object`.
-
-Here is an example use of a pipe:
-
-```json
-{
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/1.0/etc/jsonschema/mlfront-thunk.json",
-  "version": {
-    "major": 1,
-    "minor": 0
-  },
-  "precommands": [
-    "install-object SomeScripting_Minimal.Env -s Release.Agnostic -d usr/"
-    "get-asset MyAssets_Std.Scripts@1.0.0 -p script/get-size.cmd -s Release.Agnostic -f get-size.cmd",
-    "get-asset MyAssets_Std.Scripts@1.0.0 -p script/get-size.sh  -s Release.Agnostic -f get-size.sh",
-    "pipe-object    SomeContent_Std.DataFile -s Release.Agnostic -x data-file-pipe"
-  ],
-  "function": {
-    "args": [
-      "usr/bin/run-powershell-or-posix-script.exe",
-      "--powershell3",
-      "usr/bin/powershell.exe",
-      "get-size.ps1",
-      "--posix",
-      "usr/bin/sh",
-      "get-size.sh",
-      "--",
-      "${PIPE.data-file-pipe}",
-      "${SLOT.Release.Agnostic}"
-    ]
-  },
-  "bundles": [
-    {
-      "id": "MyAssets_Std.Scripts@1.0.0",
-      "listing": {
-        "origins": [ { "name": "project-tree", "mirrors": [ "." ] } ]
-      },
-      "assets": [
-        {
-          "origin": "project-tree",
-          "path": "script/get-size.cmd",
-          "checksum": {
-            "sha256": "4cc4b5286084c1285d905801291d028471cc62ad441308c95b0c25a1c42064d7"
-          }
-        },
-        {
-          "origin": "project-tree",
-          "path": "script/get-size.sh",
-          "checksum": {
-            "sha256": "3c5f810d5d04d256a671712012e1fffa089214886745523ac78e7b45f318c30b"
-          } } ] }
-  ],
-  "outputs": [
-    { "slots": ["Release.Agnostic"], "paths": ["size.txt"] }
-  ]
-}
-```
-
-with the PowerShell script `script/get-size.ps1`:
-
-```powershell
-# The usage is:
-#   get-size.ps1 LOCATION_OF_DATA_FILE LOCATION_OF_OUTPUT_FILE
-
-# Get LOCATION_OF_DATA_FILE (maybe a named pipe)
-$dataFile = $args[0]
-
-# Get LOCATION_OF_OUTPUT_FILE
-$outputFile = $args[1]
-
-# Create output directory
-$outputDir = Split-Path -Path "$outputFile" -Parent
-if (-not (Test-Path "$outputDir")) { New-Item -Type Directory "$outputDir" }
-
-# Get the size
-if ($dataFile -match ("^\\\\([.]|[A-Za-z0-9][A-Za-z0-9.-]*)\\pipe\\.*")) {
-  # $dataFile is a local \\.\pipe\SomePipe or a remote \\ServerName\pipe\SomePipe
-
-  # PICK EITHER Technique 1: Write to a temporary file.
-  Get-Content "$dataFile" > "datafile.tmp"
-  $dataSize = (Get-Item -Path "datafile.tmp").Length
-  Remove-Item "datafile.tmp"
-  "Size of data file is $dataSize bytes" | Out-File -FilePath "$outputFile"
-
-  # OR Technique 2: Sequentially read from the pipe.
-  try {
-      $pipeClient = New-Object System.IO.Pipes.NamedPipeClientStream($dataFile)
-      $pipeClient.Connect()
-
-      $reader = New-Object System.IO.StreamReader($pipeClient)
-
-      # Technique 2: Sequentially read from the pipe
-      [int]$bytesTotal = 0
-      [Char[]]$buffer = new-object char[] 16384
-      [int]$bytesRead = $reader.ReadBlock($buffer, 0, $buffer.Length)
-      while ($bytesRead -gt 0)
-      {
-          [int]$bytesRead = $reader.ReadBlock($buffer, 0, $buffer.Length)
-          Write-Host "[progress] read $bytesRead more bytes ..."
-          $bytesTotal += $bytesRead
-      }
-      $bytesTotal += $bytesRead
-
-      "Size of data file is $bytesTotal bytes" | Out-File -FilePath "$outputFile"
-
-      $reader.Close()
-      $pipeClient.Close()
-      $pipeClient.Dispose()
-  } catch {
-      Write-Error "Error connecting or reading from pipe: $($_.Exception.Message)"
-  }
-} else {
-  # local file
-  $dataSize = (Get-Item -Path "$dataFile").Length
-  "Size of data file is $dataSize bytes" | Out-File -FilePath "$outputFile"
-}
-```
-
-and the Unix shell script `script/get-size.sh`:
-
-```sh
-#!/bin/sh
-
-# The usage is:
-#   get-size.sh LOCATION_OF_DATA_FILE LOCATION_OF_OUTPUT_FILE
-
-# Exit the script immediately on errors
-set -euf
-
-# Get LOCATION_OF_DATA_FILE (maybe a fifo pipe)
-datafile=$1
-
-# Get LOCATION_OF_OUTPUT_FILE
-outputfile=$2
-
-# Make the output directory
-install -d $(dirname "$outputfile")
-
-# Write the size of the data file into the output file.
-# On Unix, we can treat a pipe like $datafile as if it were a regular file.
-size=$(wc -c "$datafile")
-echo "Size of data file is $size bytes" > "$outputfile"
-```
 
 ### get-asset MODULE@VERSION FILE_PATH (-f FILE | -d DIR/)
 
@@ -1423,7 +1251,7 @@ These rules apply to the `*-object` commands **only**:
 
 - `get-object MODULE@VERSION ...`
 - `install-object MODULE@VERSION ...`
-- `pipe-object MODULE@VERSION ...`
+- `post-object MODULE@VERSION ...`
 - `enter-object MODULE@VERSION ...`
 
 The purpose of these rules is to ensure that unique builds can be uniquely and deterministically identified.
@@ -1996,14 +1824,14 @@ end
 return M
 ```
 
-`build.newrules(M)` creates a `free_rules` and `uirules` field inside the module table `M`.
+`build.newrules(M)` creates a `freerules` and `uirules` field inside the module table `M`.
 
-The `free_rules` and `uirules` fields will both be empty tables, and those empty tables are returned.
+The `freerules` and `uirules` fields will both be empty tables, and those empty tables are returned.
 
-- `free_rules` are *free* rules that can be used in `values.json[c]` files or invoked by the end-user.
+- `freerules` are *free* rules that can be used in `values.json[c]` files or invoked by the end-user.
 - `uirules` are *interactive* rules that can only be invoked by the end-user.
 
-See [Custom Lua Rules](#introduction-to-custom-lua-rules) for a detailed explanation of the difference between `free_rules` and `uirules`.
+See [Custom Lua Rules](#introduction-to-custom-lua-rules) for a detailed explanation of the difference between `freerules` and `uirules`.
 
 #### build.generateid
 
@@ -2541,7 +2369,7 @@ MyRule.use { a=1, b=2 }
 
 ### Free Rule Functions
 
-Free rules (ie. `M.free_rules`) are rules that are free to be used everywhere: in `values.json` files and directly by the end-user.
+Free rules (ie. `M.freerules`) are rules that are free to be used everywhere: in `values.json` files and directly by the end-user.
 
 Free rules should be *pure* functions (ie. repeat and get the same results on a different machine) so they do *not* have direct access to changeable project source code directories.
 
@@ -2806,10 +2634,10 @@ return M
 
 The `M.id` field is required for all modules.
 
-The `M.free_rules` field is populated by [build.newrules](#buildnew_rules), and is required for all modules that export *free* rules.
+The `M.freerules` field is populated by [build.newrules](#buildnewrules), and is required for all modules that export *free* rules.
 By convention the local variable is named "rules".
 
-Likewise, the `M.uirules` field is populated by [build.newrules](#buildnew_rules), and is required for all modules that export *interactive* rules.
+Likewise, the `M.uirules` field is populated by [build.newrules](#buildnewrules), and is required for all modules that export *interactive* rules.
 By convention the local variable is named "uirules".
 
 C - PERFORMANCE
