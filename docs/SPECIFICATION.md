@@ -84,8 +84,10 @@
       - [Lua Global Variable - error](#lua-global-variable---error)
     - [Lua build library](#lua-build-library)
       - [build.newrules](#buildnewrules)
-    - [Lua declareoutput library](#lua-declareoutput-library)
+    - [Lua request.declareoutput library](#lua-requestdeclareoutput-library)
       - [request.declareoutput.generatesymbol](#requestdeclareoutputgeneratesymbol)
+    - [Lua request.submit library](#lua-requestsubmit-library)
+      - [request.submit.output\_id](#requestsubmitoutput_id)
     - [Lua project library](#lua-project-library)
       - [project.glob](#projectglob)
     - [Lua package library](#lua-package-library)
@@ -1840,7 +1842,7 @@ The `freerules` and `uirules` fields will both be empty tables, and those empty 
 
 See [Custom Lua Rules](#introduction-to-custom-lua-rules) for a detailed explanation of the difference between `freerules` and `uirules`.
 
-### Lua declareoutput library
+### Lua request.declareoutput library
 
 This library is available to [free rule functions](#free-rule-functions) through the `request.declareoutput` field.
 
@@ -1864,7 +1866,7 @@ return M
 request.declareoutput.generatesymbol(arg1, arg2, ...)
 ```
 
-Generates a deterministic standard namespace term. For example, it may generate `Xzd6vwarhlrgmpnhlbjb5orkstd` from `X` followed by a lowercase base32-encoding of the BLAKE2s 128-bit digest of:
+Generates a deterministic standard namespace term. For example, it may generate `X6pro7j57evsyymo36mehvpabhy` from a constant `X` followed by a lowercase base32-encoding of the BLAKE2s 128-bit digest of:
 
 1. The rule's `MODULE` string from its `id = "MODULE@VERSION"`
 2. The rule's `VERSION` string from its `id = "MODULE@VERSION"`
@@ -1882,6 +1884,33 @@ Each Lua value has its digest calculated according to:
   - Any number key is converted to an integer or it raises an error; then the integer is converted to a string.
   - The keys are lexographically sorted
   - The digest is calculated with depth-first traversal. That is the string `KEY1` then the Lua value `VALUE1`, then `KEY2` and `VALUE2`, until there are no more key values.
+
+### Lua request.submit library
+
+This library is available to [free rule functions](#free-rule-functions) and [UI rule functions](#ui-rule-functions) through the `request.submit` field.
+
+For example:
+
+```lua
+M = { id = '...' }
+rules = build.newrules(M)
+function rules.SomeRule(command,request)
+  if command == "submit" then
+    -- use the [submit] library
+    local id = request.submit.output_id
+  end
+end
+return M
+```
+
+#### request.submit.output_id
+
+```lua
+request.submit.output_id
+-- example: X6pro7j57evsyymo36mehvpabhy
+```
+
+This string is the form or asset identifier declared in [the "declareoutput" command](#rules---command---declareoutput).
 
 ### Lua project library
 
@@ -2471,7 +2500,7 @@ end
 The `request` parameter will contain the following fields:
 
 - `user` is the [Rule Request Document](#rule-request-documents) submitted by the user or given to a [precommand](#precommands)
-- `declareoutput` is the [declareoutput library](#lua-declareoutput-library)
+- `declareoutput` is the [request.declareoutput library](#lua-requestdeclareoutput-library)
 
 Historical Note: This pattern of declaring the output *before* doing the building was inspired by [Buck2's dynamic dependencies](https://buck2.build/docs/rule_authors/dynamic_dependencies/).
 
@@ -2481,6 +2510,11 @@ The `submit` command is the entry point for the free rule to:
 
 - add values to the valuestore and tasks to the task graph (use `return { submit = { values = ... } }`)
 - ask the build system for more information (use `return { submit = { continue_ = ... } }`)
+
+The `request` parameter will contain the following fields:
+
+- `user` is the [Rule Request Document](#rule-request-documents) submitted by the user or given to a [precommand](#precommands)
+- `submit` is the [request.submit library](#lua-requestsubmit-library)
 
 #### rules - request argument
 
@@ -2523,7 +2557,17 @@ For example, a rule may need to sort a large file. It would be terrible for perf
 When the rule sees `continue_=="start"`, it can return [subshell](#subshells) expression to the build system to fetch a `sort` tool from the [uutils coreutils](https://uutils.github.io/coreutils/docs/utils/sort.html) project. Something like:
 
 ```lua
-if continue_ == "start" then
+if command == "declareoutput" then
+  local symbol = request.declareoutput.generatesymbol()
+  return {
+    declareoutput = {
+      return_asset = {
+        id = "OurTest_Exec." .. symbol .. "@1.0.0",
+        path = "SHA256.sig"
+      }
+    }
+  }  
+elseif command == "submit" && continue_ == "start" then
   local form_id = build.generatesymbol(request)
   return {
     -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/dk-rule-response.json",
