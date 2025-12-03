@@ -2810,8 +2810,8 @@ The form of a UI rule function named `YourUiRule` is:
 ```lua
 local M = { id='MyLibrary_Std.A.B.MyModule@1.0.0' }
 rules, uirules = build.newrules(M)
-function uirules.YourUiRule(command, request, continue_, project)
-  -- your rule here. You have access to 'project' unlike free rules
+function uirules.YourUiRule(command, request, continue_)
+  -- your rule here
 end
 return M
 ```
@@ -3018,7 +3018,6 @@ The conversion of command line arguments follows the withdrawn but still useful 
 
 - `... -- name=Jane` creates the request document `{"name":"Jane"}`
 - `... -- pet[species]=Dahut kids[0]=Ashley` creates the request document `{"pets":{"species":"Dahut"},"kids":["Ashley"]}`
-- `... -- +customer=customer.json` creates the request document `{"customer":...}` where the `...` is the JSON contents of `customer.json` (this is an extension to the [W3C HTML JSON Forms specification]). *Experimental. Likely to disappear since the trace store captures the entire request document in a trace. Instead use the `project` table given to UI rules to make an asset from a user path, and resolve with a get-asset subshell.*
 
 While the reference implementation does not do this, other build systems are free to accept the form document directly from a HTML form as defined in [W3C HTML JSON Forms specification] or directly from a JSON document.
 
@@ -3111,7 +3110,7 @@ The algorithm is:
    -- that contains the embedded Lua.
    local M = { id = 'OurScript_Std.XTheUniqueId@0.1.0' }
    _rules, uirules = build.newrules(M)
-   function uirules.Run(command,request,continue_,project)
+   function uirules.Run(command,request,continue_)
      request.srcfile = request.srcfile or {}
      request.srcfile.id = "..."
      request.srcfile.bundle = {} -- ... it is populated
