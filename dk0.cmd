@@ -40,9 +40,9 @@ SET DK_PROJECT_DIR=%~dp0
 SET DKCODER_PWD=%CD%
 
 REM Update within dksdk-coder:
-REM   f_mlfrontshell() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/mlfrontshell-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/$ver/mlfront-shell-$i$extexe"; done }
-REM   f_mlfrontshell 2.4.2.32
-REM   shasum -a 256 build/mlfrontshell-* | awk 'BEGIN{FS="[ /-]"} {printf "SET DK_CKSUM_%s=%s\n", toupper($5), $1}' | sort
+REM   f_dk0() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/dk0-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/$ver/dk0-$i$extexe"; done }
+REM   f_dk0 2.4.2.32
+REM   shasum -a 256 build/dk0-* | awk 'BEGIN{FS="[ /-]"} {printf "SET DK_CKSUM_%s=%s\n", toupper($5), $1}' | sort
 REM
 REM   Empty value if the architecture is not supported.
 REM -------------------------------------
@@ -74,7 +74,7 @@ IF "%PROGRAMFILES(x86)%" == "" (
         ECHO.Instead develop on a 64-bit PC and cross-compile with StdStd_Std.Exe to 32-bit Windows target PCs.
         EXIT /B 1
     )
-    SET "DK_EXEDIR=%DK_DATA_HOME%\mlfrontshellexe-%DK_VER%-windows_x86"
+    SET "DK_EXEDIR=%DK_DATA_HOME%\dk0exe-%DK_VER%-windows_x86"
     IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!"
     SET "DK_EXE=!DK_EXEDIR!\mlfshell.exe"
     IF NOT EXIST "!DK_EXE!" (
@@ -83,7 +83,7 @@ IF "%PROGRAMFILES(x86)%" == "" (
         CALL :downloadFile ^
             mlfront-shell ^
             "dk %DK_VER% 32-bit" ^
-            "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/%DK_VER%/mlfront-shell-windows_x86.exe" ^
+            "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/%DK_VER%/dk0-windows_x86.exe" ^
             %DK_CKSUM_WINDOWS_X86%\mlfshell.exe ^
             %DK_CKSUM_WINDOWS_X86%
         REM On error the error message was already displayed.
@@ -103,7 +103,7 @@ IF "%PROGRAMFILES(x86)%" == "" (
         CALL :downloadFile ^
             mlfront-shell ^
             "mlfront-shell %DK_VER% 64-bit" ^
-            "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/%DK_VER%/mlfront-shell-windows_x86_64.exe" ^
+            "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/%DK_VER%/dk0-windows_x86_64.exe" ^
             %DK_CKSUM_WINDOWS_X86_64%\mlfshell.exe ^
             %DK_CKSUM_WINDOWS_X86_64%
         REM On error the error message was already displayed.
@@ -176,10 +176,10 @@ IF %ERRORLEVEL% NEQ 0 (
     REM Fallback to BITSADMIN because sometimes corporate policy does not allow executing PowerShell.
     REM BITSADMIN overwhelms the console so user-friendly to do PowerShell then BITSADMIN.
     IF %DK_QUIET% EQU 0 (
-        BITSADMIN /TRANSFER mlfrontshell-%1 /DOWNLOAD /PRIORITY FOREGROUND ^
+        BITSADMIN /TRANSFER dk0-%1 /DOWNLOAD /PRIORITY FOREGROUND ^
             %3 "%TEMP%\%4"
     ) ELSE (
-        BITSADMIN /TRANSFER mlfrontshell-%1 /DOWNLOAD /PRIORITY FOREGROUND ^
+        BITSADMIN /TRANSFER dk0-%1 /DOWNLOAD /PRIORITY FOREGROUND ^
             %3 "%TEMP%\%4" >NUL
     )
     REM Short-circuit return with error code from function if can't download.
