@@ -204,7 +204,7 @@ NEXT STEPS: The next section goes over how to specify assets and forms, and how 
 
 ### 7zip assets
 
-> Sorry macOS users, today the build tool `mlfront/dk0` downloads an *unsigned* standalone binary. It will be signed later, once `mlfront/dk0` is merged into `dk`. Your mac probably won't like it. If you are adventurous, you can run `xattr -d com.apple.quarantine ~/.local/share/mlfront-shell/dk0exe-2.4.*-darwin_arm64/mlfront-shell` and try again.
+> Sorry macOS users, today the build tool `mlfront/dk0` downloads an *unsigned* standalone binary. It will be signed later, once `mlfront/dk0` is merged into `dk`. Your mac probably won't like it. If you are adventurous, you can run `xattr -d com.apple.quarantine ~/.local/share/dk0/dk0exe-2.4.*-darwin_arm64/dk0` and try again.
 
 We will work from scratch through a complete implementation of the 7zip package discussed in [Concepts and Theory](#concepts-and-theory).
 

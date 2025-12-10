@@ -19,10 +19,10 @@ cd "$(dirname "$0")/.."
 # Follow steps in https://github.com/realworldocaml/mdx ...
 opam show mdx || opam install mdx
 
-# Hack mlfront-shell 2.4.2.12 until 2.4.2.13 is built
+# Hack dk0 2.4.2.12 until 2.4.2.13 is built
 # if [ -x ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe ]; then
-#     echo "SECURITY WARNING: Using local build of mlfront-shell" >&2
-#     install -v ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe "$LOCALAPPDATA/Programs/mlfront-shell/mlfront-shellexe-2.4.2.12-windows_x86_64/mlfshell.exe"
+#     echo "SECURITY WARNING: Using local build of dk0" >&2
+#     install -v ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe "$LOCALAPPDATA/Programs/dk0/dk0exe-2.4.2.12-windows_x86_64/mlfshell.exe"
 # fi
 
 rm -rf dk0/
@@ -37,7 +37,7 @@ if [ -n "${COMSPEC:-}" ]; then
     CMD=.cmd
 fi
 
-# dkx/mlfront-shell$CMD -- get-object DkSetup_Std.Exe@2.4.202508302258-signed -s Release.Windows_x86_64 -d target/
+# dkx/dk0$CMD -- get-object DkSetup_Std.Exe@2.4.202508302258-signed -s Release.Windows_x86_64 -d target/
 
 # nit: Why doesn't CRLF work with ocaml-mdx?
 if [ -n "${COMSPEC:-}" ]; then

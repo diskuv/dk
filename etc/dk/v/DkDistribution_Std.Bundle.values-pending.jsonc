@@ -5,7 +5,7 @@ Getting the latest version of the dk distribution
 
 The object DkDistribution_Std.Bundle.Latest will build (ie. fetch) the
 "private" and "public" bundle files listed below. Running the
-following command with `mlfront-shell` or within your own "precommands":
+following command with `dk0` or within your own "precommands":
 
   get-object DkDistribution_Std.Bundle.Latest@1.0.202501010000 -s Release.Darwin_arm64 -d dir-darwin_arm64
 
@@ -16,7 +16,7 @@ Getting a historical version of the dk distribution
 ---------------------------------------------------
 
 All historical versions are/will be available as assets in this file as
-well. Running the following command with `mlfront-shell` or within your
+well. Running the following command with `dk0` or within your
 own "precommands":
 
   get-asset DkDistribution_Std.Bundle@2.4.202508011515 -p dk-darwin_arm64 -f dk-darwin_arm64

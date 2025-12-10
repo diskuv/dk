@@ -16,7 +16,7 @@
 # ./dk dksdk.gradle.download
 /.ci/local/share/gradle
 
-# mlfront-shell
+# dk0
 /target/
 /.mlfshell_*
 /xconfig/

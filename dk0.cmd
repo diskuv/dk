@@ -1,6 +1,6 @@
 @ECHO OFF
 REM ##########################################################################
-REM # File: dk\mlfront-shell.cmd                                             #
+REM # File: dk\dk0.cmd                                             #
 REM #                                                                        #
 REM # Copyright 2025 Diskuv, Inc.                                            #
 REM #                                                                        #
@@ -14,10 +14,10 @@ REM ##########################################################################
 
 REM Recommendation: Place this file in source control.
 
-REM The canonical way to run this script is: ./mlfront-shell
+REM The canonical way to run this script is: ./dk0
 REM That works in Powershell on Windows, and in Unix. Copy-and-paste works!
 REM
-REM Purpose: Install mlfront-shell if not present. Then invoke mlfront-shell.
+REM Purpose: Install dk0 if not present. Then invoke dk0.
 
 SETLOCAL ENABLEDELAYEDEXPANSION
 
@@ -58,14 +58,14 @@ SET _DKEXE_OPTIONS=
 REM --------- Data Home ---------
 
 IF "%DKCODER_DATA_HOME%" == "" (
-    SET DK_DATA_HOME=%LOCALAPPDATA%\Programs\mlfront-shell
+    SET DK_DATA_HOME=%LOCALAPPDATA%\Programs\dk0
 ) ELSE (
     SET DK_DATA_HOME=%DKCODER_DATA_HOME%
 )
 
 REM -------------- single binary executable --------------
 
-REM Download mlfront-shell.exe
+REM Download dk0.exe
 REM     Use subdir of %TEMP% since XCOPY does not work changing basenames during copy.
 IF "%PROGRAMFILES(x86)%" == "" (
     REM 32-bit Windows
@@ -78,10 +78,10 @@ IF "%PROGRAMFILES(x86)%" == "" (
     IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!"
     SET "DK_EXE=!DK_EXEDIR!\mlfshell.exe"
     IF NOT EXIST "!DK_EXE!" (
-        IF %DK_QUIET% EQU 0 ECHO.mlfront-shell executable:
+        IF %DK_QUIET% EQU 0 ECHO.dk0 executable:
         IF NOT EXIST "%TEMP%\%DK_CKSUM_WINDOWS_X86%" MKDIR "%TEMP%\%DK_CKSUM_WINDOWS_X86%"
         CALL :downloadFile ^
-            mlfront-shell ^
+            dk0 ^
             "dk %DK_VER% 32-bit" ^
             "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/%DK_VER%/dk0-windows_x86.exe" ^
             %DK_CKSUM_WINDOWS_X86%\mlfshell.exe ^
@@ -94,15 +94,15 @@ IF "%PROGRAMFILES(x86)%" == "" (
         IF NOT "%DK_CKSUM_WINDOWS_X86%" == "" RD "%TEMP%\%DK_CKSUM_WINDOWS_X86%" /s /q
     )
 ) ELSE (
-    SET "DK_EXEDIR=%DK_DATA_HOME%\mlfront-shellexe-%DK_VER%-windows_x86_64"
+    SET "DK_EXEDIR=%DK_DATA_HOME%\dk0exe-%DK_VER%-windows_x86_64"
     IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!"
     SET "DK_EXE=!DK_EXEDIR!\mlfshell.exe"
     IF NOT EXIST "!DK_EXE!" (
-        IF %DK_QUIET% EQU 0 ECHO.mlfront-shell executable:
+        IF %DK_QUIET% EQU 0 ECHO.dk0 executable:
         IF NOT EXIST "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%" MKDIR "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%"
         CALL :downloadFile ^
-            mlfront-shell ^
-            "mlfront-shell %DK_VER% 64-bit" ^
+            dk0 ^
+            "dk0 %DK_VER% 64-bit" ^
             "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/%DK_VER%/dk0-windows_x86_64.exe" ^
             %DK_CKSUM_WINDOWS_X86_64%\mlfshell.exe ^
             %DK_CKSUM_WINDOWS_X86_64%
