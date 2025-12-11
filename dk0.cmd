@@ -40,15 +40,15 @@ SET DK_PROJECT_DIR=%~dp0
 SET DKCODER_PWD=%CD%
 
 REM Update within dksdk-coder:
-REM   f_dk0() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/dk0-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/$ver/dk0-$i$extexe"; done }
-REM   f_dk0 2.4.2.32
+REM   f_dk0() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/dk0-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/$ver/dk0-$i$extexe"; done }
+REM   f_dk0 2.4.2.35
 REM   shasum -a 256 build/dk0-* | awk 'BEGIN{FS="[ /-]"} {printf "SET DK_CKSUM_%s=%s\n", toupper($5), $1}' | sort
 REM
 REM   Empty value if the architecture is not supported.
 REM -------------------------------------
-SET DK_VER=2.4.2.32
-SET DK_CKSUM_WINDOWS_X86_64=2fcb16005ba23aaee2f95d73cd6fe8743f726c751b0c2fcfe51011c305e4e0bb
-SET DK_CKSUM_WINDOWS_X86=9122821ba42aba30c8500fa5e64071838820258c553f6db9cb6fce4d6deb52c9
+SET DK_VER=2.4.2.35
+SET DK_CKSUM_WINDOWS_X86_64=e61b0406f0f4c869661510efa00c1b86faf6c094b03c34bcb3c9221cfa503b50
+SET DK_CKSUM_WINDOWS_X86=
 
 REM --------- Quiet Detection ---------
 SET DK_QUIET=0
@@ -76,19 +76,19 @@ IF "%PROGRAMFILES(x86)%" == "" (
     )
     SET "DK_EXEDIR=%DK_DATA_HOME%\dk0exe-%DK_VER%-windows_x86"
     IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!"
-    SET "DK_EXE=!DK_EXEDIR!\mlfshell.exe"
+    SET "DK_EXE=!DK_EXEDIR!\dk0.exe"
     IF NOT EXIST "!DK_EXE!" (
         IF %DK_QUIET% EQU 0 ECHO.dk0 executable:
         IF NOT EXIST "%TEMP%\%DK_CKSUM_WINDOWS_X86%" MKDIR "%TEMP%\%DK_CKSUM_WINDOWS_X86%"
         CALL :downloadFile ^
             dk0 ^
             "dk %DK_VER% 32-bit" ^
-            "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/%DK_VER%/dk0-windows_x86.exe" ^
-            %DK_CKSUM_WINDOWS_X86%\mlfshell.exe ^
+            "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/%DK_VER%/dk0-windows_x86.exe" ^
+            %DK_CKSUM_WINDOWS_X86%\dk0.exe ^
             %DK_CKSUM_WINDOWS_X86%
         REM On error the error message was already displayed.
         IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
-        XCOPY "%TEMP%\%DK_CKSUM_WINDOWS_X86%\mlfshell.exe" "!DK_EXEDIR!" %_XCOPY_SWITCHES% /v /g /i /r /n /y /j >NUL
+        XCOPY "%TEMP%\%DK_CKSUM_WINDOWS_X86%\dk0.exe" "!DK_EXEDIR!" %_XCOPY_SWITCHES% /v /g /i /r /n /y /j >NUL
         IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
         REM It is okay if the temp dir is not cleaned up. No error checking.
         IF NOT "%DK_CKSUM_WINDOWS_X86%" == "" RD "%TEMP%\%DK_CKSUM_WINDOWS_X86%" /s /q
@@ -96,19 +96,19 @@ IF "%PROGRAMFILES(x86)%" == "" (
 ) ELSE (
     SET "DK_EXEDIR=%DK_DATA_HOME%\dk0exe-%DK_VER%-windows_x86_64"
     IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!"
-    SET "DK_EXE=!DK_EXEDIR!\mlfshell.exe"
+    SET "DK_EXE=!DK_EXEDIR!\dk0.exe"
     IF NOT EXIST "!DK_EXE!" (
         IF %DK_QUIET% EQU 0 ECHO.dk0 executable:
         IF NOT EXIST "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%" MKDIR "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%"
         CALL :downloadFile ^
             dk0 ^
             "dk0 %DK_VER% 64-bit" ^
-            "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/%DK_VER%/dk0-windows_x86_64.exe" ^
-            %DK_CKSUM_WINDOWS_X86_64%\mlfshell.exe ^
+            "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/%DK_VER%/dk0-windows_x86_64.exe" ^
+            %DK_CKSUM_WINDOWS_X86_64%\dk0.exe ^
             %DK_CKSUM_WINDOWS_X86_64%
         REM On error the error message was already displayed.
         IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
-        XCOPY "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%\mlfshell.exe" "!DK_EXEDIR!" %_XCOPY_SWITCHES% /v /g /i /r /n /y /j >NUL
+        XCOPY "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%\dk0.exe" "!DK_EXEDIR!" %_XCOPY_SWITCHES% /v /g /i /r /n /y /j >NUL
         IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
         REM It is okay if the temp dir is not cleaned up. No error checking.
         IF NOT "%DK_CKSUM_WINDOWS_X86_64%" == "" RD "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%" /s /q

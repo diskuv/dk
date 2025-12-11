@@ -22,15 +22,17 @@
 set -euf
 
 # Update within dksdk-coder:
-#   f_mlfrontshell() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/mlfrontshell-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/$ver/dk0-$i$extexe"; done }
-#   f_mlfrontshell 2.4.2.32
-#   shasum -a 256 build/mlfrontshell-* | awk 'BEGIN{FS="[ /-]"} {printf "cksum256_%s=%s\n", $5, $1}' | sort
+#   f_dk0() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/dk0-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/$ver/dk0-$i$extexe"; done }
+#   f_dk0 2.4.2.35
+#   shasum -a 256 build/dk0-* | awk 'BEGIN{FS="[ /-]"} {printf "cksum256_%s=%s\n", $5, $1}' | sort
+#
+# Empty value if the architecture is not supported.
 # -------------------------------------
-majminpat_ver=2.4.2.32
-cksum256_darwin_arm64=f4ee0c3df80c05fb275696afb36fc6552cba38798f0a619ab5f2cbc88b6d3011
-cksum256_darwin_x86_64=35ea969f9a3be010fce512f60058d10c7f460b3a0b3d501d1e4f53e1d33282a1
-cksum256_linux_x86_64=15cf0b08424647cd46a62c7e4085756b55e50df3d0899d3102989f6da641e011
-cksum256_linux_x86=d0d7f4fc20cada5ed66dda91087990e910b4266d0b8ba1a840bd41bb2df70445
+majminpat_ver=2.4.2.35
+cksum256_darwin_arm64=4aa921f8a94f9d2eca3e41fbc9fb3a50f19f58f53327974d7b49f0b26ce1f342
+cksum256_darwin_x86_64=c161f396dde4f65a46bb14c8894541f2f5c84c59cb12251dbb804fdfb39997b6
+cksum256_linux_x86_64=27a315d9876cd8f7adb06726235336891fa0bbc8a482187563ecdea73db5f1a3
+cksum256_linux_x86=
 
 dk_pwd=$PWD
 
@@ -606,12 +608,12 @@ esac
 
 DK_EXE=
 
-destdir=$tools_dir/mlfrontshellexe-$majminpat_ver-$BUILDHOST_ARCH
+destdir=$tools_dir/dk0exe-$majminpat_ver-$BUILDHOST_ARCH
 install -d "$destdir"
 download_helper() {
   download_helper_CKSUM=$1; shift
   downloadfile \
-    "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/$majminpat_ver/dk0-$BUILDHOST_ARCH" \
+    "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/$majminpat_ver/dk0-$BUILDHOST_ARCH" \
     "$destdir/dk0" \
     "$download_helper_CKSUM"
 }
@@ -620,7 +622,11 @@ download_dk() {
     darwin_arm64) download_helper $cksum256_darwin_arm64 ;;
     darwin_x86_64) download_helper $cksum256_darwin_x86_64 ;;
     linux_x86_64) download_helper $cksum256_linux_x86_64 ;;
-    linux_x86) download_helper $cksum256_linux_x86 ;;
+    linux_x86)
+      if [ -z "$cksum256_linux_x86" ]; then
+        echo "FATAL: There is no dk0 build for $BUILDHOST_ARCH" >&2; exit 3
+      fi
+      download_helper $cksum256_linux_x86 ;;
     *) echo "FATAL: There is no support for $BUILDHOST_ARCH" >&2; exit 3 ;;
   esac
 }
