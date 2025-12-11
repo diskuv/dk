@@ -14,7 +14,7 @@ jobs:
           contents: write # for action-gh-release
           attestations: write
 
-        # The secrets created by `mlfront/dk0 -- prepare-version --ci github VERSION`
+        # The secrets created by `dksrc/dk0 -- prepare-version --ci github VERSION`
         # are tied to this environment only.
         environment: dk-distribution
         steps:

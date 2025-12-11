@@ -184,7 +184,7 @@
 
 This specification documents interoperable systems that use composition to build multi-language, repeatable software in a loosely federation of packages and implementations.
 
-- Interoperable systems: There is an open-source `mlfront/dk0` *reference implementation* build system. The `dk` build system does not yet conform to this specification (as of 2025-11-17) but will change. Both are OCaml-based, and the hope is that other programming languages can have their own implementations.
+- Interoperable systems: There is an open-source `dksrc/dk0` *reference implementation* build system. The `dk` build system does not yet conform to this specification (as of 2025-11-17) but will change. Both are OCaml-based, and the hope is that other programming languages can have their own implementations.
 - Composition: This specification has four (4) different ways to take functionality provided by others and use them in your own builds (ie. composition).
 - Build multi-language, repeatable software: The domain is software that must be built with multiple programming languages. The goal is to have at least one implementation capable of opt-in, bit-by-bit reproducibility.
 - Loose federation of packages and implementations: There is a default, optional central registry of vendors who build packages themselves, using any specification-conforming implementation of the build system they desire. The registry is of vendors and their signing keys, not of the packages themselves.

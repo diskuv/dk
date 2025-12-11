@@ -1,0 +1,653 @@
+#!/bin/sh
+##########################################################################
+# File: mlfront/dk0                                                      #
+#                                                                        #
+# Copyright 2025 Diskuv, Inc.                                            #
+#                                                                        #
+# Licensed under the Open Software License version 3.0                   #
+# (the "License"); you may not use this file except in compliance        #
+# with the License. You may obtain a copy of the License at              #
+#                                                                        #
+#     https://opensource.org/license/osl-3-0-php/                        #
+#                                                                        #
+##########################################################################
+
+# Recommendation: Place this file in source control.
+#
+# Invoking: ./dk0
+#   That works in Powershell on Windows, and in Unix. Copy-and-paste works!
+#
+# Purpose: Install dk0 if not present. Then invoke dk0.
+
+set -euf
+
+# Update within dksdk-coder:
+#   f_mlfrontshell() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/mlfrontshell-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/$ver/dk0-$i$extexe"; done }
+#   f_mlfrontshell 2.4.2.32
+#   shasum -a 256 build/mlfrontshell-* | awk 'BEGIN{FS="[ /-]"} {printf "cksum256_%s=%s\n", $5, $1}' | sort
+# -------------------------------------
+majminpat_ver=2.4.2.32
+cksum256_darwin_arm64=f4ee0c3df80c05fb275696afb36fc6552cba38798f0a619ab5f2cbc88b6d3011
+cksum256_darwin_x86_64=35ea969f9a3be010fce512f60058d10c7f460b3a0b3d501d1e4f53e1d33282a1
+cksum256_linux_x86_64=15cf0b08424647cd46a62c7e4085756b55e50df3d0899d3102989f6da641e011
+cksum256_linux_x86=d0d7f4fc20cada5ed66dda91087990e910b4266d0b8ba1a840bd41bb2df70445
+
+dk_pwd=$PWD
+
+# Get the dk project tree
+DK_PROJECT_DIR=$(dirname "$0")
+DK_PROJECT_DIR=$(cd "$DK_PROJECT_DIR" && pwd)
+
+# --- Windows shunting ---
+if [ -n "${COMSPEC:-}" ] && [ -x /usr/bin/cmd ] && [ -x /usr/bin/cygpath ] && [ -e "$DK_PROJECT_DIR/dk0.cmd" ]; then
+    DK_PROJECT_DIR_WIN=$(/usr/bin/cygpath -aw "$DK_PROJECT_DIR")
+    exec /usr/bin/cmd /c "$DK_PROJECT_DIR_WIN\\dk0.cmd" "$@"
+fi
+
+# --- Quiet mode detection ---
+DKCODER_QUIET=0
+_DKEXE_OPTIONS=
+run_maybe_quiet() {
+  "$@" >&2 # Always redirect stdout to stderr in this script
+}
+printf_maybe_quiet() {
+  # shellcheck disable=SC2059
+  printf "$@" >&2
+}
+
+# --- Imports of dkml-runtime-common's crossplatform-functions.sh ---
+# Changes:
+# 1. In download_file() use [ "${DKCODER_QUIET:-}" -eq 1 ]
+# 2. In log_trace() replace non-FATAL `printf ... >&2` with `printf_maybe_quiet ...`
+# 3. In sha256check() all shasum/* use --quiet option (this should be upstreamed)
+
+# Get standard locations of Unix system binaries like `/usr/bin/mv` (or `/bin/mv`).
+#
+# Will not return anything in `/usr/local/bin` or `/usr/sbin`. Use when you do not
+# know whether the PATH has been set correctly, or when you do not know if the
+# system binary exists.
+#
+# At some point in the future, this function will error out if the required system binaries
+# do not exist. Most system binaries are common to all Unix/Linux/macOS installations but
+# some (like `comm`) may need to be installed for proper functioning of DKML.
+#
+# Outputs:
+# - env:DKMLSYS_MV - Location of `mv`
+# - env:DKMLSYS_CHMOD - Location of `chmod`
+# - env:DKMLSYS_UNAME - Location of `uname`
+# - env:DKMLSYS_ENV - Location of `env`
+# - env:DKMLSYS_AWK - Location of `awk`
+# - env:DKMLSYS_SED - Location of `sed`
+# - env:DKMLSYS_COMM - Location of `comm`
+# - env:DKMLSYS_INSTALL - Location of `install`
+# - env:DKMLSYS_RM - Location of `rm`
+# - env:DKMLSYS_SORT - Location of `sort`
+# - env:DKMLSYS_CAT - Location of `cat`
+# - env:DKMLSYS_STAT - Location of `stat`
+# - env:DKMLSYS_GREP - Location of `grep`
+# - env:DKMLSYS_CURL - Location of `curl` (empty if not found)
+# - env:DKMLSYS_WGET - Location of `wget` (empty if not found)
+# - env:DKMLSYS_TR - Location of `tr`
+autodetect_system_binaries() {
+    if [ -z "${DKMLSYS_MV:-}" ]; then
+        if [ -x /usr/bin/mv ]; then
+            DKMLSYS_MV=/usr/bin/mv
+        else
+            DKMLSYS_MV=/bin/mv
+        fi
+    fi
+    if [ -z "${DKMLSYS_CHMOD:-}" ]; then
+        if [ -x /usr/bin/chmod ]; then
+            DKMLSYS_CHMOD=/usr/bin/chmod
+        else
+            DKMLSYS_CHMOD=/bin/chmod
+        fi
+    fi
+    if [ -z "${DKMLSYS_UNAME:-}" ]; then
+        if [ -x /usr/bin/uname ]; then
+            DKMLSYS_UNAME=/usr/bin/uname
+        else
+            DKMLSYS_UNAME=/bin/uname
+        fi
+    fi
+    if [ -z "${DKMLSYS_ENV:-}" ]; then
+        if [ -x /usr/bin/env ]; then
+            DKMLSYS_ENV=/usr/bin/env
+        else
+            DKMLSYS_ENV=/bin/env
+        fi
+    fi
+    if [ -z "${DKMLSYS_AWK:-}" ]; then
+        if [ -x /usr/bin/awk ]; then
+            DKMLSYS_AWK=/usr/bin/awk
+        else
+            DKMLSYS_AWK=/bin/awk
+        fi
+    fi
+    if [ -z "${DKMLSYS_SED:-}" ]; then
+        if [ -x /usr/bin/sed ]; then
+            DKMLSYS_SED=/usr/bin/sed
+        else
+            DKMLSYS_SED=/bin/sed
+        fi
+    fi
+    if [ -z "${DKMLSYS_COMM:-}" ]; then
+        if [ -x /usr/bin/comm ]; then
+            DKMLSYS_COMM=/usr/bin/comm
+        else
+            DKMLSYS_COMM=/bin/comm
+        fi
+    fi
+    if [ -z "${DKMLSYS_INSTALL:-}" ]; then
+        if [ -x /usr/bin/install ]; then
+            DKMLSYS_INSTALL=/usr/bin/install
+        else
+            DKMLSYS_INSTALL=/bin/install
+        fi
+    fi
+    if [ -z "${DKMLSYS_RM:-}" ]; then
+        if [ -x /usr/bin/rm ]; then
+            DKMLSYS_RM=/usr/bin/rm
+        else
+            DKMLSYS_RM=/bin/rm
+        fi
+    fi
+    if [ -z "${DKMLSYS_SORT:-}" ]; then
+        if [ -x /usr/bin/sort ]; then
+            DKMLSYS_SORT=/usr/bin/sort
+        else
+            DKMLSYS_SORT=/bin/sort
+        fi
+    fi
+    if [ -z "${DKMLSYS_CAT:-}" ]; then
+        if [ -x /usr/bin/cat ]; then
+            DKMLSYS_CAT=/usr/bin/cat
+        else
+            DKMLSYS_CAT=/bin/cat
+        fi
+    fi
+    if [ -z "${DKMLSYS_STAT:-}" ]; then
+        if [ -x /usr/bin/stat ]; then
+            DKMLSYS_STAT=/usr/bin/stat
+        else
+            DKMLSYS_STAT=/bin/stat
+        fi
+    fi
+    if [ -z "${DKMLSYS_GREP:-}" ]; then
+        if [ -x /usr/bin/grep ]; then
+            DKMLSYS_GREP=/usr/bin/grep
+        else
+            DKMLSYS_GREP=/bin/grep
+        fi
+    fi
+    if [ -z "${DKMLSYS_CURL:-}" ]; then
+        if [ -x /usr/bin/curl ]; then
+            DKMLSYS_CURL=/usr/bin/curl
+        elif [ -x /bin/curl ]; then
+            DKMLSYS_CURL=/bin/curl
+        else
+            DKMLSYS_CURL=
+        fi
+    fi
+    if [ -z "${DKMLSYS_WGET:-}" ]; then
+        if [ -x /usr/bin/wget ]; then
+            DKMLSYS_WGET=/usr/bin/wget
+        elif [ -x /bin/wget ]; then
+            DKMLSYS_WGET=/bin/wget
+        else
+            DKMLSYS_WGET=
+        fi
+    fi
+    if [ -z "${DKMLSYS_TR:-}" ]; then
+        if [ -x /usr/bin/tr ]; then
+            DKMLSYS_TR=/usr/bin/tr
+        else
+            DKMLSYS_TR=/bin/tr
+        fi
+    fi
+    export DKMLSYS_MV DKMLSYS_CHMOD DKMLSYS_UNAME DKMLSYS_ENV DKMLSYS_AWK DKMLSYS_SED DKMLSYS_COMM DKMLSYS_INSTALL
+    export DKMLSYS_RM DKMLSYS_SORT DKMLSYS_CAT DKMLSYS_STAT DKMLSYS_GREP DKMLSYS_CURL DKMLSYS_WGET DKMLSYS_TR
+}
+
+# Is a Windows build machine if we are in a MSYS2 or Cygwin environment.
+#
+# Better alternatives
+# -------------------
+#
+# 1. If you are checking to see if you should do a cygpath, then just guard it
+#    like so:
+#       if [ -x /usr/bin/cygpath ]; then
+#           do_something $(/usr/bin/cygpath ...) ...
+#       fi
+#    This clearly guards what you are about to do (cygpath) with what you will
+#    need (cygpath).
+# 2. is_arg_windows_platform
+is_unixy_windows_build_machine() {
+    if is_msys2_msys_build_machine || is_cygwin_build_machine; then
+        return 0
+    fi
+    return 1
+}
+
+# Is a MSYS2 environment with the MSYS or MINGW64 subsystem?
+# * MSYS2 can also do MinGW 32-bit and 64-bit subsystems. Used by Diskuv OCaml
+# * MINGW64 used by Git Bash (aka. GitHub Actions `shell: bash`)
+# https://www.msys2.org/docs/environments/
+is_msys2_msys_build_machine() {
+    if [ -e /usr/bin/msys-2.0.dll ] && {
+        [ "${MSYSTEM:-}" = "MSYS" ] || [ "${MSYSTEM:-}" = "MINGW64" ] || [ "${MSYSTEM:-}" = "UCRT64" ] || [ "${MSYSTEM:-}" = "CLANG64" ] || [ "${MSYSTEM:-}" = "MINGW32" ] || [ "${MSYSTEM:-}" = "CLANG32" ] || [ "${MSYSTEM:-}" = "CLANGARM64" ]
+    }; then
+        return 0
+    fi
+    return 1
+}
+
+is_cygwin_build_machine() {
+    if [ -e /usr/bin/cygwin1.dll ]; then
+        return 0
+    fi
+    return 1
+}
+
+# Tries to find the host ABI.
+#
+# Beware: This function uses `uname` probing may be inaccurate for dual-arch
+# CPUs like Apple Silicon with Rosetta.
+#
+# Inputs:
+# - env:DKML_HOST_ABI - Optional but recommended. If set, then BUILDHOST_ARCH will be set to the same.
+#
+# Outputs:
+# - env:BUILDHOST_ARCH will contain the host ABI.
+autodetect_buildhost_arch() {
+    if [ -n "${DKML_HOST_ABI:-}" ]; then
+        BUILDHOST_ARCH=$DKML_HOST_ABI
+    else
+        # Set DKMLSYS_*
+        autodetect_system_binaries
+
+        autodetect_buildhost_arch_SYSTEM=$("$DKMLSYS_UNAME" -s)
+        autodetect_buildhost_arch_MACHINE=$("$DKMLSYS_UNAME" -m)
+        # list from https://en.wikipedia.org/wiki/Uname and https://stackoverflow.com/questions/45125516/possible-values-for-uname-m
+        case "${autodetect_buildhost_arch_SYSTEM}-${autodetect_buildhost_arch_MACHINE}" in
+            Linux-armv7*)
+                BUILDHOST_ARCH=linux_arm32v7;;
+            Linux-armv6* | Linux-arm)
+                BUILDHOST_ARCH=linux_arm32v6;;
+            Linux-aarch64 | Linux-arm64 | Linux-armv8*)
+                BUILDHOST_ARCH=linux_arm64;;
+            Linux-i386 | Linux-i686)
+                BUILDHOST_ARCH=linux_x86;;
+            Linux-x86_64)
+                BUILDHOST_ARCH=linux_x86_64;;
+            Darwin-arm64)
+                BUILDHOST_ARCH=darwin_arm64;;
+            Darwin-x86_64)
+                BUILDHOST_ARCH=darwin_x86_64;;
+            *-i386 | *-i686)
+                if is_unixy_windows_build_machine; then
+                    BUILDHOST_ARCH=windows_x86
+                else
+                    printf "%s\n" "FATAL: Unsupported build machine type obtained from 'uname -s' and 'uname -m': $autodetect_buildhost_arch_SYSTEM and $autodetect_buildhost_arch_MACHINE" >&2
+                    exit 1
+                fi
+                ;;
+            *-x86_64)
+                if is_unixy_windows_build_machine; then
+                    BUILDHOST_ARCH=windows_x86_64
+                else
+                    printf "%s\n" "FATAL: Unsupported build machine type obtained from 'uname -s' and 'uname -m': $autodetect_buildhost_arch_SYSTEM and $autodetect_buildhost_arch_MACHINE" >&2
+                    exit 1
+                fi
+                ;;
+            *)
+                # Since:
+                # 1) MSYS2 does not run on ARM/ARM64 (https://www.msys2.org/docs/environments/)
+                # 2) MSVC does not use ARM/ARM64 as host machine (https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-160)
+                # we do not support Windows ARM/ARM64 as a build machine
+                printf "%s\n" "FATAL: Unsupported build machine type obtained from 'uname -s' and 'uname -m': $autodetect_buildhost_arch_SYSTEM and $autodetect_buildhost_arch_MACHINE" >&2
+                exit 1
+                ;;
+        esac
+    fi
+}
+
+# A function that will try to print an ISO8601 timestamp, but will fallback to
+# the system default. Always uses UTC timezone.
+try_iso8601_timestamp() {
+    date -u -Iseconds 2>/dev/null || TZ=UTC date
+}
+
+# A function that will print the command and possibly time it (if and only if it uses a full path to
+# an executable, so that 'time' does not fail on internal shell functions).
+# If --return-error-code is the first argument or LOG_TRACE_RETURN_ERROR_CODE=ON, then instead of exiting the
+# function will return the error code.
+log_trace() {
+    log_trace_RETURN=${LOG_TRACE_RETURN_ERROR_CODE:-OFF}
+
+    log_trace_1="$1"
+    if [ "$log_trace_1" = "--return-error-code" ]; then
+        shift
+        log_trace_RETURN=ON
+    fi
+
+    if [ "${DKML_BUILD_TRACE:-OFF}" = ON ]; then
+        printf_maybe_quiet "[%s] %s\n" "$(try_iso8601_timestamp)" "+ $*"
+        if [ -x "$1" ]; then
+            time "$@"
+        else
+            "$@"
+        fi
+    else
+        # use judgement so we essentially have log at an INFO level
+        case "$1" in
+        rm|cp)
+            # debug level. only show when DKML_BUILD_TRACE=ON
+            ;;
+        git|make|ocaml_configure|ocaml_make|make_host|make_target)
+            # info level. and can show entire command without polluting the screen
+            printf_maybe_quiet "[%s] %s\n" "$(try_iso8601_timestamp)" "$*"
+            ;;
+        *)  printf_maybe_quiet "[%s] %s\n" "$(try_iso8601_timestamp)" "$1"
+        esac
+        "$@"
+    fi
+    log_trace_ec="$?"
+    if [ "$log_trace_ec" -ne 0 ]; then
+        if [ "$log_trace_RETURN" = ON ]; then
+            return "$log_trace_ec"
+        else
+            printf "FATAL: Command failed with exit code %s: %s\n" "$log_trace_ec" "$*" >&2
+            exit "$log_trace_ec"
+        fi
+    fi
+}
+
+# [sha256compute FILE] writes the SHA256 checksum (hex encoded) of file FILE to the standard output.
+sha256compute() {
+    sha256compute_FILE="$1"
+    shift
+    # For reasons unclear doing the following in MSYS2:
+    #   sha256sum 'Z:\source\README.md'
+    # will produce a backslash like:
+    #   \5518c76ed7234a153941fb7bc94b6e91d9cb8f1c4e22daf169a59b5878c3fc8a *Z:\\source\\README.md
+    # So always cygpath the filename if available
+    if [ -x /usr/bin/cygpath ]; then
+        sha256compute_FILE=$(/usr/bin/cygpath -a "$sha256compute_FILE")
+    fi
+
+    autodetect_system_binaries
+    if [ -x /usr/bin/shasum ]; then # macOS, OpenBSD, Debian
+        # CODESITE #1 (duplicates elsewhere).
+        # On Debian shasum is a perl script, and perl needs locale settings or it will complain.
+        # Confer: https://www.thomas-krenn.com/en/wiki/Perl_warning_Setting_locale_failed_in_Debian
+        # Confer: https://stackoverflow.com/a/52004330/21513816
+        #   shellcheck disable=SC2016
+        LC_ALL=C /usr/bin/shasum -a 256 "$sha256compute_FILE" | "$DKMLSYS_AWK" '{print $1}'
+    elif [ -x /usr/bin/sha256sum ]; then # Linux, MSYS2
+        #   shellcheck disable=SC2016
+        /usr/bin/sha256sum "$sha256compute_FILE" | "$DKMLSYS_AWK" '{print $1}'
+    elif [ -x /sbin/sha256 ]; then # FreeBSD
+        #   shellcheck disable=SC2016
+        /sbin/sha256 -r "$sha256compute_FILE" | "$DKMLSYS_AWK" '{print $1}'
+    else
+        printf "FATAL: %s\n" "No sha256 checksum utility found" >&2
+        exit 107
+    fi
+}
+
+# [sha256check FILE SUM] checks that the file FILE has a SHA256 checksum (hex encoded) of SUM.
+# The function will return nonzero (and exit with failure if `set -e` is enabled) if the checksum does not match.
+sha256check() {
+    sha256check_FILE="$1"
+    shift
+    sha256check_SUM="$1"
+    shift
+
+    if [ -x /usr/bin/shasum ]; then # macOS, OpenBSD, Debian
+        # CODESITE #1 (duplicates elsewhere).
+        # On Debian shasum is a perl script, and perl needs locale settings or it will complain.
+        # Confer: https://www.thomas-krenn.com/en/wiki/Perl_warning_Setting_locale_failed_in_Debian
+        # Confer: https://stackoverflow.com/a/52004330/21513816
+        # Note: shasum 5.96 (ex. conanio/gcc7:1.64.1) has no --quiet option.
+        #   shellcheck disable=SC2016
+        printf "%s  %s" "$sha256check_SUM" "$sha256check_FILE" | LC_ALL=C /usr/bin/shasum -a 256 -c >&2
+    elif [ -x /usr/bin/sha256sum ]; then # Linux, MSYS2
+        # Note: BusyBox v1.35.0 sha256sum has no --quiet option.
+        printf "%s  %s" "$sha256check_SUM" "$sha256check_FILE" | /usr/bin/sha256sum -c >&2
+    elif [ -x /sbin/sha256 ]; then # FreeBSD
+        /sbin/sha256 --quiet -c "$sha256check_SUM" "$sha256check_FILE" >&2
+    else
+        printf "FATAL: %s\n" "No sha256 checksum utility found" >&2
+
+        # REMOVEME!
+        if [ -d /sbin ]; then printf "/sbin:\n" >&2; ls /sbin >&2; fi
+        if [ -d /usr/sbin ]; then printf "/usr/sbin:\n" >&2; ls /usr/sbin >&2; fi
+        if [ -d /bin ]; then printf "/bin:\n" >&2; ls /bin >&2; fi
+        if [ -d /usr/bin ]; then printf "/usr/bin:\n" >&2; ls /usr/bin >&2; fi
+
+        exit 107
+    fi
+}
+
+# [downloadfile URL FILE SUM] downloads from URL into FILE and verifies the SHA256 checksum of SUM.
+# If the FILE already exists with the correct checksum it is not redownloaded.
+# The function will exit with failure if the checksum does not match.
+downloadfile() {
+    downloadfile_URL="$1"
+    shift
+    downloadfile_FILE="$1"
+    shift
+    downloadfile_SUM="$1"
+    shift
+
+    # Set DKMLSYS_*
+    autodetect_system_binaries
+
+    # Quick exit if exists and checksum verified. Do not display
+    # anything (even the checksum output) since this is the normal scenario
+    # that can run a billion times. The checksum verification for the
+    # download (if this fails) will not be silenced.
+    if [ -e "$downloadfile_FILE" ]; then
+        if sha256check "$downloadfile_FILE" "$downloadfile_SUM" > /dev/null 2>&1; then
+            return 0
+        else
+            $DKMLSYS_RM -f "$downloadfile_FILE"
+        fi
+    fi
+
+    printf_maybe_quiet "... %s %s\n" "Downloading" "$downloadfile_URL"
+    if [ "${CI:-}" = true ] || [ "${DKCODER_QUIET:-}" -eq 1 ]; then
+        if [ -n "$DKMLSYS_CURL" ]; then
+            log_trace "$DKMLSYS_CURL" -L -s "$downloadfile_URL" -o "$downloadfile_FILE".tmp
+        elif [ -n "$DKMLSYS_WGET" ]; then
+            log_trace "$DKMLSYS_WGET" -q -O "$downloadfile_FILE".tmp "$downloadfile_URL"
+        else
+            echo "No curl or wget available on the system paths" >&2
+            exit 107
+        fi
+    else
+        if [ -n "$DKMLSYS_CURL" ]; then
+            log_trace "$DKMLSYS_CURL" -L "$downloadfile_URL" -o "$downloadfile_FILE".tmp
+        elif [ -n "$DKMLSYS_WGET" ]; then
+            log_trace "$DKMLSYS_WGET" -O "$downloadfile_FILE".tmp "$downloadfile_URL"
+        else
+            echo "No curl or wget available on the system paths" >&2
+            exit 107
+        fi
+    fi
+    printf_maybe_quiet "\n... %s %s\n" "Verifying" "$downloadfile_URL"
+    if ! sha256check "$downloadfile_FILE".tmp "$downloadfile_SUM"; then
+        printf "%s\n" "FATAL: Encountered a corrupted or compromised download from $downloadfile_URL" >&2
+        exit 1
+    fi
+    printf_maybe_quiet "\n"
+    $DKMLSYS_MV "$downloadfile_FILE".tmp "$downloadfile_FILE"
+}
+
+# End import
+# ---------------------------------------------------------------------------
+
+# --- Environment detection ---
+
+# Set DKMLSYS_*
+autodetect_system_binaries
+
+# Find host ABI. Set in BUILDHOST_ARCH
+autodetect_buildhost_arch
+
+# --- data home ---
+
+tools_dir=
+tools_name=dk0
+#   1. Check DKCODER_DATA_HOME environment variable.
+if [ -z "$tools_dir" ] && [ -n "${DKCODER_DATA_HOME:-}" ]; then
+  install -d "$DKCODER_DATA_HOME"
+  tools_dir="$DKCODER_DATA_HOME"
+fi
+#   2. Check if CI since many CI providers can only cache content in a subdirectory
+#      of the project.
+if [ -z "$tools_dir" ] && [ "${CI:-}" = true ]; then
+  install -d "$DK_PROJECT_DIR/.z-dk/tools"
+  tools_dir="$DK_PROJECT_DIR/.z-dk/tools"
+fi
+#   3. Check in locations rooted under /opt/diskuv
+#      We look under a /opt/diskuv early because
+#      - Especially important for WSL2 to use a pure Linux filesystem (ext4) for
+#        best performance.
+#      - Using a canonical location (especially /opt/diskuv/usr/share) makes
+#        it easy to use CMake presets for non-Windows hosts.
+if [ -z "$tools_dir" ] && [ -n "${XDG_DATA_HOME:-}" ] && [ -w "/opt/diskuv/$XDG_DATA_HOME" ]; then
+  install -d "/opt/diskuv/$XDG_DATA_HOME/$tools_name"
+  tools_dir="/opt/diskuv/$XDG_DATA_HOME/$tools_name"
+fi
+if [ -z "$tools_dir" ] && [ -n "${HOME:-}" ] && [ -w "/opt/diskuv/$HOME" ]; then
+  install -d "/opt/diskuv/$HOME/.local/share/$tools_name"
+  tools_dir="/opt/diskuv/$HOME/.local/share/$tools_name"
+fi
+if [ -z "$tools_dir" ] && [ -w "/opt/diskuv/usr/share" ]; then
+  install -d "/opt/diskuv/usr/share/$tools_name"
+  tools_dir="/opt/diskuv/usr/share/$tools_name"
+fi
+#   4. Check in the conventional locations rooted under /
+if [ -z "$tools_dir" ] && [ -n "${XDG_DATA_HOME:-}" ] && [ -w "$XDG_DATA_HOME" ]; then
+  install -d "$XDG_DATA_HOME/$tools_name"
+  tools_dir="$XDG_DATA_HOME/$tools_name"
+fi
+if [ -z "$tools_dir" ] && [ -n "${HOME:-}" ] && [ -w "$HOME" ]; then
+  install -d "$HOME/.local/share/$tools_name"
+  tools_dir="$HOME/.local/share/$tools_name"
+fi
+#   5. Validate
+if [ -z "$tools_dir" ]; then
+  echo "FATAL: Could not find a location to install DkCoder." >&2
+  echo "  ...: Make sure you have a home directory and that it is write-able, or define" >&2
+  echo "  ...: the environment variable XDG_DATA_HOME in a shell profile script after" >&2
+  echo "  ...: creating the \$XDG_DATA_HOME directory." >&2
+  exit 2
+fi
+
+# --- Tool downloads and installs ---
+
+# PREREQS
+# -------
+
+install_linux_prog() {
+  install_linux_prog_NAME=$1
+  shift
+  install_linux_prog_PKG=$1
+  shift
+  install_linux_prog_ALPINE_PKG=$1
+  shift
+  if [ -x "/usr/bin/$install_linux_prog_NAME" ]; then
+    export DK_PROG_INSTALLED_LOCATION="/usr/bin/$install_linux_prog_NAME"
+  elif [ -x "/bin/$install_linux_prog_NAME" ]; then
+    export DK_PROG_INSTALLED_LOCATION="/bin/$install_linux_prog_NAME"
+  else
+    if [ -x /sbin/apk ]; then
+      if [ "$(id -u)" -eq 0 ]; then
+        run_maybe_quiet /sbin/apk add --quiet --no-progress "$install_linux_prog_ALPINE_PKG"
+      else
+        echo "Running: sudo /sbin/apk add --quiet --no-progress  $install_linux_prog_ALPINE_PKG" >&2
+        sudo /sbin/apk add --quiet --no-progress "$install_linux_prog_ALPINE_PKG"
+      fi
+    elif command -v yum > /dev/null 2> /dev/null; then
+      if [ "$(id -u)" -eq 0 ]; then
+        run_maybe_quiet yum install -q -y "$install_linux_prog_PKG"
+      else
+        echo "Running: sudo yum install -q -y $install_linux_prog_PKG" >&2
+        sudo yum install -q -y "$install_linux_prog_PKG"
+      fi
+    else
+      if [ "$(id -u)" -eq 0 ]; then
+        run_maybe_quiet apt-get -qq install -y --no-install-suggests "$install_linux_prog_PKG"
+      else
+        echo "Running: sudo apt-get -qq install -y --no-install-suggests $install_linux_prog_PKG" >&2
+        sudo apt-get -qq install -y --no-install-suggests "$install_linux_prog_PKG"
+      fi
+    fi
+    DK_PROG_INSTALLED_LOCATION=$(command -v "$install_linux_prog_NAME")
+    export DK_PROG_INSTALLED_LOCATION
+  fi
+}
+
+case "$BUILDHOST_ARCH" in
+  linux_*)
+    #   Need either [wget] or [curl] for [downloadfile]
+    if [ ! -x /usr/bin/wget ] && [ ! -x /bin/wget ] && [ ! -x /usr/bin/curl ] && [ ! -x /bin/curl ]; then
+      install_linux_prog wget wget wget || install_linux_prog curl curl curl
+    fi
+    ;;
+esac
+
+# -----
+# single binary executable
+# -----
+
+DK_EXE=
+
+destdir=$tools_dir/mlfrontshellexe-$majminpat_ver-$BUILDHOST_ARCH
+install -d "$destdir"
+download_helper() {
+  download_helper_CKSUM=$1; shift
+  downloadfile \
+    "https://gitlab.com/api/v4/projects/60486861/packages/generic/shell/$majminpat_ver/dk0-$BUILDHOST_ARCH" \
+    "$destdir/dk0" \
+    "$download_helper_CKSUM"
+}
+download_dk() {
+  case "$BUILDHOST_ARCH" in
+    darwin_arm64) download_helper $cksum256_darwin_arm64 ;;
+    darwin_x86_64) download_helper $cksum256_darwin_x86_64 ;;
+    linux_x86_64) download_helper $cksum256_linux_x86_64 ;;
+    linux_x86) download_helper $cksum256_linux_x86 ;;
+    *) echo "FATAL: There is no support for $BUILDHOST_ARCH" >&2; exit 3 ;;
+  esac
+}
+have_correct_dk=0
+if [ -x "$destdir/dk0" ]; then
+  # shellcheck disable=SC2016
+  have_correct_VER=$("$destdir/dk0" --version)
+  if [ "$have_correct_VER" = "$majminpat_ver" ]; then
+    have_correct_dk=1
+  fi
+fi
+if [ $have_correct_dk -eq 0 ]; then
+  download_dk
+  chmod +x "$destdir/dk0"
+fi
+
+# Set DK_EXE
+DK_EXE="$destdir/dk0"
+
+# --- Run executable ---
+
+#   We already changed to DK_PROJECT_DIR earlier. Change back.
+cd "$dk_pwd"
+
+export DKCODER_ARG0="$0"
+export DKCODER_PWD="$dk_pwd"
+export DK_PROJECT_DIR
+#   shellcheck disable=SC2086
+exec "$DK_EXE" -isystem "$DK_PROJECT_DIR/etc/dk/i" $_DKEXE_OPTIONS "$@"
+

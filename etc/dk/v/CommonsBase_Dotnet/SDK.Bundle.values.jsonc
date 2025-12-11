@@ -1,0 +1,121 @@
+// ------------------------------------------------
+// Source: dotnet-install.sh and dotnet-install.ps1
+//
+// It is kinda nuts but the dotnet installer script is not versioned.
+// https://github.com/dotnet/install-scripts/issues/580
+//
+// The files are in https://github.com/dotnet/install-scripts/tree/28bc529a358f6618fc57df22622274ec6610fbd9/src
+// but the official PowerShell script adds a signature at the bottom
+// of the PowerShell script.
+//
+// Even if we used the scripts, the .ps1 will only run on Windows and download
+// for Windows, and the .sh will only run on Linux/macOS and download for those platforms.
+//
+// So we download directly from the URLs that are created by the scripts.
+//
+// Use dotnet-install.sh --verbose and dotnet-install.ps1 -Verbose to see the URLs.
+// ------------------------------------------------
+// Tests:
+// ./mlfront-shell -I etc/dk/v --trust-local-package CommonsBase_Dotnet --verbose --autofix -- get-bundle CommonsBase_Dotnet.SDK.Bundle@10.0.100-rc.2.25502.107 -d target/dotnetbundle
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "bundles": [
+    {
+      "id": "CommonsBase_Dotnet.SDK.Bundle@10.0.100-rc.2.25502.107",
+      "listing": {
+        "origins": [
+          {
+            "name": "builds-dotnet-sdk",
+            "mirrors": [
+              /* verbose logs from dotnet-install ...
+                        dotnet-install: Generated 4 links.
+                        dotnet-install: Link 0: primary, 10.0.100-rc.2.25502.107, https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.100-rc.2.25502.107/dotnet-sdk-10.0.100-rc.2.25502.107-linux-arm64.tar.gz
+                        dotnet-install: Link 1: legacy, 10.0.100-rc.2.25502.107, https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.100-rc.2.25502.107/dotnet-dev-osx-arm64.10.0.100-rc.2.25502.107.tar.gz
+                        dotnet-install: Link 2: primary, 10.0.100-rc.2.25502.107, https://ci.dot.net/public/Sdk/10.0.100-rc.2.25502.107/dotnet-sdk-10.0.100-rc.2.25502.107-linux-arm64.tar.gz
+                        dotnet-install: Link 3: legacy, 10.0.100-rc.2.25502.107, https://ci.dot.net/public/Sdk/10.0.100-rc.2.25502.107/dotnet-dev-osx-arm64.10.0.100-rc.2.25502.107.tar.gz
+                   We'll use the two "primary" links.
+                */
+              "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.100-rc.2.25502.107",
+              "https://ci.dot.net/public/Sdk/10.0.100-rc.2.25502.107"
+            ]
+          }
+        ]
+      },
+      "assets": [
+        {
+          "path": "dotnet-sdk-10.0.100-rc.2.25502.107-win-x64.zip",
+          "checksum": {
+            "sha256": "9fabd9b8930c4001cb3abc7e2155e04777c151473a277f4652a5fcc7ba1cf63d"
+          },
+          "size": 301635333,
+          "origin": "builds-dotnet-sdk"
+        },
+        {
+          "path": "dotnet-sdk-10.0.100-rc.2.25502.107-win-arm64.zip",
+          "checksum": {
+            "sha256": "ed00fd8b591daccfe4bdfe1c896b7fa61faf391691eefeb630eef4b5c586739a"
+          },
+          "size": 292230117,
+          "origin": "builds-dotnet-sdk"
+        },
+        {
+          "path": "dotnet-sdk-10.0.100-rc.2.25502.107-win-x86.zip",
+          "checksum": {
+            "sha256": "0cdc78d5af54f1e04551e204d914498972013b85113f4ba1957043d46b6cce83"
+          },
+          "size": 288557066,
+          "origin": "builds-dotnet-sdk"
+        },
+        {
+          "path": "dotnet-sdk-10.0.100-rc.2.25502.107-linux-arm64.tar.gz",
+          "checksum": {
+            "sha256": "a0a0417d092bb397811ba3ad230eacde2265d15466b0b6976958f63830f6ab6d"
+          },
+          "size": 231471967,
+          "origin": "builds-dotnet-sdk"
+        },
+        {
+          "path": "dotnet-sdk-10.0.100-rc.2.25502.107-linux-musl-arm64.tar.gz",
+          "checksum": {
+            "sha256": "106e784627cfc27e90c9b32bb8c8cce93f59fa276aee35f213d05e2dad900e5f"
+          },
+          "size": 231497589,
+          "origin": "builds-dotnet-sdk"
+        },
+        {
+          "path": "dotnet-sdk-10.0.100-rc.2.25502.107-linux-x64.tar.gz",
+          "checksum": {
+            "sha256": "6ae8bf1826fe95ba66cce48296c9d66cb59d1d4c5c24063e07b0fce4ff38b7e6"
+          },
+          "size": 238718991,
+          "origin": "builds-dotnet-sdk"
+        },
+        {
+          "path": "dotnet-sdk-10.0.100-rc.2.25502.107-linux-musl-x64.tar.gz",
+          "checksum": {
+            "sha256": "cd48c52fa1636aaaab6e66c2fbd1a427921087314b19f1fbcbd24f8824ef3189"
+          },
+          "size": 238813512,
+          "origin": "builds-dotnet-sdk"
+        },
+        {
+          "path": "dotnet-sdk-10.0.100-rc.2.25502.107-osx-arm64.tar.gz",
+          "checksum": {
+            "sha256": "f96819ea2199d21118433a22f9910f2684006d74806cfdb7dc6690ba6a31ca72"
+          },
+          "size": 229420688,
+          "origin": "builds-dotnet-sdk"
+        },
+        {
+          "path": "dotnet-sdk-10.0.100-rc.2.25502.107-osx-x64.tar.gz",
+          "checksum": {
+            "sha256": "522809b3545a354fc20798e0797e69b2b4a7197e95a3694d3a0167c480d3ce6d"
+          },
+          "size": 237240641,
+          "origin": "builds-dotnet-sdk"
+        }
+      ]
+    }
+  ]
+}

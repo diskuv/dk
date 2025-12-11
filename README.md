@@ -64,7 +64,7 @@ Keep your setup boring: no interesting knobs, and no typing beyond the initial c
 
 Skip down to [Comparisons](#comparisons) for how `dk` fits with other tools.
 
-The build tool is quite new and has not yet been integrated into the script runner. But it has a `mlfront/dk0` reference implementation which are documented in the next sections, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
+The build tool is quite new and has not yet been integrated into the script runner. But it has a `dksrc/dk0` reference implementation which are documented in the next sections, and specifications are at [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
 
 Separately, a [Quick Start for Scripting](#quick-start---scripting) is further below, and the main documentation site for the script runner is <https://diskuv.com/dk/help/latest/>.
 
@@ -116,9 +116,9 @@ This is *not* a toy problem! We would need the 7zip executable if our second tas
 For unpacking the 7zip executables, we'll submit a form several times (each time with different parameters):
 
 ```sh
-$ git clone https://github.com/diskuv/dk.git dk0
+$ git clone https://github.com/diskuv/dk.git dksrc
 Cloning into 'dk0'...
-$ mlfront/dk0 -- get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_x86_64 -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
+$ dksrc/dk0 -- get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_x86_64 -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
 [up-to-date] CommonsBase_Std.S7z@25.1.0+bn-20250101000000 -s Release.Darwin_x86_64
 ```
 
@@ -149,7 +149,7 @@ so you can see the concepts in action:
 | **Generated Objects** | `Y:\a\target\pid\500\bnrtauvvz5kvhwd5\out\Release.Windows_x86`:<br>![7z.exe object](docs/images/7zip-object-7z-exe.png) |
 |                       | `Y:\a\target\pid\500\wtqhxi4flrfk6sab\out\Release.Darwin_arm64`:<br>![7z tar](docs/images/7zip-object-tar.png)          |
 
-The objects you see above are intermediate folders, so this might be the first and only time you see them. Normally you pull files out of objects into your own target directories, like was done when we submitted the form with `mlfront/dk0 ... -f target/Darwin_x86_64.7zz.exe`.
+The objects you see above are intermediate folders, so this might be the first and only time you see them. Normally you pull files out of objects into your own target directories, like was done when we submitted the form with `dksrc/dk0 ... -f target/Darwin_x86_64.7zz.exe`.
 
 **Values** have unique identifiers. We used one when we submitted the form: `CommonsBase_Std.S7z@25.1.0`.
 
@@ -177,7 +177,7 @@ The *don't be stupid* goal, combined with avoiding README-itis, are the reasons 
 
    <!-- $MDX skip -->
    ```sh
-   $ mlfront/dk0 ...
+   $ dksrc/dk0 ...
    [signify] New build key pair in xxx/build.pub and xxx/build.sec ...
    [signify] Distribute key pair among trusted coworkers only!
    ```
@@ -204,7 +204,7 @@ NEXT STEPS: The next section goes over how to specify assets and forms, and how 
 
 ### 7zip assets
 
-> Sorry macOS users, today the build tool `mlfront/dk0` downloads an *unsigned* standalone binary. It will be signed later, once `mlfront/dk0` is merged into `dk`. Your mac probably won't like it. If you are adventurous, you can run `xattr -d com.apple.quarantine ~/.local/share/dk0/dk0exe-2.4.*-darwin_arm64/dk0` and try again.
+> Sorry macOS users, today the build tool `dksrc/dk0` downloads an *unsigned* standalone binary. It will be signed later, once `dksrc/dk0` is merged into `dk`. Your mac probably won't like it. If you are adventurous, you can run `xattr -d com.apple.quarantine ~/.local/share/dk0/dk0exe-2.4.*-darwin_arm64/dk0` and try again.
 
 We will work from scratch through a complete implementation of the 7zip package discussed in [Concepts and Theory](#concepts-and-theory).
 
@@ -338,10 +338,10 @@ Let's review the command line options:
 
 | Argument                          | What                                                        |
 | --------------------------------- | ----------------------------------------------------------- |
-| `mlfront/dk0`               | The build tool. Eventually it will just be `dk`             |
+| `dksrc/dk0`               | The build tool. Eventually it will just be `dk`             |
 | `-I 7zip-project`                 | The folders containing `*.values.jsonc` files               |
 | `-x 7zip-org:subpath:`            | Invalidate all bundle files with the `origin: "7zip-org"`    |
-| `--`                              | Separate `mlfront/dk0` options from the command after |
+| `--`                              | Separate `dksrc/dk0` options from the command after |
 | `get-asset`                  | Command to get the named asset                         |
 | `OurZip_Demo.S7z1a.Assets@25.1.0` | The name and version in `.values.json`                      |
 | `-p 7zr.exe`                      | Identifies the file in `files:[{path:...},...]`             |
@@ -352,9 +352,9 @@ and with that we do:
 <!-- $MDX skip -->
 ```sh
 # You should have done this already in earlier steps. If not, do it now:
-# $ git clone https://github.com/diskuv/dk.git dk0
+# $ git clone https://github.com/diskuv/dk.git dksrc
 
-$ mlfront/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 [error 215565e4]: Could not get asset.
 
     ╭──▶ 7zip-project/OurZip_Demo.S7z.S7zr0.values.jsonc:25.24-25.40
@@ -381,13 +381,13 @@ and we get:
 
 <!-- $MDX skip -->
 ```sh
-$ mlfront/dk0 --autofix -I 7zip-project -x 7zip-org:subpath: -- get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+$ dksrc/dk0 --autofix -I 7zip-project -x 7zip-org:subpath: -- get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 ...
 autofix applied to `7zip-project/OurZip_Demo.S7z1a.S7zr.values.jsonc`
 ```
 
 ```sh
-$ mlfront/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 [up-to-date] OurZip_Demo.S7z1a.Assets@25.1.0+bn-20250101000000 -p 7zr.exe
 ```
 
@@ -486,16 +486,16 @@ Choose slots that correspond to the natural split among your assets:
 If you only have one bundle, your one slot is conventionally called `Release.Agnostic`.
 
 What are the **precommands**? Precommands are a set of commands that run when the form is submitted.
-You have already seen the `get-asset` command that you ran from the `mlfront/dk0` command line in the
+You have already seen the `get-asset` command that you ran from the `dksrc/dk0` command line in the
 [download 7zr.exe section](#7zip-step-1---download-7zrexe). You also saw the `get-object` command that submitted
-the 7zip form in [Concepts and Theory](#concepts-and-theory). Commands we can execute from the `mlfront/dk0`
+the 7zip form in [Concepts and Theory](#concepts-and-theory). Commands we can execute from the `dksrc/dk0`
 command line can also run inside your form. Later sections will introduce more commands.
 
 The JSON field is called `precommands` because a form has an optional "function" that gets called when the
 form is submitted. We don't have a function in this example, but precommands always run before the optional function.
 
 **Key Point**: The `get-object` precommand is the basic unit of function composition in the `dk` build system.
-You can submit a form from the command line `mlfront/dk0 ... -- get-object FORM ...`, which runs the form's
+You can submit a form from the command line `dksrc/dk0 ... -- get-object FORM ...`, which runs the form's
 precommands, and if one or more of those precommands is a `get-object` that precommand will submit another form.
 And that form can then run precommands, which can then submit more forms. And so on.
 
@@ -518,7 +518,7 @@ when you forgot to declare files or you declare too many files.
 We'll use `get-object` to submit our new form. With that we get:
 
 ```sh
-$ mlfront/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z1b.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/7zr-win64
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z1b.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/7zr-win64
 [up-to-date] OurZip_Demo.S7z1b.S7zr@25.1.0+bn-20250101000000 -s Release.Windows_x86_64
 ```
 
@@ -659,11 +659,11 @@ We'll be using a new command `get-bundle`.
 
 | Argument                          | What                                                        |
 | --------------------------------- | ----------------------------------------------------------- |
-| `mlfront/dk0`               | The build tool. Eventually it will just be `dk`             |
+| `dksrc/dk0`               | The build tool. Eventually it will just be `dk`             |
 | `-I 7zip-project`                 | The folders containing `*.values.jsonc` files               |
 | `-x 7zip-org:subpath:`            | Invalidate all files with the `origin: "7zip-org"`          |
 | `--autofix`                       | Fix any invalid checksums                                   |
-| `--`                              | Separate `mlfront/dk0` options from the command after |
+| `--`                              | Separate `dksrc/dk0` options from the command after |
 | `get-bundle`                       | Command to get all members of the named bundle               |
 | `OurZip_Demo.S7z1a.Assets@25.1.0` | The name and version in `.values.json`                      |
 | `-d target/7zr-assets`            | Send command output into the directory                      |
@@ -671,7 +671,7 @@ We'll be using a new command `get-bundle`.
 With that we get:
 
 ```sh
-$ mlfront/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -d target/7zr-assets
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -d target/7zr-assets
 [up-to-date] OurZip_Demo.S7z1c.Assets@25.1.0+bn-20250101000000
 ```
 
@@ -718,7 +718,7 @@ What happens if we output the bundle to a file rather than a directory.
 That is, what if we replaced `-d target/7zr-assets` with `-f target/7zr-file`?
 
 ```sh
-$ mlfront/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -f target/7zr-file
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -f target/7zr-file
 [up-to-date] OurZip_Demo.S7z1c.Assets@25.1.0+bn-20250101000000
 ```
 
@@ -862,7 +862,7 @@ But for now we can submit the form if we are on Windows. We'll submit the `Relea
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ mlfront/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z2.Windows7zExe@25.1.0' -s Release.Windows_arm64 -d target/7zexe-winarm64
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z2.Windows7zExe@25.1.0' -s Release.Windows_arm64 -d target/7zexe-winarm64
 [up-to-date] OurZip_Demo.S7z2.Windows7zExe@25.1.0+bn-20250101000000 -s Release.Windows_arm64
 ```
 
@@ -907,8 +907,6 @@ This is a new form with a function that will call `7z.exe` with the right parame
       "id": "OurZip_Demo.S7z3.MacLinux7zTar@25.1.0",
       "precommands": {
         "private": [
-          // need bin/<architecture>/7zr.exe
-          "get-object OurZip_Demo.S7z1b.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux installers
           "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
           "get-asset OurZip_Demo.S7z1c.Assets@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
@@ -929,7 +927,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
         "args": [
           // uncompress asset [7z2501-mac.tar.xz] with [7zr.exe] to the output directory
           // for slot [Release.Darwin_arm64], etc.
-          "bin/Release.Windows_x86/7zr.exe",
+          "$(get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_x86 -d :)/7zr.exe",
           "x",
           "-o${SLOT.request}",
           "7z-${SLOTNAME.request}.tar.xz",
@@ -973,7 +971,7 @@ The use of `7zr.exe` means we can only run this step on Windows hardware, even t
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ mlfront/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z3.MacLinux7zTar@25.1.0' -s Release.Linux_arm64 -d target/7ztar-linuxarm64
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z3.MacLinux7zTar@25.1.0' -s Release.Linux_arm64 -d target/7ztar-linuxarm64
 [up-to-date] OurZip_Demo.S7z3.MacLinux7zTar@25.1.0+bn-20250101000000 -s Release.Linux_arm64
 ```
 
@@ -1008,8 +1006,6 @@ This is a new form with a function that will call `7z.exe` with the right parame
       "id": "OurZip_Demo.S7z4.MacLinux7zExe@25.1.0",
       "precommands": {
         "private": [
-          // need bin/<architecture>/7z.exe (7zr does not extract tar files)
-          "get-object OurZip_Demo.S7z2.Windows7zExe@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux tar files. since same destination directory need [install-object]
           "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm -d tarballs",
           "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm64 -d tarballs",
@@ -1030,7 +1026,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
         "args": [
           // extract object [7z2501-mac.tar] with [7z.exe] to the output directory
           // for slot [Release.Darwin_arm64], etc.
-          "bin/Release.Windows_x86/7z.exe",
+          "$(get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -d :)/7z.exe",
           "x",
           "-o${SLOT.request}",
           "tarballs/7z-${SLOTNAME.request}.tar",
@@ -1075,7 +1071,7 @@ The use of `7z.exe` means we can only run this step on Windows hardware, even th
 
 <!-- $MDX os_type=Win32 -->
 ```sh
-$ mlfront/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z4.MacLinux7zExe@25.1.0' -s Release.Darwin_x86_64 -d target/7zexe-macintel
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z4.MacLinux7zExe@25.1.0' -s Release.Darwin_x86_64 -d target/7zexe-macintel
 [up-to-date] OurZip_Demo.S7z4.MacLinux7zExe@25.1.0+bn-20250101000000 -s Release.Darwin_x86_64
 ```
 
@@ -1160,7 +1156,7 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
 With that our users can grab the `7zz.exe` executable for any operating system and CPU architecture:
 
 ```sh
-$ mlfront/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -d target/7z-linux64
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -d target/7z-linux64
 [up-to-date] OurZip_Demo.S7z5.S7zExe@25.1.0+bn-20250101000000 -s Release.Linux_x86_64
 ```
 
@@ -1174,7 +1170,7 @@ target/7z-linux64/7zz.exe: ELF 64-bit LSB pie executable, x86-64, version 1 (SYS
 Since `7zz.exe` is a standalone executable that doesn't need any DLLs or `.so` (except standard GLIBC system libraries on Linux), we can use the `-m MEMBER` option to directly fetch the `7zz.exe` executable:
 
 ```sh
-$ mlfront/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: -- get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
 [up-to-date] OurZip_Demo.S7z5.S7zExe@25.1.0+bn-20250101000000 -s Release.Linux_x86_64
 $ file target/7zz.exe
 target/7zz.exe: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=7a6c7a136fc4e7df4ddcd80d2aae72bc658ef822, for GNU/Linux 3.2.0, stripped
@@ -1208,7 +1204,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v5
 
-            - name: Checkout # get mlfront/dk0
+            - name: Checkout # get dksrc/dk0
               uses: actions/checkout@v5
               with: { repository: diskuv/dk, path: dk0, ref: V2_4 }
 
@@ -1231,16 +1227,16 @@ jobs:
                   XDG_CONFIG_HOME: ${{ github.workspace }}/target/config
                   XDG_DATA_HOME: ${{ github.workspace }}/target/data
               run: |
-                mlfront/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_arm64   -m ./LICENSE -f target/LICENSE
+                dksrc/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_arm64   -m ./LICENSE -f target/LICENSE
 
-                mlfront/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_arm64   -m ./7zz.exe -f target/Release.Darwin_arm64.7zz.exe
-                mlfront/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_x86_64  -m ./7zz.exe -f target/Release.Darwin_x86_64.7zz.exe
-                mlfront/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm      -m ./7zz.exe -f target/Release.Linux_arm.7zz.exe
-                mlfront/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm64    -m ./7zz.exe -f target/Release.Linux_arm64.7zz.exe
-                mlfront/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86      -m ./7zz.exe -f target/Release.Linux_x86.7zz.exe
-                mlfront/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86_64   -m ./7zz.exe -f target/Release.Linux_x86_64.7zz.exe
-                mlfront/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86    -m ./7zz.exe -f target/Release.Windows_x86.7zz.exe
-                mlfront/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86_64 -m ./7zz.exe -f target/Release.Windows_x86_64.7zz.exe
+                dksrc/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_arm64   -m ./7zz.exe -f target/Release.Darwin_arm64.7zz.exe
+                dksrc/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Darwin_x86_64  -m ./7zz.exe -f target/Release.Darwin_x86_64.7zz.exe
+                dksrc/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm      -m ./7zz.exe -f target/Release.Linux_arm.7zz.exe
+                dksrc/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_arm64    -m ./7zz.exe -f target/Release.Linux_arm64.7zz.exe
+                dksrc/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86      -m ./7zz.exe -f target/Release.Linux_x86.7zz.exe
+                dksrc/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Linux_x86_64   -m ./7zz.exe -f target/Release.Linux_x86_64.7zz.exe
+                dksrc/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86    -m ./7zz.exe -f target/Release.Windows_x86.7zz.exe
+                dksrc/dk0 --verbose -- get-object '${{ github.workflow }}@${{ env.LIBRARY_VERSION }}' -s Release.Windows_x86_64 -m ./7zz.exe -f target/Release.Windows_x86_64.7zz.exe
 
             - name: Test ${{ github.workflow }}
               run: target/${{ env.TEST_SLOT }}.7zz.exe --help
@@ -1281,7 +1277,7 @@ and explained how to specify:
 - `"bundles": ...`
 - `"forms": ...`
 
-and explained how to run the reference implementation's `mlfront/dk0`.
+and explained how to run the reference implementation's `dksrc/dk0`.
 
 We talked through how to create a build plan for a non-simple package like 7zip.
 Many of your packages will have easier build plans.
@@ -1354,7 +1350,7 @@ Enter the form with:
 
 <!-- $MDX skip -->
 ```sh
-$ mlfront/dk0 -I dk0/docs/7zip-tutorial -x 7zip-org:subpath: -- enter-object 'OurZip_Demo.S7z9.Debug@25.1.0' -s Release.Linux_arm64
+$ dksrc/dk0 -I dk0/docs/7zip-tutorial -x 7zip-org:subpath: -- enter-object 'OurZip_Demo.S7z9.Debug@25.1.0' -s Release.Linux_arm64
 
 PS OurZip_Demo.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64>
 

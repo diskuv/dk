@@ -1,6 +1,6 @@
 // Testing:
 //  get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s Release.Darwin_arm64 -d target\coreutils-tarmacarm64
-//  mlfront/dk0 -I .\pkgs\include\CommonsBase_Std -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: -- get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s Release.Darwin_arm64 -d target\coreutils-exe-macarm64
+//  dksrc/dk0 -I .\pkgs\include\CommonsBase_Std -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: -- get-object CommonsBase_Std.Coreutils.Exe@0.2.2 -s Release.Darwin_arm64 -d target\coreutils-exe-macarm64
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
@@ -9,8 +9,6 @@
       "id": "CommonsBase_Std.Coreutils.Exe@0.2.2",
       "precommands": {
         "private": [
-          // need bin/<architecture>/7z.exe (7zr does not extract tar files)
-          "get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux tar files. since same destination directory need [install-object]
           "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Darwin_arm64 -d tarballs",
           "install-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Darwin_x86_64 -d tarballs",
@@ -33,7 +31,7 @@
         ],
         "args": [
           // with [7z.exe] ...
-          "bin/Release.Windows_x86/7z.exe",
+          "$(get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.Windows_x86 -d :)/7z.exe",
           // (e)xtract all files into a single flat directory
           "e",
           // to output directory for slot [Release.Darwin_arm64] (etc.)

@@ -29,8 +29,6 @@ All assets are stored in [CommonsBase_Std.S7z.Bundle], which is defined in [Comm
       "id": "CommonsBase_Std.S7z.MacLinux7zTar@25.1.0",
       "precommands": {
         "private": [
-          // need bin/<architecture>/7zr.exe
-          "get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_x86 -d bin/Release.Windows_x86",
           // need macOS and Linux installers
           "get-asset CommonsBase_Std.S7z.Bundle@25.1.0 -p 7z2501-linux-arm.tar.xz -f 7z-Release.Linux_arm.tar.xz",
           "get-asset CommonsBase_Std.S7z.Bundle@25.1.0 -p 7z2501-linux-arm64.tar.xz -f 7z-Release.Linux_arm64.tar.xz",
@@ -52,7 +50,7 @@ All assets are stored in [CommonsBase_Std.S7z.Bundle], which is defined in [Comm
           // uncompress asset [7z2501-mac.tar.xz] with [7zr.exe] to the output directory
           // for slot [Release.Darwin_arm64], etc.
           // with [7zr.exe] ...
-          "bin/Release.Windows_x86/7zr.exe",
+          "$(get-object CommonsBase_Std.S7z.S7zr@25.1.0 -s Release.Windows_x86 -d :)/7zr.exe",
           // uncompress
           "x",
           // to output directory for slot [Release.Darwin_arm64] (etc.)

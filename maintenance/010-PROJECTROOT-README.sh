@@ -25,7 +25,7 @@ opam show mdx || opam install mdx
 #     install -v ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe "$LOCALAPPDATA/Programs/dk0/dk0exe-2.4.2.12-windows_x86_64/mlfshell.exe"
 # fi
 
-rm -rf dk0/
+rm -rf dksrc/
 rm -rf 7zip-project/
 install -d 7zip-project
 set +f
@@ -37,7 +37,7 @@ if [ -n "${COMSPEC:-}" ]; then
     CMD=.cmd
 fi
 
-# dkx/dk0$CMD -- get-object DkSetup_Std.Exe@2.4.202508302258-signed -s Release.Windows_x86_64 -d target/
+# dksrc/dk0$CMD -- get-object DkSetup_Std.Exe@2.4.202508302258-signed -s Release.Windows_x86_64 -d target/
 
 # nit: Why doesn't CRLF work with ocaml-mdx?
 if [ -n "${COMSPEC:-}" ]; then
