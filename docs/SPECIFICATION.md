@@ -30,6 +30,7 @@
       - [${STATE}](#state)
       - [${RUNTIME}](#runtime)
     - [Execution Constraints](#execution-constraints)
+      - [OSFamily](#osfamily)
     - [Precommands](#precommands)
     - [Environment Modifications](#environment-modifications)
       - [+NAME=VALUE](#namevalue)
@@ -100,6 +101,10 @@
       - [request.io.toasset](#requestiotoasset)
       - [request.io.flush](#requestioflush)
       - [request.io.close](#requestioclose)
+    - [Lua request.execution library](#lua-requestexecution-library)
+      - [request.execution.OSFamily](#requestexecutionosfamily)
+      - [request.execution.ABIv3](#requestexecutionabiv3)
+      - [request.execution.OSv3](#requestexecutionosv3)
     - [Lua request.project library](#lua-requestproject-library)
       - [request.project.glob](#requestprojectglob)
     - [Lua package library](#lua-package-library)
@@ -748,7 +753,7 @@ Form functions may have execution constraints like the following that restricts 
 
 These names and values follow the *Platform Lexicon* defined by the Bazel build tool: <https://github.com/bazelbuild/remote-apis/blob/main/build/bazel/remote/execution/v2/platform.md/>.
 
-The reference implementation, as of 2025-11-09, only recognizes the `OSFamily` property and can detect the execution's platform if it is one of the following: `windows`, `macos`, `linux` (includes Android), `netbsd`, `freebsd` (includes DragonFly BSD), and `openbsd`.
+The reference implementation, as of 2025-11-09, only recognizes the `OSFamily` property.
 
 > Tip: be careful! If you specify the `ISA` property pair, it may be ignored today but recognized in a future version.
 
@@ -805,9 +810,13 @@ and then define in your project a folder `some-project-path/table` with files ha
 
 Finally, use the `--autofix` flag to set the `size` and `checksum` fields automatically.
 
-This is slightly complex on purpose ... we discourage the use of execution constraints. Instead, try to make your package cross-platform.
+This is slightly complex on purpose ... the use of execution constraints is discouraged. Instead, try to make your package cross-platform.
 
 Tip: In the future, remote execution platforms will be supported using most of the same mechanisms as [distributions](#distributions).
+
+#### OSFamily
+
+One of the following: `windows`, `macos`, `linux` (includes Android), `netbsd`, `freebsd` (includes DragonFly BSD), and `openbsd`.
 
 ### Precommands
 
@@ -2026,7 +2035,7 @@ local M = { id = '...' }
 rules = build.newrules(M)
 function rules.SomeRule(command,request)
   if command == "submit" then
-    -- use the [io] library
+    -- use the [request.io] library
     local file = request.io.open("a/b/somefile", "w")
   end
 end
@@ -2210,6 +2219,62 @@ request.io.close(directory)
 ```
 
 Closes the file or directory.
+
+### Lua request.execution library
+
+This library is available to [free rule functions](#free-rule-functions) and [UI rule functions](#ui-rule-functions) through the `request.execution` field.
+
+For example:
+
+```lua
+local M = { id = '...' }
+rules = build.newrules(M)
+function rules.SomeRule(command,request)
+  if command == "submit" then
+    -- use the [request.execution] library
+    local osfamily = request.execution.OSFamily
+    if osfamily == "macos" then
+      print("Howdy mac users!")
+    end
+  end
+end
+return M
+```
+
+#### request.execution.OSFamily
+
+```lua
+request.execution.OSFamily
+```
+
+The `OSFamily` of the execution platform. Values include `windows` and `macos`; they are defined in [OSFamily](#osfamily).
+
+#### request.execution.ABIv3
+
+```lua
+request.execution.ABIv3
+```
+
+The third version of the DkML ABI of the execution platform from [${SLOTNAME.*}](#slotname). Examples include `windows_x86_64` and `darwin_arm64`.
+
+#### request.execution.OSv3
+
+```lua
+request.execution.OSv3
+```
+
+The third version of the DkML OS of the execution platform. The set of OSv3 values is:
+
+- `UnknownOS`
+- `Android`
+- `DragonFly`
+- `FreeBSD`
+- `IOS`
+- `Linux`
+- `NetBSD`
+- `OpenBSD`
+- `OSX`
+- `Windows`
 
 ### Lua request.project library
 
@@ -3044,6 +3109,9 @@ The details about the build request will be available as follows:
 |                            | *but not* [Embedded File Scripts](#embedded-file-scripts) |                                                                                                               |
 | `request.project`          | [UI Rule submit](#ui-rule-command---submit)               | [request.project](#lua-requestproject-library)                                                                |
 |                            | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
+| `request.execution`        | [Free Rule submit](#free-rule-command---submit)           | [request.execution](#lua-requestexecution-library)                                                            |
+|                            | [UI Rule submit](#ui-rule-command---submit)               |                                                                                                               |
+|                            | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
 | `request.io`               | [Free Rule submit](#free-rule-command---submit)           | [request.io](#lua-requestio-library)                                                                          |
 |                            | [UI Rule submit](#ui-rule-command---submit)               |                                                                                                               |
 |                            | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
@@ -3681,7 +3749,7 @@ TODO: Combine the following with earlier table. These are from BuildCore.
 | Value Type | Key Kind    | Value Kind     |
 | ---------- | ----------- | -------------- |
 | `j`        | ChecksumKey | ValuesJsonFile |
-| `l`        | ChecksumKey | ValuesLuaFile |
+| `l`        | ChecksumKey | ValuesLuaFile  |
 
 #### v - parsed values.json AST
 
