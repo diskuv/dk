@@ -2918,7 +2918,7 @@ return {
               "sort",
               "--output",
               "${SLOT.request}/sorted-file",
-              request.user.filename or error("please provide `filename=FILENAME`")
+              assert(request.user.filename, "please provide `filename=FILENAME`")
             }
           }
         }
@@ -3059,7 +3059,7 @@ The details about the build request will be available as follows:
 It is important to check whether user provided arguments have been provided. Consider using expressions like the following to check that they are set:
 
 ```lua
-request.user.filename or error("Please provide `filename=FILENAME`")
+assert(request.user.filename, "Please provide `filename=FILENAME`")
 ```
 
 ### Rule Argument - `continue_`
@@ -3123,7 +3123,7 @@ elseif command == "submit" && continue_ == "start" then
                 "--output",
                 "${SLOT.request}/sorted-file",
                 -- the file to sort is provided by the user
-                request.user.filename or error("provide `filename=FILENAME` on the command line")
+                assert(request.user.filename, "provide `filename=FILENAME` on the command line")
               }
             }
           }
