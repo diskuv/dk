@@ -1,7 +1,7 @@
 -- usage: CommonsBase_Std.Extract.Untar@0.1.0 tarfile= modver= paths[]=
---  
---  tarfile=$PWD/target/nothing.tar
---    The tar file to extract. Tar.gz is not supported yet.
+--
+--  tarfile=$PWD/target/nothing.tar.gz
+--    The tar or tar.gz file to extract.
 --  modver=OurTest_Std.Extract@0.1.0
 --    The MODULE@VERSION of the form object that will contain the extracted files.
 --    The slot for the form object will be `Release.Agnostic`.
@@ -21,14 +21,18 @@
 local M = {
   id = "CommonsBase_Std.Extract@0.1.0"
 }
--- "local" functions module since lua-ml does not support local functions;
--- If LLL were "local" it would be nil inside rules.Untar.
--- So it is global but we'll make it a convention that LLL should not be used.
-LLL = {}
+-- lua-ml does not support local functions.
+-- And if the variable was "local" it would be nil inside rules.Untar.
+-- So a should-be-unique global is used instead.
+CommonsBase_Std__Extract__0_1_0 = {}
 
 rules = build.newrules(M)
 
-function LLL.untar_macos(p)
+function CommonsBase_Std__Extract__0_1_0.untar_macos(p)
+  local compressflag = ""
+  if p.gzip then
+    compressflag = "z"
+  end
   return {
     submit = {
       values = {
@@ -41,7 +45,7 @@ function LLL.untar_macos(p)
               args = {
                 -- macOS system tar
                 "/usr/bin/tar",
-                "-xzf",
+                "-x" .. compressflag .. "f",
                 p.tarfile,
                 "-C",
                 "${SLOT.Release.Agnostic}"
@@ -62,9 +66,13 @@ function LLL.untar_macos(p)
   }
 end
 
-function LLL.untar_linux(p)
+function CommonsBase_Std__Extract__0_1_0.untar_linux(p)
   local toyboxexe = string.format(
     "$(get-object CommonsBase_Std.Toybox@0.8.9 -s Release.%s -m ./toybox -f :exe)", p.abi)
+  local compressflag = ""
+  if p.gzip then
+    compressflag = "z"
+  end
   return {
     submit = {
       values = {
@@ -77,7 +85,7 @@ function LLL.untar_linux(p)
               args = {
                 toyboxexe,
                 "tar",
-                "-xzf",
+                "-x" .. compressflag .. "f",
                 p.tarfile,
                 "-C",
                 "${SLOT.Release.Agnostic}"
@@ -116,7 +124,7 @@ function LLL.untar_linux(p)
   }
 end
 
-function LLL.untar_win32(p)
+function CommonsBase_Std__Extract__0_1_0.untar_win32(p)
   local sevenzexe = string.format(
     "$(get-object CommonsBase_Std.S7z.Windows7zExe@25.1.0 -s Release.%s -d :)/7z.exe", p.abi)
   return {
@@ -167,13 +175,20 @@ function rules.Untar(command, request)
     local tarfile = assert(request.user.tarfile, "please provide `'tarfile=SOURCE'`")
     local paths = assert(request.user.paths, "please provide `'paths[]=PATH1' 'paths[]=PATH2' ...`")
     assert(type(paths) == "table", "paths must be a table. please provide `'paths[]=PATH1' 'paths[]=PATH2' ...`")
-    local p = { outputid = request.submit.outputid, tarfile = tarfile, paths = paths, abi = request.execution.ABIv3 }
+    local gzip = string.find(tarfile, "%.tar%.gz$") ~= nil
+    local p = {
+      outputid = request.submit.outputid,
+      tarfile = tarfile,
+      paths = paths,
+      abi = request.execution.ABIv3,
+      gzip = gzip
+    }
     if request.execution.OSFamily == "macos" then
-      return LLL.untar_macos(p)
+      return CommonsBase_Std__Extract__0_1_0.untar_macos(p)
     elseif request.execution.OSFamily == "linux" then
-      return LLL.untar_linux(p)
+      return CommonsBase_Std__Extract__0_1_0.untar_linux(p)
     elseif request.execution.OSFamily == "windows" then
-      return LLL.untar_win32(p)
+      return CommonsBase_Std__Extract__0_1_0.untar_win32(p)
     else
       error("unsupported OSFamily: " .. request.execution.OSFamily)
     end
