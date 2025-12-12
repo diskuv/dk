@@ -1,6 +1,6 @@
 // Testing:
-//  get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.Windows_x86 -d target\coreutilswin64
-//  dk0 -I .\pkgs\include\CommonsBase_Std -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -- get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.Darwin_arm64 -d target\coreutils-macarm64
+//  get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.Windows_x86 -d target/coreutilswin64
+//  dk0 -I ./pkgs/include/CommonsBase_Std -d intermediate --trial --autofix --verbose -- get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.Darwin_arm64 -d target/coreutils-macarm64
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
