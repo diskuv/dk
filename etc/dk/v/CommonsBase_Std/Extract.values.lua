@@ -142,7 +142,9 @@ function CommonsBase_Std__Extract__0_1_0.untar_win32(p)
                 -- uncompress
                 "x",
                 -- to output directory
-                "-o${SLOT.Release.Agnostic}"
+                "-o${SLOT.Release.Agnostic}",
+                -- the tarball
+                p.tarfile
               }
             },
             outputs = {
