@@ -88,10 +88,10 @@
       - [build.newrules](#buildnewrules)
     - [Lua request.declareoutput library](#lua-requestdeclareoutput-library)
       - [request.declareoutput.generatesymbol](#requestdeclareoutputgeneratesymbol)
-    - [Lua request.submit library](#lua-requestsubmit-library)
-      - [request.submit.outputid](#requestsubmitoutputid)
-      - [request.submit.outputmodule](#requestsubmitoutputmodule)
-      - [request.submit.outputversion](#requestsubmitoutputversion)
+    - [Lua request.execution library](#lua-requestexecution-library)
+      - [request.execution.OSFamily](#requestexecutionosfamily)
+      - [request.execution.ABIv3](#requestexecutionabiv3)
+      - [request.execution.OSv3](#requestexecutionosv3)
     - [Lua request.io library](#lua-requestio-library)
       - [request.io.open](#requestioopen)
       - [request.io.read](#requestioread)
@@ -103,12 +103,13 @@
       - [request.io.toasset](#requestiotoasset)
       - [request.io.flush](#requestioflush)
       - [request.io.close](#requestioclose)
-    - [Lua request.execution library](#lua-requestexecution-library)
-      - [request.execution.OSFamily](#requestexecutionosfamily)
-      - [request.execution.ABIv3](#requestexecutionabiv3)
-      - [request.execution.OSv3](#requestexecutionosv3)
-    - [Lua request.project library](#lua-requestproject-library)
-      - [request.project.glob](#requestprojectglob)
+    - [Lua request.submit library](#lua-requestsubmit-library)
+      - [request.submit.outputid](#requestsubmitoutputid)
+      - [request.submit.outputmodule](#requestsubmitoutputmodule)
+      - [request.submit.outputversion](#requestsubmitoutputversion)
+    - [Lua request.ui library](#lua-requestui-library)
+      - [request.ui.glob](#requestuiglob)
+      - [request.ui.spawn](#requestuispawn)
     - [Lua package library](#lua-package-library)
       - [require](#require)
       - [package.registrykey](#packageregistrykey)
@@ -1999,9 +2000,9 @@ Each Lua value has its digest calculated according to:
   - The keys are lexographically sorted
   - The digest is calculated with depth-first traversal. That is the string `KEY1` then the Lua value `VALUE1`, then `KEY2` and `VALUE2`, until there are no more key values.
 
-### Lua request.submit library
+### Lua request.execution library
 
-This library is available to [free rule functions](#free-rule-functions) and [UI rule functions](#ui-rule-functions) through the `request.submit` field.
+This library is available to [free rule functions](#free-rule-functions) and [UI rule functions](#ui-rule-functions) through the `request.execution` field.
 
 For example:
 
@@ -2010,45 +2011,50 @@ local M = { id = '...' }
 rules = build.newrules(M)
 function rules.SomeRule(command,request)
   if command == "submit" then
-    -- use the [submit] library
-    local id = request.submit.outputid
+    -- use the [request.execution] library
+    local osfamily = request.execution.OSFamily
+    if osfamily == "macos" then
+      print("Howdy mac users!")
+    end
   end
 end
 return M
 ```
 
-#### request.submit.outputid
+#### request.execution.OSFamily
 
 ```lua
-request.submit.outputid
--- example: OurTest_Std.A.X6pro7j57evsyymo36mehvpabhy@0.1.0
+request.execution.OSFamily
 ```
 
-This string is the form or asset identifier declared in [the "declareoutput" command](#free-rule-command---declareoutput).
+The `OSFamily` of the execution platform. Values include `windows` and `macos`; they are defined in [OSFamily](#osfamily).
 
-It is only available to [free rule functions](#free-rule-functions).
-
-#### request.submit.outputmodule
+#### request.execution.ABIv3
 
 ```lua
-request.submit.outputmodule
--- example: OurTest_Std.A.X6pro7j57evsyymo36mehvpabhy
+request.execution.ABIv3
 ```
 
-This string is the module (`MODULE`) of the form or asset `MODULE@VERSION` declared in [the "declareoutput" command](#free-rule-command---declareoutput).
+The third version of the DkML ABI of the execution platform from [${SLOTNAME.*}](#slotname). Examples include `windows_x86_64` and `darwin_arm64`.
 
-It is only available to [free rule functions](#free-rule-functions).
-
-#### request.submit.outputversion
+#### request.execution.OSv3
 
 ```lua
-request.submit.outputmodule
--- example: 0.1.0
+request.execution.OSv3
 ```
 
-This string is the version (`VERSION`) of the form or asset `MODULE@VERSION` declared in [the "declareoutput" command](#free-rule-command---declareoutput).
+The third version of the DkML OS of the execution platform. The set of OSv3 values is:
 
-It is only available to [free rule functions](#free-rule-functions).
+- `UnknownOS`
+- `Android`
+- `DragonFly`
+- `FreeBSD`
+- `IOS`
+- `Linux`
+- `NetBSD`
+- `OpenBSD`
+- `OSX`
+- `Windows`
 
 ### Lua request.io library
 
@@ -2246,9 +2252,9 @@ request.io.close(directory)
 
 Closes the file or directory.
 
-### Lua request.execution library
+### Lua request.submit library
 
-This library is available to [free rule functions](#free-rule-functions) and [UI rule functions](#ui-rule-functions) through the `request.execution` field.
+This library is available to [free rule functions](#free-rule-functions) and [UI rule functions](#ui-rule-functions) through the `request.submit` field.
 
 For example:
 
@@ -2257,59 +2263,68 @@ local M = { id = '...' }
 rules = build.newrules(M)
 function rules.SomeRule(command,request)
   if command == "submit" then
-    -- use the [request.execution] library
-    local osfamily = request.execution.OSFamily
-    if osfamily == "macos" then
-      print("Howdy mac users!")
-    end
+    -- use the [submit] library
+    local id = request.submit.outputid
   end
 end
 return M
 ```
 
-#### request.execution.OSFamily
+#### request.submit.outputid
 
 ```lua
-request.execution.OSFamily
+request.submit.outputid
+-- example: OurTest_Std.A.X6pro7j57evsyymo36mehvpabhy@0.1.0
 ```
 
-The `OSFamily` of the execution platform. Values include `windows` and `macos`; they are defined in [OSFamily](#osfamily).
+This string is the form or asset identifier declared in [the "declareoutput" command](#free-rule-command---declareoutput).
 
-#### request.execution.ABIv3
+It is only available to [free rule functions](#free-rule-functions).
+
+#### request.submit.outputmodule
 
 ```lua
-request.execution.ABIv3
+request.submit.outputmodule
+-- example: OurTest_Std.A.X6pro7j57evsyymo36mehvpabhy
 ```
 
-The third version of the DkML ABI of the execution platform from [${SLOTNAME.*}](#slotname). Examples include `windows_x86_64` and `darwin_arm64`.
+This string is the module (`MODULE`) of the form or asset `MODULE@VERSION` declared in [the "declareoutput" command](#free-rule-command---declareoutput).
 
-#### request.execution.OSv3
+It is only available to [free rule functions](#free-rule-functions).
+
+#### request.submit.outputversion
 
 ```lua
-request.execution.OSv3
+request.submit.outputmodule
+-- example: 0.1.0
 ```
 
-The third version of the DkML OS of the execution platform. The set of OSv3 values is:
+This string is the version (`VERSION`) of the form or asset `MODULE@VERSION` declared in [the "declareoutput" command](#free-rule-command---declareoutput).
 
-- `UnknownOS`
-- `Android`
-- `DragonFly`
-- `FreeBSD`
-- `IOS`
-- `Linux`
-- `NetBSD`
-- `OpenBSD`
-- `OSX`
-- `Windows`
+It is only available to [free rule functions](#free-rule-functions).
 
-### Lua request.project library
+### Lua request.ui library
 
-`request.project` is a Lua table available only to [Custom UI Rules](#ui-rule-functions).
+This library is available to [UI rule functions](#ui-rule-functions) through the `request.ui` field.
 
-#### request.project.glob
+For example:
 
 ```lua
-bundle, getbundle, getasset = request.project.glob {
+local M = { id = '...' }
+rules, uirules = build.newrules(M)
+function uirules.SomeRule(command,request)
+  if command == "ui" then
+    -- use the [request.ui] library
+    local bundle, getbundle, getasset = request.ui.glob { -[[ ... ]] }
+  end
+end
+return M
+```
+
+#### request.ui.glob
+
+```lua
+bundle, getbundle, getasset = request.ui.glob {
   patterns = {"src/**/*.c"}
   [, origin = "project-sources"]
   [, project = "OurProject_Std@0.1.0"]
@@ -2323,7 +2338,7 @@ Creates a [bundle](#assets) of files from a project source directory for use whe
 The design intent is to allow user influenced change detection and reproducibility for project files:
 
 - User-influenced change detection: In large projects (ex. monorepos), the project tree can be broken into smaller bundles. Only parts of the build that depend on smaller project bundles will be rebuilt when a project source file changes.
-- Reproducibility: A build user does not access the project files directly; the project files are always checksummed and made available through this `request.project` library.
+- Reproducibility: A build user does not access the project files directly; the project files are always checksummed and made available through this `request.ui` library.
 
 The `project` argument is the identifier and version for the **end-user's** project. It defaults to `OurProject_Std@0.1.0`. The UI rule may be used by several projects, so the `project` argument is intended to be supplied by the end-user as a [request parameter](#rule-request-documents) to the UI rule. It may be a library id and version (ex. `OurProject_Std@1.0.0`) or a standard module id and version (ex. `OurProject_Std.A.B.SomeModule@1.0.0`). The `project` must belong to the [distribution package and version](#distributions) if the project is distributed. Using the `Our` vendor namespace means the project cannot be distributed, but the project does not need to have a [distribution with keys and version ranges](#distributions).
 
@@ -2383,7 +2398,7 @@ The return values are the *bundle*, *partial get-bundle command* and the *partia
     listing = {
       origins = {
         {
-          name = "...origin...", -- from `request.project.glob {origin}` argument
+          name = "...origin...", -- from `request.ui.glob {origin}` argument
           mirrors = { "." } -- `.` is the project directory
         }
       }
@@ -2413,7 +2428,7 @@ Using the bundle could look like the following, where the source code is given a
 ```lua
 function uirules.MyRule(command, request)
   if command == "submit" and continue_ == "start" then
-    local bundle, getbundle = request.project.glob {
+    local bundle, getbundle = request.ui.glob {
       patterns = { "src/**/*.c" }
     }
     return {
@@ -2443,6 +2458,42 @@ function uirules.MyRule(command, request)
       }
     }
   end
+```
+
+#### request.ui.spawn
+
+```lua
+request.ui.spawn {
+  program = "/bin/echo"
+  [, args = { "arg1", "arg2", "..." }]
+  [, cwd = "/some/dir"]
+  [, envmods = { "+DOTNET_ROOT=/some/dir", "..." }]
+}
+```
+
+Runs the `program` with the arguments `args...`.
+The program will have its environment modified by `envmods` in accordance to [Environment Modifications](#environment-modifications).
+
+Build system implementations are required to have security controls.
+The reference implementation prompts the user and asks for confirmation before running the program.
+
+The caller is expected to check the return values. Using the Lua convention `assert(request.ui.spawn { ... })` is sufficient to pass only on exit code zero.
+The return values are:
+
+- If the user rejected giving permission to the `spawn`, the three (3) return values are `nil`, an error mesage, and the string `denied`.
+- On exit code 0, the two (2) return values are a truthy value and the number `0`.
+- On any other exit code, the four (4) return values are `nil`, an error message, the string `exit`, and the exit code number.
+- If terminated due to a signal, the four (4) return values are `nil`, an error message, the string `signal`, and the signal number.
+- If stopped due to a signal, the four (4) return values are `nil`, an error message, the string `stop`, and the signal number.
+
+That is:
+
+```lua
+nil, "The request to trust the rule to launch the program was denied", "denied"
+"t", 0
+nil, "The program exited with code 55", "exit"
+nil, "The program terminated due to signal 15", "signal", 15
+nil, "The program stopped due to signal 19", "stop", 19
 ```
 
 ### Lua package library
@@ -3091,7 +3142,7 @@ UI rules (ie. `uirules`) are rules that:
 - only one UI rule may run at a time even if the build system implementation parallelizes noninteractive rules
 - have access to the project source code directories
 
-UI rules are *impure* functions that have outputs that are not reproducible because they direct access to changing project source code. Because they are impure, UI rules are never cached. With project library functions like [request.project.glob](#requestprojectglob) these impure UI rules can take immutable snapshots of the project source code (ie. [assets](#assets)); these immutable assets can be used directly or passed to *pure* [free rules](#free-rule-functions).
+UI rules are *impure* functions that have outputs that are not reproducible because they direct access to changing project source code. Because they are impure, UI rules are never cached. With project library functions like [request.ui.glob](#requestprojectglob) these impure UI rules can take immutable snapshots of the project source code (ie. [assets](#assets)); these immutable assets can be used directly or passed to *pure* [free rules](#free-rule-functions).
 
 The form of a UI rule function named `YourUiRule` is:
 
@@ -3147,8 +3198,6 @@ The details about the build request will be available as follows:
 |                                | [UI Rule submit](#ui-rule-command---submit)               | ... The request document is described later in the [Rule Request Documents](#rule-request-documents) section. |
 |                                | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
 |                                | *but not* [Embedded File Scripts](#embedded-file-scripts) |                                                                                                               |
-| `request.project`              | [UI Rule submit](#ui-rule-command---submit)               | [request.project](#lua-requestproject-library)                                                                |
-|                                | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
 | `request.execution`            | [Free Rule submit](#free-rule-command---submit)           | [request.execution](#lua-requestexecution-library)                                                            |
 |                                | [UI Rule submit](#ui-rule-command---submit)               |                                                                                                               |
 |                                | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
@@ -3159,6 +3208,10 @@ The details about the build request will be available as follows:
 |                                | [UI Rule submit](#ui-rule-command---submit)               |                                                                                                               |
 |                                | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
 |                                | [Embedded File Scripts](#embedded-file-scripts)           |                                                                                                               |
+| `request.ui`              | [UI Rule submit](#ui-rule-command---submit)               | [request.ui](#lua-requestproject-library)                                                                |
+|                                | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
+| `request.ui`                   | [UI Rule submit](#ui-rule-command---submit)               | [request.ui](#lua-requestui-library)                                                                          |
+|                                | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
 | `request.srcfile.id`           | [Embedded File Scripts](#embedded-file-scripts)           | Asset id of the [Lua is embedded in it](#embedded-file-scripts), if any                                       |
 | `request.srcfile.bundle`       | [Embedded File Scripts](#embedded-file-scripts)           | [Bundle](#assets) of the [Lua is embedded in it](#embedded-file-scripts), if any                              |
 | `request.srcfile.getasset`     | [Embedded File Scripts](#embedded-file-scripts)           | The shell command [get-asset](#get-asset-moduleversion-file_path--f-file---d-dir)                             |
