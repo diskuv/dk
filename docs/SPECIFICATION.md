@@ -152,10 +152,10 @@
       - [table.concat](#tableconcat)
       - [table.pack](#tablepack)
       - [table.unpack](#tableunpack)
-    - [Lua json library](#lua-json-library)
-      - [json.encode](#jsonencode)
-      - [json.decode](#jsondecode)
-      - [json.null](#jsonnull)
+    - [Lua buildjson library](#lua-buildjson-library)
+      - [buildjson.encode](#buildjsonencode)
+      - [buildjson.decode](#buildjsondecode)
+      - [buildjson.null](#buildjsonnull)
     - [Custom Lua Modules](#custom-lua-modules)
     - [Introduction to Custom Lua Rules](#introduction-to-custom-lua-rules)
     - [Free Rule Functions](#free-rule-functions)
@@ -379,7 +379,7 @@ Consider the `OurTest_Exec.PostObject.TestRequest.EchoRequest@1.0.0` rule:
 
 ```lua
 local M = { id = "OurTest_Exec.PostObject.TestRequest@1.0.0" }
-local json = require("json")
+local json = require("buildjson")
 rules = build.newrules(M)
 
 function rules.EchoRequest(command, request)
@@ -397,7 +397,7 @@ function rules.EchoRequest(command, request)
         local file = request.io.open("some/asset/file", "w")
 
         request.io.write(file, "This line is from the example. There is more:\n")
-        request.io.write(file, json.encode(request.user, { indent = 1 }))
+        request.io.write(file, buildjson.encode(request.user, { indent = 1 }))
 
         local origin, asset = request.io.toasset(file, {
             path = path, origin_name = "example-origin"
@@ -1857,7 +1857,7 @@ In Lua there is no declaration of fields; semantically, there is no difference b
 
 This function receives an argument of any type and converts it to a string in a reasonable format.
 
-Table contents are not converted. See [json.encode](#jsonencode) to show inside of a table.
+Table contents are not converted. See [buildjson.encode](#buildjsonencode) to show inside of a table.
 
 #### Lua Global Variable - print
 
@@ -1868,7 +1868,7 @@ This function is not intended for formatted output, but as a quick way to show a
 
 See [printf](#lua-global-variable---printf) for functions for formatted output.
 
-See [json.encode](#jsonencode) to print tables.
+See [buildjson.encode](#buildjsonencode) to print tables.
 
 #### Lua Global Variable - printf
 
@@ -2132,7 +2132,7 @@ request.io.write(file, value1, ...)
 
 Writes the value of each of its arguments to file `file`.
 The arguments must be strings or numbers. To write other values, use [tostring](#lua-global-variable---tostring)
-or [string.format](#stringformat) or [json.encode](#jsonencode).
+or [string.format](#stringformat) or [buildjson.encode](#buildjsonencode).
 
 #### request.io.list
 
@@ -2813,49 +2813,52 @@ Returns the elements from the given list. This function is equivalent to
 
 By default, `i` is 1 and `j` is #list.
 
-### Lua json library
+### Lua buildjson library
 
-Although the `json` library is embedded into the build system, it must be accessed through `json = require('json')`.
+The `buildjson` library is embedded into the build system (nothing needs to be downloaded) but it must be accessed through `buildjson = require('buildjson')`.
 That keeps with the [design goal to maintain Lua conventions](#lua-specification).
 
-#### json.encode
+There is a popular Lua library [dkjson](https://dkolf.de/dkjson-lua/) for parsing JSON.
+The API for `buildjson` has intentionally been kept similar to `dkjson`.
+
+#### buildjson.encode
 
 ```lua
-json = require('json')
+buildjson = require('buildjson')
 tbl = {
   animals = { "dog", "cat", "aardvark" },
   instruments = { "violin", "trombone", "theremin" }
 }
-str = json.encode (tbl, { indent = true })
+str = buildjson.encode (tbl, { indent = true })
 
 -- or
-json = require('json')
-str = json.encode (tbl)
+buildjson = require('buildjson')
+str = buildjson.encode (tbl)
 ```
 
 Converts a Lua value to JSON:
 
 - `nil` values are not printed
-- `json.null` values are encoded as JSON null
+- `buildjson.null` values are encoded as JSON null
 
 If `indent` is truthy then the JSON is pretty-printed.
 
-#### json.decode
+#### buildjson.decode
 
 ```lua
-json = require('json')
+buildjson = require('buildjson')
 str = '{"animals":["dog","cat","aardvark"],"bugs":null}'
-json.decode (str)
+buildjson.decode (str)
 
 -- or
-json = require('json')
-value, errmsg, errrendered, sb, sl, sc, eb, el, ec = json.decode (str)
+buildjson = require('buildjson')
+value, errmsg, errrendered, sb, sl, sc, eb, el, ec = buildjson.decode (str)
 ```
 
 Converts JSON to a Lua value:
 
 - Large numbers are converted to floating-point numbers with a possible loss of precision. If outside the floating-point range, an error is raised.
-- JSON nulls are converted to `json.null` Lua values
+- JSON nulls are converted to `buildjson.null` Lua values
 
 If the JSON could be converted, the result is the first return value.
 
@@ -2867,16 +2870,16 @@ Otherwise:
 - `sb`, `sl`, and `sc` are the starting byte offset (zero-based), line and column (1-based)
 - `eb`, `el`, and `ec` are the ending byte offset (zero-based), line and column (1-based)
 
-#### json.null
+#### buildjson.null
 
 ```lua
-json = require('json')
+buildjson = require('buildjson')
 tbl = {
   animals = { "dog", "cat", "aardvark" },
-  bugs = json.null,
+  bugs = buildjson.null,
   trees = nil
 }
-str = json.encode (tbl)
+str = buildjson.encode (tbl)
 
 -- {
 --   "animals":["dog","cat","aardvark"],
@@ -2884,7 +2887,7 @@ str = json.encode (tbl)
 -- }
 ```
 
-The `json.null` Lua value represents JSON null.
+The `buildjson.null` Lua value represents JSON null.
 
 ### Custom Lua Modules
 
@@ -3142,7 +3145,7 @@ UI rules (ie. `uirules`) are rules that:
 - only one UI rule may run at a time even if the build system implementation parallelizes noninteractive rules
 - have access to the project source code directories
 
-UI rules are *impure* functions that have outputs that are not reproducible because they direct access to changing project source code. Because they are impure, UI rules are never cached. With project library functions like [request.ui.glob](#requestprojectglob) these impure UI rules can take immutable snapshots of the project source code (ie. [assets](#assets)); these immutable assets can be used directly or passed to *pure* [free rules](#free-rule-functions).
+UI rules are *impure* functions that have outputs that are not reproducible because they direct access to changing project source code. Because they are impure, UI rules are never cached. With project library functions like [request.ui.glob](#requestuiglob) these impure UI rules can take immutable snapshots of the project source code (ie. [assets](#assets)); these immutable assets can be used directly or passed to *pure* [free rules](#free-rule-functions).
 
 The form of a UI rule function named `YourUiRule` is:
 
@@ -3208,7 +3211,7 @@ The details about the build request will be available as follows:
 |                                | [UI Rule submit](#ui-rule-command---submit)               |                                                                                                               |
 |                                | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
 |                                | [Embedded File Scripts](#embedded-file-scripts)           |                                                                                                               |
-| `request.ui`              | [UI Rule submit](#ui-rule-command---submit)               | [request.ui](#lua-requestproject-library)                                                                |
+| `request.ui`                   | [UI Rule submit](#ui-rule-command---submit)               | [request.ui](#lua-requestui-library)                                                                          |
 |                                | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
 | `request.ui`                   | [UI Rule submit](#ui-rule-command---submit)               | [request.ui](#lua-requestui-library)                                                                          |
 |                                | [UI Rule ui](#ui-rule-command---ui)                       |                                                                                                               |
@@ -3346,8 +3349,8 @@ the JSON document was converted from the Lua table `{ a=1, b=2 }` into:
 { "a": 1, "b": 2 }
 ```
 
-See [json.encode](#jsonencode) for how Lua values are converted to JSON.
-However, for rule requests the `json.null` value is **never** encoded.
+See [buildjson.encode](#buildjsonencode) for how Lua values are converted to JSON.
+However, for rule requests the `buildjson.null` value is **never** encoded.
 That means a Lua `nil` is considered equivalent to a missing value.
 
 The introduction example also submitted a request to a rule through the command line:
