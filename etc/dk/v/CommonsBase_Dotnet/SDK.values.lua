@@ -1,3 +1,6 @@
+-- Usage:
+-- dk0 -v --trial -d explain -I ext/dk/etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Dotnet post-object CommonsBase_Dotnet.SDK.Files@10.0.100-rc.2.25502.107 -d target/dotnetsdk slot=Release.Linux_x86_64m
+
 -- Using a values.lua means the thousands-long list of asset files
 -- don't need to be duplicated, and it should be easy to provide
 -- multiple versions of .NET in the same values.lua.
@@ -161,6 +164,7 @@ CommonsBase_Std__Dotnet_SDK.paths.UNIX_ALL = {
   "sdk/10.0.100-rc.2.25502.107/Roslyn/bincore/csc",
   "sdk/10.0.100-rc.2.25502.107/Roslyn/bincore/vbc",
   "sdk/10.0.100-rc.2.25502.107/Roslyn/bincore/VBCSCompiler",
+  "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll",
   "shared/Microsoft.NETCore.App/10.0.0-rc.2.25502.107/createdump",
 }
 CommonsBase_Std__Dotnet_SDK.paths.WIN32_ALL = {
@@ -553,9 +557,6 @@ CommonsBase_Std__Dotnet_SDK.paths.WIN32_ALL = {
   "sdk/10.0.100-rc.2.25502.107/Containers/tasks/net472/zh-Hans/Microsoft.NET.Build.Containers.resources.dll",
   "sdk/10.0.100-rc.2.25502.107/Containers/tasks/net472/zh-Hant/Microsoft.NET.Build.Containers.resources.dll",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/dotnet-format.exe",
-  "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.dll",
-  "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll",
-  "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/runtimes/win/lib/net10.0/System.ServiceProcess.ServiceController.dll",
   "sdk/10.0.100-rc.2.25502.107/Roslyn/bincore/csc.exe",
   "sdk/10.0.100-rc.2.25502.107/Roslyn/bincore/vbc.exe",
   "sdk/10.0.100-rc.2.25502.107/Roslyn/bincore/VBCSCompiler.exe",
@@ -876,12 +877,6 @@ CommonsBase_Std__Dotnet_SDK.paths.WIN32_ALL = {
   "shared/Microsoft.WindowsDesktop.App/10.0.0-rc.2.25502.107/zh-Hant/UIAutomationTypes.resources.dll",
   "shared/Microsoft.WindowsDesktop.App/10.0.0-rc.2.25502.107/zh-Hant/WindowsBase.resources.dll",
   "shared/Microsoft.WindowsDesktop.App/10.0.0-rc.2.25502.107/zh-Hant/WindowsFormsIntegration.resources.dll",
-
-  -- How were these here before? Was it removed?
-  -- "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.dll",
-  -- "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll",
-  -- "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll",
-  -- "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/runtimes/win/lib/net10.0/System.ServiceProcess.ServiceController.dll",
 }
 CommonsBase_Std__Dotnet_SDK.paths.ALL = {
   "LICENSE.txt",
@@ -2119,6 +2114,8 @@ CommonsBase_Std__Dotnet_SDK.paths.ALL = {
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/ru/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/ru/Microsoft.CodeAnalysis.Workspaces.resources.dll",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/ru/System.CommandLine.resources.dll",
+  "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.dll",
+  "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/shims/net10.0/win-x64/dotnet-format.exe",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/shims/net10.0/win-x86/dotnet-format.exe",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-format/System.CommandLine.dll",
@@ -2509,6 +2506,7 @@ CommonsBase_Std__Dotnet_SDK.paths.ALL = {
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/ru/Microsoft.TemplateSearch.Common.resources.dll",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/ru/System.CommandLine.resources.dll",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/ru/System.CommandLine.StaticCompletions.resources.dll",
+  "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/runtimes/win/lib/net10.0/System.ServiceProcess.ServiceController.dll",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/System.CommandLine.dll",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/System.CommandLine.StaticCompletions.dll",
   "sdk/10.0.100-rc.2.25502.107/DotnetTools/dotnet-watch/10.0.100-rc.2.25502.107/tools/net10.0/any/System.CommandLine.StaticCompletions.xml",
@@ -5779,7 +5777,8 @@ function CommonsBase_Std__Dotnet_SDK.form_values_windows(slot)
       "get-asset CommonsBase_Dotnet.SDK.Bundle@10.0.100-rc.2.25502.107 -p dotnet-sdk-10.0.100-rc.2.25502.107-win-arm64.zip -d ${SLOT.Release.Windows_arm64}",
     }
   }
-  -- merge ALL, WIN32_ALL and Windows_XXX into `paths` (why isn't there a better way to merge tables in Lua?)
+
+  -- merge WIN32_ALL, Windows_XXX and ALL into `paths` (why isn't there a better way to merge tables in Lua?)
   local paths = {}
   --   WIN32_ALL
   local tbl = CommonsBase_Std__Dotnet_SDK.paths.WIN32_ALL
@@ -5825,6 +5824,113 @@ function CommonsBase_Std__Dotnet_SDK.form_values_windows(slot)
   return precommands, outputs
 end
 
+function CommonsBase_Std__Dotnet_SDK.form_values_unix(slot)
+  local arch = ""
+  if slot == "Release.Darwin_arm64" then
+    arch = "osx-arm64"
+  elseif slot == "Release.Darwin_x86_64" then
+    arch = "osx-x64"
+  elseif slot == "Release.Linux_arm64" then
+    arch = "linux-arm64"
+  elseif slot == "Release.Linux_x86_64" then
+    arch = "linux-x64"
+  elseif slot == "Release.Linux_arm64m" then
+    arch = "linux-musl-arm64"
+  elseif slot == "Release.Linux_x86_64m" then
+    arch = "linux-musl-x64"
+  else
+    error("Unsupported Unix slot: " .. slot)
+  end
+
+  -- merge UNIX_ALL, <Unix>_XXX, <OS>_ALL and ALL into `paths` (why isn't there a better way to merge tables in Lua?)
+  -- as the W3C HTML JSON forms expression `paths[]=path1 paths[]=path2 ...`
+  local paths = {}
+  local pathsarr = {}
+  --   UNIX_ALL
+  local tbl = CommonsBase_Std__Dotnet_SDK.paths.UNIX_ALL
+  local off, key, value = 0, 1, tbl[1]
+  while value do
+    paths[key + off] = value
+    pathsarr[key + off] = "paths[]=" .. value
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    key, value = key + 1, tbl[key + 1]
+  end
+  --  <Unix>_XXX
+  if slot == "Release.Darwin_arm64" then
+    tbl = CommonsBase_Std__Dotnet_SDK.paths.Darwin_arm64
+  elseif slot == "Release.Darwin_x86_64" then
+    tbl = CommonsBase_Std__Dotnet_SDK.paths.Darwin_x86_64
+  elseif slot == "Release.Linux_arm64" then
+    tbl = CommonsBase_Std__Dotnet_SDK.paths.Linux_arm64
+  elseif slot == "Release.Linux_x86_64" then
+    tbl = CommonsBase_Std__Dotnet_SDK.paths.Linux_x86_64
+  elseif slot == "Release.Linux_arm64m" then
+    tbl = CommonsBase_Std__Dotnet_SDK.paths.Linux_arm64m
+  elseif slot == "Release.Linux_x86_64m" then
+    tbl = CommonsBase_Std__Dotnet_SDK.paths.Linux_x86_64m
+  else
+    error("Unsupported Unix slot: " .. slot)
+  end
+  off, key, value = off + key - 1, 1, (tbl[1])
+  while value do
+    paths[key + off] = value
+    pathsarr[key + off] = "paths[]=" .. value
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    key, value = key + 1, tbl[key + 1]
+  end
+  --  <OS>_ALL
+  if slot == "Release.Darwin_arm64" or slot == "Release.Darwin_x86_64" then
+    tbl = CommonsBase_Std__Dotnet_SDK.paths.Darwin_ALL
+  else
+    tbl = CommonsBase_Std__Dotnet_SDK.paths.Linux_ALL
+  end
+  off, key, value = off + key - 1, 1, (tbl[1])
+  while value do
+    paths[key + off] = value
+    pathsarr[key + off] = "paths[]=" .. value
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    key, value = key + 1, tbl[key + 1]
+  end
+  --  ALL
+  tbl = CommonsBase_Std__Dotnet_SDK.paths.ALL
+  off, key, value = off + key - 1, 1, (tbl[1])
+  while value do
+    paths[key + off] = value
+    pathsarr[key + off] = "paths[]=" .. value
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    key, value = key + 1, tbl[key + 1]
+  end
+
+  -- Convert paths[] list into a string
+  local paths_str        = table.concat(pathsarr, " ")
+
+  local getasset_tarfile =
+      string.format(
+        "$(get-asset CommonsBase_Dotnet.SDK.Bundle@10.0.100-rc.2.25502.107 -p dotnet-sdk-10.0.100-rc.2.25502.107-%s.tar.gz -f :file)",
+        arch)
+  local postobject       =
+      string.format(
+        "post-object CommonsBase_Std.Extract.Untar@0.1.0 -d ${SLOT.%s} modver=CommonsBase_Dotnet.SDK.Unix.%s@10.0.100-rc.2.25502.107 tarfile=%s %s",
+        slot,
+        slot,
+        getasset_tarfile,
+        paths_str)
+  local precommands      = {
+    private = {
+      postobject
+    }
+  }
+  local outputs          = {
+    assets = {
+      {
+        slots = { slot },
+        paths = paths
+      }
+    }
+  }
+  return precommands, outputs
+end
+
 function rules.Files(command, request)
   if command == "declareoutput" then
     local slot = assert(request.user.slot, "please provide `slot=SLOT`")
@@ -5846,6 +5952,8 @@ function rules.Files(command, request)
     local precommands, outputs = nil, nil
     if is_windows then
       precommands, outputs = CommonsBase_Std__Dotnet_SDK.form_values_windows(slot)
+    else
+      precommands, outputs = CommonsBase_Std__Dotnet_SDK.form_values_unix(slot)
     end
     return {
       submit = {
@@ -5854,7 +5962,6 @@ function rules.Files(command, request)
           forms = {
             {
               id = request.submit.outputid,
-              -- id = "CommonsBase_Dotnet.SDK.Form.Release.Windows_x86@10.0.100-rc.2.25502.107",
               precommands = precommands,
               outputs = outputs
             }
