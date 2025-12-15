@@ -2456,7 +2456,12 @@ request.io.realpath(dir)
 
 The path to the file or directory object.
 
-The validity is only guaranteed inside a [rule expression](#free-rule-command---submit) until the next [continuation](#rule-argument---continue_). In particular:
+The validity is only guaranteed inside:
+
+- a [submit command](#free-rule-command---submit) until the next [continuation](#rule-argument---continue_).
+- a [ui command](#ui-rule-command---ui) until the ui command is finished
+
+In particular:
 
 - The path may not exist immediately after `request.io.realpath`. A hermetic implementation is allowed to:
 
