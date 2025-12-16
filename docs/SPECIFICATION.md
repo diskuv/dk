@@ -7,6 +7,7 @@
     - [Composition by Rules](#composition-by-rules)
     - [Composition by Distribution](#composition-by-distribution)
     - [(pending re-organization) Concepts](#pending-re-organization-concepts)
+  - [Project Structure](#project-structure)
   - [Assets](#assets)
     - [Local Paths](#local-paths)
     - [Zip Archive Reproducibility](#zip-archive-reproducibility)
@@ -519,6 +520,26 @@ We use the generic term **value** to mean an bundle, a form or an object.
 All values have names like `YourLibrary_Std.YourPackage.YourThing`. Think of the name as if it were a serial number, as the name uniquely identifies each bundle, form and object.
 
 All values also have versions like `1.0.0`. Making a change to a value means creating a new value with the same name but with an increased version. For example, if the text of your 2025-09-04 privacy policy is in the bundle `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904`, an end-of-year update to the privacy policy could be `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20251231`. These *semantic* versions offer a lot of flexibility and are industry-standard: [external link: semver 2.0](https://semver.org/). The important point is that values do not change; versions do.
+
+## Project Structure
+
+The build system borrows terminology from the [Buck2 build system](https://buck2.build/docs/concepts/key_concepts/).
+
+A **project**:
+
+- has a **project directory**. In the `dk0` reference build system, the directory containing the `dk0` shell script and `dk0.cmd` Windows batch script is the project directory.
+- is a container for cells (more on this shortly)
+
+A **cell** is:
+
+- a subdivision of the project source code
+  - there is at least one subdivision called `root`
+  - in the `dk0` reference build system, the option `--cell CELLNAME=path/to/source/code` define the cells. Other build system implementations can use conventions and/or project configuration files.
+
+Cells exist to make efficient builds and to locating source code even when source code is vendored.
+
+- In small projects the `root` may be the only cell; all project source code belongs to `root`.
+- In large projects (ex. monorepos), the project tree can be broken into smaller cells. Only parts of the build that depend on smaller cells will be rebuilt when a single project source file changes.
 
 ## Assets
 
@@ -2604,7 +2625,7 @@ return M
 ```lua
 bundle, getbundle, getasset = request.ui.glob {
   patterns = {"src/**/*.c"}
-  [, origin = "project-sources"]
+  [, cell = "root"]
   [, project = "OurProject_Std@0.1.0"]
   [, excludes = {"src/**/test*.c"} ]
   [, trace = 1]
@@ -2620,7 +2641,7 @@ The design intent is to allow user influenced change detection and reproducibili
 
 The `project` argument is the identifier and version for the **end-user's** project. It defaults to `OurProject_Std@0.1.0`. The UI rule may be used by several projects, so the `project` argument is intended to be supplied by the end-user as a [request parameter](#rule-request-documents) to the UI rule. It may be a library id and version (ex. `OurProject_Std@1.0.0`) or a standard module id and version (ex. `OurProject_Std.A.B.SomeModule@1.0.0`). The `project` must belong to the [distribution package and version](#distributions) if the project is distributed. Using the `Our` vendor namespace means the project cannot be distributed, but the project does not need to have a [distribution with keys and version ranges](#distributions).
 
-The `origin` argument distinguishes one set of assets from another set. It defaults to `project-sources`. The generated bundle identifier is `PROJECT_MODULE.Sources.Xyyyyyyy@PROJECT_VERSION` where `PROJECT_MODULE` is the module or library identifier from `project`, `PROJECT_VERSION` is the project version from `project`, and `yyyy` is the lowercase, no-padding, base32-encoded SHA256 checksum of `origin`.
+The `cell` argument is the name of the cell from the [project structure](#project-structure). It defaults to `root`. The generated bundle identifier is `PROJECT_MODULE.Cells.Xyyyyyyy@PROJECT_VERSION` where `PROJECT_MODULE` is the module or library identifier from `project`, `PROJECT_VERSION` is the project version from `project`, and `yyyy` is the lowercase, no-padding, base32-encoded SHA256 checksum of `cell`.
 
 The `patterns` and `excludes` are glob expressions on project files that conform to [Language Server Protocol 3.18 patterns](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.18/specification/#patterns):
 

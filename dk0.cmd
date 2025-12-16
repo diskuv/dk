@@ -147,7 +147,7 @@ SET "DK_QUIET="
 SET "_DK_PATH="
 SET "_XCOPY_SWITCHES="
 REM     Then run it
-"%DK_EXE%" %_DKEXE_OPTIONS% -isystem "%DK_PROJECT_DIR%\etc\dk\i" %*
+"%DK_EXE%" %_DKEXE_OPTIONS% -isystem "%DK_PROJECT_DIR%\etc\dk\i" --cell "dk0=%DK_PROJECT_DIR%" %*
 EXIT /B %ERRORLEVEL%
 
 REM ------ SUBROUTINE [downloadFile]
