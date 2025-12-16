@@ -6070,17 +6070,17 @@ end
 -- Any .NET script (ex. F#) can be done using the appropriate "Embedded Language Codes"
 -- from the SPECIFICATION.
 function M.run(options)
-  -- local json = require("buildjson")
-  -- print("run request:\n" .. json.encode(request, { indent = 1 }))
   local ctx = assert(options.ctx, "Expected `ctx` in options")
   local command = assert(ctx.command, "Expected `ctx = {command = '...'}` in options")
   local request = assert(ctx.request, "Expected `ctx = {request = { ... }}` in options")
   local userargs = ctx.arg or {}
+  -- local json = require("buildjson")
+  -- print("run request:\n" .. json.encode(request, { indent = 1 }))
   if command == "submit" then
     local response = CommonsBase_Std__Dotnet_SDK.common_submit_response()
     response.submit.values = response.submit.values or {}
     response.submit.values.bundles = { request.srcfile.bundle }
-    response.submit.expressions.files["scriptpath"] = "$(" .. request.srcfile.getasset .. " -f :file)"
+    response.submit.expressions.files["scriptpath"] = "$(" .. request.srcfile.getasset .. " -f :file:" .. request.srcfile.basename .. ")"
     return response
   elseif command == "ui" then
     local dotnetsdk = request.io.realpath(assert(request.continued.dotnetsdk,

@@ -3503,13 +3503,13 @@ The build system is responsible for:
    return M
    ```
 
+   The [Behavior of Embedded Lua](#behavior-of-embedded-lua) describes `request.srcfile` in more detail.
+
 3. Running the above UI rule function.
 
 #### Behavior of Embedded Lua
 
-An embedded Lua script behaves as if it were the body of a [UI rule function](#ui-rule-functions).
-
-The script will have the variables:
+The guast Lua script script will have the variables:
 
 | Global      | What                                                                                  |
 | ----------- | ------------------------------------------------------------------------------------- |
@@ -3517,6 +3517,8 @@ The script will have the variables:
 | `command`   | At first [`submit`](#ui-rule-command---submit) and then [`ui`](#ui-rule-command---ui) |
 | `request`   | The request table (see below)                                                         |
 | `continue_` | The state. See [Rule Argument - `continue_`](#rule-argument---continue_)              |
+| `ctx`       | The table:                                                                            |
+|             | `{ command=command, request=request, continue_=continue_, arg=arg }`                  |
 
 The command line arguments, if any, will be the global table named `arg` that conforms to the [Lua 5.4 "arg" library](https://www.lua.org/manual/5.4/manual.html#7).
 
@@ -3527,6 +3529,7 @@ The `request` table is available as:
 - `request.user`: This table will be empty. This is in contrast to the [non-embedded UI rule](#rule-argument---request) where the command line arguments would be converted into [Rule Request Documents](#rule-request-documents).
 - `request.srcfile`: An information table about the source file that contains the embedded Lua.
 - `request.srcfile.id`: An asset identifer unique to the source file.
+- `request.srcfile.basename`: The basename of the source file.
 - `request.srcfile.bundle`: The [bundle](#assets). For example:
 
   ```lua
