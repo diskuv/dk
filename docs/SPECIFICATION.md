@@ -76,6 +76,7 @@
     - [Script Phases](#script-phases)
     - [Lua Specification](#lua-specification)
     - [Lua Global Variables](#lua-global-variables)
+      - [Lua Global Variable - arg](#lua-global-variable---arg)
       - [Lua Global Variable - loadstring](#lua-global-variable---loadstring)
       - [Lua Global Variable - next](#lua-global-variable---next)
       - [Lua Global Variable - tostring](#lua-global-variable---tostring)
@@ -1849,6 +1850,41 @@ and the Lua 5.4 reserved words:
 
 ### Lua Global Variables
 
+#### Lua Global Variable - arg
+
+`arg`
+
+A table defined only when Lua is run [embedded](#embedded-file-scripts)
+*or* a file is run directly as a Lua script. The reference implementation `dk0`
+will run a file directly as a Lua script with `dk0 run some-script.lua` when
+the file ends with `.lua` and some other file extensions; see `dk0 --help` for
+authoritative options.
+
+Before running any code, lua collects all command-line arguments in a global table called
+`arg`. The script name goes to index 0, the first argument after the script name goes to index 1, and so on.
+Any arguments before the script name (that is, the interpreter name plus its options) go to negative indices.
+For instance, in the call
+
+```sh
+dk0 lua -la b.lua t1 t2
+```
+
+the table is like this:
+
+```lua
+arg = { [-2] = "lua", [-1] = "-la",
+        [0] = "b.lua",
+        [1] = "t1", [2] = "t2" }
+```
+
+If there is no script in the call, the interpreter name goes to index 0, followed by the other arguments. For instance, the call
+
+```sh
+dk0 lua -e "print(arg[1])"
+```
+
+will print `-e`. If there is a script, the script is called with arguments `arg[1], ···, arg[#arg]`.
+
 #### Lua Global Variable - loadstring
 
 `loadstring (string [, chunkname])`
@@ -1858,7 +1894,8 @@ Compiles the string.
 If there are no errors, returns the compiled chunk as a function; otherwise, returns `nil` plus the error message. The environment of the returned function is the global environment.
 
 ```lua
-     assert(loadstring(s))()
+chunk = assert(loadstring(s))
+chunk()
 ```
 
 When absent, `chunkname` defaults to the given string or an abbrevation of it.
