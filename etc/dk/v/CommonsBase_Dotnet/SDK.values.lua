@@ -16,7 +16,7 @@ CommonsBase_Std__Dotnet_SDK = {
 local M = {
   id = CommonsBase_Std__Dotnet_SDK.id_module .. "@" .. CommonsBase_Std__Dotnet_SDK.id_version
 }
-rules = build.newrules(M)
+rules, uirules = build.newrules(M)
 
 CommonsBase_Std__Dotnet_SDK.paths = {}
 CommonsBase_Std__Dotnet_SDK.paths.Linux_arm64 = {
@@ -5890,6 +5890,136 @@ function CommonsBase_Std__Dotnet_SDK.form_values_unix(slot)
   return precommands, outputs
 end
 
+function CommonsBase_Std__Dotnet_SDK.envmods(options)
+  local dotnetsdk = assert(options.dotnetsdk, "Expected `dotnetsdk`")
+  local nugetpackages = assert(options.nugetpackages, "Expected `nugetpackages`")
+  return {
+    -- Sadly we can't isolate changes to the Windows registry :(
+
+    -- Set or remove every variable in https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-environment-variables
+    -- so that the existing environment variables have no influence
+    "-DOTNET_SYSTEM_NET_HTTP_ENABLEACTIVITYPROPAGATION",
+    "-DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2SUPPORT",
+    "-DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP3SUPPORT",
+    "-DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2FLOWCONTROL_DISABLEDYNAMICWINDOWSIZING",
+    "-DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_FLOWCONTROL_MAXSTREAMWINDOWSIZE",
+    "-DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_FLOWCONTROL_STREAMWINDOWSCALETHRESHOLDMULTIPLIER",
+    "-DOTNET_SYSTEM_GLOBALIZATION_INVARIANT",
+    "-DOTNET_SYSTEM_GLOBALIZATION_PREDEFINED_CULTURES_ONLY",
+    "-DOTNET_SYSTEM_GLOBALIZATION_APPLOCALICU",
+    "-DOTNET_SYSTEM_GLOBALIZATION_USENLS",
+    "-DOTNET_SYSTEM_NET_SOCKETS_INLINE_COMPLETIONS",
+    "-DOTNET_SYSTEM_NET_SOCKETS_THREAD_COUNT",
+    "-DOTNET_SYSTEM_NET_DISABLEIPV6",
+    "-DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER",
+    "-DOTNET_RUNNING_IN_CONTAINER",
+    "-DOTNET_RUNNING_IN_CONTAINERS",
+    "-DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION",
+    "-DOTNET_SYSTEM_DIAGNOSTICS_DEFAULTACTIVITYIDFORMATISHIERARCHIAL",
+    "-DOTNET_SYSTEM_RUNTIME_CACHING_TRACING",
+    "-DOTNET_DiagnosticPorts",
+    "-DOTNET_DefaultDiagnosticPortSuspend",
+    "-DOTNET_EnableDiagnostics",
+    "-DOTNET_EnableDiagnostics_IPC",
+    "-DOTNET_EnableDiagnostics_Debugger",
+    "-DOTNET_EnableDiagnostics_Profiler",
+    "-DOTNET_EnableEventPipe",
+    "-DOTNET_EventPipeOutputPath",
+    "-DOTNET_EventPipeOutputStreaming",
+    string.format("+DOTNET_ROOT=%s", dotnetsdk),
+    "-DOTNET_ROOT(x86)",
+    "-DOTNET_ROOT_X86",
+    "-DOTNET_ROOT_X64",
+    "-DOTNET_HOST_PATH",
+    "-DOTNET_LAUNCH_PROFILE",
+    -- TODO: make a subshell command $(mktemp) or request.io.mktemp() for a temporary directory that is deleted after use
+    -- IT IS VERY WRONG to give a static cache directory that is shared between multiple builds!
+    -- it is not terrible for now as long as we use --trial
+    string.format("+NUGET_PACKAGES=%s", nugetpackages),
+    --  https://github.com/NuGet/Home/wiki/%5BSpec%5D-Fallback-package-folders
+    --  TODO: we should have a more intelligent rule that allows selection of the packages as JSON
+    --  request parameters and then uses a continuation to install those into the readonly fallback packages
+    string.format("+NUGET_FALLBACK_PACKAGES=%s", nugetpackages),
+    "-DOTNET_SERVICING",
+    "+DOTNET_NOLOGO=1",
+    "-DOTNET_CLI_PERF_LOG",
+    "-DOTNET_GENERATE_ASPNET_CERTIFICATE",
+    -- do not add system's global tools to PATH
+    "+DOTNET_ADD_GLOBAL_TOOLS_TO_PATH=false",
+    "-DOTNET_CLI_TELEMETRY_OPTOUT",
+    "-DOTNET_SKIP_FIRST_TIME_EXPERIENCE",
+    -- 0 (logical false) to not resolve from the global location and have isolated .NET installations
+    "+DOTNET_MULTILEVEL_LOOKUP=0",
+    "-DOTNET_ROLL_FORWARD",
+    "-DOTNET_ROLL_FORWARD_TO_PRERELEASE",
+    "-DOTNET_CLI_FORCE_UTF8_ENCODING",
+    "-DOTNET_CLI_UI_LANGUAGE",
+    "+DOTNET_DISABLE_GUI_ERRORS=1",
+    "-DOTNET_ADDITIONAL_DEPS",
+    "-DOTNET_RUNTIME_ID",
+    "-DOTNET_SHARED_STORE",
+    "-DOTNET_STARTUP_HOOKS",
+    -- TODO: use a $(mktemp) when implemented
+    "-DOTNET_BUNDLE_EXTRACT_BASE_DIR",
+    -- TODO: use a $(mktemp) when implemented
+    "-DOTNET_CLI_HOME",
+    "-DOTNET_CLI_CONTEXT_VERBOSE",
+    "-DOTNET_CLI_CONTEXT_ANSI_PASS_THRU",
+    "-DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE",
+    "-DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS",
+    -- default is false, but explicitly set to false to ensure root folder is not read
+    "+DOTNET_TOOLS_ALLOW_MANIFEST_IN_ROOT=false",
+    "-DOTNET_HOST_TRACE",
+    "-COREHOST_TRACE",
+    "-SuppressNETCoreSdkPreviewMessage",
+    "-DOTNET_CLI_RUN_MSBUILD_OUTOFPROC",
+    "-DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR",
+    "-DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER",
+    "-DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR",
+    "-DOTNET_NEW_PREFERRED_LANG"
+
+    -- The following come from using Process Monitor (Sysinternals) and filtering
+    -- for Process Name is dotnet.exe, Result is NAME NOT FOUND, and Operation is CreateFile ...
+
+    -- C:\Program Files (x86)\Nuget\NuGetDefaults.config
+    -- : Avoided with `--configfile`.
+
+    -- C:\Windows\System32\System.IO.Compression.Native
+    -- : Seems unavoidable but fine. If a .NET package needs it, it will bundle its own copy itself.
+
+    -- C:\Program Files (x86)\coreservicing
+    -- : PROBLEM: Unclear what or why this is accessed.
+
+    -- C:\ProgramData\Microsoft\Crypto\OIDInfo
+    -- : Seems unavoidable, and necessary for machine cryptography. Don't try to avoid this.
+
+    -- C:\Windows\System32\nlasvc.dll
+    -- : Network Location Awareness from `C:\Windows\System32\svchost.exe -k NetworkService`
+    -- : Seems unavoidable but irrelevant to reproducibility.
+  }
+end
+
+function CommonsBase_Std__Dotnet_SDK.common_submit_response()
+  return {
+    submit = {
+      values = {
+        schema_version = { major = 1, minor = 0 }
+      },
+      expressions = {
+        directories = {
+          dotnetsdk =
+          "$(post-object CommonsBase_Dotnet.SDK.Files@10.0.100-rc.2.25502.107 -d : slot=${SLOTNAME.Release.execution_abi})",
+          nugetpackages = "$(get-asset CommonsBase_Shell.Pwsh.Bundles@7.5.4 -p packages -d :)"
+        },
+        files = {},
+        strings = {
+          extexe = "${.exe.execution}"
+        }
+      }
+    }
+  }
+end
+
 function rules.Files(command, request)
   if command == "declareoutput" then
     local slot = assert(request.user.slot, "please provide `slot=SLOT`")
@@ -5928,6 +6058,78 @@ function rules.Files(command, request)
         }
       }
     }
+  end
+end
+
+-- These statements at the bottom of a C# script:
+--   // X = require("CommonsBase_Dotnet.SDK")
+--   // X = X.at("10.0.100-rc.2.25502.107")
+--   // return X.run { command = command, request = request, continue_ = continue_, arg = arg }
+--   // !dk!s
+-- will run the single file script as `dotnet run <SCRIPT> <ARGS>`.
+-- Any .NET script (ex. F#) can be done using the appropriate "Embedded Language Codes"
+-- from the SPECIFICATION.
+function M.run(options)
+  -- json = require("buildjson")
+  -- print("run request:\n" .. json.encode(request, { indent = 1 }))
+  local command = assert(options.command, "Expected `command` in options")
+  local request = assert(options.request, "Expected `request` in options")
+  if command == "submit" then
+    local response = CommonsBase_Std__Dotnet_SDK.common_submit_response()
+    response.submit.values = response.submit.values or {}
+    response.submit.values.bundles = { request.srcfile.bundle }
+    response.submit.expressions.files["scriptpath"] = "$(" .. request.srcfile.getasset .. " -f :file)"
+    return response
+  elseif command == "ui" then
+    local dotnetsdk = request.io.realpath(assert(request.continued.dotnetsdk,
+      "Expected `dotnetsdk` defined in `expressions.directories`"))
+    local nugetpackages = request.io.realpath(assert(request.continued.nugetpackages,
+      "Expected `nugetpackages` defined in `expressions.directories`"))
+    local scriptpath = request.io.realpath(assert(request.continued.scriptpath,
+      "Expected `scriptpath` defined in `expressions.files`"))
+    local program = dotnetsdk .. "/dotnet" .. request.continued.extexe
+
+    -- make args = run <scriptpath> -- <userargs...>
+    local userargs = options.arg or {}
+    local args = { "run", scriptpath, "--" }
+    local nuserargs = table.getn(userargs) ---@diagnostic disable-line: deprecated, access-invisible
+    local nargs = table.getn(args) ---@diagnostic disable-line: deprecated, access-invisible
+    table.move(userargs, 1, nuserargs, nargs + 1, args)
+
+    assert(request.ui.spawn {
+      program = program,
+      envmods = CommonsBase_Std__Dotnet_SDK.envmods {
+        dotnetsdk = dotnetsdk,
+        nugetpackages = nugetpackages
+      },
+      args = args
+    })
+  end
+end
+
+-- `dk0 run CommonsBase_Dotnet.SDK.Dotnet@10.0.100-rc.2.25502.107 [args...]` runs the `dotnet [args...]`
+function uirules.Dotnet(command, request)
+  -- ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe -v --trial -d intermediate -d explain --cell dk0=ext/dk -I ext/dk/etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Dotnet --trust-local-package CommonsBase_Shell run CommonsBase_Dotnet.SDK.Dotnet@10.0.100-rc.2.25502.107 'args[]=run' 'args[]=ext/dk/samples/2025/AsciiArt.cs' 'args[]=--' 'args[]=test it'
+  -- 'args[]=--info'
+  -- 'args[]=--list-runtimes'
+  if command == "submit" then
+    return CommonsBase_Std__Dotnet_SDK.common_submit_response()
+  elseif command == "ui" then
+    -- json = require("buildjson")
+    -- print("ui request:\n" .. json.encode(request, { indent = 1 }))
+    local dotnetsdk = request.io.realpath(assert(request.continued.dotnetsdk,
+      "Expected `dotnetsdk` defined in `expressions.directories`"))
+    local nugetpackages = request.io.realpath(assert(request.continued.nugetpackages,
+      "Expected `nugetpackages` defined in `expressions.directories`"))
+    local program = dotnetsdk .. "/dotnet" .. request.continued.extexe
+    assert(request.ui.spawn {
+      program = program,
+      envmods = CommonsBase_Std__Dotnet_SDK.envmods {
+        dotnetsdk = dotnetsdk,
+        nugetpackages = nugetpackages
+      },
+      args = request.user.args
+    })
   end
 end
 
