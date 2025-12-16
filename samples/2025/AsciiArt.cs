@@ -67,6 +67,6 @@ async Task WriteAsciiArt(AsciiMessageOptions options)
 
 public record AsciiMessageOptions(string[] Messages, int Delay);
 
-// X = require("CommonsBase_Dotnet.SDK"); X = X.at("10.0.100-rc.2.25502.107")
-// return X.run { command = command, request = request, continue_ = continue_, arg = arg }
+// local X = require("CommonsBase_Dotnet.SDK"); X = X.at("10.0.100-rc.2.25502.107")
+// return X.run { ctx = ctx }
 // !dk!s

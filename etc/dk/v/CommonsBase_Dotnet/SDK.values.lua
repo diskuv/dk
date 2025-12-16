@@ -6064,16 +6064,18 @@ end
 -- These statements at the bottom of a C# script:
 --   // X = require("CommonsBase_Dotnet.SDK")
 --   // X = X.at("10.0.100-rc.2.25502.107")
---   // return X.run { command = command, request = request, continue_ = continue_, arg = arg }
+--   // return X.run { ctx }
 --   // !dk!s
 -- will run the single file script as `dotnet run <SCRIPT> <ARGS>`.
 -- Any .NET script (ex. F#) can be done using the appropriate "Embedded Language Codes"
 -- from the SPECIFICATION.
 function M.run(options)
-  -- json = require("buildjson")
+  -- local json = require("buildjson")
   -- print("run request:\n" .. json.encode(request, { indent = 1 }))
-  local command = assert(options.command, "Expected `command` in options")
-  local request = assert(options.request, "Expected `request` in options")
+  local ctx = assert(options.ctx, "Expected `ctx` in options")
+  local command = assert(ctx.command, "Expected `ctx = {command = '...'}` in options")
+  local request = assert(ctx.request, "Expected `ctx = {request = { ... }}` in options")
+  local userargs = ctx.arg or {}
   if command == "submit" then
     local response = CommonsBase_Std__Dotnet_SDK.common_submit_response()
     response.submit.values = response.submit.values or {}
@@ -6090,7 +6092,6 @@ function M.run(options)
     local program = dotnetsdk .. "/dotnet" .. request.continued.extexe
 
     -- make args = run <scriptpath> -- <userargs...>
-    local userargs = options.arg or {}
     local args = { "run", scriptpath, "--" }
     local nuserargs = table.getn(userargs) ---@diagnostic disable-line: deprecated, access-invisible
     local nargs = table.getn(args) ---@diagnostic disable-line: deprecated, access-invisible

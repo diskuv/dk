@@ -3461,30 +3461,47 @@ While the reference implementation does not do this, other build systems are fre
 
 ### Embedded File Scripts
 
-The body of a Lua [UI rule function](#ui-rule-functions) may be embedded as comments in a larger file.
+The body of a Lua [UI rule function](#ui-rule-functions) (called the **guest Lua script**) may be embedded as comments at the bottom of a larger file (called the **host script**).
 
-For example, the following PowerShell script:
+Consider the following C# *host* script:
 
-```powershell
-Write-Host "This is running inside PowerShell!"
-# return "post-object CommonsBase_Shell.Pwsh@7.5.4 src=" .. request.srcfile.id
-# !dk!h
+```csharp
+Console.WriteLine("This is running in C#!");
+// local X = require("CommonsBase_Dotnet.SDK"); X = X.at("10.0.100-rc.2.25502.107")
+// return X.run { ctx = ctx }
+// !dk!s
 ```
 
-has a UI rule function that behaves as if the following were run:
+It contains the *guest Lua script* extracted the bottom comments:
 
 ```lua
-function ui_rules.EmbeddedFileScript(command, request)
-  if command == "submit" then
-    return "post-object CommonsBase_Shell.Pwsh@7.5.4 src=" .. request.srcfile.id
-  end
-end
+local X = require("CommonsBase_Dotnet.SDK"); X = X.at("10.0.100-rc.2.25502.107")
+return X.run { ctx = ctx }
 ```
 
-The:
+The guest Lua script is located using the `!dk!` marker that must appear on one of the last two *nonblank* lines within 16K of the end of the file.
 
-- `!dk!` is a magic marker that must appear on one of the last two *nonblank* lines within 16K of the end of the file
-- `h` is one of many possible codes (see [Embedded Language Codes](#embedded-language-codes) section)
+> Aside: The `s` in `!dk!g` means to extract the guest Lua script from the surrounding **s**lash (`//`) comments. It is one of *many* possible codes to integrate with the most popular programming languages (see [Embedded Language Codes](#embedded-language-codes) section).
+
+The build system is responsible for:
+
+1. Creating an asset from the host script.
+2. Converting the guest Lua script into a [UI rule function](#ui-rule-functions):
+
+   ```lua
+   local M = { id = "... some generated id ..." }
+   _rules, uirules = build.newrules(M)
+   function uirules.EmbeddedFileScript(command, request, continue_)
+     request.srcfile = { --[[ ... the host script asset ... ]] }
+     local ctx = { command = command, request = request, continue_ = continue_, arg = arg }
+     -- this is the guest Lua script
+     local X = require("CommonsBase_Dotnet.SDK"); X = X.at("10.0.100-rc.2.25502.107")
+     return X.run { ctx = ctx }
+   end
+   return M
+   ```
+
+3. Running the above UI rule function.
 
 #### Behavior of Embedded Lua
 
