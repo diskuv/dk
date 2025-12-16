@@ -1185,7 +1185,7 @@
         "origins": [
           {
             "name": "etc-cfg-nuget",
-            "mirrors": ["etc/cfg/nuget"]
+            "mirrors": ["cell://dk0/etc/cfg/nuget"]
           }
         ]
       },
@@ -1215,7 +1215,7 @@
         "origins": [
           {
             "name": "table-pwsh",
-            "mirrors": ["etc/dk/v/CommonsBase_Shell/Pwsh/table"]
+            "mirrors": ["cell://dk0/etc/dk/v/CommonsBase_Shell/Pwsh/table"]
           }
         ]
       },

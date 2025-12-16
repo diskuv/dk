@@ -10,7 +10,7 @@
         "origins": [
           {
             "name": "etc-table-dotnet",
-            "mirrors": ["etc/table/dotnet"]
+            "mirrors": ["cell://dk0/etc/table/dotnet"]
           }
         ]
       },
