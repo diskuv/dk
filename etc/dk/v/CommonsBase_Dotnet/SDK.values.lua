@@ -5778,17 +5778,12 @@ function CommonsBase_Std__Dotnet_SDK.form_values_windows(slot)
     }
   }
 
-  -- merge WIN32_ALL, Windows_XXX and ALL into `paths` (why isn't there a better way to merge tables in Lua?)
+  -- concatenate ALL, WIN32_ALL and Windows_XXX lists into `paths` using `table.move (a1, f, e, t [,a2])`
   local paths = {}
-  --   WIN32_ALL
+  local tbl = CommonsBase_Std__Dotnet_SDK.paths.ALL
+  table.move(tbl, 1, table.getn(tbl), table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
   local tbl = CommonsBase_Std__Dotnet_SDK.paths.WIN32_ALL
-  local off, key, value = 0, 1, tbl[1]
-  while value do
-    paths[key + off] = value
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    key, value = key + 1, tbl[key + 1]
-  end
-  --  Windows_XXX
+  table.move(tbl, 1, table.getn(tbl), table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
   if slot == "Release.Windows_x86_64" then
     tbl = CommonsBase_Std__Dotnet_SDK.paths.Windows_x86_64
   elseif slot == "Release.Windows_x86" then
@@ -5798,20 +5793,7 @@ function CommonsBase_Std__Dotnet_SDK.form_values_windows(slot)
   else
     error("Unsupported Windows slot: " .. slot)
   end
-  off, key, value = off + key - 1, 1, (tbl[1])
-  while value do
-    paths[key + off] = value
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    key, value = key + 1, tbl[key + 1]
-  end
-  --  ALL
-  tbl = CommonsBase_Std__Dotnet_SDK.paths.ALL
-  off, key, value = off + key - 1, 1, (tbl[1])
-  while value do
-    paths[key + off] = value
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    key, value = key + 1, tbl[key + 1]
-  end
+  table.move(tbl, 1, table.getn(tbl), table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
 
   local outputs = {
     assets = {
@@ -5842,20 +5824,19 @@ function CommonsBase_Std__Dotnet_SDK.form_values_unix(slot)
     error("Unsupported Unix slot: " .. slot)
   end
 
-  -- merge UNIX_ALL, <Unix>_XXX, <OS>_ALL and ALL into `paths` (why isn't there a better way to merge tables in Lua?)
-  -- as the W3C HTML JSON forms expression `paths[]=path1 paths[]=path2 ...`
+  -- concatenate ALL, UNIX_ALL, <OS>_ALL and <Unix>_XXX lists using `table.move (a1, f, e, t [,a2])`
+  -- into `paths`
   local paths = {}
-  local pathsarr = {}
-  --   UNIX_ALL
-  local tbl = CommonsBase_Std__Dotnet_SDK.paths.UNIX_ALL
-  local off, key, value = 0, 1, tbl[1]
-  while value do
-    paths[key + off] = value
-    pathsarr[key + off] = "paths[]=" .. value
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    key, value = key + 1, tbl[key + 1]
+  local tbl = CommonsBase_Std__Dotnet_SDK.paths.ALL
+  table.move(tbl, 1, table.getn(tbl), table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
+  tbl = CommonsBase_Std__Dotnet_SDK.paths.UNIX_ALL
+  table.move(tbl, 1, table.getn(tbl), table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
+  if slot == "Release.Darwin_arm64" or slot == "Release.Darwin_x86_64" then
+    tbl = CommonsBase_Std__Dotnet_SDK.paths.Darwin_ALL
+  else
+    tbl = CommonsBase_Std__Dotnet_SDK.paths.Linux_ALL
   end
-  --  <Unix>_XXX
+  table.move(tbl, 1, table.getn(tbl), table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
   if slot == "Release.Darwin_arm64" then
     tbl = CommonsBase_Std__Dotnet_SDK.paths.Darwin_arm64
   elseif slot == "Release.Darwin_x86_64" then
@@ -5871,37 +5852,15 @@ function CommonsBase_Std__Dotnet_SDK.form_values_unix(slot)
   else
     error("Unsupported Unix slot: " .. slot)
   end
-  off, key, value = off + key - 1, 1, (tbl[1])
-  while value do
-    paths[key + off] = value
-    pathsarr[key + off] = "paths[]=" .. value
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    key, value = key + 1, tbl[key + 1]
-  end
-  --  <OS>_ALL
-  if slot == "Release.Darwin_arm64" or slot == "Release.Darwin_x86_64" then
-    tbl = CommonsBase_Std__Dotnet_SDK.paths.Darwin_ALL
-  else
-    tbl = CommonsBase_Std__Dotnet_SDK.paths.Linux_ALL
-  end
-  off, key, value = off + key - 1, 1, (tbl[1])
-  while value do
-    paths[key + off] = value
-    pathsarr[key + off] = "paths[]=" .. value
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    key, value = key + 1, tbl[key + 1]
-  end
-  --  ALL
-  tbl = CommonsBase_Std__Dotnet_SDK.paths.ALL
-  off, key, value = off + key - 1, 1, (tbl[1])
-  while value do
-    paths[key + off] = value
-    pathsarr[key + off] = "paths[]=" .. value
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    key, value = key + 1, tbl[key + 1]
-  end
+  table.move(tbl, 1, table.getn(tbl), table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
 
-  -- Convert paths[] list into a string
+  -- make the `pathsarr` variant for the W3C HTML JSON forms expression `paths[]=path1 paths[]=path2 ...`
+  local pathsarr = {}
+  local key, value = 1, paths[1]
+  while value do
+    pathsarr[key] = "paths[]=" .. value
+    key, value = key + 1, paths[key + 1]
+  end
   local paths_str        = table.concat(pathsarr, " ")
 
   local getasset_tarfile =
