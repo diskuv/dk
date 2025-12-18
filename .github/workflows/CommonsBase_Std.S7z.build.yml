@@ -26,8 +26,8 @@ jobs:
                   # The data stores and build keys are safe to share between Windows, macOS and Linux
                   enableCrossOsArchive: true
                   path: |
-                      target/data/dk/val.1
-                      target/data/dk/cts.1.*
+                      t/d/dk/val.1
+                      t/d/dk/cts.1.*
                       target/config/dk/build.pub
                       target/config/dk/build.sec
                   restore-keys: dk-stores-and-keys             # use latest cache
