@@ -1201,9 +1201,9 @@
         {
           "path": "packages",
           "origin": "etc-cfg-nuget",
-          "size": 228,
+          "size": 226,
           "checksum": {
-            "sha256": "e3f1009a23a634b401f42cd04634c6f376b2196e64e8e60bb8cbb596dd6d2b7f"
+            "sha256": "e21a238ce8fede4c01faa609588c44207a330515ce78a973e79c3443b1695ace"
           }
         }
       ]
