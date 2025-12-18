@@ -571,7 +571,8 @@ The [Zip Archive Reproducibility (next section)](#zip-archive-reproducibility) s
 - have the zip last modification time to the earliest datetime (Jan 1, 1980 00:00:00)
 - have each zip entry with its modification time to the earliest datetime (Jan 1, 1980 00:00:00)
 - have each zip file entry set its extended attribute to be a "regular file" with `rw-r--r--` permissions
-- use zip compression level 5. That is: "compression method: (2 bytes) ... 5 - The file is Reduced with compression factor 4" at [IANA application/zip]
+- use zip compression level 5, even for tiny file entries. That is: "compression method: (2 bytes) ... 5 - The file is Reduced with compression factor 4" at [IANA application/zip]
+- always accompany a zip directory entry with a zip64 directory entry
 
 [IANA application/zip]: https://www.iana.org/assignments/media-types/application/zip
 
