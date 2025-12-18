@@ -6083,12 +6083,9 @@ function M.run(options)
     response.submit.expressions.files["scriptpath"] = "$(" .. request.srcfile.getasset .. " -f :file:" .. request.srcfile.basename .. ")"
     return response
   elseif command == "ui" then
-    local dotnetsdk = request.io.realpath(assert(request.continued.dotnetsdk,
-      "Expected `dotnetsdk` defined in `expressions.directories`"))
-    local nugetpackages = request.io.realpath(assert(request.continued.nugetpackages,
-      "Expected `nugetpackages` defined in `expressions.directories`"))
-    local scriptpath = request.io.realpath(assert(request.continued.scriptpath,
-      "Expected `scriptpath` defined in `expressions.files`"))
+    local dotnetsdk = request.io.realpath(request.continued.dotnetsdk)
+    local nugetpackages = request.io.realpath(request.continued.nugetpackages)
+    local scriptpath = request.io.realpath(request.continued.scriptpath)
     local program = dotnetsdk .. "/dotnet" .. request.continued.extexe
 
     -- make args = run <scriptpath> -- <userargs...>
