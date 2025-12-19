@@ -14,13 +14,13 @@ Scripting with `dk` does two things:
 <!-- Windows updates: dk Ml.Use -- .\maintenance\010-PROJECTROOT-README.sh -->
 
 <!-- $MDX skip -->
-```sh
+```console
 # Install a standalone executable. And available for macOS and Linux.
 $ winget install -e --id Diskuv.dk -v "2.4.25164.1"
 ```
 
 <!-- $MDX skip -->
-```sh
+```console
 # THIS EXAMPLE: The `dk` software stack has scripting.
 #      Here's a script to download and print a page to the screen.
 # IN GENERAL: Your users copy-and-paste your first example ...
@@ -69,7 +69,7 @@ winget install -e --id Diskuv.dk
 or Apple/Silicon:
 
 <!-- $MDX skip -->
-```sh
+```console
 sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-exe/2.4.202508302258-signed/dk-darwin_arm64
 sudo chmod +x /usr/local/bin/dk
 ```
@@ -77,7 +77,7 @@ sudo chmod +x /usr/local/bin/dk
 or Apple/Intel:
 
 <!-- $MDX skip -->
-```sh
+```console
 sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-exe/2.4.202508302258-signed/dk-darwin_x86_64
 sudo chmod +x /usr/local/bin/dk
 ```
@@ -85,7 +85,7 @@ sudo chmod +x /usr/local/bin/dk
 or Linux with glibc and libstdc++ (Debian, Ubuntu, etc. but not Alpine):
 
 <!-- $MDX skip -->
-```sh
+```console
 sudo curl -o /usr/local/bin/dk https://diskuv.com/a/dk-exe/2.4.202508302258-signed/dk-linux_x86_64
 sudo chmod +x /usr/local/bin/dk
 [ -x /usr/bin/dnf ] && sudo dnf install -y libstdc++
@@ -94,7 +94,7 @@ sudo chmod +x /usr/local/bin/dk
 Then cross-compile a script to standalone Windows, Linux, Android executables (and to a macOS executable if you are on a macOS machine):
 
 <!-- $MDX skip -->
-```sh
+```console
 $ dk -S "
     module Http = DkNet_Std.Http
     module Uri = Tr1Uri_Std.Uri
@@ -143,7 +143,7 @@ $ dk -S "
 The executables will be available in the `target/` folder:
 
 <!-- $MDX skip -->
-```sh
+```console
 $ file target/ZzZz_Zz.Adhoc-* | cut -c1-69 | awk '{print $0 "..."}'
 target/ZzZz_Zz.Adhoc-android_arm32v7a:   ELF 32-bit LSB pie executabl...
 target/ZzZz_Zz.Adhoc-android_arm64v8a:   ELF 64-bit LSB pie executabl...

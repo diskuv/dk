@@ -39,10 +39,19 @@ fi
 
 # dksrc/dk0$CMD get-object DkSetup_Std.Exe@2.4.202508302258-signed -s Release.Windows_x86_64 -d target/
 
-# nit: Why doesn't CRLF work with ocaml-mdx?
-if [ -n "${COMSPEC:-}" ]; then
-    dos2unix README.md docs/SCRIPTING.md
-fi
+prepare() {
+    # nit: Why doesn't CRLF work with ocaml-mdx?
+    if [ -n "${COMSPEC:-}" ]; then
+        dos2unix "$1"
+    fi
+    # https://github.com/realworldocaml/mdx/issues/372
+    # translate ```console to ```sh with sed
+    #   shellcheck disable=SC2016
+    /usr/bin/sed 's/```console/```sh/g' "$1" > "$1.tmp"
+    mv "$1.tmp" "$1"
+}
+prepare README.md
+prepare docs/SCRIPTING.md
 
 if [ -n "${COMSPEC:-}" ]; then
     # ensure dk cache is populated
@@ -57,14 +66,20 @@ fi
 opam exec -- ocaml-mdx test -v -v -o README.corrected.md README.md
 opam exec -- ocaml-mdx test -v -v -o docs/SCRIPTING.corrected.md docs/SCRIPTING.md
 
-sanitize() {
+finish() {
+    # sanitize
     # ex. /Volumes/ExtremeSSD/Source/dk/t/c/b.1/sub/bcxcynflu6qy4eg4i7s2szq67y/dotnet
-    # shellcheck disable=SC2016
+    #   shellcheck disable=SC2016
     /usr/bin/sed 's#[/A-Za-z0-9]*/t/c/b.1/sub/[^/]*#$CACHED#g' "$1" > "$1.tmp"
     mv "$1.tmp" "$1"
+
+    # translate ```sh back to ```console with sed
+    #   shellcheck disable=SC2016
+    /usr/bin/sed 's/```sh/```console/g' "$1" > "$1.tmp"
+    mv "$1.tmp" "$1"
 }
-sanitize README.corrected.md
-sanitize docs/SCRIPTING.corrected.md
+finish README.corrected.md
+finish docs/SCRIPTING.corrected.md
 
 install README.md "target/README.$(date +%s).md"
 install docs/SCRIPTING.md "target/SCRIPTING.$(date +%s).md"
