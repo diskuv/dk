@@ -146,8 +146,16 @@ SET "DK_DATA_HOME="
 SET "DK_QUIET="
 SET "_DK_PATH="
 SET "_XCOPY_SWITCHES="
+REM.    Probably a Windows batch expert can fix the following:
+REM.        "C:\Users\runneradmin\AppData\Local\Programs\dk0\dk0exe-2.4.2.47-windows_x86_64\dk0.exe"  -isystem "D:\a\dk\dk\dksrc\\etc\dk\i" --cell "dk0=D:\a\dk\dk\dksrc\" --verbose -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object CommonsBase_Std.S7z@25.1.0 -s Release.Windows_x86_64 -m ./7zz.exe -f target/Release.Windows_x86_64.7zz.exe
+REM.    where we added `--cell "dk0=%DK_PROJECT_DIR%"` and it garbles the command line:
+REM         FATAL: The build failed.
+REM         No command given. Try `dk0 --help`
+REM.    So we pass along forward slashes instead of backslashes.
+SET "_CELL=%DK_PROJECT_DIR%"
+SET "_CELL=%_CELL:\=/%"
 REM     Then run it
-"%DK_EXE%" %_DKEXE_OPTIONS% -isystem "%DK_PROJECT_DIR%\etc\dk\i" --cell "dk0=%DK_PROJECT_DIR%" %*
+"%DK_EXE%" %_DKEXE_OPTIONS% -isystem "%DK_PROJECT_DIR%\etc\dk\i" --cell "dk0=%_CELL%" %*
 EXIT /B %ERRORLEVEL%
 
 REM ------ SUBROUTINE [downloadFile]
