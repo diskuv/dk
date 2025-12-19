@@ -322,11 +322,15 @@ Some of JSON file is fairly straightforward, but let's go through six (6) fields
 2. The `assets.listing_unencrypted.spec_version` must be 3 unless there is a change to the [specification](docs/SPECIFICATION.md).
 3. The `assets.listing_unencrypted.name` field gives *part* of a unique identifier for the `7zr.exe` asset. It has syntax borrowed and hacked from the OCaml programming language.
 
-   The first part of the name, before the first period, is the **library identifier**. For example, `OurZip_Demo` is the library identifier for `OurZip_Demo.S7z.Bundle`. The library id visually has at least three bumps, with an underscore separating the second and third bump. It was designed to be visually recognizable (and recognizable from a lexer) while different enough from other identifiers that there was no accidental overlap. The following picture may help you remember the `BumpBump_Bump` shape:
+   The first part of the name, before the first period, is the **library identifier**. For example, `OurZip_Demo` is the library identifier for `OurZip_Demo.S7z.Bundle`. The library id visually has at least three bumps, with an underscore separating the second and third bump. It was designed to be visually recognizable (and recognizable from a lexer) while different enough from other identifiers that there was no accidental overlap.
 
-   ![Camels and Library Identifiers](docs/images/pascal-case-from-camels.jpg)
+   Its regular expression is:
 
-   The parts after the first period, like `S7z` and `Assets` in `OurZip_Demo.S7z.Bundle` are called **namespace terms**. They must start with a capital letter, and contain only the characters `A-Za-z0-9_`.
+   ```regex
+   ^[A-Z][a-z0-9]+[A-Z][A-Za-z0-9]+_[A-Z][A-Za-z0-9]*(_[A-Za-z0-9]+)*$
+   ```
+
+   The parts after the first period, like `S7z` and `Assets` in `OurZip_Demo.S7z.Bundle` are called **namespace terms**. They must start with a capital letter, contain only the characters `A-Za-z0-9_`, and cannot be library identifiers.
 
 4. The `assets.listing_unencrypted.version` field is not the original 7zip version "25.01". Instead, `dk` uses the [semver 2.0](https://semver.org/) versioning specification. So "25.01" was translated into "25.1.0".
 5. The `assets.files.origin` field must be the name of one of the `assets.listing.origins`.
