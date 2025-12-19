@@ -6,7 +6,7 @@ If you have a Linux application you could choose `nix` or Docker, but outside of
 
 Let's build the [ASCII art tutorial for C#](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/file-based-programs) using `dk`.
 
-The following should work on Windows using PowerShell, macOS and glibc-based Linux:
+The following should work on Windows using PowerShell, macOS and (soon) glibc-based Linux:
 
 ```console
 $ git clone --branch V2_4 https://github.com/diskuv/dk.git dksrc
