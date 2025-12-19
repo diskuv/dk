@@ -6020,6 +6020,62 @@ function CommonsBase_Std__Dotnet_SDK.common_submit_response()
   }
 end
 
+-- Workaround no +x for dotnet
+--
+-- The previous `-d :` for dotnet was not executable per the SPECIFICATION:
+-- 1. the reproducible zip files are regular files rw-r--r-- but
+-- 2. the `-f FILE` and `-d DIR` options say certain files (`*.exe`, `bin/*`, etc.) will be written with a chmod +x.
+--
+-- That design isn't robust enough. Until design improved, we'll run a coreutils chmod function on the
+-- `(... -d :)/dotnet` file.
+--
+-- Possible design improvements:
+-- Any command with `-d` like `get-object` accepts a glob expression for executable files;
+-- it should have a reasonable default (like `bin/*`, `*.exe`, etc. from the SPECIFICATION)
+-- but if specified it would override the default.
+function CommonsBase_Std__Dotnet_SDK.workaround_make_dotnet_executable(response, options)
+  local dotnetsdk = assert(options.dotnetsdk, "Expected `dotnetsdk`")
+  -- print("Applying workaround to make dotnet executable in " .. dotnetsdk)
+  local workaround = "CommonsBase_Dotnet.SDK.DotnetWorkaround@10.0.100-rc.2.25502.107"  
+  response.submit.values.forms = {
+    {
+      id = workaround,
+      precommands = {
+        private = {
+          -- We need something to get into the output, but we don't care what.
+          "get-asset CommonsBase_Dotnet.Lookup@1.0.0 -p arch -m ./Release.Linux_arm64 -f ${SLOT.Release.Agnostic}/arch.txt",
+        }
+      },
+      -- the side-effect (yuck!) of running this function is the chmod of the dotnet file.
+      -- it relies on the fact that subshells are in cached directories. our repeated
+      -- subshells for dotnetsdk (and nugetpackages) across continuations will be the same path.
+      function_ = {
+        args = {
+          -- TODO: When coreutils does not require Windows to run (through S7z.Windows7zExe), we can
+          -- avoid the system /bin/chmod and use the coreutils version ...
+          -- "$(get-object CommonsBase_Std.Coreutils@0.2.2 -s ${SLOTNAME.Release.execution_abi} -m ./coreutils.exe -f :exe)",         
+          -- "chmod",
+          "/bin/chmod",
+          "+x",
+          dotnetsdk .. "/dotnet",
+          dotnetsdk .. "/sdk/10.0.100-rc.2.25502.107/Roslyn/bincore/csc",
+        }
+      },
+      outputs = {
+        assets = {
+          {
+            slots = { "Release.Agnostic" },
+            paths = { "arch.txt" }
+          }
+        }
+      }
+    }
+  }
+  -- the workaround need to run, but we ignore its output
+  response.submit.expressions.files["ignorable-arch-txt"] =
+      "$(get-object " .. workaround .. " -s Release.Agnostic -f :file)"
+end
+
 function rules.Files(command, request)
   if command == "declareoutput" then
     local slot = assert(request.user.slot, "please provide `slot=SLOT`")
@@ -6073,14 +6129,41 @@ function M.run(options)
   local ctx = assert(options.ctx, "Expected `ctx` in options")
   local command = assert(ctx.command, "Expected `ctx = {command = '...'}` in options")
   local request = assert(ctx.request, "Expected `ctx = {request = { ... }}` in options")
+  local continue_ = ctx.continue_
   local userargs = ctx.arg or {}
   -- local json = require("buildjson")
-  -- print("run request:\n" .. json.encode(request, { indent = 1 }))
+  -- print("run request for command " ..
+  --   command .. " and continue_ " .. tostring(continue_) .. ":\n" .. json.encode(request, { indent = 1 }))
   if command == "submit" then
-    local response = CommonsBase_Std__Dotnet_SDK.common_submit_response()
+    local response
+    if request.execution.OSFamily == "macos" or request.execution.OSFamily == "linux" then
+      -- on macOS and Linux, we need to do a workaround to make dotnet executable
+      if continue_ == "start" then
+        response = CommonsBase_Std__Dotnet_SDK.common_submit_response()
+        response.submit.andthen = {
+          continue_ = { state = "workaround-dotnet-executable" }
+        }
+      else -- continue_ == "workaround-dotnet-executable"
+        response = CommonsBase_Std__Dotnet_SDK.common_submit_response()
+        CommonsBase_Std__Dotnet_SDK.workaround_make_dotnet_executable(response, {
+          dotnetsdk = request.io.realpath(request.continued.dotnetsdk)
+        })
+        request.io.close(request.continued.dotnetsdk)
+        request.io.close(request.continued.nugetpackages)
+        request.io.close(request.continued.scriptpath)
+        -- TODO: is this a bug? should we be required to clear the variables after closing?
+        request.continued.dotnetsdk = nil
+        request.continued.nugetpackages = nil
+        request.continued.scriptpath = nil
+      end
+    else
+      -- TODO: once workaround issue is fixed, this is the only branch needed
+      response = CommonsBase_Std__Dotnet_SDK.common_submit_response()
+    end
     response.submit.values = response.submit.values or {}
     response.submit.values.bundles = { request.srcfile.bundle }
-    response.submit.expressions.files["scriptpath"] = "$(" .. request.srcfile.getasset .. " -f :file:" .. request.srcfile.basename .. ")"
+    response.submit.expressions.files["scriptpath"] = "$(" ..
+        request.srcfile.getasset .. " -f :file:" .. request.srcfile.basename .. ")"
     return response
   elseif command == "ui" then
     local dotnetsdk = request.io.realpath(request.continued.dotnetsdk)
