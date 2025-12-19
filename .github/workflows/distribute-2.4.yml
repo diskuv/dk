@@ -24,14 +24,6 @@ jobs:
             - name: Checkout project
               uses: actions/checkout@v5
 
-            - name: Exclude build artifacts from Windows Defender scans
-              shell: pwsh
-              # Avoids blocks in the t/p target PID directory:
-              #   Could not unzip `coreutils-0.2.2-i686-pc-windows-msvc/coreutils.exe` in `D:\a\dk\dk\target\dk\data\dk\val.1\airomxpq6etn2iupq5eqw2z3v726lnupg5f2sj3lziuevuvhrwj2a` to `t/p/2632/2i6b/m/coreutils-0.2.2-i686-pc-windows-msvc/coreutils.exe` from `D:\a\dk\dk` because file create failed.
-              run: |
-                New-Item -Path t\p -ItemType Directory -Force
-                Add-MpPreference -ExclusionPath "$PWD\t\p"
-
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
               with:
