@@ -8,8 +8,12 @@ Let's build the [ASCII art tutorial for C#](https://learn.microsoft.com/en-us/do
 
 The following should work on Windows using PowerShell, macOS and (soon) glibc-based Linux:
 
+<!-- $MDX skip -->
 ```console
-$ git clone --branch V2_4 https://github.com/diskuv/dk.git dksrc
+git clone --branch V2_4 https://github.com/diskuv/dk.git dksrc
+```
+
+```text
 Cloning into 'dksrc'...
 ```
 
@@ -19,9 +23,10 @@ The environment variable would work better with mdx generation of README.md.
 Manual regeneration? Prefix with `yes |`, disable MDX skip and sanitize paths (maybe do that in 010 script) -->
 <!-- $MDX skip -->
 ```console
-$ dksrc/dk0 --20251217 -nosysinc run dksrc/samples/2025/AsciiArt.cs --delay 1000 "This is line one" "This is another line" "This is the last line"
+dksrc/dk0 --20251217 -nosysinc run dksrc/samples/2025/AsciiArt.cs --delay 1000 "This is line one" "This is another line" "This is the last line"
+```
 
-
+```text
 The script `dksrc/samples/2025/AsciiArt.cs` (OurScript_Std.Xewxvzupgqaehc3qi.Run@0.1.0+bn-20250101000000)
 is requesting permission to run:
   Program: $CACHED/dotnet
