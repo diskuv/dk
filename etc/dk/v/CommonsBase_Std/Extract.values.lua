@@ -68,7 +68,7 @@ end
 
 function CommonsBase_Std__Extract__0_1_0.untar_linux(p)
   local toyboxexe = string.format(
-    "$(get-object CommonsBase_Std.Toybox@0.8.9 -s Release.%s -m ./toybox -f :exe)", p.abi)
+    "$(get-object CommonsBase_Std.Toybox@0.8.9 -s Release.%s -m ./toybox -f :exe:toybox.exe)", p.abi)
   local compressflag = ""
   if p.gzip then
     compressflag = "z"

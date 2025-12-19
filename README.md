@@ -4,14 +4,14 @@ Motivating problem: You have technical users, many of whom are not software engi
 
 Let's pretend your application is the [official ASCII art application for C# .NET](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/file-based-programs). You evaluate the commons ways to run your software:
 
-| You can                                             | but                                                                   |
-| --------------------------------------------------- | ------------------------------------------------------------------------  |
-| compile your application and distribute executables | users can't customize a prebuilt executable                                                  |
-| ask users to install a language SDK and runtime     | not all users are software engineers with Administrator/root access     |
+| You can                                             | but                                                                       |
+| --------------------------------------------------- | ------------------------------------------------------------------------- |
+| compile your application and distribute executables | users can't customize a prebuilt executable                               |
+| ask users to install a language SDK and runtime     | not all users are software engineers with Administrator/root access       |
 | build `Docker` containers                           | Windows users have corporate and school PCs without Administrator access  |
 |                                                     | ... and containers are hard to customize                                  |
 |                                                     | ... and running GUIs and accessing GPUs/AI is difficult inside containers |
-| write a `nix` package and distribute a `nix` cache  | most desktop users are not Linux users                                       |
+| write a `nix` package and distribute a `nix` cache  | most desktop users are not Linux users                                    |
 
 **Instead** tell your users to run the following on Windows with PowerShell or in a macOS shell:
 
