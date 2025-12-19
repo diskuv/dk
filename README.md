@@ -8,7 +8,7 @@ Let's build the [ASCII art tutorial for C#](https://learn.microsoft.com/en-us/do
 
 The following should work on Windows using PowerShell, macOS and glibc-based Linux:
 
-```sh
+```console
 $ git clone --branch V2_4 https://github.com/diskuv/dk.git dksrc
 Cloning into 'dksrc'...
 ```
@@ -18,7 +18,7 @@ So mdx is disabled until dk0 has an option and environment variable to accept th
 The environment variable would work better with mdx generation of README.md.
 Manual regeneration? Prefix with `yes |`, disable MDX skip and sanitize paths (maybe do that in 010 script) -->
 <!-- $MDX skip -->
-```sh
+```console
 $ dksrc/dk0 --20251217 -nosysinc run dksrc/samples/2025/AsciiArt.cs --delay 1000 "This is line one" "This is another line" "This is the last line"
 
 
@@ -116,7 +116,7 @@ This is *not* a toy problem! We would need the 7zip executable if our second tas
 
 For unpacking the 7zip executables, we'll submit a form several times (each time with different parameters):
 
-```sh
+```console
 $ dksrc/dk0 get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_x86_64 -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
 [up-to-date] CommonsBase_Std.S7z@25.1.0+bn-20250101000000 -s Release.Darwin_x86_64
 ```
@@ -175,7 +175,7 @@ The *don't be stupid* goal, combined with avoiding README-itis, are the reasons 
 3. OpenBSD signify-based keys to identify software. The reference implementation generates build keys on first build, and they can be cached in CI if you trust your CI vendor:
 
    <!-- $MDX skip -->
-   ```sh
+   ```console
    $ dksrc/dk0 ...
    [signify] New build key pair in xxx/build.pub and xxx/build.sec ...
    [signify] Distribute key pair among trusted coworkers only!
@@ -349,7 +349,7 @@ Let's review the command line options:
 and with that we do:
 
 <!-- $MDX skip -->
-```sh
+```console
 # You should have done this already in earlier steps. If not, do it now:
 # $ git clone https://github.com/diskuv/dk.git dksrc
 
@@ -379,13 +379,13 @@ Let's rerun it with a new option:
 and we get:
 
 <!-- $MDX skip -->
-```sh
+```console
 $ dksrc/dk0 --autofix -I 7zip-project -x 7zip-org:subpath: get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 ...
 autofix applied to `7zip-project/OurZip_Demo.S7z1a.S7zr.values.jsonc`
 ```
 
-```sh
+```console
 $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 [up-to-date] OurZip_Demo.S7z1a.Assets@25.1.0+bn-20250101000000 -p 7zr.exe
 ```
@@ -393,7 +393,7 @@ $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-asset 'OurZip_Demo.S7z1a.As
 Let inspect the file. The `file` commands work only on Linux, but on Windows you can do a `7zr.exe --help`.
 
 <!-- $MDX os_type<>Win32 -->
-```sh
+```console
 $ file target/7zr.exe
 target/7zr.exe: PE32 executable (console) Intel 80386, for MS Windows, 6 sections
 ```
@@ -516,7 +516,7 @@ when you forgot to declare files or you declare too many files.
 
 We'll use `get-object` to submit our new form. With that we get:
 
-```sh
+```console
 $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z1b.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/7zr-win64
 [up-to-date] OurZip_Demo.S7z1b.S7zr@25.1.0+bn-20250101000000 -s Release.Windows_x86_64
 ```
@@ -524,7 +524,7 @@ $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z1b.S
 If we inspect the target directory, we see all the files from the object in Unix:
 
 <!-- $MDX os_type<>Win32 -->
-```sh
+```console
 $ ls target/7zr-win64 | sort
 7zr.exe
 ```
@@ -532,7 +532,7 @@ $ ls target/7zr-win64 | sort
 and on Windows:
 
 <!-- $MDX skip -->
-```sh
+```console
 $ dir target/7zr-win64
     Directory: target\7zr-win64
 
@@ -669,7 +669,7 @@ We'll be using a new command `get-bundle`.
 
 With that we get:
 
-```sh
+```console
 $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -d target/7zr-assets
 [progress]: dla 7zip-org:7zr.exe ...
 [progress]:   dlb https://github.com/ip7z/7zip/releases/download/25.01 ...
@@ -695,7 +695,7 @@ $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-bundle 'OurZip_Demo.S7z1c.A
 If we inspect the target directory, we see all the files from the bundle in Unix:
 
 <!-- $MDX os_type<>Win32 -->
-```sh
+```console
 $ ls target/7zr-assets | sort
 7z2501-arm.exe
 7z2501-arm64.exe
@@ -711,7 +711,7 @@ $ ls target/7zr-assets | sort
 and on Windows:
 
 <!-- $MDX skip -->
-```sh
+```console
 $ dir target/7zr-assets
 
     Directory: target\7zr-assets
@@ -734,7 +734,7 @@ Notice that all of the dates are set to Jan 1, 1980 for reproducibility.
 What happens if we output the bundle to a file rather than a directory.
 That is, what if we replaced `-d target/7zr-assets` with `-f target/7zr-file`?
 
-```sh
+```console
 $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -f target/7zr-file
 [progress]: dla 7zip-org:7zr.exe ...
 [progress]:   dlb https://github.com/ip7z/7zip/releases/download/25.01 ...
@@ -759,7 +759,7 @@ $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-bundle 'OurZip_Demo.S7z1c.A
 
 The file is a zip archive per the [Saving Assets section of the specification](docs/SPECIFICATION.md#saving-assets).
 
-```sh
+```console
 $ unzip -l target/7zr-file
 Archive:  target/7zr-file
   Length      Date    Time    Name
@@ -861,7 +861,7 @@ The `precommands` should be familiar to you from the previous two sections.
 The `function` runs the command:
 
 <!-- $MDX skip -->
-```sh
+```console
 bin/${SLOTNAME.request}/7zr.exe x -o${SLOT.request} 7z-${SLOTNAME.request}.exe 7z.exe
 ```
 
@@ -871,7 +871,7 @@ So if we were to submit this form with `get-object FORM -s Release.Windows_x86_6
 following command would be run:
 
 <!-- $MDX skip -->
-```sh
+```console
 bin/Release.Windows_x86_64/7zr.exe x -o${SLOT.Release.Windows_x86_64} 7z-Release.Windows_x86_64.exe 7z.exe
 ```
 
@@ -896,7 +896,7 @@ We need to do three things to solve that problem:
 But for now we can submit the form if we are on Windows. We'll submit the `Release.Windows_arm64` slot:
 
 <!-- $MDX os_type=Win32 -->
-```sh
+```console
 $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z2.Windows7zExe@25.1.0' -s Release.Windows_arm64 -d target/7zexe-winarm64
 [up-to-date] OurZip_Demo.S7z2.Windows7zExe@25.1.0+bn-20250101000000 -s Release.Windows_arm64
 ```
@@ -904,7 +904,7 @@ $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z2.Wi
 If we inspect the target directory, we see all the files from the object on Windows:
 
 <!-- $MDX skip -->
-```sh
+```console
 $ dir target/7zexe-winarm64
 
     Directory: target\7zexe-winarm64
@@ -916,7 +916,7 @@ Mode                 LastWriteTime         Length Name
 
 And if we inspected that `7z.exe` with the UNIX command `file`, we'd see:
 
-```sh
+```console
 $ file target/7zexe-winarm64/7z.exe
 target/7zexe-winarm64/7z.exe: PE32+ executable (console) Aarch64, for MS Windows, 6 sections
 ```
@@ -1005,7 +1005,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
 The use of `7zr.exe` means we can only run this step on Windows hardware, even though we produce output for non-Windows slots like `Release.Linux_arm64`:
 
 <!-- $MDX os_type=Win32 -->
-```sh
+```console
 $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z3.MacLinux7zTar@25.1.0' -s Release.Linux_arm64 -d target/7ztar-linuxarm64
 [up-to-date] OurZip_Demo.S7z3.MacLinux7zTar@25.1.0+bn-20250101000000 -s Release.Linux_arm64
 ```
@@ -1105,7 +1105,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
 The use of `7z.exe` means we can only run this step on Windows hardware, even though we produce output for non-Windows slots like `Release.Darwin_x86_64`:
 
 <!-- $MDX os_type=Win32 -->
-```sh
+```console
 $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z4.MacLinux7zExe@25.1.0' -s Release.Darwin_x86_64 -d target/7zexe-macintel
 [up-to-date] OurZip_Demo.S7z4.MacLinux7zExe@25.1.0+bn-20250101000000 -s Release.Darwin_x86_64
 ```
@@ -1122,7 +1122,7 @@ Mode                 LastWriteTime         Length Name
 
 Using the UNIX command `file` we see that the CPU architecture matches what we requested:
 
-```sh
+```console
 $ file target/7zexe-macintel/7zz
 target/7zexe-macintel/7zz: Mach-O universal binary with 2 architectures: [x86_64:\012- Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>] [\012- arm64:\012- Mach-O 64-bit arm64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>]
 ```
@@ -1190,12 +1190,12 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
 
 With that our users can grab the `7zz.exe` executable for any operating system and CPU architecture:
 
-```sh
+```console
 $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -d target/7z-linux64
 [up-to-date] OurZip_Demo.S7z5.S7zExe@25.1.0+bn-20250101000000 -s Release.Linux_x86_64
 ```
 
-```sh
+```console
 $ ls target/7z-linux64
 7zz.exe
 $ file target/7z-linux64/7zz.exe
@@ -1204,7 +1204,7 @@ target/7z-linux64/7zz.exe: ELF 64-bit LSB pie executable, x86-64, version 1 (SYS
 
 Since `7zz.exe` is a standalone executable that doesn't need any DLLs or `.so` (except standard GLIBC system libraries on Linux), we can use the `-m MEMBER` option to directly fetch the `7zz.exe` executable:
 
-```sh
+```console
 $ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
 [up-to-date] OurZip_Demo.S7z5.S7zExe@25.1.0+bn-20250101000000 -s Release.Linux_x86_64
 $ file target/7zz.exe
@@ -1394,7 +1394,7 @@ The always-failing form is the following (you don't need to create your own copy
 Enter the form with:
 
 <!-- $MDX skip -->
-```sh
+```console
 $ dksrc/dk0 -I dk0/docs/7zip-tutorial -x 7zip-org:subpath: -- enter-object 'OurZip_Demo.S7z9.Debug@25.1.0' -s Release.Linux_arm64
 
 PS OurZip_Demo.S7z9.Debug@25.1.0+bn-20250101000000 -s Release.Linux_arm64>
