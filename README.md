@@ -1,4 +1,4 @@
-# dk - A terribly uninteresting build system
+# dk - A build system
 
 Motivating problem: You have technical users, many of whom are not software engineers. They need to customize your software on their own PCs.
 
@@ -92,7 +92,7 @@ We'll start explaining the build system by unpackaging the popular zip compressi
 
 ---
 
-- [dk - A terribly uninteresting build system](#dk---a-terribly-uninteresting-build-system)
+- [dk - A build system](#dk---a-build-system)
   - [Introduction](#introduction)
   - [Concepts and Theory](#concepts-and-theory)
     - [Theory](#theory)
