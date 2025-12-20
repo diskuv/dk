@@ -29,6 +29,10 @@ opam show mdx || opam install mdx
 rm -rf dksrc/
 git clone --branch V2_4 https://github.com/diskuv/dk.git dksrc
 
+# Clear t/ and target/ directories for reproducibility of --trial
+rm -rf t/ target/
+
+# Mimic that the user created the files for the 7zip-project.
 rm -rf 7zip-project/
 install -d 7zip-project
 set +f
