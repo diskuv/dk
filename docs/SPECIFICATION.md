@@ -4135,20 +4135,23 @@ where the parsed AST can be generated on-demand. <https://github.com/diskuv/dk/i
 
 The value file is:
 
-| Offset (bytes)         | Size (bytes) | What                               |
-| ---------------------- | ------------ | ---------------------------------- |
-| 0                      | 4            | Magic number. `44 4B 48 5A` (DKHZ) |
-| 4                      | 4            | Reserved. `00 00 00 00`            |
-| 8                      | 4            | size (*i*) of asset id             |
-| 12                     | 4            | size (*p*) of asset path           |
-| 16                     | 8            | size (*n*) of [Central Directory]  |
-| 24                     | i            | asset id = `MODULE@VERSION`        |
-| 24 + i                 | p            | asset path                         |
-| CD = align(24 + i + p) | n            | [Central Directory]                |
+| Offset (bytes)                | Size (bytes) | What                               |
+| ----------------------------- | ------------ | ---------------------------------- |
+| 0                             | 4            | Magic number. `44 4B 48 5A` (DKHZ) |
+| 4                             | 4            | Reserved. `00 00 00 00`            |
+| 8                             | 4            | size (*i*) of asset id             |
+| 12                            | 4            | size (*p*) of asset path           |
+| 16                            | 8            | size (*n*) of [Central Directory]  |
+| 24                            | i            | asset id = `MODULE@VERSION`        |
+| 24 + i                        | p            | asset path                         |
+| FIRST_OFS = align(24 + i + p) | 8            | offset of first entry              |
+| CD = FIRST_OFS + 8            | n            | [Central Directory]                |
 
 where:
 
 - **`CD`** is `24 + i + p` aligned up to the nearest 8 byte boundary.
+
+The offset the first entry is typically zero (0) but for self-extracting archives it will be nonzero.
 
 All sizes are little-endian.
 
