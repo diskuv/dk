@@ -693,15 +693,92 @@
                                 },
                                 "checksum": {
                                     "type": "object",
+                                    "description": "The checksum of the asset. Prefer 'blake2b256' if possible, or 'sha256' if not possible. 'sha1' is only for compatibility with git.",
                                     "properties": {
                                         "sha256": {
                                             "type": "string",
                                             "description": "The SHA-256 checksum of the asset, in lowercase hexadecimal."
+                                        },
+                                        "sha1": {
+                                            "type": "string",
+                                            "description": "The SHA-1 checksum of the asset, in lowercase hexadecimal."
+                                        },
+                                        "blake2b256": {
+                                            "type": "string",
+                                            "description": "The BLAKE2B-256 checksum of the asset, in lowercase hexadecimal. The BLAKE hashes are not suspectible to length extension attacks."
                                         }
                                     },
-                                    "required": [
-                                        "sha256"
+                                    "oneOf": [
+                                        {
+                                            "required": ["sha256"]
+                                        },
+                                        {
+                                            "required": ["sha1"]
+                                        },
+                                        {
+                                            "required": ["blake2b256"]
+                                        }
                                     ]
+                                },
+                                "indexes": {
+                                    "type": "array",
+                                    "description": "Optional indexes that are included at the end of the asset file to speed up access. For example, a zipfile index.",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "type": "string",
+                                                "description": "The type of index. Currently, the only supported type is `zip`."
+                                            },
+                                            "zip": {
+                                                "type": "object",
+                                                "description": "Parameters for a zipfile index.",
+                                                "properties": {
+                                                    "local_offset": {
+                                                        "type": "integer",
+                                                        "description": "The byte offset in the asset file where the zip file local headers start. Defaults to zero (0)."
+                                                    },
+                                                    "central_offset": {
+                                                        "type": "integer",
+                                                        "description": "The byte offset in the asset file where the zip file central directory starts."
+                                                    },
+                                                    "central_size": {
+                                                        "type": "integer",
+                                                        "description": "The size in bytes of the zip file central directory."
+                                                    },
+                                                    "central_checksum": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "blake2b256": {
+                                                                "type": "string",
+                                                                "description": "The BLAKE2B-256 checksum of the asset, in lowercase hexadecimal. The BLAKE hashes are not suspectible to length extension attacks for the central directory at the end of the zip file."
+                                                            }
+                                                        },
+                                                        "oneOf": [
+                                                            {
+                                                                "required": ["blake2b256"]
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "central_offset",
+                                                    "central_size"
+                                                ]
+                                            }
+                                        },
+                                        "additionalProperties": false,
+                                        "required": [
+                                            "type"
+                                        ],
+                                        "oneOf": [
+                                            {                                                
+                                                "required": [
+                                                    "zip"
+                                                ]
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             "required": [

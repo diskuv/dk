@@ -224,6 +224,22 @@
         },
         {
           "origin": "github-release",
+          "path": "gh_2.81.0_macOS_amd64.zip",
+          "size": 18960315,
+          "checksum": {
+            "sha256": "c93bc9adbaf768a2789b60360069be8a623bef94df60ae5344f2b57ad8ae024f"
+          },
+          "indexes": [{
+            "type": "zip",
+            "zip": {
+              "local_offset": 0,
+              "central_offset": 18960300,
+              "central_size": 15
+            }
+          }]
+        },
+        {
+          "origin": "github-release",
           "path": "dk-darwin_arm64",
           "size": 8810960,
           "checksum": {

@@ -192,12 +192,14 @@
     - [Value Store](#value-store)
       - [v - parsed values.json AST](#v---parsed-valuesjson-ast)
       - [z - zip file](#z---zip-file)
+      - [BLD - Build Metadata](#bld---build-metadata)
       - [V256 - SHA256 of Values File](#v256---sha256-of-values-file)
       - [P256 - SHA256 of Asset](#p256---sha256-of-asset)
       - [Z256 - SHA256 of Zip Archive File](#z256---sha256-of-zip-archive-file)
       - [CT - Compatibility Tag](#ct---compatibility-tag)
       - [VCI - Values Canonical ID](#vci---values-canonical-id)
       - [VCK - Values Checksum](#vck---values-checksum)
+      - [FRM - Form](#frm---form)
   - [Evaluation](#evaluation)
 
 ## Introduction
@@ -1455,7 +1457,7 @@ Get the contents of the slot `REQUEST_SLOT` for the object uniquely identified b
 | Option              | Description                                                                                                                 |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `-f :file:BASENAME` | Place object in an [anonymous regular file](#anonymous-regular-files--f-filebasename) and return its filepath               |
-| `-f :exe:BASENAME`  | Place object in an [anonymous executable file](#anonymous-executable-files--f-exe) and return its filepath                  |
+| `-f :exe:BASENAME`  | Place object in an [anonymous executable file](#anonymous-executable-files--f-exebasename) and return its filepath          |
 | `-d :`              | The object must be a zip archive, and its contents are extracted into an [anonymous directory](#anonymous-directories--d-). |
 | `-n STRIP`          | See [Option: [-n STRIP]](#option--n-strip)                                                                                  |
 | `-m MEMBER`         | See [Option: [-m MEMBER](#option--m-member)]                                                                                |
@@ -1473,7 +1475,7 @@ Submit the JSON constructed from `CLI_FORM_DOC` to the rule uniquely identified 
 | Option              | Description                                                                                                                 |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `-f :file:BASENAME` | Place object in an [anonymous regular file](#anonymous-regular-files--f-filebasename) and return its filepath               |
-| `-f :exe:BASENAME`  | Place object in an [anonymous executable file](#anonymous-executable-files--f-exe) and return its filepath                  |
+| `-f :exe:BASENAME`  | Place object in an [anonymous executable file](#anonymous-executable-files--f-exebasename) and return its filepath          |
 | `-d :`              | The object must be a zip archive, and its contents are extracted into an [anonymous directory](#anonymous-directories--d-). |
 | `-n STRIP`          | See [Option: [-n STRIP]](#option--n-strip)                                                                                  |
 | `-m MEMBER`         | See [Option: [-m MEMBER](#option--m-member)]                                                                                |
@@ -1493,7 +1495,7 @@ Get the contents of the asset at `FILE_PATH` for the bundle `MODULE@VERSION`.
 | Option              | Description                                                                                                                |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `-f :file:BASENAME` | Place asset in an [anonymous regular file](#anonymous-regular-files--f-filebasename) and return its filepath               |
-| `-f :exe:BASENAME`  | Place asset in an [anonymous executable file](#anonymous-executable-files--f-exe) and return its filepath                  |
+| `-f :exe:BASENAME`  | Place asset in an [anonymous executable file](#anonymous-executable-files--f-exebasename) and return its filepath          |
 | `-d :`              | The asset must be a zip archive, and its contents are extracted into an [anonymous directory](#anonymous-directories--d-). |
 | `-n STRIP`          | See [Option: [-n STRIP]](#option--n-strip)                                                                                 |
 | `-m MEMBER`         | See [Option: [-m MEMBER](#option--m-member)]                                                                               |
@@ -4075,17 +4077,17 @@ The value store is a key-value table stored on disk.
 
 The **value type** is a single letter that categorizes what the value is:
 
-| Value Type | What                      | Docs                      |
-| ---------- | ------------------------- | ------------------------- |
-| `o`        | object                    | [Objects](#objects)       |
-| `b`        | bundle                    | [Bundles](#bundles)       |
-| `a`        | asset                     | [Assets](#assets)         |
-| `z`        | asset (large zip files)   | [Assets](#assets)         |
-| `j`        | values.json file          | [JSON Files](#json-files) |
-| `l`        | values.lua file           | [Lua Scripts](#scripts)   |
-| `v`        | (cache) parsed values AST | [JSON Files](#json-files) |
-| `c`        | built-in constants        | [Objects](#objects)       |
-| `s`        | source file               | FILLMEIN                  |
+| Value Type | What                      | Docs                                     |
+| ---------- | ------------------------- | ---------------------------------------- |
+| `o`        | object                    | [Objects](#objects)                      |
+| `b`        | bundle                    | [Bundles](#bundles)                      |
+| `a`        | asset                     | [Assets](#assets)                        |
+| `i`        | index files               | [Objects](#objects) or [Assets](#assets) |
+| `j`        | values.json file          | [JSON Files](#json-files)                |
+| `l`        | values.lua file           | [Lua Scripts](#scripts)                  |
+| `v`        | (cache) parsed values AST | [JSON Files](#json-files)                |
+| `c`        | built-in constants        | [Objects](#objects)                      |
+| `s`        | source file               | FILLMEIN                                 |
 
 All value types are *lowercase* for support on case-insensitive file systems.
 
@@ -4100,13 +4102,28 @@ The value will be of a type that depends on the build key:
 | Build Key                             | Value Type | Id Material                                | Value File                                                               |
 | ------------------------------------- | ---------- | ------------------------------------------ | ------------------------------------------------------------------------ |
 | [asset](#assets)                      | `a`        | [P256](#p256---sha256-of-asset)            | contents of asset                                                        |
-|                                       | `z`        | [Z256](#z256---sha256-of-zip-archive-file) | [zip file central directory](#z---zip-file)                              |
+|                                       |            | `::` [BLD](#bld---build-metadata)          |                                                                          |
+|                                       | `i`        | [Z256](#z256---sha256-of-zip-archive-file) | [zip file index](#z---zip-file)                                          |
 | [bundle](#bundles)                    | `b`        | [Z256](#z256---sha256-of-zip-archive-file) | contents of zip archive file                                             |
+|                                       |            | `::` [BLD](#bld---build-metadata)          |                                                                          |
+| [object](#objects)                    | `o`        | [FRM](#frm---form)                         | output of form function                                                  |
+|                                       |            | `::<SLOT>`                                 |                                                                          |
+|                                       |            | `::` [BLD](#bld---build-metadata)          |                                                                          |
+|                                       | `i`        | [Z256](#z256---sha256-of-zip-archive-file) | [zip file index](#z---zip-file)                                          |
 | [V256](#v256---sha256-of-values-file) | `j`        | [V256](#v256---sha256-of-values-file)      | dos2unix json `{schema_version:,forms:,bundles:}`                        |
 | [V256](#v256---sha256-of-values-file) | `l`        | [V256](#v256---sha256-of-values-file)      | dos2unix lua script                                                      |
 | [VCI](#vci---values-canonical-id)     | `v`        | [VCK](#vck---values-checksum)              | [parsed `{schema_version:,forms:,bundles:}`](#v---parsed-valuesjson-ast) |
 
-If the asset value is known¹ to be a zip file the build system implementation will produce both the `z` value type *and* the `a` value type. A build system implementation may choose to lazily extract entries using the `z` value type which serves as an index over the `a` value type. The `z` value type optimization avoids the overhead of preemptively downloading and unzip all of the possibly huge `a` zip file. However, for the `z` index to provide a benefit, the build system implementation that reads the asset value must support zipfile assets *and* the asset URL must support byte range lookups. For example, if the assets are on a [web server](#web-assets) that does not support the [HTTP Range header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Range), the entire `a` zip file will be downloaded.
+To allow byte range optimized reading of zip files, special rules are in place when fetching assets and objects:
+
+- When fetching an asset, the fetched build system value is a composite `Optional (zip)` and `Always (asset)`.
+- When fetching an object, the fetched build system value is a composite `Optional (zip)` and `Always (object)`.
+- If the object value is known¹ to be a zip file the build system implementation will produce both the `i` value type *and* the `o` value type.
+- If the asset value is known¹ to be a zip file the build system implementation will produce both the `i` value type *and* the `a` value type.
+
+A build system implementation may choose to lazily extract entries using the `Optional (zip)` value (if present) which serves as an index over the `Always (*)` value.
+The `Optional (zip)` value avoids the overhead of preemptively downloading and unzip all of the possibly huge `Always (*)` zip file.
+However, for the `Optional (zip)` value to provide a benefit, the value URL must support byte range lookups. For example, if assets are on a [web server](#web-assets) that does not support the [HTTP Range header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Range), the entire `Always (asset)` zip file will be downloaded.
 
 ¹: Currently only value store assets of [distributed value stores](#distributed-value-stores) are known to be zip files. Other asset files are [1-to-1 with their SHA256 identifiers](#asset-identity), and so can't be deterministically known to be zip files.
 
@@ -4123,33 +4140,37 @@ A `values.json` is parsed into an AST, and the AST is persisted directly from OC
 The build system will verify the signature of the AST before loading the AST into memory.
 If the signature does not match the local build key, or if the AST is incompatible with the memory layout of the current process (see [compatibility tag](#ct---compatibility-tag)), the `j` values.json file is fetched and re-parsed into a new AST.
 
-<https://github.com/diskuv/dk/issues/44>: *This is fixed*. Currently in the reference implementation the `v` AST is present in the distributable valuestore.
-Distribution is only beneficial when the memory layout of the remote build system is compatible with the memory layout of the local build system,
-and even then the parse time must be greater than the added download time.
-
-**Security Note**: Distributed parsed AST adds a direct entry point into the build system's memory layout.
-So other implementations and a future reference implementation should keep the AST in a local, non-distributable cache
-where the parsed AST can be generated on-demand. <https://github.com/diskuv/dk/issues/44>
-
 #### z - zip file
 
-The value file is:
+The value file is the following for an asset:
 
-| Offset (bytes)                | Size (bytes) | What                               |
-| ----------------------------- | ------------ | ---------------------------------- |
-| 0                             | 4            | Magic number. `44 4B 48 5A` (DKHZ) |
-| 4                             | 4            | Reserved. `00 00 00 00`            |
-| 8                             | 4            | size (*i*) of asset id             |
-| 12                            | 4            | size (*p*) of asset path           |
-| 16                            | 8            | size (*n*) of [Central Directory]  |
-| 24                            | i            | asset id = `MODULE@VERSION`        |
-| 24 + i                        | p            | asset path                         |
-| FIRST_OFS = align(24 + i + p) | 8            | offset of first entry              |
-| CD = FIRST_OFS + 8            | n            | [Central Directory]                |
+| Offset (bytes)                 | Size (bytes) | What                               |
+| ------------------------------ | ------------ | ---------------------------------- |
+| 0                              | 4            | Magic number. `44 4B 49 5A` (DKIZ) |
+| 4                              | 4            | `00 00 00 00`                      |
+| 8                              | 4            | size (*i*) of asset modver         |
+| 12                             | 4            | size (*i2*) of asset path          |
+| 16                             | i            | asset modver = `MODULE@VERSION`    |
+| 16 + i                         | i2           | asset path                         |
+| FIRST_OFS = align(16 + i + i2) | 8            | offset of first entry              |
+| CD = FIRST_OFS + 8             | n            | [Central Directory]                |
+
+and the following for an object:
+
+| Offset (bytes)                 | Size (bytes) | What                               |
+| ------------------------------ | ------------ | ---------------------------------- |
+| 0                              | 4            | Magic number. `44 4B 49 5A` (DKIZ) |
+| 4                              | 4            | `00 00 00 01`                      |
+| 8                              | 4            | size (*i*) of object modver        |
+| 12                             | 4            | size (*i2*) of object slot         |
+| 16                             | i            | object modver = `MODULE@VERSION`   |
+| 16 + i                         | i2           | object slot                        |
+| FIRST_OFS = align(16 + i + i2) | 8            | offset of first entry              |
+| CD = FIRST_OFS + 8             | n            | [Central Directory]                |
 
 where:
 
-- **`CD`** is `24 + i + p` aligned up to the nearest 8 byte boundary.
+- **`FIRST_OFS`** is `24 + i + i2` aligned up to the nearest 8 byte boundary.
 
 The offset the first entry is typically zero (0) but for self-extracting archives it will be nonzero.
 
@@ -4176,12 +4197,18 @@ The following [Central Directory] fields are modified:
 | Classic EOCD                                   | 6      | 2    | 1 (Disk where central directory starts)                                  |
 | Classic EOCD                                   | 8      | 8    | CD (Offset of start of central directory, relative to start of archive)  |
 
-The modifications mean the `z` value files are valid ZIP files. In other words:
+The modifications mean the `i` value files are valid ZIP files. In other words:
 
-- the `z` file becomes the second disk containing only the directory entries
+- the `i` file becomes the second disk containing only the directory entries
 - the original asset file, if downloaded in its entirety, is the first disk
 
 [Central Directory]: https://en.wikipedia.org/wiki/ZIP_(file_format)#Structure
+
+#### BLD - Build Metadata
+
+The dot (`.`) separated build metadata from the semver version.
+
+For example, `OurZip_Demo.S7z2.Windows7zExe@25.1.0+bn-20250101000000+diff` has build metadata `bn-20250101000000.diff`.
 
 #### V256 - SHA256 of Values File
 
@@ -4224,6 +4251,14 @@ The hex-encoded SHA256 of the `values.json` *canonicalized* JSON, stripped of al
 The hex-encoded SHA256 of the marshalled AST of the carriage-return-stripped `values.json`.
 
 The stripping of carriage returns occurs before the CST and AST parsing, so that any serialized AST uses the byte positions of the Unix-encoded JSON.
+
+#### FRM - Form
+
+The concatenation of:
+
+- [VCI](#vci---values-canonical-id) for the `values.json` defining the form
+- `|form|`
+- `MODULE@VERSION`
 
 ## Evaluation
 
