@@ -19,7 +19,7 @@ All assets are stored in [CommonsBase_Std.S7z.Bundle], which is defined in [Comm
 
 */
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
   "schema_version": {
     "major": 1,
     "minor": 0

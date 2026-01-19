@@ -1,7 +1,7 @@
 // Testing:
 // -I etc/dk/v --trust-local-package CommonsBase_Dotnet --verbose --autofix get-object CommonsBase_Dotnet.SDK@10.0.100-rc.2.25502.107 -s Release.Windows_x86_64 -d target/dotnetw64
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
   "forms": [
     {

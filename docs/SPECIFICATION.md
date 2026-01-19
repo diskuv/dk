@@ -221,7 +221,7 @@ Multiple build configurations can be composed through **precommands** that are l
 ```json
 // filename: producer.values.json
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
   "bundles": [
     {
@@ -255,7 +255,7 @@ Multiple build configurations can be composed through **precommands** that are l
 ```json
 // filename: consumer.values.json
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
   "forms": [
     {
@@ -316,7 +316,7 @@ Consider the following snippet from JSON build configuration that fetches PowerS
 
 ```json
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
   "forms": [
     {
@@ -471,7 +471,7 @@ For example:
 
 ```json
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
   "bundles": [
     {
@@ -509,7 +509,7 @@ For example:
 }
 ```
 
-A full-example is <https://github.com/diskuv/dk/blob/V2_4/etc/dk/i/CommonsBase_Std.values.json>.
+A full-example is <https://github.com/diskuv/dk/blob/V2_5/etc/dk/i/CommonsBase_Std.values.json>.
 
 The relevant sections of the specification are:
 
@@ -3109,7 +3109,7 @@ The output key can be a [form](#forms) key:
 function rules.YourFreeRule(command, request)
   if command == "declareoutput" then
     return {
-      -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/dk-rule-response.json",
+      -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json",
       declareoutput = {
         return_form = {
           -- parse [request.user] to calculate `id` and `slot`
@@ -3128,7 +3128,7 @@ or an [asset](#assets) key:
 function rules.YourFreeRule(command, request)
   if command == "declareoutput" then
     return {
-      -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/dk-rule-response.json",
+      -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json",
       declareoutput = {
         return_asset = {
           -- parse [request.asst] to calculate `id` and `path`
@@ -3379,7 +3379,7 @@ if command == "declareoutput" then
   }
 elseif command == "submit" && continue_ == "start" then
   return {
-    -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/dk-rule-response.json",
+    -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json",
     submit = {
       values = {
         forms = {
