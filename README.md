@@ -3,7 +3,7 @@
 Motivating problem: You distribute source code to users. You may be a package maintainer, a contractor who must give source to their customers, an educator with students, etc. And it has been difficult getting your users to build your software project.
 
 We'll use the [official ASCII art application for C# .NET](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/file-based-programs) as an example.
-*This isn't the best example; in the future it will be replaced with an example using C and OCaml!*
+*This isn't the best example; in the future it will be replaced with a much more useful example using C and OCaml!*
 
 There are conventional ways to allows your users to run your software project:
 
