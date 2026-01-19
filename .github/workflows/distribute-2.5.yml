@@ -43,8 +43,12 @@ jobs:
                     Release.Linux_x86
                     Release.Linux_x86_64
                   # TODO: rules (CommonsBase_Std.Extract.Untar@0.1.0)
+                  # nit: The intermediate forms CommonsBase_Std.S7z.* are exported since the README.md
+                  #      walks users through creating and using them on Windows.
                   forms: |
                     CommonsBase_Std.Coreutils@0.2.2                    
+                    CommonsBase_Std.S7z.S7zr@25.1.0
+                    CommonsBase_Std.S7z.Windows7zExe@25.1.0
                     CommonsBase_Std.S7z@25.1.0
                   use-cache: true
                   #   Use HEAD when not tagged
