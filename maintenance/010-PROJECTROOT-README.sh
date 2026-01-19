@@ -28,6 +28,9 @@ opam show mdx || opam install mdx
 # Clone dk source. First step in README.md.
 rm -rf dksrc/
 git clone --branch V2_4 https://github.com/diskuv/dk.git dksrc
+#   SYNC: 010-PROJECTROOT-README.sh 100-imports.sh
+dksrc/dk0 --trial import-github-l2 --repo diskuv/dk --tag 2.5.202601180000 --outdir dksrc/etc/dk/i/
+
 
 # Clear t/ and target/ directories for reproducibility of --trial
 rm -rf t/ target/
