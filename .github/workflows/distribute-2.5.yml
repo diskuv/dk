@@ -43,8 +43,9 @@ jobs:
                     Release.Linux_x86
                     Release.Linux_x86_64
                   forms: |
-                    CommonsBase_Std.S7z@25.1.0
                     CommonsBase_Std.Coreutils@0.2.2
+                    CommonsBase_Std.Extract@0.1.0
+                    CommonsBase_Std.S7z@25.1.0
                   use-cache: true
                   #   Use HEAD when not tagged
                   experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
