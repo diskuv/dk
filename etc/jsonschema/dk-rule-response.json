@@ -11,7 +11,7 @@
                 "$schema": {
                     "description": "The dk build system schema for responses from rule functions. Used by VS Code for auto-completions, but otherwise ignored.",
                     "type": "string",
-                    "default": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/dk-rule-response.json"
+                    "default": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json"
                 },
                 "return_form": {
                     "description": "The form value that will be returned from the rule function.",
@@ -70,12 +70,12 @@
                 "$schema": {
                     "description": "The dk build system schema for responses from rule functions. Used by VS Code for auto-completions, but otherwise ignored.",
                     "type": "string",
-                    "default": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/dk-rule-response.json"
+                    "default": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json"
                 },
                 "values": {
                     "type": "object",
                     "description": "Values to be added to the valuestore and to the task graph. The `forms[].function` field may be written as `forms[].function_` to avoid conflicts with the Lua `function` keyword.",
-                    "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/dk-values.json"
+                    "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json"
                 },
                 "expressions": {
                     "type": "object",

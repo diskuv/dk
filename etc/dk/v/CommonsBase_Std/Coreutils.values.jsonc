@@ -3,7 +3,7 @@
 // Testing distribution:
 //  dk0 get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.Windows_x86 -d target/coreutilswin64
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
   "schema_version": { "major": 1, "minor": 0 },
   "forms": [
     {

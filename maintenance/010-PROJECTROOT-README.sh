@@ -19,15 +19,17 @@ cd "$(dirname "$0")/.."
 # Follow steps in https://github.com/realworldocaml/mdx ...
 opam show mdx || opam install mdx
 
-# Hack dk0 2.4.2.12 until 2.4.2.13 is built
-# if [ -x ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe ]; then
-#     echo "SECURITY WARNING: Using local build of dk0" >&2
-#     install -v ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe "$LOCALAPPDATA/Programs/dk0/dk0exe-2.4.2.12-windows_x86_64/mlfshell.exe"
-# fi
-
 # Clone dk source. First step in README.md.
 rm -rf dksrc/
-git clone --branch V2_4 https://github.com/diskuv/dk.git dksrc
+git clone --branch V2_5 https://github.com/diskuv/dk.git dksrc
+#   SYNC: 010-PROJECTROOT-README.sh 100-imports.sh
+# dksrc/dk0 --trial import-github-l2 --repo diskuv/dk --tag 2.5.202601180000 --outdir dksrc/etc/dk/i/
+
+# Hack dk0 2.4.2.52 until 2.4.2.53 is built
+# if [ -x ../dksdk-coder/_build/default/ext/MlFront/src/MlFront_Exec/Shell.exe ]; then
+#     echo "SECURITY WARNING: Using local build of dk0" >&2
+#     install -v maintenance/hardcoded-dk0.sh dksrc/dk0
+# fi
 
 # Clear t/ and target/ directories for reproducibility of --trial
 rm -rf t/ target/

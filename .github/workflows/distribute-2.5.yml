@@ -4,10 +4,10 @@ on:
     tags:
       - '2.5.*' # build if tag is pushed
     branches:
-      - main    # will be translated to `dkdist_next_odd_minor_version` (prerelease and build metadata can't be used when distributing versions)
+      - main    # will be translated to `dkdist_branch_version` (prerelease and build metadata can't be used when distributing versions)
   workflow_dispatch: # allow manual triggering from GitHub page
 env:
-  dkdist_next_odd_minor_version: 2.7.1 # must have non-zero patch version
+  dkdist_branch_version: 2.5.1 # must have non-zero patch version
 
 jobs:
     distribute:
@@ -32,7 +32,7 @@ jobs:
               uses: diskuv/dk-distribute@v1
               with:
                   #   Use even minor tag-based version if tag, else use hardcoded next odd minor version
-                  id: ${{ github.ref_type == 'tag' && format('CommonsBase_Std@{0}', github.ref_name) || format('CommonsBase_Std@{0}', env.dkdist_next_odd_minor_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('CommonsBase_Std@{0}', github.ref_name) || format('CommonsBase_Std@{0}', env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_4_pubkey }}
                   seckey: ${{ secrets.distribute_2_4_seckey }}
                   slots: |
@@ -42,9 +42,16 @@ jobs:
                     Release.Darwin_x86_64
                     Release.Linux_x86
                     Release.Linux_x86_64
+                  # TODO: rules (CommonsBase_Std.Extract.Untar@0.1.0)
+                  # nit: The intermediate forms CommonsBase_Std.S7z.* should be exported since the README.md
+                  #      walks users through creating and using them on Windows. However they only work in
+                  #      the Windows slots; need more options in diskuv/dk-distribute to limit which slots
+                  #      get which forms.
+                  # CommonsBase_Std.S7z.S7zr@25.1.0
+                  # CommonsBase_Std.S7z.Windows7zExe@25.1.0
                   forms: |
+                    CommonsBase_Std.Coreutils@0.2.2                    
                     CommonsBase_Std.S7z@25.1.0
-                    CommonsBase_Std.Coreutils@0.2.2
                   use-cache: true
                   #   Use HEAD when not tagged
                   experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}

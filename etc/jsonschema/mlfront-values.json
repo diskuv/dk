@@ -111,7 +111,7 @@
         "$schema": {
             "description": "The JSON schema for MlFront values.json, values.json, *.values.json and *.values.jsonc. Used by VS Code for auto-completions, but otherwise ignored.",
             "type": "string",
-            "default": "https://github.com/diskuv/dk/raw/refs/heads/V2_4/etc/jsonschema/mlfront-values.json"
+            "default": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json"
         },
         "schema_version": {
             "type": "object",

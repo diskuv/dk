@@ -15,7 +15,7 @@ jobs:
 
             - name: Checkout # get dksrc/dk0
               uses: actions/checkout@v5
-              with: { repository: diskuv/dk, path: dksrc, ref: V2_4 }
+              with: { repository: diskuv/dk, path: dksrc, ref: V2_5 }
 
             - name: Cache dk data stores and build keys
               uses: actions/cache@v4
@@ -84,7 +84,7 @@ jobs:
             
             - name: Checkout # get dksrc/dk0
               uses: actions/checkout@v5
-              with: { repository: diskuv/dk, path: dksrc, ref: V2_4 }
+              with: { repository: diskuv/dk, path: dksrc, ref: V2_5 }
 
             - name: Cache dk data stores and build keys
               uses: actions/cache@v4
