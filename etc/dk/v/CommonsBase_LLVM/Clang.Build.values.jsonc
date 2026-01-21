@@ -1,0 +1,608 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "forms": [
+    {
+      "id": "CommonsBase_LLVM.Clang.Build.Darwin_x86_64@19.1.3",
+      "precommands": {
+        "private": [
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-unix-wrapper.sh -f build-unix-wrapper.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-unix-inside.sh -f build-unix-inside.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-llvm.sh -f build-llvm.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/DkSDKPresets.cmake -f DkSDKPresets.cmake",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/package-clang.sh -f package-clang.sh",
+          "get-asset CommonsBase_LLVM.CMake.Bundle@3.25.3+ci2 -p cmake-3.25.2%2Bci2/cmake-darwin_universal.zip -d cmake",
+          "get-asset CommonsBase_LLVM.Ninja.Bundle@1.12.1 -p ninja-mac.zip -d ninja",
+          "get-asset CommonsBase_LLVM.Source.Bundle@19.1.3 -p llvm-project-19.1.3.src.tar.xz -f llvm-project-19.1.3.src.tar.xz",
+          "get-asset CommonsBase_LLVM.Binaries.Bundle@19.1.3 -p LLVM-19.1.3-macOS-X64.tar.xz -f LLVM-19.1.3-macOS-X64.tar.xz",
+          "get-asset CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2 -p zstd-1.5.7.tar.gz -f zstd-1.5.7.tar.gz",
+          "get-asset CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2 -p libxml2-2.14.2.tar.xz -f libxml2-2.14.2.tar.xz"
+        ]
+      },
+      "function": {
+        "execution": [
+          { "name": "OSFamily", "value": "macos" }
+        ],
+        "envmods": [
+          "+DKML_TARGET_ABI=darwin_x86_64",
+          "+CMAKE_EXE=cmake/cmake-3.25.2-macos10.10-universal/CMake.app/Contents/bin/cmake",
+          "+LLVM_PROJECT_TAR=llvm-project-19.1.3.src.tar.xz",
+          "+LLVM_DEV_TAR=LLVM-19.1.3-macOS-X64.tar.xz",
+          "+ZSTD_TAR_GZ=zstd-1.5.7.tar.gz",
+          "+LIBXML2_TAR_XZ=libxml2-2.14.2.tar.xz",
+          "+NINJA_EXE=ninja/ninja",
+          "+CODEGEN_DIR=codegen/darwin_x86_64",
+          "+PACKAGE_CLANG_OUT=${SLOT.request}"
+        ],
+        "args": [
+          "/bin/sh",
+          "build-unix-wrapper.sh",
+          "${SLOT.request}"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "slots": ["Release.Darwin_x86_64"],
+            "paths": [
+              "bin",
+              "lib"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "CommonsBase_LLVM.Clang.Build.Darwin_arm64@19.1.3",
+      "precommands": {
+        "private": [
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-unix-wrapper.sh -f build-unix-wrapper.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-unix-inside.sh -f build-unix-inside.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-llvm.sh -f build-llvm.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/DkSDKPresets.cmake -f DkSDKPresets.cmake",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/package-clang.sh -f package-clang.sh",
+          "get-asset CommonsBase_LLVM.CMake.Bundle@3.25.3+ci2 -p cmake-3.25.2%2Bci2/cmake-darwin_universal.zip -d cmake",
+          "get-asset CommonsBase_LLVM.Ninja.Bundle@1.12.1 -p ninja-mac.zip -d ninja",
+          "get-asset CommonsBase_LLVM.Source.Bundle@19.1.3 -p llvm-project-19.1.3.src.tar.xz -f llvm-project-19.1.3.src.tar.xz",
+          "get-asset CommonsBase_LLVM.Binaries.Bundle@19.1.3 -p LLVM-19.1.3-macOS-ARM64.tar.xz -f LLVM-19.1.3-macOS-ARM64.tar.xz",
+          "get-asset CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2 -p zstd-1.5.7.tar.gz -f zstd-1.5.7.tar.gz",
+          "get-asset CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2 -p libxml2-2.14.2.tar.xz -f libxml2-2.14.2.tar.xz"
+        ]
+      },
+      "function": {
+        "execution": [
+          { "name": "OSFamily", "value": "macos" }
+        ],
+        "envmods": [
+          "+DKML_TARGET_ABI=darwin_arm64",
+          "+CMAKE_EXE=cmake/cmake-3.25.2-macos10.10-universal/CMake.app/Contents/bin/cmake",
+          "+LLVM_PROJECT_TAR=llvm-project-19.1.3.src.tar.xz",
+          "+LLVM_DEV_TAR=LLVM-19.1.3-macOS-ARM64.tar.xz",
+          "+ZSTD_TAR_GZ=zstd-1.5.7.tar.gz",
+          "+LIBXML2_TAR_XZ=libxml2-2.14.2.tar.xz",
+          "+NINJA_EXE=ninja/ninja",
+          "+CODEGEN_DIR=codegen/darwin_arm64",
+          "+PACKAGE_CLANG_OUT=${SLOT.request}"
+        ],
+        "args": [
+          "/bin/sh",
+          "build-unix-wrapper.sh",
+          "${SLOT.request}"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "slots": ["Release.Darwin_arm64"],
+            "paths": [
+              "bin/clang",
+              "bin/clang++",
+              "bin/clang-cpp",
+              "lib/clang/19/include/__clang_cuda_builtin_vars.h",
+              "lib/clang/19/include/__clang_cuda_cmath.h",
+              "lib/clang/19/include/__clang_cuda_complex_builtins.h",
+              "lib/clang/19/include/__clang_cuda_device_functions.h",
+              "lib/clang/19/include/__clang_cuda_intrinsics.h",
+              "lib/clang/19/include/__clang_cuda_libdevice_declares.h",
+              "lib/clang/19/include/__clang_cuda_math_forward_declares.h",
+              "lib/clang/19/include/__clang_cuda_math.h",
+              "lib/clang/19/include/__clang_cuda_runtime_wrapper.h",
+              "lib/clang/19/include/__clang_cuda_texture_intrinsics.h",
+              "lib/clang/19/include/__clang_hip_cmath.h",
+              "lib/clang/19/include/__clang_hip_libdevice_declares.h",
+              "lib/clang/19/include/__clang_hip_math.h",
+              "lib/clang/19/include/__clang_hip_runtime_wrapper.h",
+              "lib/clang/19/include/__clang_hip_stdlib.h",
+              "lib/clang/19/include/__stdarg___gnuc_va_list.h",
+              "lib/clang/19/include/__stdarg___va_copy.h",
+              "lib/clang/19/include/__stdarg_header_macro.h",
+              "lib/clang/19/include/__stdarg_va_arg.h",
+              "lib/clang/19/include/__stdarg_va_copy.h",
+              "lib/clang/19/include/__stdarg_va_list.h",
+              "lib/clang/19/include/__stddef_header_macro.h",
+              "lib/clang/19/include/__stddef_max_align_t.h",
+              "lib/clang/19/include/__stddef_null.h",
+              "lib/clang/19/include/__stddef_nullptr_t.h",
+              "lib/clang/19/include/__stddef_offsetof.h",
+              "lib/clang/19/include/__stddef_ptrdiff_t.h",
+              "lib/clang/19/include/__stddef_rsize_t.h",
+              "lib/clang/19/include/__stddef_size_t.h",
+              "lib/clang/19/include/__stddef_unreachable.h",
+              "lib/clang/19/include/__stddef_wchar_t.h",
+              "lib/clang/19/include/__stddef_wint_t.h",
+              "lib/clang/19/include/__wmmintrin_aes.h",
+              "lib/clang/19/include/__wmmintrin_pclmul.h",
+              "lib/clang/19/include/adcintrin.h",
+              "lib/clang/19/include/adxintrin.h",
+              "lib/clang/19/include/altivec.h",
+              "lib/clang/19/include/ammintrin.h",
+              "lib/clang/19/include/amxcomplexintrin.h",
+              "lib/clang/19/include/amxfp16intrin.h",
+              "lib/clang/19/include/amxintrin.h",
+              "lib/clang/19/include/arm_acle.h",
+              "lib/clang/19/include/arm_bf16.h",
+              "lib/clang/19/include/arm_cde.h",
+              "lib/clang/19/include/arm_cmse.h",
+              "lib/clang/19/include/arm_fp16.h",
+              "lib/clang/19/include/arm_mve.h",
+              "lib/clang/19/include/arm_neon_sve_bridge.h",
+              "lib/clang/19/include/arm_neon.h",
+              "lib/clang/19/include/arm_sme.h",
+              "lib/clang/19/include/arm_sve.h",
+              "lib/clang/19/include/arm_vector_types.h",
+              "lib/clang/19/include/arm64intr.h",
+              "lib/clang/19/include/armintr.h",
+              "lib/clang/19/include/avx2intrin.h",
+              "lib/clang/19/include/avx512bf16intrin.h",
+              "lib/clang/19/include/avx512bitalgintrin.h",
+              "lib/clang/19/include/avx512bwintrin.h",
+              "lib/clang/19/include/avx512cdintrin.h",
+              "lib/clang/19/include/avx512dqintrin.h",
+              "lib/clang/19/include/avx512fintrin.h",
+              "lib/clang/19/include/avx512fp16intrin.h",
+              "lib/clang/19/include/avx512ifmaintrin.h",
+              "lib/clang/19/include/avx512ifmavlintrin.h",
+              "lib/clang/19/include/avx512vbmi2intrin.h",
+              "lib/clang/19/include/avx512vbmiintrin.h",
+              "lib/clang/19/include/avx512vbmivlintrin.h",
+              "lib/clang/19/include/avx512vlbf16intrin.h",
+              "lib/clang/19/include/avx512vlbitalgintrin.h",
+              "lib/clang/19/include/avx512vlbwintrin.h",
+              "lib/clang/19/include/avx512vlcdintrin.h",
+              "lib/clang/19/include/avx512vldqintrin.h",
+              "lib/clang/19/include/avx512vlfp16intrin.h",
+              "lib/clang/19/include/avx512vlintrin.h",
+              "lib/clang/19/include/avx512vlvbmi2intrin.h",
+              "lib/clang/19/include/avx512vlvnniintrin.h",
+              "lib/clang/19/include/avx512vlvp2intersectintrin.h",
+              "lib/clang/19/include/avx512vnniintrin.h",
+              "lib/clang/19/include/avx512vp2intersectintrin.h",
+              "lib/clang/19/include/avx512vpopcntdqintrin.h",
+              "lib/clang/19/include/avx512vpopcntdqvlintrin.h",
+              "lib/clang/19/include/avxifmaintrin.h",
+              "lib/clang/19/include/avxintrin.h",
+              "lib/clang/19/include/avxneconvertintrin.h",
+              "lib/clang/19/include/avxvnniint16intrin.h",
+              "lib/clang/19/include/avxvnniint8intrin.h",
+              "lib/clang/19/include/avxvnniintrin.h",
+              "lib/clang/19/include/bmi2intrin.h",
+              "lib/clang/19/include/bmiintrin.h",
+              "lib/clang/19/include/builtins.h",
+              "lib/clang/19/include/cet.h",
+              "lib/clang/19/include/cetintrin.h",
+              "lib/clang/19/include/cldemoteintrin.h",
+              "lib/clang/19/include/clflushoptintrin.h",
+              "lib/clang/19/include/clwbintrin.h",
+              "lib/clang/19/include/clzerointrin.h",
+              "lib/clang/19/include/cmpccxaddintrin.h",
+              "lib/clang/19/include/cpuid.h",
+              "lib/clang/19/include/crc32intrin.h",
+              "lib/clang/19/include/cuda_wrappers/algorithm",
+              "lib/clang/19/include/cuda_wrappers/bits/basic_string.h",
+              "lib/clang/19/include/cuda_wrappers/bits/basic_string.tcc",
+              "lib/clang/19/include/cuda_wrappers/bits/shared_ptr_base.h",
+              "lib/clang/19/include/cuda_wrappers/cmath",
+              "lib/clang/19/include/cuda_wrappers/complex",
+              "lib/clang/19/include/cuda_wrappers/new",
+              "lib/clang/19/include/emmintrin.h",
+              "lib/clang/19/include/enqcmdintrin.h",
+              "lib/clang/19/include/f16cintrin.h",
+              "lib/clang/19/include/float.h",
+              "lib/clang/19/include/fma4intrin.h",
+              "lib/clang/19/include/fmaintrin.h",
+              "lib/clang/19/include/fuzzer/FuzzedDataProvider.h",
+              "lib/clang/19/include/fxsrintrin.h",
+              "lib/clang/19/include/gfniintrin.h",
+              "lib/clang/19/include/hexagon_circ_brev_intrinsics.h",
+              "lib/clang/19/include/hexagon_protos.h",
+              "lib/clang/19/include/hexagon_types.h",
+              "lib/clang/19/include/hresetintrin.h",
+              "lib/clang/19/include/htmintrin.h",
+              "lib/clang/19/include/htmxlintrin.h",
+              "lib/clang/19/include/hvx_hexagon_protos.h",
+              "lib/clang/19/include/ia32intrin.h",
+              "lib/clang/19/include/immintrin.h",
+              "lib/clang/19/include/intrin.h",
+              "lib/clang/19/include/intrin0.h",
+              "lib/clang/19/include/inttypes.h",
+              "lib/clang/19/include/invpcidintrin.h",
+              "lib/clang/19/include/iso646.h",
+              "lib/clang/19/include/keylockerintrin.h",
+              "lib/clang/19/include/larchintrin.h",
+              "lib/clang/19/include/lasxintrin.h",
+              "lib/clang/19/include/limits.h",
+              "lib/clang/19/include/llvm_libc_wrappers/assert.h",
+              "lib/clang/19/include/llvm_libc_wrappers/ctype.h",
+              "lib/clang/19/include/llvm_libc_wrappers/inttypes.h",
+              "lib/clang/19/include/llvm_libc_wrappers/stdio.h",
+              "lib/clang/19/include/llvm_libc_wrappers/stdlib.h",
+              "lib/clang/19/include/llvm_libc_wrappers/string.h",
+              "lib/clang/19/include/llvm_libc_wrappers/time.h",
+              "lib/clang/19/include/lsxintrin.h",
+              "lib/clang/19/include/lwpintrin.h",
+              "lib/clang/19/include/lzcntintrin.h",
+              "lib/clang/19/include/mm_malloc.h",
+              "lib/clang/19/include/mm3dnow.h",
+              "lib/clang/19/include/mmintrin.h",
+              "lib/clang/19/include/module.modulemap",
+              "lib/clang/19/include/movdirintrin.h",
+              "lib/clang/19/include/msa.h",
+              "lib/clang/19/include/mwaitxintrin.h",
+              "lib/clang/19/include/nmmintrin.h",
+              "lib/clang/19/include/opencl-c-base.h",
+              "lib/clang/19/include/opencl-c.h",
+              "lib/clang/19/include/openmp_wrappers/__clang_openmp_device_functions.h",
+              "lib/clang/19/include/openmp_wrappers/cmath",
+              "lib/clang/19/include/openmp_wrappers/complex_cmath.h",
+              "lib/clang/19/include/openmp_wrappers/complex.h",
+              "lib/clang/19/include/openmp_wrappers/complex",
+              "lib/clang/19/include/openmp_wrappers/math.h",
+              "lib/clang/19/include/openmp_wrappers/new",
+              "lib/clang/19/include/orc/c_api.h",
+              "lib/clang/19/include/pconfigintrin.h",
+              "lib/clang/19/include/pkuintrin.h",
+              "lib/clang/19/include/pmmintrin.h",
+              "lib/clang/19/include/popcntintrin.h",
+              "lib/clang/19/include/ppc_wrappers/bmi2intrin.h",
+              "lib/clang/19/include/ppc_wrappers/bmiintrin.h",
+              "lib/clang/19/include/ppc_wrappers/emmintrin.h",
+              "lib/clang/19/include/ppc_wrappers/immintrin.h",
+              "lib/clang/19/include/ppc_wrappers/mm_malloc.h",
+              "lib/clang/19/include/ppc_wrappers/mmintrin.h",
+              "lib/clang/19/include/ppc_wrappers/nmmintrin.h",
+              "lib/clang/19/include/ppc_wrappers/pmmintrin.h",
+              "lib/clang/19/include/ppc_wrappers/smmintrin.h",
+              "lib/clang/19/include/ppc_wrappers/tmmintrin.h",
+              "lib/clang/19/include/ppc_wrappers/x86gprintrin.h",
+              "lib/clang/19/include/ppc_wrappers/x86intrin.h",
+              "lib/clang/19/include/ppc_wrappers/xmmintrin.h",
+              "lib/clang/19/include/prfchiintrin.h",
+              "lib/clang/19/include/prfchwintrin.h",
+              "lib/clang/19/include/profile/instr_prof_interface.h",
+              "lib/clang/19/include/profile/InstrProfData.inc",
+              "lib/clang/19/include/ptrauth.h",
+              "lib/clang/19/include/ptwriteintrin.h",
+              "lib/clang/19/include/raointintrin.h",
+              "lib/clang/19/include/rdpruintrin.h",
+              "lib/clang/19/include/rdseedintrin.h",
+              "lib/clang/19/include/riscv_bitmanip.h",
+              "lib/clang/19/include/riscv_crypto.h",
+              "lib/clang/19/include/riscv_ntlh.h",
+              "lib/clang/19/include/riscv_vector.h",
+              "lib/clang/19/include/rtmintrin.h",
+              "lib/clang/19/include/s390intrin.h",
+              "lib/clang/19/include/sanitizer/allocator_interface.h",
+              "lib/clang/19/include/sanitizer/asan_interface.h",
+              "lib/clang/19/include/sanitizer/common_interface_defs.h",
+              "lib/clang/19/include/sanitizer/coverage_interface.h",
+              "lib/clang/19/include/sanitizer/dfsan_interface.h",
+              "lib/clang/19/include/sanitizer/hwasan_interface.h",
+              "lib/clang/19/include/sanitizer/linux_syscall_hooks.h",
+              "lib/clang/19/include/sanitizer/lsan_interface.h",
+              "lib/clang/19/include/sanitizer/memprof_interface.h",
+              "lib/clang/19/include/sanitizer/msan_interface.h",
+              "lib/clang/19/include/sanitizer/netbsd_syscall_hooks.h",
+              "lib/clang/19/include/sanitizer/scudo_interface.h",
+              "lib/clang/19/include/sanitizer/tsan_interface_atomic.h",
+              "lib/clang/19/include/sanitizer/tsan_interface.h",
+              "lib/clang/19/include/sanitizer/ubsan_interface.h",
+              "lib/clang/19/include/serializeintrin.h",
+              "lib/clang/19/include/sgxintrin.h",
+              "lib/clang/19/include/sha512intrin.h",
+              "lib/clang/19/include/shaintrin.h",
+              "lib/clang/19/include/sifive_vector.h",
+              "lib/clang/19/include/sm3intrin.h",
+              "lib/clang/19/include/sm4intrin.h",
+              "lib/clang/19/include/smmintrin.h",
+              "lib/clang/19/include/stdalign.h",
+              "lib/clang/19/include/stdarg.h",
+              "lib/clang/19/include/stdatomic.h",
+              "lib/clang/19/include/stdbool.h",
+              "lib/clang/19/include/stdckdint.h",
+              "lib/clang/19/include/stddef.h",
+              "lib/clang/19/include/stdint.h",
+              "lib/clang/19/include/stdnoreturn.h",
+              "lib/clang/19/include/tbmintrin.h",
+              "lib/clang/19/include/tgmath.h",
+              "lib/clang/19/include/tmmintrin.h",
+              "lib/clang/19/include/tsxldtrkintrin.h",
+              "lib/clang/19/include/uintrintrin.h",
+              "lib/clang/19/include/unwind.h",
+              "lib/clang/19/include/usermsrintrin.h",
+              "lib/clang/19/include/vadefs.h",
+              "lib/clang/19/include/vaesintrin.h",
+              "lib/clang/19/include/varargs.h",
+              "lib/clang/19/include/vecintrin.h",
+              "lib/clang/19/include/velintrin_approx.h",
+              "lib/clang/19/include/velintrin_gen.h",
+              "lib/clang/19/include/velintrin.h",
+              "lib/clang/19/include/vpclmulqdqintrin.h",
+              "lib/clang/19/include/waitpkgintrin.h",
+              "lib/clang/19/include/wasm_simd128.h",
+              "lib/clang/19/include/wbnoinvdintrin.h",
+              "lib/clang/19/include/wmmintrin.h",
+              "lib/clang/19/include/x86gprintrin.h",
+              "lib/clang/19/include/x86intrin.h",
+              "lib/clang/19/include/xmmintrin.h",
+              "lib/clang/19/include/xopintrin.h",
+              "lib/clang/19/include/xray/xray_interface.h",
+              "lib/clang/19/include/xray/xray_log_interface.h",
+              "lib/clang/19/include/xray/xray_records.h",
+              "lib/clang/19/include/xsavecintrin.h",
+              "lib/clang/19/include/xsaveintrin.h",
+              "lib/clang/19/include/xsaveoptintrin.h",
+              "lib/clang/19/include/xsavesintrin.h",
+              "lib/clang/19/include/xtestintrin.h",
+              "lib/clang/19/include/yvals_core.h",
+              "lib/clang/19/include/zos_wrappers/builtins.h",
+              "lib/clang/19/lib/darwin/libclang_rt.asan_abi_ios.a",
+              "lib/clang/19/lib/darwin/libclang_rt.asan_abi_iossim.a",
+              "lib/clang/19/lib/darwin/libclang_rt.asan_abi_osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.asan_ios_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.asan_iossim_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.asan_osx_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.cc_kext_ios.a",
+              "lib/clang/19/lib/darwin/libclang_rt.cc_kext.a",
+              "lib/clang/19/lib/darwin/libclang_rt.fuzzer_interceptors_ios.a",
+              "lib/clang/19/lib/darwin/libclang_rt.fuzzer_interceptors_iossim.a",
+              "lib/clang/19/lib/darwin/libclang_rt.fuzzer_interceptors_osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.fuzzer_ios.a",
+              "lib/clang/19/lib/darwin/libclang_rt.fuzzer_iossim.a",
+              "lib/clang/19/lib/darwin/libclang_rt.fuzzer_no_main_ios.a",
+              "lib/clang/19/lib/darwin/libclang_rt.fuzzer_no_main_iossim.a",
+              "lib/clang/19/lib/darwin/libclang_rt.fuzzer_no_main_osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.fuzzer_osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.ios.a",
+              "lib/clang/19/lib/darwin/libclang_rt.iossim.a",
+              "lib/clang/19/lib/darwin/libclang_rt.lsan_ios_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.lsan_iossim_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.lsan_osx_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.profile_ios.a",
+              "lib/clang/19/lib/darwin/libclang_rt.profile_iossim.a",
+              "lib/clang/19/lib/darwin/libclang_rt.profile_osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.rtsan_ios_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.rtsan_iossim_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.rtsan_osx_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.stats_client_ios.a",
+              "lib/clang/19/lib/darwin/libclang_rt.stats_client_iossim.a",
+              "lib/clang/19/lib/darwin/libclang_rt.stats_client_osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.stats_ios_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.stats_iossim_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.stats_osx_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.tsan_ios_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.tsan_iossim_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.tsan_osx_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.ubsan_ios_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.ubsan_iossim_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.ubsan_minimal_ios_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.ubsan_minimal_ios.a",
+              "lib/clang/19/lib/darwin/libclang_rt.ubsan_minimal_iossim_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.ubsan_minimal_iossim.a",
+              "lib/clang/19/lib/darwin/libclang_rt.ubsan_minimal_osx_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.ubsan_minimal_osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.ubsan_osx_dynamic.dylib",
+              "lib/clang/19/lib/darwin/libclang_rt.xray_osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.xray-basic_osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.xray-fdr_osx.a",
+              "lib/clang/19/lib/darwin/libclang_rt.xray-profiling_osx.a",
+              "lib/clang/19/lib/darwin/liborc_rt_ios.a",
+              "lib/clang/19/lib/darwin/liborc_rt_iossim.a",
+              "lib/clang/19/lib/darwin/liborc_rt_osx.a",
+              "lib/clang/19/share/asan_ignorelist.txt",
+              "lib/clang/19/share/cfi_ignorelist.txt",
+              "lib/libclang-cpp.dylib",
+              "lib/libclang.dylib"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "CommonsBase_LLVM.Clang.Build.Linux_x86@19.1.3",
+      "precommands": {
+        "private": [
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-unix-wrapper.sh -f build-unix-wrapper.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-unix-inside.sh -f build-unix-inside.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-llvm.sh -f build-llvm.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/DkSDKPresets.cmake -f DkSDKPresets.cmake",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/package-clang.sh -f package-clang.sh",
+          "get-asset CommonsBase_LLVM.CMake.Bundle@3.25.3+ci2 -p cmake-3.25.2%2Bci2/cmake-linux_x86.zip -d cmake",
+          "get-asset CommonsBase_LLVM.Ninja.Bundle@1.12.1 -p ninja-linux_x86.zip -d ninja",
+          "get-asset CommonsBase_LLVM.Source.Bundle@19.1.3 -p llvm-project-19.1.3.src.tar.xz -f llvm-project-19.1.3.src.tar.xz",
+          "get-asset CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2 -p zstd-1.5.7.tar.gz -f zstd-1.5.7.tar.gz",
+          "get-asset CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2 -p libxml2-2.14.2.tar.xz -f libxml2-2.14.2.tar.xz"
+        ]
+      },
+      "function": {
+        "execution": [
+          { "name": "OSFamily", "value": "linux" }
+        ],
+        "envmods": [
+          "+DKML_TARGET_ABI=linux_x86",
+          "+CMAKE_EXE=cmake/cmake/bin/cmake",
+          "+LLVM_PROJECT_TAR=llvm-project-19.1.3.src.tar.xz",
+          "+ZSTD_TAR_GZ=zstd-1.5.7.tar.gz",
+          "+LIBXML2_TAR_XZ=libxml2-2.14.2.tar.xz",
+          "+NINJA_EXE=ninja/ninja",
+          "+CODEGEN_DIR=codegen/linux_x86",
+          "+PACKAGE_CLANG_OUT=${SLOT.request}"
+        ],
+        "args": [
+          "/bin/sh",
+          "build-unix-wrapper.sh",
+          "${SLOT.request}"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "slots": ["Release.Linux_x86"],
+            "paths": [
+              "bin",
+              "lib"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "CommonsBase_LLVM.Clang.Build.Linux_x86_64@19.1.3",
+      "precommands": {
+        "private": [
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-unix-wrapper.sh -f build-unix-wrapper.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-unix-inside.sh -f build-unix-inside.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-llvm.sh -f build-llvm.sh",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/DkSDKPresets.cmake -f DkSDKPresets.cmake",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/package-clang.sh -f package-clang.sh",
+          "get-asset CommonsBase_LLVM.CMake.Bundle@3.25.3+ci2 -p cmake-3.25.2%2Bci2/cmake-linux_x86_64.zip -d cmake",
+          "get-asset CommonsBase_LLVM.Ninja.Bundle@1.12.1 -p ninja-linux_x86_64.zip -d ninja",
+          "get-asset CommonsBase_LLVM.Source.Bundle@19.1.3 -p llvm-project-19.1.3.src.tar.xz -f llvm-project-19.1.3.src.tar.xz",
+          "get-asset CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2 -p zstd-1.5.7.tar.gz -f zstd-1.5.7.tar.gz",
+          "get-asset CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2 -p libxml2-2.14.2.tar.xz -f libxml2-2.14.2.tar.xz"
+        ]
+      },
+      "function": {
+        "execution": [
+          { "name": "OSFamily", "value": "linux" }
+        ],
+        "envmods": [
+          "+DKML_TARGET_ABI=linux_x86_64",
+          "+CMAKE_EXE=cmake/cmake/bin/cmake",
+          "+LLVM_PROJECT_TAR=llvm-project-19.1.3.src.tar.xz",
+          "+ZSTD_TAR_GZ=zstd-1.5.7.tar.gz",
+          "+LIBXML2_TAR_XZ=libxml2-2.14.2.tar.xz",
+          "+NINJA_EXE=ninja/ninja",
+          "+CODEGEN_DIR=codegen/linux_x86_64",
+          "+PACKAGE_CLANG_OUT=${SLOT.request}"
+        ],
+        "args": [
+          "/bin/sh",
+          "build-unix-wrapper.sh",
+          "${SLOT.request}"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "slots": ["Release.Linux_x86_64"],
+            "paths": [
+              "bin",
+              "lib"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "CommonsBase_LLVM.Clang.Build.Windows_x86@19.1.3",
+      "precommands": {
+        "private": [
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-win32-wrapper.cmd -f build-win32-wrapper.cmd",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-win32-inside.cmd -f build-win32-inside.cmd",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/package-clang.cmd -f package-clang.cmd",
+          "get-asset CommonsBase_LLVM.CMake.Bundle@3.25.3+ci2 -p v3.25.3/cmake-3.25.3-windows-x86_64.zip -d cmake",
+          "get-asset CommonsBase_LLVM.Source.Bundle@19.1.3 -p llvm-project-19.1.3.src.tar.xz -f llvm-project-19.1.3.src.tar.xz",
+          "get-asset CommonsBase_LLVM.Binaries.Bundle@19.1.3 -p LLVM-19.1.3-win32.exe -f LLVM-19.1.3-win32.exe",
+          "get-asset CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2 -p libxml2-2.14.2.tar.xz -f libxml2-2.14.2.tar.xz"
+        ]
+      },
+      "function": {
+        "execution": [
+          { "name": "OSFamily", "value": "windows" }
+        ],
+        "envmods": [
+          "+DKML_TARGET_ABI=windows_x86",
+          "+CMAKE_EXE=cmake\\cmake-3.25.3-windows-x86_64\\bin\\cmake.exe",
+          "+LLVM_INSTALLER_EXE=LLVM-19.1.3-win32.exe",
+          "+LLVM_PROJECT_TAR_XZ=llvm-project-19.1.3.src.tar.xz",
+          "+LIBXML2_TAR_XZ=libxml2-2.14.2.tar.xz",
+          "+CODEGEN_DIR=codegen\\windows_x86",
+          "+PACKAGE_CLANG_OUT=${SLOT.request}"
+        ],
+        "args": [
+          "cmd",
+          "/C",
+          "build-win32-wrapper.cmd",
+          "${SLOT.request}"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "slots": ["Release.Windows_x86"],
+            "paths": [
+              "bin",
+              "lib"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "CommonsBase_LLVM.Clang.Build.Windows_x86_64@19.1.3",
+      "precommands": {
+        "private": [
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-win32-wrapper.cmd -f build-win32-wrapper.cmd",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/build-win32-inside.cmd -f build-win32-inside.cmd",
+          "get-asset CommonsBase_LLVM.Scripts.Bundle@19.1.3 -p llvm/package-clang.cmd -f package-clang.cmd",
+          "get-asset CommonsBase_LLVM.CMake.Bundle@3.25.3+ci2 -p v3.25.3/cmake-3.25.3-windows-x86_64.zip -d cmake",
+          "get-asset CommonsBase_LLVM.Source.Bundle@19.1.3 -p llvm-project-19.1.3.src.tar.xz -f llvm-project-19.1.3.src.tar.xz",
+          "get-asset CommonsBase_LLVM.Binaries.Bundle@19.1.3 -p LLVM-19.1.3-win64.exe -f LLVM-19.1.3-win64.exe",
+          "get-asset CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2 -p libxml2-2.14.2.tar.xz -f libxml2-2.14.2.tar.xz"
+        ]
+      },
+      "function": {
+        "execution": [
+          { "name": "OSFamily", "value": "windows" }
+        ],
+        "envmods": [
+          "+DKML_TARGET_ABI=windows_x86_64",
+          "+CMAKE_EXE=cmake\\cmake-3.25.3-windows-x86_64\\bin\\cmake.exe",
+          "+LLVM_INSTALLER_EXE=LLVM-19.1.3-win64.exe",
+          "+LLVM_PROJECT_TAR_XZ=llvm-project-19.1.3.src.tar.xz",
+          "+LIBXML2_TAR_XZ=libxml2-2.14.2.tar.xz",
+          "+CODEGEN_DIR=codegen\\windows_x86_64",
+          "+PACKAGE_CLANG_OUT=${SLOT.request}"
+        ],
+        "args": [
+          "cmd",
+          "/C",
+          "build-win32-wrapper.cmd",
+          "${SLOT.request}"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "slots": ["Release.Windows_x86_64"],
+            "paths": [
+              "bin",
+              "lib"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

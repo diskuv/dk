@@ -1,0 +1,46 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "schema_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "bundles": [
+    {
+      "id": "CommonsBase_LLVM.Deps.Bundle@1.5.7+libxml2-2.14.2",
+      "listing": {
+        "origins": [
+          {
+            "name": "zstd",
+            "mirrors": [
+              "https://github.com/facebook/zstd/releases/download/v1.5.7"
+            ]
+          },
+          {
+            "name": "libxml2",
+            "mirrors": [
+              "https://download.gnome.org/sources/libxml2/2.14"
+            ]
+          }
+        ]
+      },
+      "assets": [
+        {
+          "origin": "zstd",
+          "path": "zstd-1.5.7.tar.gz",
+          "checksum": {
+            "sha256": "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3"
+          },
+          "size": 2434947
+        },
+        {
+          "origin": "libxml2",
+          "path": "libxml2-2.14.2.tar.xz",
+          "checksum": {
+            "sha256": "353f3c83535d4224a4e5f1e88c90b5d4563ea8fec11f6407df640fd28fc8b8c6"
+          },
+          "size": 2324716
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+@ECHO OFF
+SETLOCAL
+
+REM Inputs via env:
+REM   CMAKE_EXE
+REM   DKML_TARGET_ABI
+REM   LLVM_INSTALLER_EXE
+REM   LLVM_PROJECT_TAR_XZ
+REM   LIBXML2_TAR_XZ
+REM   CODEGEN_DIR (optional)
+REM   PACKAGE_CLANG_OUT (optional)
+
+IF "%CMAKE_EXE%"=="" (
+  ECHO.
+  ECHO.CMAKE_EXE is required
+  ECHO.
+  EXIT /B 3
+)
+IF NOT EXIST "%CMAKE_EXE%" (
+  ECHO.
+  ECHO.CMAKE_EXE was not found at "%CMAKE_EXE%"
+  ECHO.
+  EXIT /B 3
+)
+
+CALL "%~dp0build-win32-inside.cmd"
+IF ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
+
+IF NOT "%PACKAGE_CLANG_OUT%"=="" (
+  IF "%CODEGEN_DIR%"=="" (
+    SET "CODEGEN_DIR=codegen\%DKML_TARGET_ABI%"
+  )
+  CALL "%~dp0package-clang.cmd" "%CODEGEN_DIR%" "%PACKAGE_CLANG_OUT%"
+  IF ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
+)
+
+EXIT /B 0
