@@ -1,0 +1,46 @@
+// Uniform interface: ninja.exe will always exist.
+// - ninja.exe will _not_ be executable on Unix; use a subshell like $(get-object CommonsBase_Build.Ninja@1.12.1 -s Release.Darwin_arm64 -m ./ninja.exe -f :exe:ninja.exe)
+//
+// The slot Release.Windows_x86 is missing; we would need to build it from source.
+// But likely unnecessary since build tools rarely run on 32-bit Windows.
+{
+    "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+    "schema_version": {
+        "major": 1,
+        "minor": 0
+    },
+    "forms": [
+        {
+            "id": "CommonsBase_Build.Ninja@1.12.1",
+            "precommands": {
+                "private": [
+                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-mac.zip -m ninja -f ${SLOT.Release.Darwin_arm64}/ninja.exe",
+                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-mac.zip -m ninja -f ${SLOT.Release.Darwin_x86_64}/ninja.exe",
+                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-linux_x86.zip -m ninja -f ${SLOT.Release.Linux_x86}/ninja.exe",
+                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-linux_x86_64.zip -m ninja -f ${SLOT.Release.Linux_x86_64}/ninja.exe",
+                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-linux_arm64.zip -m ninja -f ${SLOT.Release.Linux_arm64}/ninja.exe",
+                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-winarm64.zip -m ninja.exe -f ${SLOT.Release.Windows_arm64}/ninja.exe",
+                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-win.zip -m ninja.exe -f ${SLOT.Release.Windows_x86_64}/ninja.exe"
+                ]
+            },
+            "outputs": {
+                "assets": [
+                    {
+                        "paths": [
+                            "ninja.exe"
+                        ],
+                        "slots": [
+                            "Release.Darwin_arm64",
+                            "Release.Darwin_x86_64",
+                            "Release.Linux_x86",
+                            "Release.Linux_x86_64",
+                            "Release.Linux_arm64",
+                            "Release.Windows_arm64",
+                            "Release.Windows_x86_64"
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

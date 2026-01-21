@@ -1,0 +1,75 @@
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "bundles": [
+    {
+      "id": "CommonsBase_Build.Ninja.Bundle@1.12.1",
+      "listing": {
+        "origins": [
+          {
+            "name": "ninja-build",
+            "mirrors": [
+              "https://github.com/ninja-build/ninja/releases/download/v1.12.1"
+            ]
+          },
+          {
+            "name": "diskuv-ninja",
+            "mirrors": [
+              "https://github.com/diskuv/dk/releases/download/ninja-1.12.1%2Bci2"
+            ]
+          }
+        ]
+      },
+      "assets": [
+        {
+          "origin": "ninja-build",
+          "path": "ninja-win.zip",
+          "checksum": {
+            "sha256": "f550fec705b6d6ff58f2db3c374c2277a37691678d6aba463adcbb129108467a"
+          },
+          "size": 275425
+        },
+        {
+          "origin": "ninja-build",
+          "path": "ninja-winarm64.zip",
+          "checksum": {
+            "sha256": "79c96a50e0deafec212cfa85aa57c6b74003f52d9d1673ddcd1eab1c958c5900"
+          },
+          "size": 254317
+        },
+        {
+          "origin": "diskuv-ninja",
+          "path": "ninja-linux_arm64.zip",
+          "checksum": {
+            "sha256": "ce84d5a327643fab4630198f8bf7862235c56a599352a29e096419e0083c39eb"
+          },
+          "size": 3407636
+        },
+        {
+          "origin": "diskuv-ninja",
+          "path": "ninja-linux_x86_64.zip",
+          "checksum": {
+            "sha256": "089f094bf0d1dec27729bd7f23628c7a2f0409be57578d55f6ac08e3ee6e4c39"
+          },
+          "size": 3450192
+        },
+        {
+          "origin": "diskuv-ninja",
+          "path": "ninja-linux_x86.zip",
+          "checksum": {
+            "sha256": "264bf0b8f34da9a2b3599f1e5e134d046f71eadc37189b99f461e8ac07007a64"
+          },
+          "size": 3444929
+        },
+        {
+          "origin": "ninja-build",
+          "path": "ninja-mac.zip",
+          "checksum": {
+            "sha256": "89a287444b5b3e98f88a945afa50ce937b8ffd1dcc59c555ad9b1baf855298c9"
+          },
+          "size": 281130
+        }
+      ]
+    }
+  ]
+}
