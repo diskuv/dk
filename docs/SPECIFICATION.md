@@ -1514,9 +1514,14 @@ If the simplified `-f :file` expression is used, the file will be named `a.dat.
 
 Place the object or asset in an anonymous executable file and return the file path.
 
-The executable will be named `BASENAME`, have its executable bit enabled on Unix platforms,
-and be placed in a directory with no other files. Conventionally `BASENAME` includes an `.exe`
-extension so it can run on Windows, but `.exe` is not required.
+The executable will:
+
+- be named `BASENAME`
+- on Unix execution machines its executable bits are set (bitwise OR `0o111`)
+- on macOS execution machines it will be codesigned if it is a Mach-O file that must be signed
+- be placed in a directory with no other files
+
+Conventionally `BASENAME` includes an `.exe` extension so it can run on Windows, but `.exe` is not required.
 
 If the simplified `-f :exe` expression is used, the file will be named `a.exe`.
 
