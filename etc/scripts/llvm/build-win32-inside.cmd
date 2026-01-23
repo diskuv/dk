@@ -18,6 +18,13 @@ ECHO.build-win32-inside.cmd
 ECHO.=============
 ECHO..
 ECHO.------
+ECHO.Inputs
+ECHO.------
+ECHO.DKML_COMPILE_CM_CONFIG=%DKML_COMPILE_CM_CONFIG%
+ECHO.DKML_COMPILE_CM_MSVC_VCVARS_VER=%DKML_COMPILE_CM_MSVC_VCVARS_VER%
+ECHO.LLVM_TARGETS_TO_BUILD=%LLVM_TARGETS_TO_BUILD%
+ECHO..
+ECHO.------
 ECHO.Matrix
 ECHO.------
 ECHO.DKML_TARGET_ABI=%DKML_TARGET_ABI%
@@ -49,6 +56,28 @@ IF "%DKML_TARGET_ABI%" == "windows_x86_64" (
 	ECHO.Unrecognized Windows target ABI. DKML_TARGET_ABI=%DKML_TARGET_ABI%
 	ECHO.
 	exit /b 1
+)
+
+IF NOT "%DKML_COMPILE_CM_MSVC_VCVARS_VER%" == "" (
+	SET CMAKE_GENERATOR_TOOLSET=version=%DKML_COMPILE_CM_MSVC_VCVARS_VER%
+	REM It would be nice if the Visual Studio installation can be auto-detected,
+	REM but must set when CMAKE_GENERATOR_TOOLSET is used because:
+	REM > Warning: Environment variable CMAKE_GENERATOR_TOOLSET will be ignored, because CMAKE_GENERATOR is not set.
+	SET CMAKE_GENERATOR=Visual Studio 17 2022
+)
+
+IF "%DKML_COMPILE_CM_CONFIG%" == "" (
+	SET CMAKE_CONFIGURATION_TYPES=Release
+) ELSE (
+	SET CMAKE_CONFIGURATION_TYPES=%DKML_COMPILE_CM_CONFIG%
+)
+
+IF "%LLVM_TARGETS_TO_BUILD%" == "" (
+	SET VAL_LLVM_TARGETS_TO_BUILD=
+) ELSE (
+	REM Replace comma-separated with semicolon-separated
+	SET VAL_LLVM_TARGETS_TO_BUILD=
+	SET VAL_LLVM_TARGETS_TO_BUILD=-D LLVM_TARGETS_TO_BUILD=%LLVM_TARGETS_TO_BUILD:,=;%
 )
 
 REM uv.exe
@@ -214,7 +243,6 @@ IF NOT "%CPKG_CODEGEN%" == "DISABLE" (
 		-S build\libxml2-2.14.2 ^
 		-B build\libxml2 ^
 		-DCMAKE_GENERATOR_PLATFORM=%VAL_CMAKE_GENERATOR_PLATFORM% ^
-		-DCMAKE_BUILD_TYPE=Release ^
 		-DBUILD_SHARED_LIBS=OFF ^
 		-DLIBXML2_WITH_ICONV=OFF ^
 		-DLIBXML2_WITH_PYTHON=OFF ^
@@ -228,7 +256,7 @@ IF NOT "%CPKG_CODEGEN%" == "DISABLE" (
 	)
 
 	ECHO.Building libxml2...
-	"%CMAKE_EXE%" --build build\libxml2 --config Release
+	"%CMAKE_EXE%" --build build\libxml2 --config %CMAKE_CONFIGURATION_TYPES%
 	IF !ERRORLEVEL! NEQ 0 (
 		ECHO.
 		ECHO.Could not build libxml2.
@@ -237,7 +265,7 @@ IF NOT "%CPKG_CODEGEN%" == "DISABLE" (
 	)
 
 	ECHO.Installing libxml2...
-	"%CMAKE_EXE%" --install build\libxml2 --config Release
+	"%CMAKE_EXE%" --install build\libxml2 --config %CMAKE_CONFIGURATION_TYPES%
 	IF !ERRORLEVEL! NEQ 0 (
 		ECHO.
 		ECHO.Could not install libxml2.
@@ -263,6 +291,7 @@ IF NOT "%CPKG_CODEGEN%" == "DISABLE" (
 		-DLLVM_ENABLE_PROJECTS= ^
 		-DLLVM_ENABLE_RUNTIMES= ^
 		-DLLVM_ENABLE_LIBXML2=FORCE_ON ^
+		%VAL_LLVM_TARGETS_TO_BUILD% ^
 		-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=true ^
 		-DCMAKE_INSTALL_PREFIX=%CD%\build\llvm-install --debug-find-pkg=zstd
 	REM --trace-expand --trace-redirect=ci\win32.log
@@ -280,7 +309,7 @@ IF NOT "%CPKG_CODEGEN%" == "DISABLE" (
 	ECHO..
 
 	ECHO.Building LLVM Core...
-	"%CMAKE_EXE%" --build build\llvm-core --config Release
+	"%CMAKE_EXE%" --build build\llvm-core --config %CMAKE_CONFIGURATION_TYPES%
 	IF !ERRORLEVEL! NEQ 0 (
 		ECHO.
 		ECHO.Could not build LLVM Core.
@@ -289,7 +318,7 @@ IF NOT "%CPKG_CODEGEN%" == "DISABLE" (
 	)
 
 	ECHO.Installing LLVM Core...
-	"%CMAKE_EXE%" --install build\llvm-core --config Release
+	"%CMAKE_EXE%" --install build\llvm-core --config %CMAKE_CONFIGURATION_TYPES%
 	IF !ERRORLEVEL! NEQ 0 (
 		ECHO.
 		ECHO.Could not install LLVM Core.
