@@ -34,24 +34,25 @@ jobs:
                   id: ${{ github.ref_type == 'tag' && format('CommonsBase_Std@{0}', github.ref_name) || format('CommonsBase_Std@{0}', env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_4_pubkey }}
                   seckey: ${{ secrets.distribute_2_4_seckey }}
-                  slots: |
-                    Release.Windows_x86
-                    Release.Windows_x86_64
-                    Release.Darwin_arm64
-                    Release.Darwin_x86_64
-                    Release.Linux_x86
-                    Release.Linux_x86_64
-                  # nit: The intermediate forms CommonsBase_Std.S7z.* could be exported since the README.md
-                  #      walks users through creating and using them on Windows. However they only work in
-                  #      the Windows slots; need more options (max 10 though?) in diskuv/dk-distribute to limit which slots
-                  #      get which forms.
-                  # CommonsBase_Std.S7z.S7zr@25.1.0
-                  # CommonsBase_Std.S7z.Windows7zExe@25.1.0
-                  forms: |
-                    CommonsBase_Std.Coreutils@0.2.2                    
-                    CommonsBase_Std.S7z@25.1.0
-                  rules: |
-                    CommonsBase_Std.Extract.Untar@0.1.0
+                  objects: |
+                    Release.Windows_x86_64:CommonsBase_Std.S7z.S7zr@25.1.0
+                    Release.Windows_x86_64:CommonsBase_Std.S7z.Windows7zExe@25.1.0
+
+                    Release.Windows_x86:CommonsBase_Std.Coreutils@0.2.2
+                    Release.Windows_x86_64:CommonsBase_Std.Coreutils@0.2.2
+                    Release.Darwin_arm64:CommonsBase_Std.Coreutils@0.2.2
+                    Release.Darwin_x86_64:CommonsBase_Std.Coreutils@0.2.2
+                    Release.Linux_x86:CommonsBase_Std.Coreutils@0.2.2
+                    Release.Linux_x86_64:CommonsBase_Std.Coreutils@0.2.2
+
+                    Release.Windows_x86:CommonsBase_Std.S7z@25.1.0
+                    Release.Windows_x86_64:CommonsBase_Std.S7z@25.1.0
+                    Release.Darwin_arm64:CommonsBase_Std.S7z@25.1.0
+                    Release.Darwin_x86_64:CommonsBase_Std.S7z@25.1.0
+                    Release.Linux_x86:CommonsBase_Std.S7z@25.1.0
+                    Release.Linux_x86_64:CommonsBase_Std.S7z@25.1.0
+                  scripts: |
+                    CommonsBase_Std.Extract@0.1.0
                   use-cache: true
                   #   Use HEAD when not tagged
                   experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
