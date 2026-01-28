@@ -55,7 +55,9 @@ jobs:
                     CommonsBase_Std.Extract@0.1.0
                   use-cache: true
                   #   Use HEAD when not tagged
-                  experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
+                  # experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
+                  #   Temporary: always use HEAD until MlFront testing is done
+                  experimental-mlfront-ref: HEAD
                   options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_Std: rebuild "system" modules
 
             - name: Generate artifact attestation
