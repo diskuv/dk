@@ -10,16 +10,16 @@
     },
     "forms": [
         {
-            "id": "CommonsBase_Build.Ninja@1.12.1",
+            "id": "CommonsBase_Build.Ninja0@1.12.1",
             "precommands": {
                 "private": [
-                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-mac.zip -m ninja -f ${SLOT.Release.Darwin_arm64}/ninja.exe -e '*'",
-                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-mac.zip -m ninja -f ${SLOT.Release.Darwin_x86_64}/ninja.exe -e '*'",
-                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-linux_x86.zip -m ninja -f ${SLOT.Release.Linux_x86}/ninja.exe -e '*'",
-                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-linux_x86_64.zip -m ninja -f ${SLOT.Release.Linux_x86_64}/ninja.exe -e '*'",
-                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-linux_arm64.zip -m ninja -f ${SLOT.Release.Linux_arm64}/ninja.exe -e '*'",
-                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-winarm64.zip -m ninja.exe -f ${SLOT.Release.Windows_arm64}/ninja.exe",
-                    "get-asset CommonsBase_Build.Ninja.Bundle@1.12.1 -p ninja-win.zip -m ninja.exe -f ${SLOT.Release.Windows_x86_64}/ninja.exe"
+                    "get-asset CommonsBase_Build.Ninja0.Bundle@1.12.1 -p ninja-mac.zip -m ninja -f ${SLOT.Release.Darwin_arm64}/ninja.exe -e '*'",
+                    "get-asset CommonsBase_Build.Ninja0.Bundle@1.12.1 -p ninja-mac.zip -m ninja -f ${SLOT.Release.Darwin_x86_64}/ninja.exe -e '*'",
+                    "get-asset CommonsBase_Build.Ninja0.Bundle@1.12.1 -p ninja-linux_x86.zip -m ninja -f ${SLOT.Release.Linux_x86}/ninja.exe -e '*'",
+                    "get-asset CommonsBase_Build.Ninja0.Bundle@1.12.1 -p ninja-linux_x86_64.zip -m ninja -f ${SLOT.Release.Linux_x86_64}/ninja.exe -e '*'",
+                    "get-asset CommonsBase_Build.Ninja0.Bundle@1.12.1 -p ninja-linux_arm64.zip -m ninja -f ${SLOT.Release.Linux_arm64}/ninja.exe -e '*'",
+                    "get-asset CommonsBase_Build.Ninja0.Bundle@1.12.1 -p ninja-winarm64.zip -m ninja.exe -f ${SLOT.Release.Windows_arm64}/ninja.exe",
+                    "get-asset CommonsBase_Build.Ninja0.Bundle@1.12.1 -p ninja-win.zip -m ninja.exe -f ${SLOT.Release.Windows_x86_64}/ninja.exe"
                 ]
             },
             "outputs": {

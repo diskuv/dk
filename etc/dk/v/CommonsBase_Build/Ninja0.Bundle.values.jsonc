@@ -3,7 +3,7 @@
   "schema_version": { "major": 1, "minor": 0 },
   "bundles": [
     {
-      "id": "CommonsBase_Build.Ninja.Bundle@1.12.1",
+      "id": "CommonsBase_Build.Ninja0.Bundle@1.12.1",
       "listing": {
         "origins": [
           {

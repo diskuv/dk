@@ -8,6 +8,15 @@ Every other library can and should be distributed using the dk build keys.
 
 ## Conventions
 
+### Stages
+
+Stage "0" is for a shrinking set of binaries used to bootstrap C and other language compilers.
+
+For example:
+
+- `CommonsBase_Build.Ninja0` are prebuilt Ninja executables used to bootstrap the `clang` C compiler
+- `CommonsBase_Build.Ninja` will be Ninja executables compiled from source
+
 ### Official names
 
 We use the official name, including the official capitalization, unless:
