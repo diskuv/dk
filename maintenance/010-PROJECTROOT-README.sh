@@ -91,6 +91,7 @@ finish() {
 finish README.corrected.md
 finish docs/SCRIPTING.corrected.md
 
+install -d target
 install README.md "target/README.$(date +%s).md"
 install docs/SCRIPTING.md "target/SCRIPTING.$(date +%s).md"
 
