@@ -1,6 +1,8 @@
 (cram
  (applies_to darwin_arm64)
  (enabled_if
-  (= %{system} macosx))
+  (and 
+    (= %{system} macosx)
+    (= %{architecture} arm64)))
  (deps
   (source_tree etc/)))

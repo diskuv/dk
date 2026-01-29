@@ -26,7 +26,7 @@ CMake0
 The deterministic zip files created for dk0 objects don't contain symlinks, so `get-object`
 will be an invalid CMake.app since its code signature will be broken.
 
-  $ dk0 --trial -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Build get-object CommonsBase_Build.CMake0@3.25.3 -s Release.Darwin_arm64 -d o/cmake/ -e 'CMake.app/Contents/bin/*'
+  $ dk0 --trial -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Build post-object CommonsBase_Build.CMake0.Generate@3.25.3 generator=Ninja 'args[]=-S' 'args[]=.' -d o/cmakegen
   [progress]: dla dk-releases:cmake-darwin_universal.zip size 80161981 ...
   [progress]:   dlb https://github.com/diskuv/dk/releases/download/cmake-3.25.2+ci2 ...
   [up-to-date] CommonsBase_Build.CMake0@3.25.3+bn-20250101000000 -s Release.Darwin_arm64
