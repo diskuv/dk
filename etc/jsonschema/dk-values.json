@@ -554,10 +554,21 @@
                         "additionalProperties": false,
                         "properties": {
                             "args": {
-                                "description": "The command line arguments to the executable. All form variables (ex. ${SLOT.Release.Agnostic}) may be used.",
+                                "description": "One or more command lines. A flat list is the command line arguments for a single command line; a two-level list is a list of command lines. All form variables (ex. ${SLOT.Release.Agnostic}) may be used.",
                                 "type": "array",
                                 "items": {
-                                    "type": "string"
+                                    "oneOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "minItems": 1
+                                        }
+                                    ]
                                 },
                                 "minItems": 1
                             },
