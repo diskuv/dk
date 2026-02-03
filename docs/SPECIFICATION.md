@@ -157,6 +157,7 @@
       - [string.len](#stringlen)
       - [string.lower](#stringlower)
       - [string.rep](#stringrep)
+      - [string.sanitizesubdir](#stringsanitizesubdir)
       - [string.sub](#stringsub)
       - [string.upper](#stringupper)
     - [Lua table library](#lua-table-library)
@@ -3035,6 +3036,19 @@ Receives a string and returns a copy of this string with all ASCII uppercase let
 Returns a string that is the concatenation of `n` copies of the string `s` separated by the string `sep`. The default value for `sep` is the empty string (that is, no separator). Returns the empty string if `n` is not positive.
 
 (Note that it is very easy to exhaust the memory of your machine with a single call to this function.)
+
+#### string.sanitizesubdir
+
+`string.sanitizesubdir (s)`
+
+Returns a normalization of the subdirectory `s` if and only if `s` is a strict subdirectory; that is:
+
+- `s`, after file path normalization, does not begin with `..`
+- `s` has no unsafe file characters
+
+If `s` can't be sanitized, a `nil` and an error string is returned.
+
+This function supports conventional Lua assert checks: `local sanitized = assert(string.sanitizesubdir (s))`.
 
 #### string.sub
 
