@@ -2659,13 +2659,13 @@ Without `relative`, at the discretion of the build system implementation the ret
 #### request.io.toasset
 
 ```lua
-local origin, asset = request.io.toasset(file, {
+local origin, asset = request.io.toasset(file_or_dir, {
   path = "some/asset/path",
   origin_name = "..."
 })
 ```
 
-Converts the file to an asset and closes the file.
+Converts the file or directory to an asset and closes the file.
 
 In the options only `path` is mandatory.
 
