@@ -2536,24 +2536,27 @@ Some build system implementations may sandbox the I/O operations.
 #### request.io.open
 
 ```lua
-file = request.io.open(filename, mode)
+file_or_directory = request.io.open(filename_or_dirname, mode)
 ```
 
-This function opens a file, in the mode specified in the string mode. It returns a new file descriptor, or, in case of errors, nil plus an error message.
+This function opens a file or directory in the mode specified in the string mode. It returns a new file descriptor, or, in case of errors, nil plus an error message.
 
 The mode string can be any of the following:
 
-- "w" write mode
+- "r" read-only mode.
+- "w" write mode. `filename_or_dirname` must be a filename. Any parent directories required by `filename` will be created.
 
 Unlike the C library function `fopen`, the file will be opened in binary mode rather than text mode. (Text mode adds CRLF on Windows systems and is non-reproducible when cross-compiling.)
 
-The `filename` must be a *strictly* relative path:
+The `filename_or_dirname` must be a *strictly* relative path:
 
 - An absolute path will raise an error.
 - After the path is normalized, any path segments that start with `..` will raise an error.
 - After the path is normalized, any path segments that contain a forward or backward slash will raise an error. For example, Unix filenames can contain backslashes, but they will raise errors.
 
-Any parent directories required by `filename` will be created.
+Directory operations:
+
+- For the `r` read-only mode when `filename_or_dirname` is a directory, the usable functions are `request.io.list` and `request.io.toasset`.
 
 The file *may* be closed after the request is finished (ie. the `post-object` is finished), but it is the author's responsibility to close the file with [request.io.close](#requestioclose) or with [request.io.toasset](#requestiotoasset).
 
