@@ -105,6 +105,17 @@
                         "additionalProperties": false
                     }
                 },
+                "commands": {
+                    "type": "array",
+                    "description": "Value shell commands like `post-object ...`.",
+                    "items": {
+                        "type": "array",
+                        "description": "Value shell words for a single value shell command",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "continue_": {
                     "type": "object",
                     "description": "Logic to be performed after the [values] have been added and the [expressions] evaluated. Either continue to the next state by specifying [continue_] or return a value by not specifying a [continue_].",

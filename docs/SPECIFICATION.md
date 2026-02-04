@@ -3278,7 +3278,7 @@ The `submit` command is the entry point for the free rule to build artifacts by:
 All responses must set the field `submit`. That is:
 
 ```lua
-return { submit = { values = ..., expressions = ..., andthen = ... } }
+return { submit = { values = ..., expressions = ..., commands = ..., andthen = ... } }
 ```
 
 The fields that go into `submit.values` and `submit.andthen` are enumerated in the authoritative [dk-rule-response.json schema](../etc/jsonschema/dk-rule-response.json).
@@ -3312,6 +3312,9 @@ return {
           "$(get-object OurExample_Std.SomeModule@0.1.2 -s ${SLOTNAME.Release.execution_abi} -m ./sorted-file -f :file)"
       }
     },
+    commands = {
+      {"post-object", "OurExample_Std.SomeRule@3.4.5"}
+    },
     andthen = {
       continue_ = {
         state = "have-sorted-file",
@@ -3328,9 +3331,10 @@ When the build system sees that response, the following sequence occurs:
 2. all the `expressions.strings` are evaluated and will be made available as Lua strings in `request.continued`
 3. all the `expressions.files` are evaluated and will be made available as readable file objects in `request.continued`
 4. all the `expressions.dirs` are evaluated and will be made available as readable directory objects in `request.continued`
-5. the rule function will get a callback (ie. `andthen`)
+5. all the `commands` are evaluated
+6. the rule function will get a callback (ie. `andthen`)
 
-All three steps (`values`, `expressions`, `andthen`) were optional.
+All four steps (`values`, `expressions`, `commands`, `andthen`) were optional.
 
 The build system will perform the callback of the `andthen` with the following parameters:
 
