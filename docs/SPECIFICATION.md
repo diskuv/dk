@@ -60,6 +60,7 @@
     - [Option: \[-n STRIP\]](#option--n-strip)
     - [Option: \[-m MEMBER\]](#option--m-member)
   - [Subshells](#subshells)
+    - [subshell options](#subshell-options)
     - [subshell: get-object MODULE@VERSION -s REQUEST\_SLOT](#subshell-get-object-moduleversion--s-request_slot)
     - [subshell: post-object MODULE@VERSION -- CLI\_FORM\_DOC](#subshell-post-object-moduleversion----cli_form_doc)
     - [subshell: get-asset MODULE@VERSION FILE\_PATH](#subshell-get-asset-moduleversion-file_path)
@@ -1412,6 +1413,32 @@ To leave the directory structure as-is, set `STRIP` to `0`. To strip away the to
 Gets the zip file member from the object or asset, which must be a zip archive.
 
 ## Subshells
+
+### subshell options
+
+A subshell may have options for the build system that precede the subshell command.
+
+Each option must:
+
+- precede the subshell command (ie. precede `get-object`, etc.)
+- start with a dash (`-`)
+- be a single valueshell [word](#value-shell-language-vsl)
+
+For example, `$(--path=absnative -q '-x=still one word' get-object ...)` has three options:
+
+- `--path=absnative`
+- `-q`
+- `-x=still one word`
+
+Any options that are not recognized by the build system must be ignored.
+
+In the reference implementation, the only recognized options are:
+
+| Option         | Description                                                        |
+| -------------- | ------------------------------------------------------------------ |
+| `--path=STYLE` | Sets the subshell to return a path in one of the styles:           |
+|                | - `rel`: default. relative path, Unix style                        |
+|                | - `absnative`: absolute Windows path on Windows, Unix path on Unix |
 
 ### subshell: get-object MODULE@VERSION -s REQUEST_SLOT
 
