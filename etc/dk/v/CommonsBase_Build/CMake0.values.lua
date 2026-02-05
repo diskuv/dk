@@ -33,7 +33,7 @@
 -- the prefix option in `cmake --install --prefix` (usually when the project sets CMAKE_INSTALL_PREFIX CACHE
 -- variable by default).
 -- 2: TODO: The Ninja generator (the default) only works on Windows when the build is run in a Visual Studio Developer Command Prompt.
--- 3: FUTURE: CMakeCache.txt can be checked in this rule to find out if all the CACHE variables are hermetic. 
+-- 3: FUTURE: CMakeCache.txt can be checked in this rule to find out if all the CACHE variables are hermetic.
 --    Example: BAD: _Python3_EXECUTABLE:INTERNAL=/opt/homebrew/Frameworks/Python.framework/Versions/3.11/bin/python3.11
 --    Example: GOOD: generated_dir:INTERNAL=/Volumes/SSD/Source/dk/t/p/4472/e7lu/f/Release.Agnostic/b/_deps/googletest-build/googletest/generated
 
@@ -118,9 +118,13 @@ function rules.F_Build(command, request)
     -- print(json.encode(request.user, { indent = 1 }))
     -- print("p object: " .. json.encode(p, { indent = 1 }))
 
+    -- ninjaexe must be absolute path since it is passed to CMAKE_MAKE_PROGRAM CACHE variable
     if request.execution.OSFamily == "macos" then
       p.cmakeexe =
       "$(get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-darwin_universal.zip -n 1 -d : -e 'CMake.app/Contents/bin/*')/CMake.app/Contents/bin/cmake"
+      p.absninjaexe = "$(--path=absnative get-object CommonsBase_Build.Ninja0@1.12.1 -s Release." ..
+          p.abi ..
+          " -m ./ninja.exe -f ninja -e '*')"
       p.osfamily = "macos"
       return CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, p)
     elseif request.execution.OSFamily == "linux" then
@@ -136,6 +140,9 @@ function rules.F_Build(command, request)
       end
       p.cmakeexe = "$(get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-" ..
           cmakeabi .. ".zip -n 1 -d : -e 'bin/*')/bin/cmake"
+      p.absninjaexe = "$(--path=absnative get-object CommonsBase_Build.Ninja0@1.12.1 -s Release." ..
+          p.abi ..
+          " -m ./ninja.exe -f ninja -e '*')"
       p.osfamily = "linux"
       return CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, p)
     elseif request.execution.OSFamily == "windows" then
@@ -152,6 +159,9 @@ function rules.F_Build(command, request)
       p.cmakeexe =
           "$(get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-" ..
           cmakeabi .. ".zip -n 1 -d : -e 'bin/*')/bin/cmake.exe"
+      p.absninjaexe = "$(--path=absnative get-object CommonsBase_Build.Ninja0@1.12.1 -s Release." ..
+          p.abi ..
+          " -m ./ninja.exe -f ninja.exe -e '*')"
       p.osfamily = "windows"
       return CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, p)
     else
@@ -184,15 +194,16 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
   -- ninja generator args
   local gninjaargs = {}
   if p.generator == "Ninja" then
+    -- CMAKE_MAKE_PROGRAM needs to be absolute path
     gninjaargs = {
-      "-DCMAKE_MAKE_PROGRAM:FILEPATH=$(get-object CommonsBase_Build.Ninja0@1.12.1 -s Release." .. p.abi ..
-      " -m ./ninja.exe -f : -e '*')/ninja.exe"
+      "-DCMAKE_MAKE_PROGRAM:FILEPATH=" .. p.absninjaexe
     }
   end
 
   -- concatenate [p.gargs] into string "generate_cmd"
   local gargs = {
     p.cmakeexe, "-G", p.generator, "-S", sourcedir, "-B", "b",
+    -- CMAKE_INSTALL_PREFIX needs to be absolute path
     "-DCMAKE_INSTALL_PREFIX:FILEPATH=${SLOTABS.Release.Agnostic}"
   }
   table.move(p.gargs, 1, table.getn(p.gargs), table.getn(gargs) + 1, gargs) ---@diagnostic disable-line: deprecated, access-invisible
@@ -206,7 +217,9 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
 
   -- concatenate p.iargs into array "iargs"
   local iargs = {
-    p.cmakeexe, "--install", "b", "--prefix", "${SLOTABS.Release.Agnostic}"
+    p.cmakeexe, "--install", "b",
+    -- the install prefix needs to be absolute path
+    "--prefix", "${SLOTABS.Release.Agnostic}"
   }
   table.move(p.iargs, 1, table.getn(p.iargs), table.getn(iargs) + 1, iargs) ---@diagnostic disable-line: deprecated, access-invisible
 
