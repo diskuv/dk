@@ -9,6 +9,7 @@
 --  urlpath: path added to the mirrors so full URL is a ZIP file of the CMake source directory
 --  installdir: (required) the install directory to pass to `cmake --install ... --prefix INSTALL_DIRECTORY`
 --  generator: the cmake generator to use (defaults to "Ninja")
+--  sourcesubdir: subdirectory inside the asset or bundle that contains the CMakeLists.txt (defaults to root of asset or bundle)
 --  nstrip: levels of leading directories to nstrip while extract asset or bundle (defaults to 0)
 --  gargs[]: list of cmake generator arguments to pass to cmake executable.
 --        The -S source directory is required.
@@ -16,6 +17,8 @@
 --  bargs[]: list of cmake build arguments to pass to cmake executable.
 --  iargs[]: list of cmake install arguments to pass to cmake executable.
 --  out[]: (required) list of expected output files in the build directory
+--  outrmdir[]: list of "fd" directory name glob patterns for directories in the build directory to remove
+--  outrmglob[]: list of "fd" filename glob patterns for files in the build directory to remove after outrmdir[]
 --  exe[]: list of glob patterns for executables to set execute permissions (Unix) and locally codesign (macOS).
 -- examples:
 --  dk0 --trial run CommonsBase_Build.CMake0.Build@3.25.3 \
@@ -45,6 +48,8 @@
 --  bargs[]: list of cmake build arguments to pass to cmake executable.
 --  iargs[]: list of cmake install arguments to pass to cmake executable.
 --  out[]: (required) list of expected output files in the build directory
+--  outrmdir[]: list of "fd" directory name glob patterns for directories in the build directory to remove
+--  outrmglob[]: list of "fd" filename glob patterns for files in the build directory to remove after outrmdir[]
 --  exe[]: list of glob patterns for executables to set execute permissions (Unix) and locally codesign (macOS).
 -- examples:
 --  dk0 --trial post-object CommonsBase_Build.CMake0.F_Build@3.25.3 \
@@ -60,7 +65,7 @@
 --   cmake --install b --prefix ${SLOTABS.Release.Agnostic} <iargs>
 
 -- COMPILERS
--- 
+--
 -- ::: Windows / Visual Studio
 -- <TODO> The Ninja generator (the default) only works on Windows when the build is run in a Visual Studio Developer Command Prompt.
 
@@ -69,12 +74,12 @@
 -- ANS1: Because dk0 objects are deterministic zip files that do not allow symlinks.
 -- Symlinks cause inconsistency across platforms so with deterministic objects
 -- the CMake.app code signature output by `get-object` would be invalid on macOS.
--- 
+--
 -- Q2: CMAKE_INSTALL_PREFIX?
 -- The CMAKE_INSTALL_PREFIX is set for CMake projects like google/or-tools that do not respect
 -- the prefix option in `cmake --install --prefix` (usually when the project sets CMAKE_INSTALL_PREFIX CACHE
 -- variable by default).
--- 
+--
 -- Q3: Hermeticity?
 -- In a <FUTURE> version, CMakeCache.txt can be checked in this rule to find out if all the CACHE variables are hermetic.
 --    Example: BAD: _Python3_EXECUTABLE:INTERNAL=/opt/homebrew/Frameworks/Python.framework/Versions/3.11/bin/python3.11
@@ -124,6 +129,8 @@ function uirules.Build(command, request)
   local sourcesubdir = assert(string.sanitizesubdir(request.user.sourcesubdir or "."))
   local out = request.user.out
   assert(type(out) == "table", "out must be a table. please provide `'out[]=FILE1' 'out[]=FILE2' ...`")
+  local outrmdir = request.user.outrmdir or {}
+  local outrmglob = request.user.outrmglob or {}
   local exe = request.user.exe or {}
   local nstrip = request.user.nstrip or 0
 
@@ -155,6 +162,8 @@ function uirules.Build(command, request)
     urlpath_size = urlpath_size,
     nstrip = nstrip,
     out = out,
+    outrmdir = outrmdir,
+    outrmglob = outrmglob,
     installdir = installdir,
     exe = exe
   }
@@ -218,6 +227,24 @@ function CommonsBase_Build__CMake0__3_25_3.ui_generate_build_install(command, re
       k, v = next(p.out, k)
     end
 
+    -- outrmdir
+    local arg_outrmdir = {}
+    k, v = next(p.outrmdir)
+    while k do
+      a = "outrmdir[]=" .. v -- "outrmdir[]=GLOB_PATTERN" is F_Build option
+      arg_outrmdir[k] = a
+      k, v = next(p.outrmdir, k)
+    end
+
+    -- outrmglob
+    local arg_outrmglob = {}
+    k, v = next(p.outrmglob)
+    while k do
+      a = "outrmglob[]=" .. v -- "outrmglob[]=GLOB_PATTERN" is F_Build option
+      arg_outrmglob[k] = a
+      k, v = next(p.outrmglob, k)
+    end
+
     -- exe
     local arg_exe = {}
     k, v = next(p.exe)
@@ -267,6 +294,8 @@ function CommonsBase_Build__CMake0__3_25_3.ui_generate_build_install(command, re
     }
     table.move(arg_content, 1, table.getn(arg_content), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
     table.move(arg_out, 1, table.getn(arg_out), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
+    table.move(arg_outrmdir, 1, table.getn(arg_outrmdir), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
+    table.move(arg_outrmglob, 1, table.getn(arg_outrmglob), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
     table.move(arg_exe, 1, table.getn(arg_exe), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
     table.move(arg_gargs, 1, table.getn(arg_gargs), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
     table.move(arg_bargs, 1, table.getn(arg_bargs), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
@@ -317,6 +346,8 @@ function rules.F_Build(command, request)
     local sourcesubdir = assert(string.sanitizesubdir(request.user.sourcesubdir or "."))
     local out = request.user.out
     assert(type(out) == "table", "out must be a table. please provide `'out[]=FILE1' 'out[]=FILE2' ...`")
+    local outrmdir = request.user.outrmdir or {}
+    local outrmglob = request.user.outrmglob or {}
     local exe = request.user.exe or {}
     local nstrip = request.user.nstrip or 0
 
@@ -332,17 +363,25 @@ function rules.F_Build(command, request)
       bargs = bargs,
       iargs = iargs,
       out = out,
+      outrmdir = outrmdir,
+      outrmglob = outrmglob,
       exe = exe,
       nstrip = nstrip
     }
 
+    p.coreutilsexe = "$(get-object CommonsBase_Std.Coreutils@0.2.2 -s Release." ..
+        p.abi .. " -m ./coreutils.exe -e '*' -f coreutils.exe)"
+    p.fdexe = "$(get-object CommonsBase_Std.Fd@10.3.0 -s Release." ..
+        p.abi .. " -m ./fd.exe -e '*' -f fd.exe)"
+
     -- ninjaexe must be absolute path since it is passed to CMAKE_MAKE_PROGRAM CACHE variable
+    p.absninjaexe = "$(--path=absnative get-object CommonsBase_Build.Ninja0@1.12.1 -s Release." ..
+        p.abi ..
+        " -m ./ninja.exe -f ninja -e '*')"
+
     if request.execution.OSFamily == "macos" then
       p.cmakeexe =
       "$(get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-darwin_universal.zip -n 1 -d : -e 'CMake.app/Contents/bin/*')/CMake.app/Contents/bin/cmake"
-      p.absninjaexe = "$(--path=absnative get-object CommonsBase_Build.Ninja0@1.12.1 -s Release." ..
-          p.abi ..
-          " -m ./ninja.exe -f ninja -e '*')"
       p.osfamily = "macos"
       return CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, p)
     elseif request.execution.OSFamily == "linux" then
@@ -358,9 +397,6 @@ function rules.F_Build(command, request)
       end
       p.cmakeexe = "$(get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-" ..
           cmakeabi .. ".zip -n 1 -d : -e 'bin/*')/bin/cmake"
-      p.absninjaexe = "$(--path=absnative get-object CommonsBase_Build.Ninja0@1.12.1 -s Release." ..
-          p.abi ..
-          " -m ./ninja.exe -f ninja -e '*')"
       p.osfamily = "linux"
       return CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, p)
     elseif request.execution.OSFamily == "windows" then
@@ -389,6 +425,8 @@ function rules.F_Build(command, request)
 end
 
 function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, p)
+  local k, v
+
   -- the source directory will be "s/" inside the function directory
   -- the build directory will be "b/" inside the function directory
   local sourcedir
@@ -441,6 +479,46 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
   }
   table.move(p.iargs, 1, table.getn(p.iargs), table.getn(iargs) + 1, iargs) ---@diagnostic disable-line: deprecated, access-invisible
 
+  -- assemble the array of commands
+  local args = {
+    -- run: cmake -G
+    gargs,
+    -- run: cmake --build
+    bargs,
+    -- run: cmake --install
+    iargs
+  }
+
+  -- validate and add `rm -rf DIRS` for each ${SLOT.Release.Agnostic}/DIR in p.outrmdir
+  local rmdirs = {}
+  k, v = next(p.outrmdir)
+  while k do
+    v = assert(string.sanitizesubdir(v)) -- sanitize to prevent malicious input
+    rmdirs[k] = "${SLOT.Release.Agnostic}/" .. v
+    k, v = next(p.outrmdir, k)
+  end
+  if (table.getn(rmdirs) > 0) then ---@diagnostic disable-line: deprecated, access-invisible
+    local rmrfcmd = { p.coreutilsexe, "rm", "-rf" }
+    table.move(rmdirs, 1, table.getn(rmdirs), table.getn(rmrfcmd) + 1, rmrfcmd) ---@diagnostic disable-line: deprecated, access-invisible
+    local rmrfcmd1 = { rmrfcmd } -- add one [rm -rf] command
+    table.move(rmrfcmd1, 1, table.getn(rmrfcmd1), table.getn(args) + 1, args) ---@diagnostic disable-line: deprecated, access-invisible
+  end
+
+  -- add `fd --glob --hidden --no-ignore -X coreutils rm -f \; -- GLOB ${SLOT.Release.Agnostic}` for each GLOB in p.outrmglob  
+  -- validation? the GLOB is after `--` so dashes won't be interpreted as options.
+  -- also, the GLOB is applied to filenames _under_ the -C BASEDIR.
+  -- so GLOB is sanitized
+  -- --base-directory? it is hidden option; confer https://github.com/sharkdp/fd/issues/475
+  k, v = next(p.outrmglob)
+  while k do
+    local fdcmd = { p.fdexe, "--glob", "--hidden", "--no-ignore",        
+        "-X", p.coreutilsexe, "rm", "-f", ";",
+        "--", v, "${SLOT.Release.Agnostic}" }
+    local fdcmd1 = { fdcmd } -- add one [fd] command
+    table.move(fdcmd1, 1, table.getn(fdcmd1), table.getn(args) + 1, args) ---@diagnostic disable-line: deprecated, access-invisible
+    k, v = next(p.outrmglob, k)
+  end
+
   return {
     submit = {
       values = {
@@ -455,14 +533,7 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
             },
             function_ = {
               execution = { { name = "OSFamily", value = p.osfamily } },
-              args = {
-                -- run: cmake -G
-                gargs,
-                -- run: cmake --build
-                bargs,
-                -- run: cmake --install
-                iargs
-              }
+              args = args
             },
             outputs = {
               assets = {

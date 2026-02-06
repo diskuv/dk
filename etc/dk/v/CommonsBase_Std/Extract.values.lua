@@ -13,15 +13,17 @@
 --    A future version may extract only the specified paths,
 --    but for now we extract all files and expect you to declare them all.
 
--- DESIGN
+-- DESIGN QUESTIONS
+-- 
 -- Q1: Platforms?
 -- A1: On macOS the /usr/bin/tar system binary is used.
 -- On Linux the toybox tar command is fetched from an asset and used.
 -- On Windows the 7z.exe command is fetched from an asset and used.
+-- 
 -- Q2: There is no way to filter which files I want.
--- A2: <FUTURE> This rule will be renamed to Extract0, and the new Extract
--- will run Fd on the extracted files to filter them. The split is because
--- Fd requires Extract0.
+-- A2: <FUTURE> This rule will be renamed to CommonsBase_Std.Extract0, and the new CommonsBase_Std.Extract
+-- will run CommonsBase_Std.Fd on the extracted files to filter them. The split is because
+-- CommonsBase_Std.Fd requires CommonsBase_Std.Extract0.
 --
 -- examples:
 --   tar cvf target/nothing.tar README.md
