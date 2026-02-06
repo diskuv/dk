@@ -1,4 +1,4 @@
--- USAGE 1 of 1: CommonsBase_Std.Extract.Untar@0.1.0
+-- USAGE 1 of 1: CommonsBase_Std.Extract.F_Untar@0.1.0
 -- (Free rule) Untars a tar, tar.gz, tar.xz or tar.bz2 file.
 -- Configurations: One of the following sets of options must be provided:
 --  tarfile= modver= paths[]=
@@ -21,7 +21,7 @@
 -- examples:
 --   tar cvf target/nothing.tar README.md
 -- 
---   dk0 --trial post-object CommonsBase_Std.Extract.Untar@0.1.0 \
+--   dk0 --trial post-object CommonsBase_Std.Extract.F_Untar@0.1.0 \
 --     -f target/untar modver=OurTest_Std.Extract@0.1.0 \
 --     tarfile=$PWD/target/nothing.tar 'paths[]=README.md'
 -- 
@@ -30,7 +30,7 @@
 --   _build/default/ext/MlFront/src/MlFront_Exec/Shell.exe \
 --     -isystem ./ext/dk/etc/dk/i -I ext/dk/etc/dk/v \
 --     --trust-local-package CommonsBase_Std \
---     --trial post-object CommonsBase_Std.Extract.Untar@0.1.0 \
+--     --trial post-object CommonsBase_Std.Extract.F_Untar@0.1.0 \
 --     -f target/untar modver=OurTest_Std.Extract@0.1.0 \
 --     tarfile=$PWD/target/nothing.tar 'paths[]=README.md'
 
@@ -45,7 +45,7 @@ CommonsBase_Std__Extract__0_1_0 = {}
 
 rules = build.newrules(M)
 
-function rules.Untar(command, request)
+function rules.F_Untar(command, request)
   if command == "declareoutput" then
     local modver = assert(request.user.modver, "please provide `modver=MODULE@VERSION`")
     return {

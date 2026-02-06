@@ -1,6 +1,5 @@
 -- USAGE 1 OF 2: CommonsBase_Build.CMake0.Build@3.25.3
 -- (UI rule) Generates a CMake build system in the build directory.
--- All options of F_Build except bundlemodver/assetmodver/assetpath are supported.
 -- Configurations: One of the following sets of options must be provided:
 --   installdir= src[]=
 --   installdir= mirrors[]= urlpath=

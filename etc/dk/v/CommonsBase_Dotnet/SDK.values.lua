@@ -5869,7 +5869,7 @@ function CommonsBase_Std__Dotnet_SDK.form_values_unix(slot)
         arch)
   local postobject       =
       string.format(
-        "post-object CommonsBase_Std.Extract.Untar@0.1.0 -d ${SLOT.%s} modver=CommonsBase_Dotnet.SDK.Unix.%s@10.0.100-rc.2.25502.107 tarfile=%s %s",
+        "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.%s} modver=CommonsBase_Dotnet.SDK.Unix.%s@10.0.100-rc.2.25502.107 tarfile=%s %s",
         slot,
         slot,
         getasset_tarfile,
