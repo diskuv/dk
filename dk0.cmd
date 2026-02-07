@@ -41,14 +41,14 @@ SET DKCODER_PWD=%CD%
 
 REM Update within dksdk-coder:
 REM   f_dk0() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/dk0-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/$ver/dk0-$i$extexe"; done }
-REM   f_dk0 2.4.2.61
+REM   f_dk0 2.4.2.62
 REM   shasum -a 256 build/dk0-* | awk 'BEGIN{FS="[ /-]"} {printf "SET DK_CKSUM_%s=%s\n", toupper($5), $1}' | sort
 REM
 REM   Empty value if the architecture is not supported.
 REM   In particular, use empty instead of 9491d4737000e80bcbdd7a39e9dc13c2178ff865beff7d800d6159bfc395e8fa which is checksum for HTTP 404 error.
 REM -------------------------------------
-SET DK_VER=2.4.2.61
-SET DK_CKSUM_WINDOWS_X86_64=cc09d563c8696dae68107be16af064677c79093f7acf745970f6a29a457179c9
+SET DK_VER=2.4.2.62
+SET DK_CKSUM_WINDOWS_X86_64=4bc96d3bf8116600b9f6e57e4d5af5f45f5b46bbab153dc0f21a94a42b93db4e
 SET DK_CKSUM_WINDOWS_X86=
 
 REM --------- Quiet Detection ---------
