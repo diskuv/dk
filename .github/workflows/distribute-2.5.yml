@@ -32,8 +32,8 @@ jobs:
               uses: diskuv/dk-distribute@v1
               with:
                   id: ${{ github.ref_type == 'tag' && format('CommonsBase_Std@{0}', github.ref_name) || format('CommonsBase_Std@{0}', env.dkdist_branch_version) }}
-                  pubkey: ${{ secrets.distribute_2_4_pubkey }}
-                  seckey: ${{ secrets.distribute_2_4_seckey }}
+                  pubkey: ${{ secrets.distribute_2_5_pubkey }}
+                  seckey: ${{ secrets.distribute_2_5_seckey }}
                   objects: |
                     Release.Windows_x86_64:CommonsBase_Std.S7z.S7zr@25.1.0
                     Release.Windows_x86_64:CommonsBase_Std.S7z.Windows7zExe@25.1.0
@@ -51,6 +51,13 @@ jobs:
                     Release.Darwin_x86_64:CommonsBase_Std.S7z@25.1.0
                     Release.Linux_x86:CommonsBase_Std.S7z@25.1.0
                     Release.Linux_x86_64:CommonsBase_Std.S7z@25.1.0
+
+                    Release.Windows_x86:CommonsBase_Std.Fd@10.3.0
+                    Release.Windows_x86_64:CommonsBase_Std.Fd@10.3.0
+                    Release.Darwin_arm64:CommonsBase_Std.Fd@10.3.0
+                    Release.Darwin_x86_64:CommonsBase_Std.Fd@10.3.0
+                    Release.Linux_x86:CommonsBase_Std.Fd@10.3.0
+                    Release.Linux_x86_64:CommonsBase_Std.Fd@10.3.0
                   scripts: |
                     CommonsBase_Std.Extract@0.1.0
                   use-cache: true
