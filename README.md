@@ -343,7 +343,7 @@ We'll make a JSON file to download `7zr.exe`.
 <!-- $MDX skip file=docs/7zip-tutorial/OurZip_Demo.S7z1a.S7zr.values.jsonc -->
 ```jsonc
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": { "major": 1, "minor": 0 },  
   "bundles": [
     {
@@ -490,7 +490,7 @@ We'll create a new JSON file containing the form.
 <!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z1b.S7zr.values.jsonc -->
 ```jsonc
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": { "major": 1, "minor": 0 }, 
   "forms": [
     {
@@ -641,7 +641,7 @@ Now that we have seen how to specify one asset, let's do all of the Windows inst
 <!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z1c.S7zr.values.jsonc -->
 ```jsonc
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {
     "major": 1,
     "minor": 0
@@ -897,7 +897,7 @@ Whenever we run a command we need a form with a `function`.
 <!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z2.Windows7zExe.values.jsonc -->
 ```jsonc
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {
     "major": 1,
     "minor": 0
@@ -1081,7 +1081,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
 <!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z3.MacLinux7zTar.values.jsonc -->
 ```jsonc
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {
     "major": 1,
     "minor": 0
@@ -1203,7 +1203,7 @@ This is a new form with a function that will call `7z.exe` with the right parame
 <!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z4.MacLinux7zExe.values.jsonc -->
 ```jsonc
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {
     "major": 1,
     "minor": 0
@@ -1326,7 +1326,7 @@ We have not yet provided an overall interface for the 7zip package. Let's do thi
 <!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z5.values.jsonc -->
 ```jsonc
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {
     "major": 1,
     "minor": 0
@@ -1594,7 +1594,7 @@ The always-failing form is the following (you don't need to create your own copy
 <!-- $MDX file=docs/7zip-tutorial/OurZip_Demo.S7z9.Debug.values.jsonc -->
 ```jsonc
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {
     "major": 1,
     "minor": 0

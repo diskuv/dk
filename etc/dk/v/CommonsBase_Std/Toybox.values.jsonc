@@ -1,7 +1,7 @@
 // The initial version is equivalent to the builtin MlFront_Attestation.Toybox@0.8.9.
 // Over time the versions will likely diverge (the CommonsBase_Std should be more in sync with upstream toybox).
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {
     "major": 1,
     "minor": 0

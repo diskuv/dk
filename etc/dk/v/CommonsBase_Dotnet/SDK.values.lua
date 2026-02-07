@@ -6,7 +6,7 @@
 -- multiple versions of .NET in the same values.lua.
 
 -- lua-ml does not support local functions.
--- And if the variable was "local" it would be nil inside rules.Untar.
+-- And if the variable was "local" it would be nil inside the rules/uirules function bodies.
 -- So a should-be-unique global is used instead.
 CommonsBase_Std__Dotnet_SDK = {
   id_module = "CommonsBase_Dotnet.SDK",
@@ -5869,7 +5869,7 @@ function CommonsBase_Std__Dotnet_SDK.form_values_unix(slot)
         arch)
   local postobject       =
       string.format(
-        "post-object CommonsBase_Std.Extract.Untar@0.1.0 -d ${SLOT.%s} modver=CommonsBase_Dotnet.SDK.Unix.%s@10.0.100-rc.2.25502.107 tarfile=%s %s",
+        "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.%s} modver=CommonsBase_Dotnet.SDK.Unix.%s@10.0.100-rc.2.25502.107 tarfile=%s %s",
         slot,
         slot,
         getasset_tarfile,
@@ -6131,7 +6131,7 @@ function M.run(options)
   local request = assert(ctx.request, "Expected `ctx = {request = { ... }}` in options")
   local continue_ = ctx.continue_
   local userargs = ctx.arg or {}
-  -- local json = require("buildjson")
+  -- local json = require("jsondk")
   -- print("run request for command " ..
   --   command .. " and continue_ " .. tostring(continue_) .. ":\n" .. json.encode(request, { indent = 1 }))
   if command == "submit" then
@@ -6199,7 +6199,7 @@ function uirules.Dotnet(command, request)
   if command == "submit" then
     return CommonsBase_Std__Dotnet_SDK.common_submit_response()
   elseif command == "ui" then
-    -- json = require("buildjson")
+    -- json = require("jsondk")
     -- print("ui request:\n" .. json.encode(request, { indent = 1 }))
     local dotnetsdk = request.io.realpath(assert(request.continued.dotnetsdk,
       "Expected `dotnetsdk` defined in `expressions.directories`"))

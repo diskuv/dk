@@ -1,0 +1,165 @@
+// Testing:
+//  get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Darwin_arm64 -d target\coreutils-tarmacarm64
+//  dksrc/dk0 -I .\pkgs\include\CommonsBase_Std -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Darwin_arm64 -d target\coreutils-tarmacarm64
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "forms": [
+    {
+      "id": "CommonsBase_Std.Fd.Tar@10.3.0",
+      "precommands": {
+        "private": [
+          // extract macOS and Linux tar.gz files
+          "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.Release.Darwin_arm64} modver=CommonsBase_Std.Fd.Tar.Darwin_arm64@10.3.0 tarfile=$(get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-aarch64-apple-darwin.tar.gz -f fd.tar.gz) paths[]=fd-v10.3.0-aarch64-apple-darwin/fd paths[]=fd-v10.3.0-aarch64-apple-darwin/CHANGELOG.md paths[]=fd-v10.3.0-aarch64-apple-darwin/LICENSE-APACHE paths[]=fd-v10.3.0-aarch64-apple-darwin/LICENSE-MIT paths[]=fd-v10.3.0-aarch64-apple-darwin/README.md paths[]=fd-v10.3.0-aarch64-apple-darwin/autocomplete/_fd paths[]=fd-v10.3.0-aarch64-apple-darwin/autocomplete/fd.bash paths[]=fd-v10.3.0-aarch64-apple-darwin/autocomplete/fd.fish paths[]=fd-v10.3.0-aarch64-apple-darwin/autocomplete/fd.ps1 paths[]=fd-v10.3.0-aarch64-apple-darwin/fd.1",
+          "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.Release.Darwin_x86_64} modver=CommonsBase_Std.Fd.Tar.Darwin_x86_64@10.3.0 tarfile=$(get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-apple-darwin.tar.gz -f fd.tar.gz) paths[]=fd-v10.3.0-x86_64-apple-darwin/fd paths[]=fd-v10.3.0-x86_64-apple-darwin/CHANGELOG.md paths[]=fd-v10.3.0-x86_64-apple-darwin/LICENSE-APACHE paths[]=fd-v10.3.0-x86_64-apple-darwin/LICENSE-MIT paths[]=fd-v10.3.0-x86_64-apple-darwin/README.md paths[]=fd-v10.3.0-x86_64-apple-darwin/autocomplete/_fd paths[]=fd-v10.3.0-x86_64-apple-darwin/autocomplete/fd.bash paths[]=fd-v10.3.0-x86_64-apple-darwin/autocomplete/fd.fish paths[]=fd-v10.3.0-x86_64-apple-darwin/autocomplete/fd.ps1 paths[]=fd-v10.3.0-x86_64-apple-darwin/fd.1",
+          "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.Release.Linux_arm64_gnu} modver=CommonsBase_Std.Fd.Tar.Linux_arm64_gnu@10.3.0 tarfile=$(get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-aarch64-unknown-linux-gnu.tar.gz -f fd.tar.gz) paths[]=fd-v10.3.0-aarch64-unknown-linux-gnu/fd paths[]=fd-v10.3.0-aarch64-unknown-linux-gnu/CHANGELOG.md paths[]=fd-v10.3.0-aarch64-unknown-linux-gnu/LICENSE-APACHE paths[]=fd-v10.3.0-aarch64-unknown-linux-gnu/LICENSE-MIT paths[]=fd-v10.3.0-aarch64-unknown-linux-gnu/README.md paths[]=fd-v10.3.0-aarch64-unknown-linux-gnu/autocomplete/_fd paths[]=fd-v10.3.0-aarch64-unknown-linux-gnu/autocomplete/fd.bash paths[]=fd-v10.3.0-aarch64-unknown-linux-gnu/autocomplete/fd.fish paths[]=fd-v10.3.0-aarch64-unknown-linux-gnu/autocomplete/fd.ps1 paths[]=fd-v10.3.0-aarch64-unknown-linux-gnu/fd.1",
+          "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.Release.Linux_arm64} modver=CommonsBase_Std.Fd.Tar.Linux_arm64@10.3.0 tarfile=$(get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-aarch64-unknown-linux-musl.tar.gz -f fd.tar.gz) paths[]=fd-v10.3.0-aarch64-unknown-linux-musl/fd paths[]=fd-v10.3.0-aarch64-unknown-linux-musl/CHANGELOG.md paths[]=fd-v10.3.0-aarch64-unknown-linux-musl/LICENSE-APACHE paths[]=fd-v10.3.0-aarch64-unknown-linux-musl/LICENSE-MIT paths[]=fd-v10.3.0-aarch64-unknown-linux-musl/README.md paths[]=fd-v10.3.0-aarch64-unknown-linux-musl/autocomplete/_fd paths[]=fd-v10.3.0-aarch64-unknown-linux-musl/autocomplete/fd.bash paths[]=fd-v10.3.0-aarch64-unknown-linux-musl/autocomplete/fd.fish paths[]=fd-v10.3.0-aarch64-unknown-linux-musl/autocomplete/fd.ps1 paths[]=fd-v10.3.0-aarch64-unknown-linux-musl/fd.1",
+          "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.Release.Linux_arm} modver=CommonsBase_Std.Fd.Tar.Linux_arm@10.3.0 tarfile=$(get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-arm-unknown-linux-gnueabihf.tar.gz -f fd.tar.gz) paths[]=fd-v10.3.0-arm-unknown-linux-gnueabihf/fd paths[]=fd-v10.3.0-arm-unknown-linux-gnueabihf/CHANGELOG.md paths[]=fd-v10.3.0-arm-unknown-linux-gnueabihf/LICENSE-APACHE paths[]=fd-v10.3.0-arm-unknown-linux-gnueabihf/LICENSE-MIT paths[]=fd-v10.3.0-arm-unknown-linux-gnueabihf/README.md paths[]=fd-v10.3.0-arm-unknown-linux-gnueabihf/autocomplete/_fd paths[]=fd-v10.3.0-arm-unknown-linux-gnueabihf/autocomplete/fd.bash paths[]=fd-v10.3.0-arm-unknown-linux-gnueabihf/autocomplete/fd.fish paths[]=fd-v10.3.0-arm-unknown-linux-gnueabihf/autocomplete/fd.ps1 paths[]=fd-v10.3.0-arm-unknown-linux-gnueabihf/fd.1",
+          "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.Release.Linux_x86_gnu} modver=CommonsBase_Std.Fd.Tar.Linux_x86_gnu@10.3.0 tarfile=$(get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-i686-unknown-linux-gnu.tar.gz -f fd.tar.gz) paths[]=fd-v10.3.0-i686-unknown-linux-gnu/fd paths[]=fd-v10.3.0-i686-unknown-linux-gnu/CHANGELOG.md paths[]=fd-v10.3.0-i686-unknown-linux-gnu/LICENSE-APACHE paths[]=fd-v10.3.0-i686-unknown-linux-gnu/LICENSE-MIT paths[]=fd-v10.3.0-i686-unknown-linux-gnu/README.md paths[]=fd-v10.3.0-i686-unknown-linux-gnu/autocomplete/_fd paths[]=fd-v10.3.0-i686-unknown-linux-gnu/autocomplete/fd.bash paths[]=fd-v10.3.0-i686-unknown-linux-gnu/autocomplete/fd.fish paths[]=fd-v10.3.0-i686-unknown-linux-gnu/autocomplete/fd.ps1 paths[]=fd-v10.3.0-i686-unknown-linux-gnu/fd.1",
+          "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.Release.Linux_x86} modver=CommonsBase_Std.Fd.Tar.Linux_x86@10.3.0 tarfile=$(get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-i686-unknown-linux-musl.tar.gz -f fd.tar.gz) paths[]=fd-v10.3.0-i686-unknown-linux-musl/fd paths[]=fd-v10.3.0-i686-unknown-linux-musl/CHANGELOG.md paths[]=fd-v10.3.0-i686-unknown-linux-musl/LICENSE-APACHE paths[]=fd-v10.3.0-i686-unknown-linux-musl/LICENSE-MIT paths[]=fd-v10.3.0-i686-unknown-linux-musl/README.md paths[]=fd-v10.3.0-i686-unknown-linux-musl/autocomplete/_fd paths[]=fd-v10.3.0-i686-unknown-linux-musl/autocomplete/fd.bash paths[]=fd-v10.3.0-i686-unknown-linux-musl/autocomplete/fd.fish paths[]=fd-v10.3.0-i686-unknown-linux-musl/autocomplete/fd.ps1 paths[]=fd-v10.3.0-i686-unknown-linux-musl/fd.1",
+          "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.Release.Linux_x86_64} modver=CommonsBase_Std.Fd.Tar.Linux_x86_64@10.3.0 tarfile=$(get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-unknown-linux-musl.tar.gz -f fd.tar.gz) paths[]=fd-v10.3.0-x86_64-unknown-linux-musl/fd paths[]=fd-v10.3.0-x86_64-unknown-linux-musl/CHANGELOG.md paths[]=fd-v10.3.0-x86_64-unknown-linux-musl/LICENSE-APACHE paths[]=fd-v10.3.0-x86_64-unknown-linux-musl/LICENSE-MIT paths[]=fd-v10.3.0-x86_64-unknown-linux-musl/README.md paths[]=fd-v10.3.0-x86_64-unknown-linux-musl/autocomplete/_fd paths[]=fd-v10.3.0-x86_64-unknown-linux-musl/autocomplete/fd.bash paths[]=fd-v10.3.0-x86_64-unknown-linux-musl/autocomplete/fd.fish paths[]=fd-v10.3.0-x86_64-unknown-linux-musl/autocomplete/fd.ps1 paths[]=fd-v10.3.0-x86_64-unknown-linux-musl/fd.1",
+          "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.Release.Linux_x86_64_gnu} modver=CommonsBase_Std.Fd.Tar.Linux_x86_64_gnu@10.3.0 tarfile=$(get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-unknown-linux-gnu.tar.gz -f fd.tar.gz) paths[]=fd-v10.3.0-x86_64-unknown-linux-gnu/fd paths[]=fd-v10.3.0-x86_64-unknown-linux-gnu/CHANGELOG.md paths[]=fd-v10.3.0-x86_64-unknown-linux-gnu/LICENSE-APACHE paths[]=fd-v10.3.0-x86_64-unknown-linux-gnu/LICENSE-MIT paths[]=fd-v10.3.0-x86_64-unknown-linux-gnu/README.md paths[]=fd-v10.3.0-x86_64-unknown-linux-gnu/autocomplete/_fd paths[]=fd-v10.3.0-x86_64-unknown-linux-gnu/autocomplete/fd.bash paths[]=fd-v10.3.0-x86_64-unknown-linux-gnu/autocomplete/fd.fish paths[]=fd-v10.3.0-x86_64-unknown-linux-gnu/autocomplete/fd.ps1 paths[]=fd-v10.3.0-x86_64-unknown-linux-gnu/fd.1"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "paths": [
+              "fd-v10.3.0-aarch64-apple-darwin/CHANGELOG.md",
+              "fd-v10.3.0-aarch64-apple-darwin/LICENSE-APACHE",
+              "fd-v10.3.0-aarch64-apple-darwin/LICENSE-MIT",
+              "fd-v10.3.0-aarch64-apple-darwin/README.md",
+              "fd-v10.3.0-aarch64-apple-darwin/autocomplete/_fd",
+              "fd-v10.3.0-aarch64-apple-darwin/autocomplete/fd.bash",
+              "fd-v10.3.0-aarch64-apple-darwin/autocomplete/fd.fish",
+              "fd-v10.3.0-aarch64-apple-darwin/autocomplete/fd.ps1",
+              "fd-v10.3.0-aarch64-apple-darwin/fd.1",
+              "fd-v10.3.0-aarch64-apple-darwin/fd"
+            ],
+            "slots": ["Release.Darwin_arm64"]
+          },
+          {
+            "paths": [
+              "fd-v10.3.0-x86_64-apple-darwin/CHANGELOG.md",
+              "fd-v10.3.0-x86_64-apple-darwin/LICENSE-APACHE",
+              "fd-v10.3.0-x86_64-apple-darwin/LICENSE-MIT",
+              "fd-v10.3.0-x86_64-apple-darwin/README.md",
+              "fd-v10.3.0-x86_64-apple-darwin/autocomplete/_fd",
+              "fd-v10.3.0-x86_64-apple-darwin/autocomplete/fd.bash",
+              "fd-v10.3.0-x86_64-apple-darwin/autocomplete/fd.fish",
+              "fd-v10.3.0-x86_64-apple-darwin/autocomplete/fd.ps1",
+              "fd-v10.3.0-x86_64-apple-darwin/fd.1",
+              "fd-v10.3.0-x86_64-apple-darwin/fd"
+            ],
+            "slots": ["Release.Darwin_x86_64"]
+          },
+          {
+            "paths": [
+              "fd-v10.3.0-aarch64-unknown-linux-gnu/CHANGELOG.md",
+              "fd-v10.3.0-aarch64-unknown-linux-gnu/LICENSE-APACHE",
+              "fd-v10.3.0-aarch64-unknown-linux-gnu/LICENSE-MIT",
+              "fd-v10.3.0-aarch64-unknown-linux-gnu/README.md",
+              "fd-v10.3.0-aarch64-unknown-linux-gnu/autocomplete/_fd",
+              "fd-v10.3.0-aarch64-unknown-linux-gnu/autocomplete/fd.bash",
+              "fd-v10.3.0-aarch64-unknown-linux-gnu/autocomplete/fd.fish",
+              "fd-v10.3.0-aarch64-unknown-linux-gnu/autocomplete/fd.ps1",
+              "fd-v10.3.0-aarch64-unknown-linux-gnu/fd.1",
+              "fd-v10.3.0-aarch64-unknown-linux-gnu/fd"
+            ],
+            "slots": ["Release.Linux_arm64_gnu"]
+          },
+          {
+            "paths": [
+              "fd-v10.3.0-aarch64-unknown-linux-musl/CHANGELOG.md",
+              "fd-v10.3.0-aarch64-unknown-linux-musl/LICENSE-APACHE",
+              "fd-v10.3.0-aarch64-unknown-linux-musl/LICENSE-MIT",
+              "fd-v10.3.0-aarch64-unknown-linux-musl/README.md",
+              "fd-v10.3.0-aarch64-unknown-linux-musl/autocomplete/_fd",
+              "fd-v10.3.0-aarch64-unknown-linux-musl/autocomplete/fd.bash",
+              "fd-v10.3.0-aarch64-unknown-linux-musl/autocomplete/fd.fish",
+              "fd-v10.3.0-aarch64-unknown-linux-musl/autocomplete/fd.ps1",
+              "fd-v10.3.0-aarch64-unknown-linux-musl/fd.1",
+              "fd-v10.3.0-aarch64-unknown-linux-musl/fd"              
+            ],
+            "slots": ["Release.Linux_arm64"]
+          },
+          {
+            "paths": [
+              "fd-v10.3.0-arm-unknown-linux-gnueabihf/CHANGELOG.md",
+              "fd-v10.3.0-arm-unknown-linux-gnueabihf/LICENSE-APACHE",
+              "fd-v10.3.0-arm-unknown-linux-gnueabihf/LICENSE-MIT",
+              "fd-v10.3.0-arm-unknown-linux-gnueabihf/README.md",
+              "fd-v10.3.0-arm-unknown-linux-gnueabihf/autocomplete/_fd",
+              "fd-v10.3.0-arm-unknown-linux-gnueabihf/autocomplete/fd.bash",
+              "fd-v10.3.0-arm-unknown-linux-gnueabihf/autocomplete/fd.fish",
+              "fd-v10.3.0-arm-unknown-linux-gnueabihf/autocomplete/fd.ps1",
+              "fd-v10.3.0-arm-unknown-linux-gnueabihf/fd.1",
+              "fd-v10.3.0-arm-unknown-linux-gnueabihf/fd"
+            ],
+            "slots": ["Release.Linux_arm"]
+          },
+          {
+            "paths": [
+              "fd-v10.3.0-i686-unknown-linux-gnu/CHANGELOG.md",
+              "fd-v10.3.0-i686-unknown-linux-gnu/LICENSE-APACHE",
+              "fd-v10.3.0-i686-unknown-linux-gnu/LICENSE-MIT",
+              "fd-v10.3.0-i686-unknown-linux-gnu/README.md",
+              "fd-v10.3.0-i686-unknown-linux-gnu/autocomplete/_fd",
+              "fd-v10.3.0-i686-unknown-linux-gnu/autocomplete/fd.bash",
+              "fd-v10.3.0-i686-unknown-linux-gnu/autocomplete/fd.fish",
+              "fd-v10.3.0-i686-unknown-linux-gnu/autocomplete/fd.ps1",
+              "fd-v10.3.0-i686-unknown-linux-gnu/fd.1",
+              "fd-v10.3.0-i686-unknown-linux-gnu/fd"
+            ],
+            "slots": ["Release.Linux_x86_gnu"]
+          },
+          {
+            "paths": [
+              "fd-v10.3.0-i686-unknown-linux-musl/CHANGELOG.md",
+              "fd-v10.3.0-i686-unknown-linux-musl/LICENSE-APACHE",
+              "fd-v10.3.0-i686-unknown-linux-musl/LICENSE-MIT",
+              "fd-v10.3.0-i686-unknown-linux-musl/README.md",
+              "fd-v10.3.0-i686-unknown-linux-musl/autocomplete/_fd",
+              "fd-v10.3.0-i686-unknown-linux-musl/autocomplete/fd.bash",
+              "fd-v10.3.0-i686-unknown-linux-musl/autocomplete/fd.fish",
+              "fd-v10.3.0-i686-unknown-linux-musl/autocomplete/fd.ps1",
+              "fd-v10.3.0-i686-unknown-linux-musl/fd.1",
+              "fd-v10.3.0-i686-unknown-linux-musl/fd"
+            ],
+            "slots": ["Release.Linux_x86"]
+          },
+          {
+            "paths": [
+              "fd-v10.3.0-x86_64-unknown-linux-musl/CHANGELOG.md",
+              "fd-v10.3.0-x86_64-unknown-linux-musl/LICENSE-APACHE",
+              "fd-v10.3.0-x86_64-unknown-linux-musl/LICENSE-MIT",
+              "fd-v10.3.0-x86_64-unknown-linux-musl/README.md",
+              "fd-v10.3.0-x86_64-unknown-linux-musl/autocomplete/_fd",
+              "fd-v10.3.0-x86_64-unknown-linux-musl/autocomplete/fd.bash",
+              "fd-v10.3.0-x86_64-unknown-linux-musl/autocomplete/fd.fish",
+              "fd-v10.3.0-x86_64-unknown-linux-musl/autocomplete/fd.ps1",
+              "fd-v10.3.0-x86_64-unknown-linux-musl/fd.1",
+              "fd-v10.3.0-x86_64-unknown-linux-musl/fd"
+            ],
+            "slots": ["Release.Linux_x86_64"]
+          },
+          {
+            "paths": [
+              "fd-v10.3.0-x86_64-unknown-linux-gnu/CHANGELOG.md",
+              "fd-v10.3.0-x86_64-unknown-linux-gnu/LICENSE-APACHE",
+              "fd-v10.3.0-x86_64-unknown-linux-gnu/LICENSE-MIT",
+              "fd-v10.3.0-x86_64-unknown-linux-gnu/README.md",
+              "fd-v10.3.0-x86_64-unknown-linux-gnu/autocomplete/_fd",
+              "fd-v10.3.0-x86_64-unknown-linux-gnu/autocomplete/fd.bash",
+              "fd-v10.3.0-x86_64-unknown-linux-gnu/autocomplete/fd.fish",
+              "fd-v10.3.0-x86_64-unknown-linux-gnu/autocomplete/fd.ps1",
+              "fd-v10.3.0-x86_64-unknown-linux-gnu/fd.1",
+              "fd-v10.3.0-x86_64-unknown-linux-gnu/fd"
+            ],
+            "slots": ["Release.Linux_x86_64_gnu"]
+          }
+        ]
+      }
+    }
+  ]
+}

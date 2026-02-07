@@ -1,0 +1,38 @@
+// [fd] is a single-binary replacement for find.
+// It is faster than find and has a more user-friendly syntax, but it does not support all of the features of find (e.g. -exec).
+// This bundle provides precompiled binaries of fd for common platforms.
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "bundles": [
+    {
+      "id": "CommonsBase_Std.Fd.Bundle@10.3.0",
+      "listing": {
+        "origins": [
+          {
+            "name": "gh-sharkdp-fd",
+            "mirrors": [
+              "https://github.com/sharkdp/fd/releases/download/v10.3.0"
+            ]
+          }
+        ]
+      },
+      "assets": [
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "0570263812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904"}, "path": "fd-v10.3.0-aarch64-apple-darwin.tar.gz", "size": 1337349},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "bf9b1e31bcac71c1e95d49c56f0d872f525b95d03854e94b1d4dd6786f825cc5"}, "path": "fd-v10.3.0-aarch64-pc-windows-msvc.zip", "size": 1416342},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "66f297e404400a3358e9a0c0b2f3f4725956e7e4435427a9ae56e22adbe73a68"}, "path": "fd-v10.3.0-aarch64-unknown-linux-gnu.tar.gz", "size": 1575492},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "996b9b1366433b211cb3bbedba91c9dbce2431842144d925428ead0adf32020b"}, "path": "fd-v10.3.0-aarch64-unknown-linux-musl.tar.gz", "size": 1608477},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "a09a7e2bc9afb993c7f67afa2c95d940ad2e5ee064f9d9bdef35f4065874238c"}, "path": "fd-v10.3.0-arm-unknown-linux-gnueabihf.tar.gz", "size": 1610195},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "db0caa86f5ac7b1e2d9b0dc7ae4138f12f6adc9a4567d2974b29fb1d2809cb72"}, "path": "fd-v10.3.0-arm-unknown-linux-musleabihf.tar.gz", "size": 1466796},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "1e1c1c677d01c1df9e54095d727f61649401ac54a5946cecb3fbe3d002615fd8"}, "path": "fd-v10.3.0-i686-pc-windows-msvc.zip", "size": 1381022},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "8bb29df8b6dae820bd4aa9e0c508f458faf988f3353e9d2ceed3fc9d0628c9f7"}, "path": "fd-v10.3.0-i686-unknown-linux-gnu.tar.gz", "size": 1773069},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "e761dfc5baff0fb91cd1428f1475fae0e9d70dfbf55c10e9db803566abf70fad"}, "path": "fd-v10.3.0-i686-unknown-linux-musl.tar.gz", "size": 1524821},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "50d30f13fe3d5914b14c4fff5abcbd4d0cdab4b855970a6956f4f006c17117a3"}, "path": "fd-v10.3.0-x86_64-apple-darwin.tar.gz", "size": 1430203},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "3546f30be3c133dcaa2b0f6d886aaae93a87585f477c8af4faa4d601589668cd"}, "path": "fd-v10.3.0-x86_64-pc-windows-gnu.zip", "size": 1479456},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "318aa2a6fa664325933e81fda60d523fff29444129e91ebf0726b5b3bcd8b059"}, "path": "fd-v10.3.0-x86_64-pc-windows-msvc.zip", "size": 1490905},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "c3c2bc79f838e780173fc8f18b337ec273e7ba17c7ff8f551be29fc3c19b7916"}, "path": "fd-v10.3.0-x86_64-unknown-linux-gnu.tar.gz", "size": 1710062},
+        {"origin": "gh-sharkdp-fd", "checksum": {"sha256": "2b6bfaae8c48f12050813c2ffe1884c61ea26e750d803df9c9114550a314cd14"}, "path": "fd-v10.3.0-x86_64-unknown-linux-musl.tar.gz", "size": 1759301}
+      ]
+    }
+  ]
+}

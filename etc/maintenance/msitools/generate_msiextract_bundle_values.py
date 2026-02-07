@@ -165,7 +165,7 @@ def ghcr_blob_size_bytes(*, digest: str, authorization: str, curl: str) -> int:
 
 def render_values_jsonc(*, version: str, assets: list[dict[str, Any]]) -> str:
     doc = {
-        "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+        "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
         "schema_version": {"major": 1, "minor": 0},
         "bundles": [
             {

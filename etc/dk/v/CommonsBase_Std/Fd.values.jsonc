@@ -1,0 +1,88 @@
+// [fd] is a single-binary replacement for find.
+// It is faster than find and has a more user-friendly syntax, but it does not support all of the features of find (e.g. -exec).
+//
+// USAGE:
+// dk0 --trial get-object CommonsBase_Std.Fd@10.3.0 -s Release.Darwin_arm64 -d target/ -e fd.exe
+{
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "forms": [
+    {
+      "id": "CommonsBase_Std.Fd@10.3.0",
+      "precommands": {
+        "private": [
+          // Interface is: fd.exe, LICENSE-APACHE, LICENSE-MIT
+
+          // macOS and Linux fd.exe
+          "get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Darwin_arm64 -m ./fd-v10.3.0-aarch64-apple-darwin/fd -f ${SLOT.Release.Darwin_arm64}/fd.exe",
+          "get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Darwin_x86_64 -m ./fd-v10.3.0-x86_64-apple-darwin/fd -f ${SLOT.Release.Darwin_x86_64}/fd.exe",
+          "get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Linux_arm64_gnu -m ./fd-v10.3.0-aarch64-unknown-linux-gnu/fd -f ${SLOT.Release.Linux_arm64_gnu}/fd.exe",
+          "get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Linux_arm64 -m ./fd-v10.3.0-aarch64-unknown-linux-musl/fd -f ${SLOT.Release.Linux_arm64}/fd.exe",
+          "get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Linux_arm -m ./fd-v10.3.0-arm-unknown-linux-gnueabihf/fd -f ${SLOT.Release.Linux_arm}/fd.exe",
+          "get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Linux_x86_gnu -m ./fd-v10.3.0-i686-unknown-linux-gnu/fd -f ${SLOT.Release.Linux_x86_gnu}/fd.exe",
+          "get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Linux_x86 -m ./fd-v10.3.0-i686-unknown-linux-musl/fd -f ${SLOT.Release.Linux_x86}/fd.exe",
+          "get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Linux_x86_64 -m ./fd-v10.3.0-x86_64-unknown-linux-musl/fd -f ${SLOT.Release.Linux_x86_64}/fd.exe",
+          "get-object CommonsBase_Std.Fd.Tar@10.3.0 -s Release.Linux_x86_64_gnu -m ./fd-v10.3.0-x86_64-unknown-linux-gnu/fd -f ${SLOT.Release.Linux_x86_64_gnu}/fd.exe",
+
+          // Windows fd.exe. The Windows assets are zip files are supported natively by dk.
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-aarch64-pc-windows-msvc.zip -m fd-v10.3.0-aarch64-pc-windows-msvc/fd.exe -f ${SLOT.Release.Windows_arm64}/fd.exe",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-i686-pc-windows-msvc.zip -m fd-v10.3.0-i686-pc-windows-msvc/fd.exe -f ${SLOT.Release.Windows_x86}/fd.exe",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/fd.exe -f ${SLOT.Release.Windows_x86_64}/fd.exe",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-gnu.zip -m fd-v10.3.0-x86_64-pc-windows-gnu/fd.exe -f ${SLOT.Release.Windows_x86_64_gnu}/fd.exe",
+
+          // Windows, macOS and Linux LICENSE-APACHE file
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Darwin_arm64}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Darwin_x86_64}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Linux_arm64_gnu}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Linux_arm64}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Linux_arm}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Linux_x86}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Linux_x86_gnu}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Linux_x86_64}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Linux_x86_64_gnu}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Windows_arm64}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Windows_x86}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Windows_x86_64}/LICENSE-APACHE",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-APACHE -f ${SLOT.Release.Windows_x86_64_gnu}/LICENSE-APACHE",
+
+          // Windows, macOS and Linux LICENSE-MIT file
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Darwin_arm64}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Darwin_x86_64}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Linux_arm64_gnu}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Linux_arm64}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Linux_arm}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Linux_x86}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Linux_x86_gnu}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Linux_x86_64}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Linux_x86_64_gnu}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Windows_arm64}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Windows_x86}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Windows_x86_64}/LICENSE-MIT",
+          "get-asset CommonsBase_Std.Fd.Bundle@10.3.0 -p fd-v10.3.0-x86_64-pc-windows-msvc.zip -m fd-v10.3.0-x86_64-pc-windows-msvc/LICENSE-MIT -f ${SLOT.Release.Windows_x86_64_gnu}/LICENSE-MIT"
+        ]
+      },
+      "outputs": {
+        "assets": [
+          {
+            "slots": [
+              "Release.Darwin_arm64",
+              "Release.Darwin_x86_64",
+              "Release.Linux_arm64_gnu",
+              "Release.Linux_arm64",
+              "Release.Linux_arm",
+              "Release.Linux_x86",
+              "Release.Linux_x86_gnu",
+              "Release.Linux_x86_64",
+              "Release.Linux_x86_64_gnu",
+              "Release.Windows_arm64",
+              "Release.Windows_x86",
+              "Release.Windows_x86_64",
+              "Release.Windows_x86_64_gnu"
+            ],
+            "paths": ["fd.exe", "LICENSE-APACHE", "LICENSE-MIT"]
+          }
+        ]
+      }
+    }
+  ]
+}

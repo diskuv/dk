@@ -2,7 +2,7 @@
 //  get-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Darwin_arm64 -d target\coreutils-tarmacarm64
 //  dksrc/dk0 -I .\pkgs\include\CommonsBase_Std -d intermediate --tracestore V:\dk\cts --valuestore V:\dk\val --autofix --verbose -x gh-uutils:subpath: -x 7zip-org:subpath: get-object CommonsBase_Std.Coreutils.Tar@0.2.2 -s Release.Darwin_arm64 -d target\coreutils-tarmacarm64
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": { "major": 1, "minor": 0 },
   "forms": [
     {
