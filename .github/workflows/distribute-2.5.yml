@@ -51,6 +51,13 @@ jobs:
                     Release.Darwin_x86_64:CommonsBase_Std.S7z@25.1.0
                     Release.Linux_x86:CommonsBase_Std.S7z@25.1.0
                     Release.Linux_x86_64:CommonsBase_Std.S7z@25.1.0
+
+                    Release.Windows_x86:CommonsBase_Std.Fd@10.3.0
+                    Release.Windows_x86_64:CommonsBase_Std.Fd@10.3.0
+                    Release.Darwin_arm64:CommonsBase_Std.Fd@10.3.0
+                    Release.Darwin_x86_64:CommonsBase_Std.Fd@10.3.0
+                    Release.Linux_x86:CommonsBase_Std.Fd@10.3.0
+                    Release.Linux_x86_64:CommonsBase_Std.Fd@10.3.0
                   scripts: |
                     CommonsBase_Std.Extract@0.1.0
                   use-cache: true
