@@ -1,7 +1,7 @@
 // Testing:
 //  get-object CommonsBase_Std.Msitools.Msiextract.Tar@0.106.0 -s Release.Darwin_x86_64 -d target/msitools-tar-macosx86_64
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": { "major": 1, "minor": 0 },
   "forms": [
     {

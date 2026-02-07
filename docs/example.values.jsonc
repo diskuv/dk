@@ -1,5 +1,5 @@
 {
-  "$schema": "../etc/jsonschema/mlfront-values.json",
+  "$schema": "../etc/jsonschema/dk-values.json",
   "schema_version": {
     "major": 1,
     "minor": 0

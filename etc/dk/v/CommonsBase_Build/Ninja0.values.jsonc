@@ -3,7 +3,7 @@
 // The slot Release.Windows_x86 is missing; we would need to build it from source.
 // But likely unnecessary since build tools rarely run on 32-bit Windows.
 {
-    "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+    "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {
         "major": 1,
         "minor": 0

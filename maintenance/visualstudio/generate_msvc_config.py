@@ -270,7 +270,7 @@ def main():
     # 6. Generate JSONC
     semver_version = to_semver(args.msvc_version)
     output_obj = {
-        "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/mlfront-values.json",
+        "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
         "schema_version": {"major": 1, "minor": 0},
         "bundles": [
             {
