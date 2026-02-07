@@ -11,4 +11,4 @@ git clone https://github.com/diskuv/dk.git dksrc
 
 # Import GitHub-attested artifacts
 #   SYNC: 010-PROJECTROOT-README.sh 100-imports.sh
-dksrc/dk0 --trial import-github-l2 --repo diskuv/dk --tag 2.5.202602060001 --outdir etc/dk/i/
+dksrc/dk0 --trial import-github-l2 --repo diskuv/dk --tag 2.5.202602060003 --outdir etc/dk/i/
