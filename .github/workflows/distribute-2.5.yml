@@ -59,9 +59,9 @@ jobs:
                   use-cache: true
                   # TODO: put MlFront commit ref and/or version number into distribution; it is part of provenance.
                   #   Use HEAD when not tagged
-                  # experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
+                  experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
                   #   Temporary: always use HEAD until MlFront testing is done
-                  experimental-mlfront-ref: HEAD
+                  # experimental-mlfront-ref: HEAD
                   options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_Std: rebuild "system" modules
 
             - name: Archive CommonsBase_Std
@@ -96,21 +96,23 @@ jobs:
                   id: ${{ github.ref_type == 'tag' && format('CommonsBase_Build@{0}', github.ref_name) || format('CommonsBase_Build@{0}', env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
-                  objects: |
-                    Release.Windows_x86:CommonsBase_Build.Ninja0@1.12.1
+                  # No `Release.Windows_x86:CommonsBase_Build.Ninja0@1.12.1` today
+                  objects: |                    
+                    Release.Windows_arm64:CommonsBase_Build.Ninja0@1.12.1
                     Release.Windows_x86_64:CommonsBase_Build.Ninja0@1.12.1
                     Release.Darwin_arm64:CommonsBase_Build.Ninja0@1.12.1
                     Release.Darwin_x86_64:CommonsBase_Build.Ninja0@1.12.1
                     Release.Linux_x86:CommonsBase_Build.Ninja0@1.12.1
                     Release.Linux_x86_64:CommonsBase_Build.Ninja0@1.12.1
+                    Release.Linux_arm64:CommonsBase_Build.Ninja0@1.12.1
                   scripts: |
                     CommonsBase_Build.CMake0.Build@3.25.3
                   use-cache: true
                   # TODO: put MlFront commit ref and/or version number into distribution; it is part of provenance.
                   #   Use HEAD when not tagged
-                  # experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
+                  experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
                   #   Temporary: always use HEAD until MlFront testing is done
-                  experimental-mlfront-ref: HEAD
+                  # experimental-mlfront-ref: HEAD
                   options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_*: rebuild "system" modules
 
             - name: Archive CommonsBase_Build
