@@ -1,0 +1,41 @@
+// USAGE: This is not meant to be called by end-users. It exists only because
+// dk0 does not yet have static input dependencies for rules, so during `dk0 distribute`
+// there is no way to distribute the CMake0.Bundle values (`dk0 distribute` correctly only exports
+// objects and script modules). In fact, the lack of declaring rule inputs is a design gap
+// that must be fixed before dk0 moves to arrows. So, "declareoutput" should be renamed to
+// "declare" (?) and input assets/objects added to it. Of course, rules can still create whatever
+// assets/objects they want, but any outside interaction (inputs and outputs to the rule) must
+// be declared.
+{
+    "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
+    "schema_version": {
+        "major": 1,
+        "minor": 0
+    },
+    "forms": [
+        {
+            "id": "CommonsBase_Build.CMake0.Phony@3.25.3",
+            "precommands": {
+                "private": [
+                    "get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-darwin_universal.zip -f ${SLOT.Release.Agnostic}/1",
+                    "get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-linux_arm64.zip -f ${SLOT.Release.Agnostic}/2",
+                    "get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-linux_x86_64.zip -f ${SLOT.Release.Agnostic}/3",
+                    "get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-linux_x86.zip -f ${SLOT.Release.Agnostic}/4",
+                    "get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-3.25.3-windows-x86_64.zip -f ${SLOT.Release.Agnostic}/5",
+                    "get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-3.25.3-windows-i386.zip -f ${SLOT.Release.Agnostic}/6",
+                    "get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-3.25.3-windows-arm64.zip -f ${SLOT.Release.Agnostic}/7"
+                ]
+            },
+            "outputs": {
+                "assets": [
+                    {
+                        "slots": [
+                            "Release.Agnostic"
+                        ],
+                        "paths": ["1", "2", "3", "4", "5", "6", "7"]
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -105,6 +105,8 @@ jobs:
                     Release.Linux_x86:CommonsBase_Build.Ninja0@1.12.1
                     Release.Linux_x86_64:CommonsBase_Build.Ninja0@1.12.1
                     Release.Linux_arm64:CommonsBase_Build.Ninja0@1.12.1
+
+                    Release.Agnostic:CommonsBase_Build.CMake0.Phony@3.25.3
                   scripts: |
                     CommonsBase_Build.CMake0@3.25.3
                   use-cache: true
