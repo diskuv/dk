@@ -106,7 +106,7 @@ jobs:
                     Release.Linux_x86_64:CommonsBase_Build.Ninja0@1.12.1
                     Release.Linux_arm64:CommonsBase_Build.Ninja0@1.12.1
                   scripts: |
-                    CommonsBase_Build.CMake0.Build@3.25.3
+                    CommonsBase_Build.CMake0@3.25.3
                   use-cache: true
                   # TODO: put MlFront commit ref and/or version number into distribution; it is part of provenance.
                   #   Use HEAD when not tagged
