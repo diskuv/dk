@@ -18,7 +18,8 @@
 --  iargs[]: list of cmake install arguments to pass to cmake executable.
 --  out[]: (required) list of expected output files in the build directory
 --  outrmexact[]: list of exact strictly relative paths (relative to build directory) to remove
---  outrmglob[]: list of "fd" filename glob patterns for files in the build directory to remove after outrmexact[]
+--  outrmglob[]: list of "fd" filename glob patterns for files in the build directory to remove after outrmexact[].
+--        Remove every file type except directories; use outrmexact for directories for safety.
 --  exe[]: list of glob patterns for executables to set execute permissions (Unix) and locally codesign (macOS).
 -- examples:
 --  dk0 --trial run CommonsBase_Build.CMake0.Build@3.25.3 \
@@ -49,7 +50,8 @@
 --  iargs[]: list of cmake install arguments to pass to cmake executable.
 --  out[]: (required) list of expected output files in the build directory
 --  outrmexact[]: list of exact strictly relative paths (relative to build directory) to remove
---  outrmglob[]: list of "fd" filename glob patterns for files in the build directory to remove after outrmexact[]
+--  outrmglob[]: list of "fd" filename glob patterns for files in the build directory to remove after outrmexact[].
+--        Remove every file type except directories; use outrmexact for directories for safety.
 --  exe[]: list of glob patterns for executables to set execute permissions (Unix) and locally codesign (macOS).
 -- examples:
 --  dk0 --trial post-object CommonsBase_Build.CMake0.F_Build@3.25.3 \
@@ -481,6 +483,8 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
   k, v = next(p.outrmglob)
   while k do
     local fdcmd = { p.fdexe, "--glob", "--hidden", "--no-ignore",
+      -- remove every file type except directories which should use outrmexact for safety
+      "--type", "f", "--type", "l", "--type", "s", "--type", "p", "--type", "c", "--type", "b",
       "-X", p.coreutilsexe, "rm", "-f", ";",
       "--", v, "${SLOT.Release.Agnostic}" }
     local fdcmd1 = { fdcmd } -- add one [fd] command
