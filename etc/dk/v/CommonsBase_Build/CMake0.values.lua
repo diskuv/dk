@@ -97,6 +97,20 @@ CommonsBase_Build__CMake0__3_25_3 = {}
 
 rules, uirules = build.newrules(M)
 
+function CommonsBase_Build__CMake0__3_25_3.parse_common_args(request, p)
+  p.execabi = request.execution.ABIv3
+  p.gargs = request.user.gargs or {}
+  p.bargs = request.user.bargs or {}
+  p.iargs = request.user.iargs or {}
+  p.sourcesubdir = assert(stringdk.sanitizesubpath(request.user.sourcesubdir or "."))
+  p.out = request.user.out
+  assert(type(p.out) == "table", "out must be a table. please provide `'out[]=FILE1' 'out[]=FILE2' ...`")
+  p.outrmexact = request.user.outrmexact or {}
+  p.outrmglob = request.user.outrmglob or {}
+  p.exe = request.user.exe or {}
+  p.nstrip = request.user.nstrip or 0
+end
+
 function uirules.Build(command, request)
   local installdir = assert(request.user.installdir, "please provide 'installdir=INSTALL_DIRECTORY'")
   local generator = request.user.generator or "Ninja"
@@ -122,17 +136,9 @@ function uirules.Build(command, request)
     end
   end
 
-  -- SYNC: rules.F_Build#A, uirules.Build#A
-  local gargs = request.user.gargs or {}
-  local bargs = request.user.bargs or {}
-  local iargs = request.user.iargs or {}
-  local sourcesubdir = assert(stringdk.sanitizesubpath(request.user.sourcesubdir or "."))
-  local out = request.user.out
-  assert(type(out) == "table", "out must be a table. please provide `'out[]=FILE1' 'out[]=FILE2' ...`")
-  local outrmexact = request.user.outrmexact or {}
-  local outrmglob = request.user.outrmglob or {}
-  local exe = request.user.exe or {}
-  local nstrip = request.user.nstrip or 0
+  -- parse arguments
+  local p = {}
+  CommonsBase_Build__CMake0__3_25_3.parse_common_args(request, p)
 
   -- split urlpath=path#sha256,size
   local urlpath_only, urlpath_sha256, urlpath_size
@@ -146,27 +152,14 @@ function uirules.Build(command, request)
     urlpath_size = tonumber(string.sub(urlpath, e2 + 1))
   end
 
-  local outputid = "OurCMake_Build." .. request.rule.generatesymbol() .. "@1.0.0"
-  local p = {
-    outputid = outputid,
-    abi = request.execution.ABIv3,
-    generator = generator,
-    gargs = gargs,
-    bargs = bargs,
-    iargs = iargs,
-    sourcesubdir = sourcesubdir,
-    src = src,
-    mirrors = mirrors,
-    urlpath_only = urlpath_only,
-    urlpath_sha256 = urlpath_sha256,
-    urlpath_size = urlpath_size,
-    nstrip = nstrip,
-    out = out,
-    outrmexact = outrmexact,
-    outrmglob = outrmglob,
-    installdir = installdir,
-    exe = exe
-  }
+  p.outputid = "OurCMake_Build." .. request.rule.generatesymbol() .. "@1.0.0"
+  p.generator = generator
+  p.src = src
+  p.mirrors = mirrors
+  p.urlpath_only = urlpath_only
+  p.urlpath_sha256 = urlpath_sha256
+  p.urlpath_size = urlpath_size
+  p.installdir = installdir
 
   -- delegate to helper function since this is getting large
   return CommonsBase_Build__CMake0__3_25_3.ui_generate_build_install(command, request, p)
@@ -329,54 +322,29 @@ function rules.F_Build(command, request)
       }
     }
   elseif command == "submit" then
-    local generator = request.user.generator or "Ninja"
-    local bundlemodver = request.user.bundlemodver
-    local assetmodver = request.user.assetmodver
-    local assetpath = request.user.assetpath
-    assert(bundlemodver or assetmodver,
+    -- parse arguments
+    local p = {}
+    CommonsBase_Build__CMake0__3_25_3.parse_common_args(request, p)
+
+    p.outputid = request.submit.outputid
+    p.generator = request.user.generator or "Ninja"
+    p.bundlemodver = request.user.bundlemodver
+    p.assetmodver = request.user.assetmodver
+    p.assetpath = request.user.assetpath
+    assert(p.bundlemodver or p.assetmodver,
       "please provide either 'bundlemodver=BUNDLEMODULE@VERSION' or 'assetmodver=ASSETMODULE@VERSION' for the CMake source directory")
-    if assetmodver then
-      assert(assetpath, "please provide 'assetpath=PATH_INSIDE_ASSET' when using 'assetmodver=ASSETMODULE@VERSION'")
+    if p.assetmodver then
+      assert(p.assetpath, "please provide 'assetpath=PATH_INSIDE_ASSET' when using 'assetmodver=ASSETMODULE@VERSION'")
     end
 
-    -- SYNC: rules.F_Build#A, uirules.Build#A
-    local gargs = request.user.gargs or {}
-    local bargs = request.user.bargs or {}
-    local iargs = request.user.iargs or {}
-    local sourcesubdir = assert(stringdk.sanitizesubpath(request.user.sourcesubdir or "."))
-    local out = request.user.out
-    assert(type(out) == "table", "out must be a table. please provide `'out[]=FILE1' 'out[]=FILE2' ...`")
-    local outrmexact = request.user.outrmexact or {}
-    local outrmglob = request.user.outrmglob or {}
-    local exe = request.user.exe or {}
-    local nstrip = request.user.nstrip or 0
-
-    local p = {
-      outputid = request.submit.outputid,
-      abi = request.execution.ABIv3,
-      generator = generator,
-      bundlemodver = bundlemodver,
-      assetmodver = assetmodver,
-      assetpath = assetpath,
-      sourcesubdir = sourcesubdir,
-      gargs = gargs,
-      bargs = bargs,
-      iargs = iargs,
-      out = out,
-      outrmexact = outrmexact,
-      outrmglob = outrmglob,
-      exe = exe,
-      nstrip = nstrip
-    }
-
     p.coreutilsexe = "$(get-object CommonsBase_Std.Coreutils@0.2.2 -s Release." ..
-        p.abi .. " -m ./coreutils.exe -e '*' -f coreutils.exe)"
+        p.execabi .. " -m ./coreutils.exe -e '*' -f coreutils.exe)"
     p.fdexe = "$(get-object CommonsBase_Std.Fd@10.3.0 -s Release." ..
-        p.abi .. " -m ./fd.exe -e '*' -f fd.exe)"
+        p.execabi .. " -m ./fd.exe -e '*' -f fd.exe)"
 
     -- ninjaexe must be absolute path since it is passed to CMAKE_MAKE_PROGRAM CACHE variable
     p.absninjaexe = "$(--path=absnative get-object CommonsBase_Build.Ninja0@1.12.1 -s Release." ..
-        p.abi ..
+        p.execabi ..
         " -m ./ninja.exe -f ninja -e '*')"
 
     if request.execution.OSFamily == "macos" then
@@ -413,8 +381,9 @@ function rules.F_Build(command, request)
       p.cmakeexe =
           "$(get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-" ..
           cmakeabi .. ".zip -n 1 -d : -e 'bin/*')/bin/cmake.exe"
+      -- use ninja.exe as the executable filename so it runs on Windows
       p.absninjaexe = "$(--path=absnative get-object CommonsBase_Build.Ninja0@1.12.1 -s Release." ..
-          p.abi ..
+          p.execabi ..
           " -m ./ninja.exe -f ninja.exe -e '*')"
       p.osfamily = "windows"
       return CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, p)
@@ -504,16 +473,16 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
     table.move(rmrfcmd1, 1, table.getn(rmrfcmd1), table.getn(args) + 1, args) ---@diagnostic disable-line: deprecated, access-invisible
   end
 
-  -- add `fd --glob --hidden --no-ignore -X coreutils rm -f \; -- GLOB ${SLOT.Release.Agnostic}` for each GLOB in p.outrmglob  
+  -- add `fd --glob --hidden --no-ignore -X coreutils rm -f \; -- GLOB ${SLOT.Release.Agnostic}` for each GLOB in p.outrmglob
   -- validation? the GLOB is after `--` so dashes won't be interpreted as options.
   -- also, the GLOB is applied to filenames _under_ the -C BASEDIR.
   -- so GLOB is sanitized
   -- --base-directory? it is hidden option; confer https://github.com/sharkdp/fd/issues/475
   k, v = next(p.outrmglob)
   while k do
-    local fdcmd = { p.fdexe, "--glob", "--hidden", "--no-ignore",        
-        "-X", p.coreutilsexe, "rm", "-f", ";",
-        "--", v, "${SLOT.Release.Agnostic}" }
+    local fdcmd = { p.fdexe, "--glob", "--hidden", "--no-ignore",
+      "-X", p.coreutilsexe, "rm", "-f", ";",
+      "--", v, "${SLOT.Release.Agnostic}" }
     local fdcmd1 = { fdcmd } -- add one [fd] command
     table.move(fdcmd1, 1, table.getn(fdcmd1), table.getn(args) + 1, args) ---@diagnostic disable-line: deprecated, access-invisible
     k, v = next(p.outrmglob, k)
