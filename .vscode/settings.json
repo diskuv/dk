@@ -8,5 +8,8 @@
     // SYNC: src/DkStd_Std/Project/Init.ml, .vscode/settings.json
     "template": "${firstWorkspaceFolder}/dk -g dune-ide --fixed-length-modules false RunQuiet Ml.Exec --merlin -- $prog $args"
   },
-  "editor.wordWrapColumn": 78
+  "editor.wordWrapColumn": 78,
+  "json.schemaDownload.trustedDomains": {
+    "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/": true
+  }
 }

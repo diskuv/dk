@@ -39,8 +39,10 @@
 -- Options:
 --  generator: the cmake generator to use (defaults to "Ninja")
 --  assetmodver: asset module@version of CMake source directory
---  assetpath: path inside the asset module to the CMake source directory
---  bundlemodver: bundle module@version of CMake source directory
+--  assetpath: path inside the [assetmodver] asset module to the CMake source directory
+--  overlayassetpath: path inside the [assetmodver] asset module that gets layered on top of the source
+--  bundlemodver: bundle module@version of CMake source directory; overlayassetpath ignored
+--  overlaybundlemodver: bundle module@version that gets layered on top of the source
 --  sourcesubdir: subdirectory inside the asset or bundle that contains the CMakeLists.txt (defaults to root of asset or bundle)
 --  nstrip: levels of leading directories to nstrip while extract asset or bundle (defaults to 0)
 --  gargs[]: list of cmake generator arguments to pass to cmake executable.
@@ -104,6 +106,8 @@ function CommonsBase_Build__CMake0__3_25_3.parse_common_args(request, p)
   p.gargs = request.user.gargs or {}
   p.bargs = request.user.bargs or {}
   p.iargs = request.user.iargs or {}
+  p.overlayassetpath = request.user.overlayassetpath
+  p.overlaybundlemodver = request.user.overlaybundlemodver
   p.sourcesubdir = assert(stringdk.sanitizesubpath(request.user.sourcesubdir or "."))
   p.out = request.user.out
   assert(type(p.out) == "table", "out must be a table. please provide `'out[]=FILE1' 'out[]=FILE2' ...`")
@@ -407,7 +411,7 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
     sourcedir = stringdk.quote_value_shell("s/" .. p.sourcesubdir)
   end
 
-  -- precommand to get source
+  -- precommands to get source and maybe overlay
   local precommand_getsource
   if p.bundlemodver then
     precommand_getsource = "get-bundle " .. p.bundlemodver .. " -d s"
@@ -416,6 +420,14 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
   end
   if p.nstrip and p.nstrip > 0 then
     precommand_getsource = precommand_getsource .. " -n " .. tostring(p.nstrip)
+  end
+  local precommands_private = {
+    precommand_getsource
+  }
+  if p.overlaybundlemodver then
+    table.insert(precommands_private, "get-bundle " .. p.overlaybundlemodver .. " -d t/s")
+  elseif p.overlayassetpath and p.assetmodver then
+    table.insert(precommands_private, "get-asset " .. p.assetmodver .. " -p " .. p.overlayassetpath .. " -d t/s")
   end
 
   -- ninja generator args
@@ -460,6 +472,15 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
     iargs
   }
 
+  -- prepend overlay bundle copy command
+  if p.overlaybundlemodver or p.overlayassetpath then
+    local overlaycopycmd = {
+      -- copy contents of t/s into s/
+      p.coreutilsexe, "cp", "-v", "-r", "--target-directory", ".", "t/s"
+    }
+    table.insert(args, 1, overlaycopycmd)
+  end
+
   -- validate and add `rm -rf DIRS` for each ${SLOT.Release.Agnostic}/DIR in p.outrmexact
   local rmdirs = {}
   k, v = next(p.outrmexact)
@@ -500,9 +521,7 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
           {
             id = p.outputid,
             precommands = {
-              private = {
-                precommand_getsource
-              }
+              private = precommands_private
             },
             function_ = {
               execution = { { name = "OSFamily", value = p.osfamily } },
