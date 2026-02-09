@@ -186,7 +186,7 @@ jobs:
           artifact-metadata: write # for actions/attest-build-provenance
         steps:
             - name: Checkout project
-              uses: actions/checkout@v5 # for dksrc/dk0
+              uses: actions/checkout@v5 # for ./dk0
 
             - name: Download CommonsBase_Std distribution artifact
               uses: actions/download-artifact@v4
@@ -206,7 +206,7 @@ jobs:
               run: |
                 find dk-dist
                 echo "Combining: dksrc/dk0 --trial --verbose combine --origin-name 'CommonsBase' --mirror '${{github.server_url}}/${{github.repository}}/releases/download/${{github.ref_name}}'"
-                dksrc/dk0 --trial --verbose combine --origin-name 'CommonsBase' --mirror '${{github.server_url}}/${{github.repository}}/releases/download/${{github.ref_name}}'
+                ./dk0 --trial --verbose combine --origin-name 'CommonsBase' --mirror '${{github.server_url}}/${{github.repository}}/releases/download/${{github.ref_name}}'
 
             - name: Generate artifact attestation
               id: attest
