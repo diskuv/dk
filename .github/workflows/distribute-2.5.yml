@@ -10,7 +10,7 @@ env:
   dkdist_branch_version: 2.5.1 # must have non-zero patch version
 
 jobs:
-    distribute-CommonsBase_Std:
+    CommonsBase_Std:
         runs-on: windows-2022 # CommonsBase_Std requires Windows to build S7z
         if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')) || github.ref_name == 'main'
 
@@ -75,8 +75,8 @@ jobs:
                   t/d
                   t/k
 
-    distribute-CommonsBase_Build:
-        needs: distribute-CommonsBase_Std
+    CommonsBase_Build:
+        needs: CommonsBase_Std
         runs-on: ubuntu-24.04
         if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')) || github.ref_name == 'main'
 
@@ -122,16 +122,14 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                 name: dist-CommonsBase_Build
-                # t/d for dk0 data and t/k for dk0 keys, so previous dk0 values don't need to be rebuilt
-                path: |
-                  dk-dist/
-                  t/d
-                  t/k
-                
-    distribute-NotGoogleDev_OR:
+                # t/d for dk0 data and t/k for dk0 keys, so previous dk0 values don't need to be rebuilt.
+                # BUT: the artifacts will be over 4GB which will fail this step, so don't use t/d or t/k
+                path: dk-dist/
+
+    NotGoogleDev_OR:
         needs: 
-          - distribute-CommonsBase_Std
-          - distribute-CommonsBase_Build
+          - CommonsBase_Std
+          - CommonsBase_Build
         runs-on: ubuntu-24.04
         if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')) || github.ref_name == 'main'
 
@@ -174,9 +172,9 @@ jobs:
 
     release:
         needs:
-          - distribute-CommonsBase_Std
-          - distribute-CommonsBase_Build
-          - distribute-NotGoogleDev_OR
+          - CommonsBase_Std
+          - CommonsBase_Build
+          - NotGoogleDev_OR
         runs-on: ubuntu-24.04
         if: github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')
         permissions:
