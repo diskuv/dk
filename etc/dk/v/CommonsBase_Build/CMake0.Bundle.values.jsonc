@@ -41,9 +41,9 @@
           "origin": "kitware-releases",
           "path": "cmake-3.25.3-windows-arm64.zip",
           "checksum": {
-            "sha256": "7dddcd53746da9acc08c17102fc857ff776aa8e18d93c1d495823624306162f4"
+            "sha256": "3498fea26257eebfbfc89ed17963f3d8d83c19362b90fb23517842de777a522a"
           },
-          "size": 38114288
+          "size": 40937837
         },
         {
           "origin": "dk-releases",

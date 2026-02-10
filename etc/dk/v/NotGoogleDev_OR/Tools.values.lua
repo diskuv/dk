@@ -2,7 +2,7 @@
 --  NotGoogleDev - "Not" (unofficial) "GoogleDev" (Google developed software documented within https://developers.google.com)
 --  _OR - Operations Research at https://developers.google.com/optimization/ which contains `OR-Tools` and `OR API`
 
--- USAGE 1 of 1: NotGoogleDev_OR.Tools.F_Lib@9.15.0
+-- USAGE 1 of 2: NotGoogleDev_OR.Tools.F_Lib@9.15.0
 -- (Free rule) An object with or-tools C/C++ libraries, header files and share/ files (ex. solver models)
 --
 -- Configurations: One of the following sets of options must be provided:
@@ -40,6 +40,16 @@
 --     --trust-local-package CommonsBase_Std \
 --     --trial post-object -d target/ortools-static/ NotGoogleDev_OR.Tools.F_Lib@9.15.0 \
 --     ...
+--
+-- USAGE 2 of 2: NotGoogleDev_OR.Tools.F_Bin@9.15.0
+-- (Free rule) An object with or-tools example binaries
+-- Intended for verifying that static=1 in F_Lib, which shares the same code,
+-- produces fully static binaries.
+--
+-- Examples:
+--   dk0 --trial post-object -d target/ortools-macos-arm64-bin/ NotGoogleDev_OR.Tools.F_Bin@9.15.0 \
+--     targetabi=Release.Darwin_arm64
+--
 
 local M = {
   id = "NotGoogleDev_OR.Tools@9.15.0"
@@ -57,7 +67,7 @@ function rules.F_Lib(command, request)
     return {
       declareoutput = {
         return_form = {
-          id = "OurNotGoogleDev_OR.Tools.F_Build.Form." .. request.rule.generatesymbol() .. "@1.0.0",
+          id = "OurNotGoogleDev_OR.Tools.F_Lib.Form." .. request.rule.generatesymbol() .. "@1.0.0",
           slot = "Release.Agnostic"
         }
       }
@@ -69,6 +79,29 @@ function rules.F_Lib(command, request)
       outputmodule = request.submit.outputmodule,
       outputversion = request.submit.outputversion,
       static = static
+    }
+    NotGoogleDev_OR__Tools__9_15_0.cmake_flags(request, p)
+    return NotGoogleDev_OR__Tools__9_15_0.delegate_to_cmake(request, p)
+  end
+end
+
+function rules.F_Bin(command, request)
+  if command == "declareoutput" then
+    return {
+      declareoutput = {
+        return_form = {
+          id = "OurNotGoogleDev_OR.Tools.F_Bin.Form." .. request.rule.generatesymbol() .. "@1.0.0",
+          slot = "Release.Agnostic"
+        }
+      }
+    }
+  elseif command == "submit" then
+    local p = {
+      outputid = request.submit.outputid,
+      outputmodule = request.submit.outputmodule,
+      outputversion = request.submit.outputversion,
+      static = 1,
+      binaries_only = 1
     }
     NotGoogleDev_OR__Tools__9_15_0.cmake_flags(request, p)
     return NotGoogleDev_OR__Tools__9_15_0.delegate_to_cmake(request, p)
@@ -106,19 +139,34 @@ end
 function NotGoogleDev_OR__Tools__9_15_0.delegate_to_cmake(request, p)
   local k, v
   local genid = request.rule.generatesymbol()
-  local bundleid = "OurNotGoogleDev_OR.Tools.F_Build.Content." .. genid .. "@1.0.0"
+  local bundleid = "OurNotGoogleDev_OR.Tools.Content." .. genid .. "@1.0.0"
   local assetpath = "v9.15.zip"
+  local overlaystaticassetpath = "overlay-static"
 
   local BUILD_SHARED_LIBS = p.static and "OFF" or "ON"
 
   -- constructed expected paths
   local paths = {}
-  --   add header files
-  table.move(NotGoogleDev_OR__Tools__9_15_0.includes, 1, table.getn(NotGoogleDev_OR__Tools__9_15_0.includes),
-    table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
-  --   add libraries
-  table.move(NotGoogleDev_OR__Tools__9_15_0.libs, 1, table.getn(NotGoogleDev_OR__Tools__9_15_0.libs),
-    table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
+  if p.binaries_only then
+    -- if binaries_only then only add the binary paths
+    table.move(NotGoogleDev_OR__Tools__9_15_0.binaries, 1, table.getn(NotGoogleDev_OR__Tools__9_15_0.binaries),
+      1, paths) ---@diagnostic disable-line: deprecated, access-invisible
+  else
+    --   add header files
+    table.move(NotGoogleDev_OR__Tools__9_15_0.includes, 1, table.getn(NotGoogleDev_OR__Tools__9_15_0.includes),
+      table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
+    --   add common libraries
+    table.move(NotGoogleDev_OR__Tools__9_15_0.common_libs, 1, table.getn(NotGoogleDev_OR__Tools__9_15_0.common_libs),
+      table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
+    --   add static or shared libraries
+    if p.static then
+      table.move(NotGoogleDev_OR__Tools__9_15_0.static_libs, 1, table.getn(NotGoogleDev_OR__Tools__9_15_0.static_libs),
+        table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
+    else
+      table.move(NotGoogleDev_OR__Tools__9_15_0.shared_libs, 1, table.getn(NotGoogleDev_OR__Tools__9_15_0.shared_libs),
+        table.getn(paths) + 1, paths) ---@diagnostic disable-line: deprecated, access-invisible
+    end
+  end
 
   -- CMake command arguments for CommonsBase_Build.CMake0.F_Build@3.25.3
   local cmakecmd_arr = {
@@ -129,9 +177,24 @@ function NotGoogleDev_OR__Tools__9_15_0.delegate_to_cmake(request, p)
     "assetpath=" .. assetpath,
     "nstrip=1",
     'gargs[]=-DBUILD_DEPS:BOOL=ON',
-    'gargs[]=-DBUILD_SHARED_LIBS:BOOL=' .. BUILD_SHARED_LIBS,
-    'outrmexact[]=bin', 'outrmexact[]=man', 'outrmexact[]=share'
+    'gargs[]=-DBUILD_SHARED_LIBS:BOOL=' .. BUILD_SHARED_LIBS
   }
+
+  if p.binaries_only then
+    table.insert(cmakecmd_arr, 'outrmexact[]=include')
+    table.insert(cmakecmd_arr, 'outrmexact[]=lib')
+    table.insert(cmakecmd_arr, 'outrmexact[]=man')
+    table.insert(cmakecmd_arr, 'outrmexact[]=share')
+  else
+    table.insert(cmakecmd_arr, 'outrmexact[]=bin')
+    table.insert(cmakecmd_arr, 'outrmexact[]=man')
+    table.insert(cmakecmd_arr, 'outrmexact[]=share')
+  end
+
+  -- If static add overlayassetpath
+  if p.static then
+    table.insert(cmakecmd_arr, 'overlayassetpath=' .. overlaystaticassetpath)
+  end
 
   -- Add the CMake flags from the cmakeflags array as "gargs[]=" arguments.
   k, v = next(p.cmakeflags)
@@ -148,8 +211,7 @@ function NotGoogleDev_OR__Tools__9_15_0.delegate_to_cmake(request, p)
   end
 
   -- Sadly the CMake command arguments must be passed as a single JSON string today.
-  -- TODO: change JSON parser (or Lua table -> JSON serializer) to support
-  -- JSON arrays rather than a JSON string.
+  -- TODO: change JSON parser (or Lua table -> JSON serializer) to support JSON arrays rather than a JSON string.
   local cmakecmd_quoted = {}
   k, v = next(cmakecmd_arr)
   while k do
@@ -170,6 +232,10 @@ function NotGoogleDev_OR__Tools__9_15_0.delegate_to_cmake(request, p)
                 {
                   name = "gh-google-or-tools",
                   mirrors = { "https://github.com/google/or-tools/archive/refs/tags" }
+                },
+                {
+                  name = "NotGoogleDev_OR",
+                  mirrors = { "cell://dk0/etc/dk/v/NotGoogleDev_OR" }
                 }
               }
             },
@@ -180,6 +246,14 @@ function NotGoogleDev_OR__Tools__9_15_0.delegate_to_cmake(request, p)
                 size = 25297362,
                 checksum = {
                   sha256 = "920d8266b30a7a8f8572a5dc663fdf8d2701792101dd95f09e72397c16e12858"
+                }
+              },
+              {
+                origin = "NotGoogleDev_OR",
+                path = overlaystaticassetpath,
+                size = 6008,
+                checksum = {
+                  sha256 = "3c66a24294bbf5548164c48e775045751c3930e68fb4e17941a1e17ae273681c"
                 }
               }
             }
@@ -5919,7 +5993,7 @@ NotGoogleDev_OR__Tools__9_15_0.includes = {
   "include/xml/xml.h", "include/xml/xmldef.h", "include/zconf.h", "include/zlib.h"
 }
 
-NotGoogleDev_OR__Tools__9_15_0.libs = {
+NotGoogleDev_OR__Tools__9_15_0.common_libs = {
   "lib/cmake/Boost-1.87.0/BoostConfig.cmake", "lib/cmake/Boost-1.87.0/BoostConfigVersion.cmake",
   "lib/cmake/Cbc/CbcConfig.cmake", "lib/cmake/Cbc/CbcConfigVersion.cmake", "lib/cmake/Cbc/CbcTargets-release.cmake",
   "lib/cmake/Cbc/CbcTargets.cmake", "lib/cmake/Cgl/CglConfig.cmake", "lib/cmake/Cgl/CglConfigVersion.cmake",
@@ -6120,101 +6194,7 @@ NotGoogleDev_OR__Tools__9_15_0.libs = {
   "lib/cmake/soplex/soplex-config-version.cmake", "lib/cmake/soplex/soplex-config.cmake",
   "lib/cmake/soplex/soplex-targets-release.cmake", "lib/cmake/soplex/soplex-targets.cmake",
   "lib/cmake/utf8_range/utf8_range-config.cmake", "lib/cmake/utf8_range/utf8_range-targets-release.cmake",
-  "lib/cmake/utf8_range/utf8_range-targets.cmake", "lib/libCbc.2.10.12.dylib", "lib/libCbc.2.dylib", "lib/libCbc.dylib",
-  "lib/libCbcSolver.2.10.12.dylib", "lib/libCbcSolver.2.dylib", "lib/libCbcSolver.dylib", "lib/libCgl.0.60.9.dylib",
-  "lib/libCgl.0.dylib", "lib/libCgl.dylib", "lib/libClp.1.17.10.dylib", "lib/libClp.1.dylib", "lib/libClp.dylib",
-  "lib/libClpSolver.1.17.10.dylib", "lib/libClpSolver.1.dylib", "lib/libClpSolver.dylib",
-  "lib/libCoinUtils.2.11.12.dylib", "lib/libCoinUtils.2.dylib", "lib/libCoinUtils.dylib", "lib/libOsi.0.108.11.dylib",
-  "lib/libOsi.0.dylib", "lib/libOsi.dylib", "lib/libOsiCbc.2.10.12.dylib", "lib/libOsiCbc.2.dylib", "lib/libOsiCbc.dylib",
-  "lib/libOsiClp.1.17.10.dylib", "lib/libOsiClp.1.dylib", "lib/libOsiClp.dylib", "lib/libabsl_base.2508.0.0.dylib",
-  "lib/libabsl_base.dylib", "lib/libabsl_city.2508.0.0.dylib", "lib/libabsl_city.dylib",
-  "lib/libabsl_civil_time.2508.0.0.dylib", "lib/libabsl_civil_time.dylib", "lib/libabsl_cord.2508.0.0.dylib",
-  "lib/libabsl_cord.dylib", "lib/libabsl_cord_internal.2508.0.0.dylib", "lib/libabsl_cord_internal.dylib",
-  "lib/libabsl_cordz_functions.2508.0.0.dylib", "lib/libabsl_cordz_functions.dylib",
-  "lib/libabsl_cordz_handle.2508.0.0.dylib", "lib/libabsl_cordz_handle.dylib", "lib/libabsl_cordz_info.2508.0.0.dylib",
-  "lib/libabsl_cordz_info.dylib", "lib/libabsl_cordz_sample_token.2508.0.0.dylib", "lib/libabsl_cordz_sample_token.dylib",
-  "lib/libabsl_crc32c.2508.0.0.dylib", "lib/libabsl_crc32c.dylib", "lib/libabsl_crc_cord_state.2508.0.0.dylib",
-  "lib/libabsl_crc_cord_state.dylib", "lib/libabsl_crc_cpu_detect.2508.0.0.dylib", "lib/libabsl_crc_cpu_detect.dylib",
-  "lib/libabsl_crc_internal.2508.0.0.dylib", "lib/libabsl_crc_internal.dylib",
-  "lib/libabsl_debugging_internal.2508.0.0.dylib", "lib/libabsl_debugging_internal.dylib",
-  "lib/libabsl_decode_rust_punycode.2508.0.0.dylib", "lib/libabsl_decode_rust_punycode.dylib",
-  "lib/libabsl_demangle_internal.2508.0.0.dylib", "lib/libabsl_demangle_internal.dylib",
-  "lib/libabsl_demangle_rust.2508.0.0.dylib", "lib/libabsl_demangle_rust.dylib", "lib/libabsl_die_if_null.2508.0.0.dylib",
-  "lib/libabsl_die_if_null.dylib", "lib/libabsl_examine_stack.2508.0.0.dylib", "lib/libabsl_examine_stack.dylib",
-  "lib/libabsl_exponential_biased.2508.0.0.dylib", "lib/libabsl_exponential_biased.dylib",
-  "lib/libabsl_failure_signal_handler.2508.0.0.dylib", "lib/libabsl_failure_signal_handler.dylib",
-  "lib/libabsl_flags_commandlineflag.2508.0.0.dylib", "lib/libabsl_flags_commandlineflag.dylib",
-  "lib/libabsl_flags_commandlineflag_internal.2508.0.0.dylib", "lib/libabsl_flags_commandlineflag_internal.dylib",
-  "lib/libabsl_flags_config.2508.0.0.dylib", "lib/libabsl_flags_config.dylib",
-  "lib/libabsl_flags_internal.2508.0.0.dylib", "lib/libabsl_flags_internal.dylib",
-  "lib/libabsl_flags_marshalling.2508.0.0.dylib", "lib/libabsl_flags_marshalling.dylib",
-  "lib/libabsl_flags_parse.2508.0.0.dylib", "lib/libabsl_flags_parse.dylib",
-  "lib/libabsl_flags_private_handle_accessor.2508.0.0.dylib", "lib/libabsl_flags_private_handle_accessor.dylib",
-  "lib/libabsl_flags_program_name.2508.0.0.dylib", "lib/libabsl_flags_program_name.dylib",
-  "lib/libabsl_flags_reflection.2508.0.0.dylib", "lib/libabsl_flags_reflection.dylib",
-  "lib/libabsl_flags_usage.2508.0.0.dylib", "lib/libabsl_flags_usage.dylib",
-  "lib/libabsl_flags_usage_internal.2508.0.0.dylib", "lib/libabsl_flags_usage_internal.dylib",
-  "lib/libabsl_graphcycles_internal.2508.0.0.dylib", "lib/libabsl_graphcycles_internal.dylib",
-  "lib/libabsl_hash.2508.0.0.dylib", "lib/libabsl_hash.dylib", "lib/libabsl_hashtable_profiler.2508.0.0.dylib",
-  "lib/libabsl_hashtable_profiler.dylib", "lib/libabsl_hashtablez_sampler.2508.0.0.dylib",
-  "lib/libabsl_hashtablez_sampler.dylib", "lib/libabsl_int128.2508.0.0.dylib", "lib/libabsl_int128.dylib",
-  "lib/libabsl_kernel_timeout_internal.2508.0.0.dylib", "lib/libabsl_kernel_timeout_internal.dylib",
-  "lib/libabsl_leak_check.2508.0.0.dylib", "lib/libabsl_leak_check.dylib", "lib/libabsl_log_entry.2508.0.0.dylib",
-  "lib/libabsl_log_entry.dylib", "lib/libabsl_log_flags.2508.0.0.dylib", "lib/libabsl_log_flags.dylib",
-  "lib/libabsl_log_globals.2508.0.0.dylib", "lib/libabsl_log_globals.dylib", "lib/libabsl_log_initialize.2508.0.0.dylib",
-  "lib/libabsl_log_initialize.dylib", "lib/libabsl_log_internal_check_op.2508.0.0.dylib",
-  "lib/libabsl_log_internal_check_op.dylib", "lib/libabsl_log_internal_conditions.2508.0.0.dylib",
-  "lib/libabsl_log_internal_conditions.dylib", "lib/libabsl_log_internal_fnmatch.2508.0.0.dylib",
-  "lib/libabsl_log_internal_fnmatch.dylib", "lib/libabsl_log_internal_format.2508.0.0.dylib",
-  "lib/libabsl_log_internal_format.dylib", "lib/libabsl_log_internal_globals.2508.0.0.dylib",
-  "lib/libabsl_log_internal_globals.dylib", "lib/libabsl_log_internal_log_sink_set.2508.0.0.dylib",
-  "lib/libabsl_log_internal_log_sink_set.dylib", "lib/libabsl_log_internal_message.2508.0.0.dylib",
-  "lib/libabsl_log_internal_message.dylib", "lib/libabsl_log_internal_nullguard.2508.0.0.dylib",
-  "lib/libabsl_log_internal_nullguard.dylib", "lib/libabsl_log_internal_proto.2508.0.0.dylib",
-  "lib/libabsl_log_internal_proto.dylib", "lib/libabsl_log_internal_structured_proto.2508.0.0.dylib",
-  "lib/libabsl_log_internal_structured_proto.dylib", "lib/libabsl_log_severity.2508.0.0.dylib",
-  "lib/libabsl_log_severity.dylib", "lib/libabsl_log_sink.2508.0.0.dylib", "lib/libabsl_log_sink.dylib",
-  "lib/libabsl_malloc_internal.2508.0.0.dylib", "lib/libabsl_malloc_internal.dylib",
-  "lib/libabsl_periodic_sampler.2508.0.0.dylib", "lib/libabsl_periodic_sampler.dylib",
-  "lib/libabsl_poison.2508.0.0.dylib", "lib/libabsl_poison.dylib", "lib/libabsl_profile_builder.2508.0.0.dylib",
-  "lib/libabsl_profile_builder.dylib", "lib/libabsl_random_distributions.2508.0.0.dylib",
-  "lib/libabsl_random_distributions.dylib", "lib/libabsl_random_internal_distribution_test_util.2508.0.0.dylib",
-  "lib/libabsl_random_internal_distribution_test_util.dylib", "lib/libabsl_random_internal_entropy_pool.2508.0.0.dylib",
-  "lib/libabsl_random_internal_entropy_pool.dylib", "lib/libabsl_random_internal_platform.2508.0.0.dylib",
-  "lib/libabsl_random_internal_platform.dylib", "lib/libabsl_random_internal_randen.2508.0.0.dylib",
-  "lib/libabsl_random_internal_randen.dylib", "lib/libabsl_random_internal_randen_hwaes.2508.0.0.dylib",
-  "lib/libabsl_random_internal_randen_hwaes.dylib", "lib/libabsl_random_internal_randen_hwaes_impl.2508.0.0.dylib",
-  "lib/libabsl_random_internal_randen_hwaes_impl.dylib", "lib/libabsl_random_internal_randen_slow.2508.0.0.dylib",
-  "lib/libabsl_random_internal_randen_slow.dylib", "lib/libabsl_random_internal_seed_material.2508.0.0.dylib",
-  "lib/libabsl_random_internal_seed_material.dylib", "lib/libabsl_random_seed_gen_exception.2508.0.0.dylib",
-  "lib/libabsl_random_seed_gen_exception.dylib", "lib/libabsl_random_seed_sequences.2508.0.0.dylib",
-  "lib/libabsl_random_seed_sequences.dylib", "lib/libabsl_raw_hash_set.2508.0.0.dylib", "lib/libabsl_raw_hash_set.dylib",
-  "lib/libabsl_raw_logging_internal.2508.0.0.dylib", "lib/libabsl_raw_logging_internal.dylib",
-  "lib/libabsl_scoped_set_env.2508.0.0.dylib", "lib/libabsl_scoped_set_env.dylib",
-  "lib/libabsl_spinlock_wait.2508.0.0.dylib", "lib/libabsl_spinlock_wait.dylib", "lib/libabsl_stacktrace.2508.0.0.dylib",
-  "lib/libabsl_stacktrace.dylib", "lib/libabsl_status.2508.0.0.dylib", "lib/libabsl_status.dylib",
-  "lib/libabsl_statusor.2508.0.0.dylib", "lib/libabsl_statusor.dylib", "lib/libabsl_str_format_internal.2508.0.0.dylib",
-  "lib/libabsl_str_format_internal.dylib", "lib/libabsl_strerror.2508.0.0.dylib", "lib/libabsl_strerror.dylib",
-  "lib/libabsl_string_view.2508.0.0.dylib", "lib/libabsl_string_view.dylib", "lib/libabsl_strings.2508.0.0.dylib",
-  "lib/libabsl_strings.dylib", "lib/libabsl_strings_internal.2508.0.0.dylib", "lib/libabsl_strings_internal.dylib",
-  "lib/libabsl_symbolize.2508.0.0.dylib", "lib/libabsl_symbolize.dylib", "lib/libabsl_synchronization.2508.0.0.dylib",
-  "lib/libabsl_synchronization.dylib", "lib/libabsl_throw_delegate.2508.0.0.dylib", "lib/libabsl_throw_delegate.dylib",
-  "lib/libabsl_time.2508.0.0.dylib", "lib/libabsl_time.dylib", "lib/libabsl_time_zone.2508.0.0.dylib",
-  "lib/libabsl_time_zone.dylib", "lib/libabsl_tracing_internal.2508.0.0.dylib", "lib/libabsl_tracing_internal.dylib",
-  "lib/libabsl_utf8_for_code_point.2508.0.0.dylib", "lib/libabsl_utf8_for_code_point.dylib",
-  "lib/libabsl_vlog_config_internal.2508.0.0.dylib", "lib/libabsl_vlog_config_internal.dylib", "lib/libboost_atomic.a",
-  "lib/libboost_chrono.a", "lib/libboost_container.a", "lib/libboost_date_time.a", "lib/libboost_random.a",
-  "lib/libboost_serialization.a", "lib/libboost_thread.a", "lib/libboost_wserialization.a", "lib/libbz2.1.0.9.dylib",
-  "lib/libbz2.1.dylib", "lib/libbz2.dylib", "lib/libgmock.1.17.0.dylib", "lib/libgmock.dylib",
-  "lib/libgmock_main.1.17.0.dylib", "lib/libgmock_main.dylib", "lib/libgtest.1.17.0.dylib", "lib/libgtest.dylib",
-  "lib/libgtest_main.1.17.0.dylib", "lib/libgtest_main.dylib", "lib/libhighs.1.12.dylib", "lib/libhighs.1.dylib",
-  "lib/libhighs.dylib", "lib/libortools.a", "lib/libortools_flatzinc.a", "lib/libprotobuf-lite.33.1.0.dylib",
-  "lib/libprotobuf-lite.dylib", "lib/libprotobuf.33.1.0.dylib", "lib/libprotobuf.dylib", "lib/libprotoc.33.1.0.dylib",
-  "lib/libprotoc.dylib", "lib/libre2.11.0.0.dylib", "lib/libre2.11.dylib", "lib/libre2.dylib", "lib/libscip.10.0.0.dylib",
-  "lib/libscip.10.0.dylib", "lib/libscip.dylib", "lib/libsoplex-pic.a", "lib/libsoplex.a",
-  "lib/libsoplexshared.8.0.0.dylib", "lib/libsoplexshared.8.0.dylib", "lib/libsoplexshared.dylib", "lib/libupb.a",
-  "lib/libutf8_range.33.1.0.dylib", "lib/libutf8_range.dylib", "lib/libutf8_validity.33.1.0.dylib",
-  "lib/libutf8_validity.dylib", "lib/libz.1.3.1.dylib", "lib/libz.1.dylib", "lib/libz.dylib",
+  "lib/cmake/utf8_range/utf8_range-targets.cmake",
   "lib/pkgconfig/absl_absl_check.pc", "lib/pkgconfig/absl_absl_log.pc", "lib/pkgconfig/absl_absl_vlog_is_on.pc",
   "lib/pkgconfig/absl_algorithm.pc", "lib/pkgconfig/absl_algorithm_container.pc", "lib/pkgconfig/absl_any.pc",
   "lib/pkgconfig/absl_any_invocable.pc", "lib/pkgconfig/absl_atomic_hook.pc", "lib/pkgconfig/absl_bad_any_cast.pc",
@@ -6302,6 +6282,182 @@ NotGoogleDev_OR__Tools__9_15_0.libs = {
   "lib/pkgconfig/gmock_main.pc", "lib/pkgconfig/gtest.pc", "lib/pkgconfig/gtest_main.pc", "lib/pkgconfig/highs.pc",
   "lib/pkgconfig/protobuf-lite.pc", "lib/pkgconfig/protobuf.pc", "lib/pkgconfig/re2.pc", "lib/pkgconfig/upb.pc",
   "lib/pkgconfig/utf8_range.pc"
+}
+
+NotGoogleDev_OR__Tools__9_15_0.static_libs = {
+  "lib/libabsl_base.a", "lib/libabsl_city.a", "lib/libabsl_civil_time.a", "lib/libabsl_cord_internal.a",
+  "lib/libabsl_cord.a", "lib/libabsl_cordz_functions.a", "lib/libabsl_cordz_handle.a", "lib/libabsl_cordz_info.a",
+  "lib/libabsl_cordz_sample_token.a", "lib/libabsl_crc_cord_state.a", "lib/libabsl_crc_cpu_detect.a",
+  "lib/libabsl_crc_internal.a", "lib/libabsl_crc32c.a", "lib/libabsl_debugging_internal.a",
+  "lib/libabsl_decode_rust_punycode.a", "lib/libabsl_demangle_internal.a", "lib/libabsl_demangle_rust.a",
+  "lib/libabsl_die_if_null.a", "lib/libabsl_examine_stack.a", "lib/libabsl_exponential_biased.a",
+  "lib/libabsl_failure_signal_handler.a", "lib/libabsl_flags_commandlineflag_internal.a",
+  "lib/libabsl_flags_commandlineflag.a", "lib/libabsl_flags_config.a", "lib/libabsl_flags_internal.a",
+  "lib/libabsl_flags_marshalling.a", "lib/libabsl_flags_parse.a", "lib/libabsl_flags_private_handle_accessor.a",
+  "lib/libabsl_flags_program_name.a", "lib/libabsl_flags_reflection.a", "lib/libabsl_flags_usage_internal.a",
+  "lib/libabsl_flags_usage.a", "lib/libabsl_graphcycles_internal.a", "lib/libabsl_hash.a",
+  "lib/libabsl_hashtable_profiler.a", "lib/libabsl_hashtablez_sampler.a", "lib/libabsl_int128.a",
+  "lib/libabsl_kernel_timeout_internal.a", "lib/libabsl_leak_check.a", "lib/libabsl_log_entry.a",
+  "lib/libabsl_log_flags.a", "lib/libabsl_log_globals.a", "lib/libabsl_log_initialize.a",
+  "lib/libabsl_log_internal_check_op.a", "lib/libabsl_log_internal_conditions.a", "lib/libabsl_log_internal_fnmatch.a",
+  "lib/libabsl_log_internal_format.a", "lib/libabsl_log_internal_globals.a", "lib/libabsl_log_internal_log_sink_set.a",
+  "lib/libabsl_log_internal_message.a", "lib/libabsl_log_internal_nullguard.a", "lib/libabsl_log_internal_proto.a",
+  "lib/libabsl_log_internal_structured_proto.a", "lib/libabsl_log_severity.a", "lib/libabsl_log_sink.a",
+  "lib/libabsl_malloc_internal.a", "lib/libabsl_periodic_sampler.a", "lib/libabsl_poison.a",
+  "lib/libabsl_profile_builder.a", "lib/libabsl_random_distributions.a",
+  "lib/libabsl_random_internal_distribution_test_util.a", "lib/libabsl_random_internal_entropy_pool.a",
+  "lib/libabsl_random_internal_platform.a", "lib/libabsl_random_internal_randen_hwaes_impl.a",
+  "lib/libabsl_random_internal_randen_hwaes.a", "lib/libabsl_random_internal_randen_slow.a",
+  "lib/libabsl_random_internal_randen.a", "lib/libabsl_random_internal_seed_material.a",
+  "lib/libabsl_random_seed_gen_exception.a", "lib/libabsl_random_seed_sequences.a", "lib/libabsl_raw_hash_set.a",
+  "lib/libabsl_raw_logging_internal.a", "lib/libabsl_scoped_set_env.a", "lib/libabsl_spinlock_wait.a",
+  "lib/libabsl_stacktrace.a", "lib/libabsl_status.a", "lib/libabsl_statusor.a", "lib/libabsl_str_format_internal.a",
+  "lib/libabsl_strerror.a", "lib/libabsl_string_view.a", "lib/libabsl_strings_internal.a", "lib/libabsl_strings.a",
+  "lib/libabsl_symbolize.a", "lib/libabsl_synchronization.a", "lib/libabsl_throw_delegate.a", "lib/libabsl_time_zone.a",
+  "lib/libabsl_time.a", "lib/libabsl_tracing_internal.a", "lib/libabsl_utf8_for_code_point.a",
+  "lib/libabsl_vlog_config_internal.a", "lib/libboost_atomic.a", "lib/libboost_chrono.a", "lib/libboost_container.a",
+  "lib/libboost_date_time.a", "lib/libboost_random.a", "lib/libboost_serialization.a", "lib/libboost_thread.a",
+  "lib/libboost_wserialization.a", "lib/libbz2.a", "lib/libCbc.a", "lib/libCbcSolver.a", "lib/libCgl.a", "lib/libClp.a",
+  "lib/libClpSolver.a", "lib/libCoinUtils.a", "lib/libgmock_main.a", "lib/libgmock.a", "lib/libgtest_main.a",
+  "lib/libgtest.a", "lib/libhighs.a", "lib/libortools_flatzinc.a", "lib/libortools.a", "lib/libOsi.a", "lib/libOsiCbc.a",
+  "lib/libOsiClp.a", "lib/libprotobuf-lite.a", "lib/libprotobuf.a", "lib/libprotoc.a", "lib/libre2.a", "lib/libscip.a",
+  "lib/libsoplex-pic.a", "lib/libsoplex.a", "lib/libsoplexshared.8.0.0.dylib", "lib/libsoplexshared.8.0.dylib",
+  "lib/libsoplexshared.dylib", "lib/libupb.a", "lib/libutf8_range.a", "lib/libutf8_validity.a", "lib/libz.a"
+}
+
+NotGoogleDev_OR__Tools__9_15_0.shared_libs = {
+  "lib/libabsl_base.2508.0.0.dylib", "lib/libabsl_base.dylib", "lib/libabsl_city.2508.0.0.dylib",
+  "lib/libabsl_city.dylib", "lib/libabsl_civil_time.2508.0.0.dylib", "lib/libabsl_civil_time.dylib",
+  "lib/libabsl_cord_internal.2508.0.0.dylib", "lib/libabsl_cord_internal.dylib", "lib/libabsl_cord.2508.0.0.dylib",
+  "lib/libabsl_cord.dylib", "lib/libabsl_cordz_functions.2508.0.0.dylib", "lib/libabsl_cordz_functions.dylib",
+  "lib/libabsl_cordz_handle.2508.0.0.dylib", "lib/libabsl_cordz_handle.dylib", "lib/libabsl_cordz_info.2508.0.0.dylib",
+  "lib/libabsl_cordz_info.dylib", "lib/libabsl_cordz_sample_token.2508.0.0.dylib", "lib/libabsl_cordz_sample_token.dylib",
+  "lib/libabsl_crc_cord_state.2508.0.0.dylib", "lib/libabsl_crc_cord_state.dylib",
+  "lib/libabsl_crc_cpu_detect.2508.0.0.dylib", "lib/libabsl_crc_cpu_detect.dylib",
+  "lib/libabsl_crc_internal.2508.0.0.dylib", "lib/libabsl_crc_internal.dylib", "lib/libabsl_crc32c.2508.0.0.dylib",
+  "lib/libabsl_crc32c.dylib", "lib/libabsl_debugging_internal.2508.0.0.dylib", "lib/libabsl_debugging_internal.dylib",
+  "lib/libabsl_decode_rust_punycode.2508.0.0.dylib", "lib/libabsl_decode_rust_punycode.dylib",
+  "lib/libabsl_demangle_internal.2508.0.0.dylib", "lib/libabsl_demangle_internal.dylib",
+  "lib/libabsl_demangle_rust.2508.0.0.dylib", "lib/libabsl_demangle_rust.dylib", "lib/libabsl_die_if_null.2508.0.0.dylib",
+  "lib/libabsl_die_if_null.dylib", "lib/libabsl_examine_stack.2508.0.0.dylib", "lib/libabsl_examine_stack.dylib",
+  "lib/libabsl_exponential_biased.2508.0.0.dylib", "lib/libabsl_exponential_biased.dylib",
+  "lib/libabsl_failure_signal_handler.2508.0.0.dylib", "lib/libabsl_failure_signal_handler.dylib",
+  "lib/libabsl_flags_commandlineflag_internal.2508.0.0.dylib", "lib/libabsl_flags_commandlineflag_internal.dylib",
+  "lib/libabsl_flags_commandlineflag.2508.0.0.dylib", "lib/libabsl_flags_commandlineflag.dylib",
+  "lib/libabsl_flags_config.2508.0.0.dylib", "lib/libabsl_flags_config.dylib",
+  "lib/libabsl_flags_internal.2508.0.0.dylib", "lib/libabsl_flags_internal.dylib",
+  "lib/libabsl_flags_marshalling.2508.0.0.dylib", "lib/libabsl_flags_marshalling.dylib",
+  "lib/libabsl_flags_parse.2508.0.0.dylib", "lib/libabsl_flags_parse.dylib",
+  "lib/libabsl_flags_private_handle_accessor.2508.0.0.dylib", "lib/libabsl_flags_private_handle_accessor.dylib",
+  "lib/libabsl_flags_program_name.2508.0.0.dylib", "lib/libabsl_flags_program_name.dylib",
+  "lib/libabsl_flags_reflection.2508.0.0.dylib", "lib/libabsl_flags_reflection.dylib",
+  "lib/libabsl_flags_usage_internal.2508.0.0.dylib", "lib/libabsl_flags_usage_internal.dylib",
+  "lib/libabsl_flags_usage.2508.0.0.dylib", "lib/libabsl_flags_usage.dylib",
+  "lib/libabsl_graphcycles_internal.2508.0.0.dylib", "lib/libabsl_graphcycles_internal.dylib",
+  "lib/libabsl_hash.2508.0.0.dylib", "lib/libabsl_hash.dylib", "lib/libabsl_hashtable_profiler.2508.0.0.dylib",
+  "lib/libabsl_hashtable_profiler.dylib", "lib/libabsl_hashtablez_sampler.2508.0.0.dylib",
+  "lib/libabsl_hashtablez_sampler.dylib", "lib/libabsl_int128.2508.0.0.dylib", "lib/libabsl_int128.dylib",
+  "lib/libabsl_kernel_timeout_internal.2508.0.0.dylib", "lib/libabsl_kernel_timeout_internal.dylib",
+  "lib/libabsl_leak_check.2508.0.0.dylib", "lib/libabsl_leak_check.dylib", "lib/libabsl_log_entry.2508.0.0.dylib",
+  "lib/libabsl_log_entry.dylib", "lib/libabsl_log_flags.2508.0.0.dylib", "lib/libabsl_log_flags.dylib",
+  "lib/libabsl_log_globals.2508.0.0.dylib", "lib/libabsl_log_globals.dylib", "lib/libabsl_log_initialize.2508.0.0.dylib",
+  "lib/libabsl_log_initialize.dylib", "lib/libabsl_log_internal_check_op.2508.0.0.dylib",
+  "lib/libabsl_log_internal_check_op.dylib", "lib/libabsl_log_internal_conditions.2508.0.0.dylib",
+  "lib/libabsl_log_internal_conditions.dylib", "lib/libabsl_log_internal_fnmatch.2508.0.0.dylib",
+  "lib/libabsl_log_internal_fnmatch.dylib", "lib/libabsl_log_internal_format.2508.0.0.dylib",
+  "lib/libabsl_log_internal_format.dylib", "lib/libabsl_log_internal_globals.2508.0.0.dylib",
+  "lib/libabsl_log_internal_globals.dylib", "lib/libabsl_log_internal_log_sink_set.2508.0.0.dylib",
+  "lib/libabsl_log_internal_log_sink_set.dylib", "lib/libabsl_log_internal_message.2508.0.0.dylib",
+  "lib/libabsl_log_internal_message.dylib", "lib/libabsl_log_internal_nullguard.2508.0.0.dylib",
+  "lib/libabsl_log_internal_nullguard.dylib", "lib/libabsl_log_internal_proto.2508.0.0.dylib",
+  "lib/libabsl_log_internal_proto.dylib", "lib/libabsl_log_internal_structured_proto.2508.0.0.dylib",
+  "lib/libabsl_log_internal_structured_proto.dylib", "lib/libabsl_log_severity.2508.0.0.dylib",
+  "lib/libabsl_log_severity.dylib", "lib/libabsl_log_sink.2508.0.0.dylib", "lib/libabsl_log_sink.dylib",
+  "lib/libabsl_malloc_internal.2508.0.0.dylib", "lib/libabsl_malloc_internal.dylib",
+  "lib/libabsl_periodic_sampler.2508.0.0.dylib", "lib/libabsl_periodic_sampler.dylib",
+  "lib/libabsl_poison.2508.0.0.dylib", "lib/libabsl_poison.dylib", "lib/libabsl_profile_builder.2508.0.0.dylib",
+  "lib/libabsl_profile_builder.dylib", "lib/libabsl_random_distributions.2508.0.0.dylib",
+  "lib/libabsl_random_distributions.dylib", "lib/libabsl_random_internal_distribution_test_util.2508.0.0.dylib",
+  "lib/libabsl_random_internal_distribution_test_util.dylib", "lib/libabsl_random_internal_entropy_pool.2508.0.0.dylib",
+  "lib/libabsl_random_internal_entropy_pool.dylib", "lib/libabsl_random_internal_platform.2508.0.0.dylib",
+  "lib/libabsl_random_internal_platform.dylib", "lib/libabsl_random_internal_randen_hwaes_impl.2508.0.0.dylib",
+  "lib/libabsl_random_internal_randen_hwaes_impl.dylib", "lib/libabsl_random_internal_randen_hwaes.2508.0.0.dylib",
+  "lib/libabsl_random_internal_randen_hwaes.dylib", "lib/libabsl_random_internal_randen_slow.2508.0.0.dylib",
+  "lib/libabsl_random_internal_randen_slow.dylib", "lib/libabsl_random_internal_randen.2508.0.0.dylib",
+  "lib/libabsl_random_internal_randen.dylib", "lib/libabsl_random_internal_seed_material.2508.0.0.dylib",
+  "lib/libabsl_random_internal_seed_material.dylib", "lib/libabsl_random_seed_gen_exception.2508.0.0.dylib",
+  "lib/libabsl_random_seed_gen_exception.dylib", "lib/libabsl_random_seed_sequences.2508.0.0.dylib",
+  "lib/libabsl_random_seed_sequences.dylib", "lib/libabsl_raw_hash_set.2508.0.0.dylib", "lib/libabsl_raw_hash_set.dylib",
+  "lib/libabsl_raw_logging_internal.2508.0.0.dylib", "lib/libabsl_raw_logging_internal.dylib",
+  "lib/libabsl_scoped_set_env.2508.0.0.dylib", "lib/libabsl_scoped_set_env.dylib",
+  "lib/libabsl_spinlock_wait.2508.0.0.dylib", "lib/libabsl_spinlock_wait.dylib", "lib/libabsl_stacktrace.2508.0.0.dylib",
+  "lib/libabsl_stacktrace.dylib", "lib/libabsl_status.2508.0.0.dylib", "lib/libabsl_status.dylib",
+  "lib/libabsl_statusor.2508.0.0.dylib", "lib/libabsl_statusor.dylib", "lib/libabsl_str_format_internal.2508.0.0.dylib",
+  "lib/libabsl_str_format_internal.dylib", "lib/libabsl_strerror.2508.0.0.dylib", "lib/libabsl_strerror.dylib",
+  "lib/libabsl_string_view.2508.0.0.dylib", "lib/libabsl_string_view.dylib",
+  "lib/libabsl_strings_internal.2508.0.0.dylib", "lib/libabsl_strings_internal.dylib",
+  "lib/libabsl_strings.2508.0.0.dylib", "lib/libabsl_strings.dylib", "lib/libabsl_symbolize.2508.0.0.dylib",
+  "lib/libabsl_symbolize.dylib", "lib/libabsl_synchronization.2508.0.0.dylib", "lib/libabsl_synchronization.dylib",
+  "lib/libabsl_throw_delegate.2508.0.0.dylib", "lib/libabsl_throw_delegate.dylib", "lib/libabsl_time_zone.2508.0.0.dylib",
+  "lib/libabsl_time_zone.dylib", "lib/libabsl_time.2508.0.0.dylib", "lib/libabsl_time.dylib",
+  "lib/libabsl_tracing_internal.2508.0.0.dylib", "lib/libabsl_tracing_internal.dylib",
+  "lib/libabsl_utf8_for_code_point.2508.0.0.dylib", "lib/libabsl_utf8_for_code_point.dylib",
+  "lib/libabsl_vlog_config_internal.2508.0.0.dylib", "lib/libabsl_vlog_config_internal.dylib", "lib/libboost_atomic.a",
+  "lib/libboost_chrono.a", "lib/libboost_container.a", "lib/libboost_date_time.a", "lib/libboost_random.a",
+  "lib/libboost_serialization.a", "lib/libboost_thread.a", "lib/libboost_wserialization.a", "lib/libbz2.1.0.9.dylib",
+  "lib/libbz2.1.dylib", "lib/libbz2.dylib", "lib/libCbc.2.10.12.dylib", "lib/libCbc.2.dylib", "lib/libCbc.dylib",
+  "lib/libCbcSolver.2.10.12.dylib", "lib/libCbcSolver.2.dylib", "lib/libCbcSolver.dylib", "lib/libCgl.0.60.9.dylib",
+  "lib/libCgl.0.dylib", "lib/libCgl.dylib", "lib/libClp.1.17.10.dylib", "lib/libClp.1.dylib", "lib/libClp.dylib",
+  "lib/libClpSolver.1.17.10.dylib", "lib/libClpSolver.1.dylib", "lib/libClpSolver.dylib",
+  "lib/libCoinUtils.2.11.12.dylib", "lib/libCoinUtils.2.dylib", "lib/libCoinUtils.dylib",
+  "lib/libgmock_main.1.17.0.dylib", "lib/libgmock_main.dylib", "lib/libgmock.1.17.0.dylib", "lib/libgmock.dylib",
+  "lib/libgtest_main.1.17.0.dylib", "lib/libgtest_main.dylib", "lib/libgtest.1.17.0.dylib", "lib/libgtest.dylib",
+  "lib/libhighs.1.12.dylib", "lib/libhighs.1.dylib", "lib/libhighs.dylib", "lib/libortools_flatzinc.9.15.dylib",
+  "lib/libortools_flatzinc.9.dylib", "lib/libortools_flatzinc.dylib", "lib/libortools.9.15.dylib",
+  "lib/libortools.9.dylib", "lib/libortools.dylib", "lib/libOsi.0.108.11.dylib", "lib/libOsi.0.dylib", "lib/libOsi.dylib",
+  "lib/libOsiCbc.2.10.12.dylib", "lib/libOsiCbc.2.dylib", "lib/libOsiCbc.dylib", "lib/libOsiClp.1.17.10.dylib",
+  "lib/libOsiClp.1.dylib", "lib/libOsiClp.dylib", "lib/libprotobuf-lite.33.1.0.dylib", "lib/libprotobuf-lite.dylib",
+  "lib/libprotobuf.33.1.0.dylib", "lib/libprotobuf.dylib", "lib/libprotoc.33.1.0.dylib", "lib/libprotoc.dylib",
+  "lib/libre2.11.0.0.dylib", "lib/libre2.11.dylib", "lib/libre2.dylib", "lib/libscip.10.0.0.dylib",
+  "lib/libscip.10.0.dylib", "lib/libscip.dylib", "lib/libsoplex-pic.a", "lib/libsoplex.a",
+  "lib/libsoplexshared.8.0.0.dylib", "lib/libsoplexshared.8.0.dylib", "lib/libsoplexshared.dylib", "lib/libupb.a",
+  "lib/libutf8_range.33.1.0.dylib", "lib/libutf8_range.dylib", "lib/libutf8_validity.33.1.0.dylib",
+  "lib/libutf8_validity.dylib", "lib/libz.1.3.1.dylib", "lib/libz.1.dylib", "lib/libz.dylib"
+}
+
+NotGoogleDev_OR__Tools__9_15_0.binaries = {
+  "bin/assignment_groups_mip", "bin/assignment_groups_sat", "bin/assignment_linear_sum_assignment",
+  "bin/assignment_min_flow", "bin/assignment_mip", "bin/assignment_sat", "bin/assignment_task_sizes_mip",
+  "bin/assignment_task_sizes_sat", "bin/assignment_teams_mip", "bin/assignment_teams_sat", "bin/assumptions_sample_sat",
+  "bin/balance_min_flow", "bin/basic_example", "bin/bfs_directed", "bin/bfs_one_to_all", "bin/bfs_undirected",
+  "bin/bin_packing_mip", "bin/binpacking_problem_sat", "bin/bool_or_sample_sat", "bin/channeling_sample_sat",
+  "bin/clone_model_sample_sat", "bin/cocktail_hour", "bin/cp_is_fun_cp", "bin/cp_is_fun_sat", "bin/cp_sat_example",
+  "bin/cutting_stock", "bin/dag_constrained_shortest_path_sequential", "bin/dag_multiple_shortest_paths_one_to_all",
+  "bin/dag_multiple_shortest_paths_sequential", "bin/dag_shortest_path_one_to_all", "bin/dag_shortest_path_sequential",
+  "bin/dag_simple_constrained_shortest_path", "bin/dag_simple_multiple_shortest_paths", "bin/dag_simple_shortest_path",
+  "bin/dijkstra_all_pairs_shortest_paths", "bin/dijkstra_directed", "bin/dijkstra_one_to_all", "bin/dijkstra_sequential",
+  "bin/dijkstra_undirected", "bin/earliness_tardiness_cost_sample_sat", "bin/facility_lp_benders", "bin/fzn-cp-sat",
+  "bin/graph_coloring", "bin/highs", "bin/integer_programming_example", "bin/interval_sample_sat", "bin/issue4269",
+  "bin/knapsack", "bin/lagrangian_relaxation", "bin/linear_programming_example", "bin/literal_sample_sat",
+  "bin/mathopt_info", "bin/minimal_jobshop_cp", "bin/minimal_jobshop_sat", "bin/mip_var_array",
+  "bin/multiple_knapsack_mip", "bin/multiple_knapsack_sat", "bin/no_overlap_sample_sat", "bin/non_linear_sat",
+  "bin/nqueens_cp", "bin/nqueens_sat", "bin/nurses_cp", "bin/nurses_sat", "bin/optional_interval_sample_sat",
+  "bin/protoc", "bin/protoc-33.1.0", "bin/protoc-gen-upb", "bin/protoc-gen-upb_minitable",
+  "bin/protoc-gen-upb_minitable-33.1.0", "bin/protoc-gen-upb-33.1.0", "bin/protoc-gen-upbdefs",
+  "bin/protoc-gen-upbdefs-33.1.0", "bin/rabbits_and_pheasants_cp", "bin/rabbits_and_pheasants_sat",
+  "bin/ranking_sample_sat", "bin/reified_sample_sat", "bin/root_a_tree", "bin/rooted_tree_paths", "bin/sat_runner",
+  "bin/schedule_requests_sat", "bin/scip", "bin/search_for_all_solutions_sample_sat", "bin/simple_cp_program",
+  "bin/simple_glop_program", "bin/simple_knapsack_program", "bin/simple_lp_program", "bin/simple_ls_program",
+  "bin/simple_max_flow_program", "bin/simple_min_cost_flow_program", "bin/simple_mip_program", "bin/simple_pdlp_program",
+  "bin/simple_routing_program", "bin/simple_sat_program", "bin/solution_hinting_sample_sat", "bin/solve",
+  "bin/solve_and_print_intermediate_solutions_sample_sat", "bin/solve_with_time_limit_sample_sat",
+  "bin/step_function_sample_sat", "bin/stigler_diet", "bin/stop_after_n_solutions_sample_sat",
+  "bin/time_indexed_scheduling", "bin/tsp", "bin/tsp_circuit_board", "bin/tsp_cities", "bin/tsp_cities_routes",
+  "bin/tsp_distance_matrix", "bin/vector_bin_packing", "bin/vrp", "bin/vrp_breaks", "bin/vrp_capacity",
+  "bin/vrp_drop_nodes", "bin/vrp_global_span", "bin/vrp_initial_routes", "bin/vrp_pickup_delivery",
+  "bin/vrp_pickup_delivery_fifo", "bin/vrp_pickup_delivery_lifo", "bin/vrp_resources", "bin/vrp_routes",
+  "bin/vrp_solution_callback", "bin/vrp_starts_ends", "bin/vrp_time_windows", "bin/vrp_with_time_limit",
+  "bin/vrptw_store_solution_data"
 }
 
 return M
