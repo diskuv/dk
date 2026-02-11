@@ -7,6 +7,7 @@ repository=
 usage() {
   echo "Usage: get-latest-gh-release.sh [-l limit] [-r repository] package" >&2
   echo "Get the GitHub release for \`package\` with the latest tag \`<version>+<package>\`" >&2
+  echo "-l: The number of GitHub releases when searching for the package. Default is 30." >&2
   echo "Example: get-latest-gh-release.sh -r diskuv/dk CommonsBase_Std" >&2
   echo "Sample output: 2.5.202602060017+CommonsBase-Std" >&2
   echo "There will be no output if no matching release is found." >&2

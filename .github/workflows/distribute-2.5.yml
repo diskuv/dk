@@ -152,7 +152,7 @@ jobs:
                 GH_TOKEN: ${{ github.token }}
               run: |
                 find etc/dk/i -mindepth 1 -type f -exec rm -f {} +
-                .github/scripts/import-latest-gh-releases.sh -r '${{ github.repository }}' \
+                .github/scripts/import-latest-gh-releases.sh -m -c "$GITHUB_STEP_SUMMARY" -r '${{ github.repository }}' \
                   CommonsBase_Std
                 ls etc/dk/i
 
@@ -230,7 +230,7 @@ jobs:
                 GH_TOKEN: ${{ github.token }}
               run: |
                 find etc/dk/i -mindepth 1 -type f -exec rm -f {} +
-                .github/scripts/import-latest-gh-releases.sh -r '${{ github.repository }}' \
+                .github/scripts/import-latest-gh-releases.sh -m -c "$GITHUB_STEP_SUMMARY" -r '${{ github.repository }}' \
                   CommonsBase_Std CommonsBase_Build
                 ls etc/dk/i
 
@@ -297,7 +297,7 @@ jobs:
                 GH_TOKEN: ${{ github.token }}
               run: |
                 find etc/dk/i -mindepth 1 -type f -exec rm -f {} +
-                .github/scripts/import-latest-gh-releases.sh -r '${{ github.repository }}' \
+                .github/scripts/import-latest-gh-releases.sh -m -c "$GITHUB_STEP_SUMMARY" -r '${{ github.repository }}' \
                   CommonsBase_Std CommonsBase_Build NotGoogleDev_OR
                 ls etc/dk/i
 
