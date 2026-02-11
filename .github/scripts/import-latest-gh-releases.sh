@@ -36,6 +36,7 @@ for package in "$@"; do
     exit 1
   fi
 
-  echo "Importing release $tag for package $package from repository $repository: ./dk0 --trial import-github-l2 --repo $repository --tag $tag --outdir $PROJECTDIR/etc/dk/i/"
+  printf "Importing release %s for package %s from repository %s:\n" "$tag" "$package" "$repository"
+  printf "./dk0 --trial import-github-l2 --repo %s --tag %s --outdir %s/etc/dk/i/\n" "$repository" "$tag" "$PROJECTDIR"
   ./dk0 --trial import-github-l2 --repo "$repository" --tag "$tag" --outdir "$PROJECTDIR"/etc/dk/i/
 done

@@ -181,7 +181,7 @@ jobs:
                   experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
                   #   Temporary: always use HEAD until MlFront testing is done
                   # experimental-mlfront-ref: HEAD
-                  options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_*: rebuild "system" modules
+                  options: -I etc/dk/v
 
             - name: Archive CommonsBase_Build
               if: github.ref_type != 'tag'
@@ -248,7 +248,7 @@ jobs:
                   experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
                   #   Temporary: always use HEAD until MlFront testing is done
                   # experimental-mlfront-ref: HEAD
-                  options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_*: rebuild "system" modules
+                  options: -I etc/dk/v
 
             - name: Archive NotGoogleDev_OR
               if: github.ref_type != 'tag'
@@ -316,7 +316,7 @@ jobs:
                   experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
                   #   Temporary: always use HEAD until MlFront testing is done
                   # experimental-mlfront-ref: HEAD
-                  options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_*: rebuild "system" modules
+                  options: -I etc/dk/v
 
             - name: Archive NotInriaParkas_Caml
               if: github.ref_type != 'tag'
