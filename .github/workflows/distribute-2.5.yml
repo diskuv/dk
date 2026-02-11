@@ -132,7 +132,12 @@ jobs:
     NotGoogleDev_OR:
         needs:
           - CommonsBase_Std
-          - CommonsBase_Build
+          # the following are not strictly needed, and are avoided because multiple [needs] creates a
+          # race condition to decide which tracestore is downloaded. missing tracestores can cause
+          # "the package has not been imported" errors. the non-racyand correct method would be to
+          # have [needs] jobs that created GH Releases, where those jobs could be import-github-l2
+          # into this job. (TODO)
+          # - CommonsBase_Build
         runs-on: ubuntu-24.04
         if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')) || github.ref_name == 'main'
 
@@ -176,9 +181,14 @@ jobs:
     NotInriaParkas_Caml:
         needs:
           - CommonsBase_Std
-          - CommonsBase_Build
-          - NotGoogleDev_OR
-        runs-on: ubuntu-24.04
+          # the following are not strictly needed, and are avoided because multiple [needs] creates a
+          # race condition to decide which tracestore is downloaded. missing tracestores can cause
+          # "the package has not been imported" errors. the non-racyand correct method would be to
+          # have [needs] jobs that created GH Releases, where those jobs could be import-github-l2
+          # into this job. (TODO)
+          # - CommonsBase_Build
+          # - NotGoogleDev_OR
+        runs-on: macos-latest
         if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')) || github.ref_name == 'main'
 
         # The secrets created by `dksrc/dk0 prepare-version --ci github VERSION`
