@@ -97,7 +97,7 @@ jobs:
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   # No `Release.Windows_x86:CommonsBase_Build.Ninja0@1.12.1` today
-                  objects: |                    
+                  objects: |
                     Release.Windows_arm64:CommonsBase_Build.Ninja0@1.12.1
                     Release.Windows_x86_64:CommonsBase_Build.Ninja0@1.12.1
                     Release.Darwin_arm64:CommonsBase_Build.Ninja0@1.12.1
@@ -130,7 +130,7 @@ jobs:
                   t/k
 
     NotGoogleDev_OR:
-        needs: 
+        needs:
           - CommonsBase_Std
           - CommonsBase_Build
         runs-on: ubuntu-24.04
@@ -174,7 +174,7 @@ jobs:
                   t/k
 
     NotInriaParkas_Caml:
-        needs: 
+        needs:
           - CommonsBase_Std
           - CommonsBase_Build
           - NotGoogleDev_OR
@@ -198,7 +198,8 @@ jobs:
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   objects: |
-                    NotInriaParkas_Caml.ORTools@9.15.0
+                    Release.Darwin_arm64:NotInriaParkas_Caml.ORTools@9.15.0
+                    Release.Darwin_x86_64:NotInriaParkas_Caml.ORTools@9.15.0
                   use-cache: true
                   # TODO: put MlFront commit ref and/or version number into distribution; it is part of provenance.
                   #   Use HEAD when not tagged
