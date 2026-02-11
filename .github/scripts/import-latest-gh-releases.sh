@@ -38,7 +38,7 @@ if [ -z "$repository" ]; then
 fi
 
 if [ "$capturemarkdown" = true ]; then
-    printf "### Imports of package dependencies\n\n" >> "$capturefile"
+    printf "### Imported packages\n\n" >> "$capturefile"
     printf '```\n' >> "$capturefile"
 fi
 
@@ -50,12 +50,14 @@ for package in "$@"; do
     exit 1
   fi
 
+  printf -- "------------------------------------------------\n" >&2
   printf "Importing release %s for package %s from repository %s:\n" "$tag" "$package" "$repository"
-  printf "./dk0 --trial import-github-l2 --repo %s --tag %s --outdir %s/etc/dk/i/\n" "$repository" "$tag" "$PROJECTDIR"
+  printf "./dk0 --trial import-github-l2 --repo %s --tag %s --outdir %s/etc/dk/i/\n\n" "$repository" "$tag" "$PROJECTDIR"
   if [ -n "$capturefile" ]; then
     printf "./dk0 --trial import-github-l2 --repo %s --tag %s --outdir etc/dk/i/\n" "$repository" "$tag" >> "$capturefile"
   fi
   ./dk0 --trial import-github-l2 --repo "$repository" --tag "$tag" --outdir "$PROJECTDIR"/etc/dk/i/
+  printf -- "------------------------------------------------\n\n" >&2
 done
 
 if [ "$capturemarkdown" = true ]; then
