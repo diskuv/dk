@@ -10,9 +10,48 @@ env:
   dkdist_branch_version: 2.5.1 # must have non-zero patch version
 
 jobs:
+    # JOB DESIGN:
+    #
+    # Each job in this workflow is a "package job" that build and distributes a single package.
+    # Tags are `VERSION+PACKAGE` (ex. 2.5.202602060017+CommonsBase_Std) where the PACKAGE is
+    # semver build metadata. A design alternative would be to use an input variable for PACKAGE,
+    # but that requires the dk developer to go to the GitHub Actions UI and we lose the PACKAGE
+    # in `git log`.
+    #
+    # The +PACKAGE and any other build metadata will be stripped by `diskuv/dk-distribute@v1`.
+    # But we wanted PACKAGE to be visible to this GitHub workflow so that each package can be built
+    # independently with a self-contained GitHub package job (self-contained == little or no `needs:`),
+    # especially since some packages have time-consuming builds. Instead of `needs:` we expect:
+    # 1. The developer to do a `dk0 import-github-l2` once a package is built.
+    # 2. Each package job in this workflow file to manipulate the etc/dk/i system directory in a
+    # `Shape Dependencies` step so that only packages that are required (ie. `needs:`) are
+    # present in the etc/dk/i directory. For example, the CommonsBase_Build package job should only have
+    # the CommonsBase_Std package in its etc/dk/i directory, and especially not have
+    # etc/dk/i/CommonsBase_Build.values.json which would conflict with the
+    # etc/dk/v/CommonsBase_Build.values.json that should be built.
+    #
+    # Package independence is also the basic dk design principle of "loose federation
+    # of packages" in SPECIFICATION.md; any package job in this workflow file can be moved to a
+    # different GitHub repository which is relatively easy to do because we have self-contained
+    # GitHub jobs. In particular, packages that are not CommonsBase_* shoulld be moved once the
+    # experiment is over.
+    #
+    # Steps:
+    # For the main branch, `Archive` step is save artifacts generated for later debugging.
+    # For tags only, `Attest` + `Release` steps are to save attestation and artifacts publicly.
+
     CommonsBase_Std:
-        runs-on: windows-2022 # CommonsBase_Std requires Windows to build S7z
-        if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')) || github.ref_name == 'main'
+        # tag(2.5.x+CommonsBase_Std) or branch(main)
+        if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.') && endsWith(github.ref_name, '+CommonsBase_Std')) || github.ref_name == 'main'
+
+        # runs-on(Windows): CommonsBase_Std requires Windows to build S7z
+        runs-on: windows-2022
+
+        permissions:
+          contents: write # for action-gh-release
+          id-token: write # for actions/attest-build-provenance
+          attestations: write # for actions/attest-build-provenance
+          artifact-metadata: write # for actions/attest-build-provenance
 
         # The secrets created by `dksrc/dk0 prepare-version --ci github VERSION`
         # are tied to this environment only.
@@ -62,23 +101,38 @@ jobs:
                   experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
                   #   Temporary: always use HEAD until MlFront testing is done
                   # experimental-mlfront-ref: HEAD
-                  options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_Std: rebuild "system" modules
+                  options: -nosysinc -I etc/dk/v # -nosysinc since CommonsBase_Std has no dependencies
 
             - name: Archive CommonsBase_Std
-              # (always upload since 'release' is in a different job) if: github.ref_type != 'tag'
+              if: github.ref_type != 'tag'
               uses: actions/upload-artifact@v4
               with:
                 name: dist-CommonsBase_Std
-                # t/d for dk0 data and t/k for dk0 keys, so previous dk0 values don't need to be rebuilt
-                path: |
-                  dk-dist/
-                  t/d
-                  t/k
+                path: dk-dist/
+
+            - name: Attest
+              if: github.ref_type == 'tag'
+              id: attest
+              uses: actions/attest-build-provenance@v3
+              with: { subject-path: dk-dist/* }
+
+            - name: Release ${{ github.workflow }}
+              if: github.ref_type == 'tag'
+              uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
+              with: { files: dk-dist/* }
 
     CommonsBase_Build:
-        needs: CommonsBase_Std
+        # tag(2.5.x+CommonsBase_Build) or branch(main)
+        if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.') && endsWith(github.ref_name, '+CommonsBase_Build')) || github.ref_name == 'main'
+
+        # runs-on(anything). Linux is cheapest and quickest to boot in Github Actions
         runs-on: ubuntu-24.04
-        if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')) || github.ref_name == 'main'
+
+        permissions:
+          contents: write # for action-gh-release
+          id-token: write # for actions/attest-build-provenance
+          attestations: write # for actions/attest-build-provenance
+          artifact-metadata: write # for actions/attest-build-provenance
 
         # The secrets created by `dksrc/dk0 prepare-version --ci github VERSION`
         # are tied to this environment only.
@@ -87,8 +141,17 @@ jobs:
             - name: Harden Runner # Optional but recommended
               uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
               with: { egress-policy: audit }
+
             - name: Checkout project
               uses: actions/checkout@v5
+            - name: Shape Dependencies
+              shell: bash
+              # [CommonsBase_Std] are dependencies
+              run: |
+                find etc/dk/i -mindepth 1 -maxdepth 1 \
+                  -not -name 'CommonsBase_Std.*' \
+                  -exec rm -rf {} +
+                ls etc/dk/i
 
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
@@ -118,28 +181,35 @@ jobs:
                   options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_*: rebuild "system" modules
 
             - name: Archive CommonsBase_Build
-              # (always upload since 'release' is in a different job) if: github.ref_type != 'tag'
+              if: github.ref_type != 'tag'
               uses: actions/upload-artifact@v4
               with:
                 name: dist-CommonsBase_Build
-                # t/d for dk0 data and t/k for dk0 keys, so previous dk0 values don't need to be rebuilt.
-                # BUT: the artifacts will be over 4GB which will fail this step, so don't need t/d or t/k.
-                # YET: upload-artifact uses the common ancestor of the paths, so keep tiny t/k.
-                path: |
-                  dk-dist/
-                  t/k
+                path: dk-dist/
+
+            - name: Attest
+              if: github.ref_type == 'tag'
+              id: attest
+              uses: actions/attest-build-provenance@v3
+              with: { subject-path: dk-dist/* }
+
+            - name: Release ${{ github.workflow }}
+              if: github.ref_type == 'tag'
+              uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
+              with: { files: dk-dist/* }
 
     NotGoogleDev_OR:
-        needs:
-          - CommonsBase_Std
-          # the following are not strictly needed, and are avoided because multiple [needs] creates a
-          # race condition to decide which tracestore is downloaded. missing tracestores can cause
-          # "the package has not been imported" errors. the non-racyand correct method would be to
-          # have [needs] jobs that created GH Releases, where those jobs could be import-github-l2
-          # into this job. (TODO)
-          # - CommonsBase_Build
+        # tag(2.5.x+NotGoogleDev_OR) or branch(main)
+        if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.') && endsWith(github.ref_name, '+NotGoogleDev_OR')) || github.ref_name == 'main'
+
+        # runs-on(anything). Linux is cheapest and quickest to boot in Github Actions
         runs-on: ubuntu-24.04
-        if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')) || github.ref_name == 'main'
+
+        permissions:
+          contents: write # for action-gh-release
+          id-token: write # for actions/attest-build-provenance
+          attestations: write # for actions/attest-build-provenance
+          artifact-metadata: write # for actions/attest-build-provenance
 
         # The secrets created by `dksrc/dk0 prepare-version --ci github VERSION`
         # are tied to this environment only.
@@ -148,8 +218,18 @@ jobs:
             - name: Harden Runner # Optional but recommended
               uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
               with: { egress-policy: audit }
+
             - name: Checkout project
               uses: actions/checkout@v5
+            - name: Shape Dependencies
+              shell: bash
+              # [CommonsBase_Std, CommonsBase_Build] are dependencies
+              run: |
+                find etc/dk/i -mindepth 1 -maxdepth 1 \
+                  -not -name 'CommonsBase_Std.*' \
+                  -not -name 'CommonsBase_Build.*' \
+                  -exec rm -rf {} +
+                ls etc/dk/i
 
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
@@ -168,28 +248,35 @@ jobs:
                   options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_*: rebuild "system" modules
 
             - name: Archive NotGoogleDev_OR
-              # (always upload since 'release' is in a different job) if: github.ref_type != 'tag'
+              if: github.ref_type != 'tag'
               uses: actions/upload-artifact@v4
               with:
                 name: dist-NotGoogleDev_OR
-                # t/d for dk0 data and t/k for dk0 keys, so previous dk0 values don't need to be rebuilt
-                path: |
-                  dk-dist/
-                  t/d
-                  t/k
+                path: dk-dist/
+
+            - name: Attest
+              if: github.ref_type == 'tag'
+              id: attest
+              uses: actions/attest-build-provenance@v3
+              with: { subject-path: dk-dist/* }
+
+            - name: Release ${{ github.workflow }}
+              if: github.ref_type == 'tag'
+              uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
+              with: { files: dk-dist/* }
 
     NotInriaParkas_Caml:
-        needs:
-          - CommonsBase_Std
-          # the following are not strictly needed, and are avoided because multiple [needs] creates a
-          # race condition to decide which tracestore is downloaded. missing tracestores can cause
-          # "the package has not been imported" errors. the non-racyand correct method would be to
-          # have [needs] jobs that created GH Releases, where those jobs could be import-github-l2
-          # into this job. (TODO)
-          # - CommonsBase_Build
-          # - NotGoogleDev_OR
+        # tag(2.5.x+NotInriaParkas_Caml) or branch(main)
+        if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.') && endsWith(github.ref_name, '+NotInriaParkas_Caml')) || github.ref_name == 'main'
+
+        # runs-on(macOS). This NotInriaParkas_Caml package has (so far) been developed only for macOS
         runs-on: macos-latest
-        if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')) || github.ref_name == 'main'
+
+        permissions:
+          contents: write # for action-gh-release
+          id-token: write # for actions/attest-build-provenance
+          attestations: write # for actions/attest-build-provenance
+          artifact-metadata: write # for actions/attest-build-provenance
 
         # The secrets created by `dksrc/dk0 prepare-version --ci github VERSION`
         # are tied to this environment only.
@@ -198,8 +285,19 @@ jobs:
             - name: Harden Runner # Optional but recommended
               uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
               with: { egress-policy: audit }
+
             - name: Checkout project
               uses: actions/checkout@v5
+            - name: Shape Dependencies
+              shell: bash
+              # [CommonsBase_Std, CommonsBase_Build, NotGoogleDev_OR] are dependencies
+              run: |
+                find etc/dk/i -mindepth 1 -maxdepth 1 \
+                  -not -name 'CommonsBase_Std.*' \
+                  -not -name 'CommonsBase_Build.*' \
+                  -not -name 'NotGoogleDev_OR.*' \
+                  -exec rm -rf {} +
+                ls etc/dk/i
 
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
@@ -219,62 +317,19 @@ jobs:
                   options: -nosysinc -I etc/dk/v # special flags only for CommonsBase_*: rebuild "system" modules
 
             - name: Archive NotInriaParkas_Caml
-              # (always upload since 'release' is in a different job) if: github.ref_type != 'tag'
+              if: github.ref_type != 'tag'
               uses: actions/upload-artifact@v4
               with:
                 name: dist-NotInriaParkas_Caml
-                # t/d for dk0 data and t/k for dk0 keys, so previous dk0 values don't need to be rebuilt
-                path: |
-                  dk-dist/
-                  t/d
-                  t/k
+                path: dk-dist/
 
-    release:
-        needs:
-          - CommonsBase_Std
-          - CommonsBase_Build
-          - NotGoogleDev_OR
-          - NotInriaParkas_Caml
-        runs-on: ubuntu-24.04
-        if: github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.')
-        permissions:
-          contents: write # for action-gh-release
-          id-token: write # for actions/attest-build-provenance
-          attestations: write # for actions/attest-build-provenance
-          artifact-metadata: write # for actions/attest-build-provenance
-        steps:
-            - name: Checkout project
-              uses: actions/checkout@v5 # for ./dk0
-
-            - name: Download CommonsBase_Std distribution artifact
-              uses: actions/download-artifact@v4
-              with:
-                name: dist-CommonsBase_Std
-            - name: Download CommonsBase_Build distribution artifact
-              uses: actions/download-artifact@v4
-              with:
-                name: dist-CommonsBase_Build
-            - name: Download NotGoogleDev_OR distribution artifact
-              uses: actions/download-artifact@v4
-              with:
-                name: dist-NotGoogleDev_OR
-            - name: Download NotInriaParkas_Caml distribution artifact
-              uses: actions/download-artifact@v4
-              with:
-                name: dist-NotInriaParkas_Caml
-
-            - name: Combine distributions across jobs
-              # overwrites the dk-dist/values.json downloaded from the previous jobs
-              run: |
-                find dk-dist
-                echo "Combining: dksrc/dk0 --trial --verbose combine --origin-name 'CommonsBase' --mirror '${{github.server_url}}/${{github.repository}}/releases/download/${{github.ref_name}}'"
-                ./dk0 --trial --verbose combine --origin-name 'CommonsBase' --mirror '${{github.server_url}}/${{github.repository}}/releases/download/${{github.ref_name}}'
-
-            - name: Generate artifact attestation
+            - name: Attest
+              if: github.ref_type == 'tag'
               id: attest
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
             - name: Release ${{ github.workflow }}
+              if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
