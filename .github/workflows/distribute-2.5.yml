@@ -315,8 +315,8 @@ jobs:
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   options: -nosysinc -I etc/dk/i -I etc/dk/v # "Import Dependencies" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
                   objects: |
-                    Release.Darwin_arm64:NotInriaParkas_Caml.ORTools@9.15.0
                     Release.Darwin_x86_64:NotInriaParkas_Caml.ORTools@9.15.0
+                    Release.Darwin_arm64:NotInriaParkas_Caml.ORTools@9.15.0
                   use-cache: true
                   # TODO: put MlFront commit ref and/or version number into distribution; it is part of provenance.
                   #   Use HEAD when not tagged
