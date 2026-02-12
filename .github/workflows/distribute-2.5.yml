@@ -68,7 +68,7 @@ jobs:
             - name: Import and Summarize Packages # No dependencies so no imports
               shell: bash
               run: |
-                ! [ "${{ github.ref_type }}" = "tag" ] || .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}' >> "$GITHUB_STEP_SUMMARY"
+                ! [ "${{ github.ref_type }}" = "tag" ] || .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}'
 
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
@@ -159,7 +159,7 @@ jobs:
                 DEPENDENCIES: CommonsBase_Std
               run: |
                 find etc/dk/i -mindepth 1 -type f -exec rm -f {} +
-                ! [ "${{ github.ref_type }}" = "tag" ] || .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}' >> "$GITHUB_STEP_SUMMARY"
+                ! [ "${{ github.ref_type }}" = "tag" ] || .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}'
                 .github/scripts/import-latest-gh-releases.sh -m -c "$GITHUB_STEP_SUMMARY" -r '${{ github.repository }}' $DEPENDENCIES
                 for d in $DEPENDENCIES; do rm -vrf etc/dk/v/$d.* etc/dk/v/$d/; done
                 find etc/dk/i -type f
@@ -240,7 +240,7 @@ jobs:
                 DEPENDENCIES: CommonsBase_Std CommonsBase_Build
               run: |
                 find etc/dk/i -mindepth 1 -type f -exec rm -f {} +
-                ! [ "${{ github.ref_type }}" = "tag" ] || .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}' >> "$GITHUB_STEP_SUMMARY"
+                ! [ "${{ github.ref_type }}" = "tag" ] || .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}'
                 .github/scripts/import-latest-gh-releases.sh -m -c "$GITHUB_STEP_SUMMARY" -r '${{ github.repository }}' $DEPENDENCIES
                 for d in $DEPENDENCIES; do rm -vrf etc/dk/v/$d.* etc/dk/v/$d/; done
                 find etc/dk/i -type f
@@ -310,7 +310,7 @@ jobs:
                 DEPENDENCIES: CommonsBase_Std CommonsBase_Build NotGoogleDev_OR
               run: |
                 find etc/dk/i -mindepth 1 -type f -exec rm -f {} +
-                ! [ "${{ github.ref_type }}" = "tag" ] || .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}' >> "$GITHUB_STEP_SUMMARY"
+                ! [ "${{ github.ref_type }}" = "tag" ] || .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}'
                 .github/scripts/import-latest-gh-releases.sh -m -c "$GITHUB_STEP_SUMMARY" -r '${{ github.repository }}' $DEPENDENCIES
                 for d in $DEPENDENCIES; do rm -vrf etc/dk/v/$d.* etc/dk/v/$d/; done
                 find etc/dk/i -type f
