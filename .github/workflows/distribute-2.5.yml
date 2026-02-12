@@ -26,7 +26,7 @@ jobs:
     # especially since some packages have time-consuming builds. Instead of `needs:` we expect:
     # 1. The developer to do a `dk0 import-github-l2` once a package is built.
     # 2. Each package job in this workflow file to manipulate the etc/dk/i system directory in a
-    # `Import Dependencies` step so that only packages that are required (ie. `needs:`) are
+    # `Import and Summarize Packages` step so that only packages that are required (ie. `needs:`) are
     # present in the etc/dk/i directory. For example, the CommonsBase_Build package job should only have
     # the CommonsBase_Std package in its etc/dk/i directory, and especially not have
     # etc/dk/i/CommonsBase_Build.values.json which would conflict with the
@@ -64,6 +64,11 @@ jobs:
               with: { egress-policy: audit }
             - name: Checkout project
               uses: actions/checkout@v5
+
+            - name: Import and Summarize Packages # No dependencies so no imports
+              shell: bash
+              run: |
+                [ "${{ github.ref_type }}" = "tag" ] && .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}' >> "$GITHUB_STEP_SUMMARY"
 
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
@@ -147,13 +152,14 @@ jobs:
             - name: Checkout project
               uses: actions/checkout@v5
 
-            - name: Import Dependencies
+            - name: Import and Summarize Packages
               shell: bash
               env:
                 GH_TOKEN: ${{ github.token }}
                 DEPENDENCIES: CommonsBase_Std
               run: |
                 find etc/dk/i -mindepth 1 -type f -exec rm -f {} +
+                [ "${{ github.ref_type }}" = "tag" ] && .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}' >> "$GITHUB_STEP_SUMMARY"
                 .github/scripts/import-latest-gh-releases.sh -m -c "$GITHUB_STEP_SUMMARY" -r '${{ github.repository }}' $DEPENDENCIES
                 for d in $DEPENDENCIES; do rm -vrf etc/dk/v/$d.* etc/dk/v/$d/; done
                 find etc/dk/i -type f
@@ -164,7 +170,7 @@ jobs:
                   id: ${{ github.ref_type == 'tag' && format('CommonsBase_Build@{0}', github.ref_name) || format('CommonsBase_Build@{0}', env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
-                  options: -nosysinc -I etc/dk/i -I etc/dk/v # "Import Dependencies" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
+                  options: -nosysinc -I etc/dk/i -I etc/dk/v # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
                   # No `Release.Windows_x86:CommonsBase_Build.Ninja0@1.12.1` today
                   objects: |
                     Release.Windows_arm64:CommonsBase_Build.Ninja0@1.12.1
@@ -227,13 +233,14 @@ jobs:
             - name: Checkout project
               uses: actions/checkout@v5
 
-            - name: Import Dependencies
+            - name: Import and Summarize Packages
               shell: bash
               env:
                 GH_TOKEN: ${{ github.token }}
                 DEPENDENCIES: CommonsBase_Std CommonsBase_Build
               run: |
                 find etc/dk/i -mindepth 1 -type f -exec rm -f {} +
+                [ "${{ github.ref_type }}" = "tag" ] && .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}' >> "$GITHUB_STEP_SUMMARY"
                 .github/scripts/import-latest-gh-releases.sh -m -c "$GITHUB_STEP_SUMMARY" -r '${{ github.repository }}' $DEPENDENCIES
                 for d in $DEPENDENCIES; do rm -vrf etc/dk/v/$d.* etc/dk/v/$d/; done
                 find etc/dk/i -type f
@@ -244,7 +251,7 @@ jobs:
                   id: ${{ github.ref_type == 'tag' && format('NotGoogleDev_OR@{0}', github.ref_name) || format('NotGoogleDev_OR@{0}', env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
-                  options: -nosysinc -I etc/dk/i -I etc/dk/v # "Import Dependencies" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
+                  options: -nosysinc -I etc/dk/i -I etc/dk/v # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
                   scripts: |
                     NotGoogleDev_OR.Tools@9.15.0
                   use-cache: true
@@ -296,13 +303,14 @@ jobs:
             - name: Checkout project
               uses: actions/checkout@v5
 
-            - name: Import Dependencies
+            - name: Import and Summarize Packages
               shell: bash
               env:
                 GH_TOKEN: ${{ github.token }}
                 DEPENDENCIES: CommonsBase_Std CommonsBase_Build NotGoogleDev_OR
               run: |
                 find etc/dk/i -mindepth 1 -type f -exec rm -f {} +
+                [ "${{ github.ref_type }}" = "tag" ] && .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}' >> "$GITHUB_STEP_SUMMARY"
                 .github/scripts/import-latest-gh-releases.sh -m -c "$GITHUB_STEP_SUMMARY" -r '${{ github.repository }}' $DEPENDENCIES
                 for d in $DEPENDENCIES; do rm -vrf etc/dk/v/$d.* etc/dk/v/$d/; done
                 find etc/dk/i -type f
@@ -313,11 +321,12 @@ jobs:
                   id: ${{ github.ref_type == 'tag' && format('NotInriaParkas_Caml@{0}', github.ref_name) || format('NotInriaParkas_Caml@{0}', env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
-                  options: -nosysinc -I etc/dk/i -I etc/dk/v # "Import Dependencies" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
+                  options: -nosysinc -I etc/dk/i -I etc/dk/v # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
                   # TODO: we have a gremlin ... perhaps cached AST ... with SLOT.Release.request translated into Release.Darwin_arm64 even
                   #       though the request is Release.Darwin_x86_64.
                   #       attempt 1: fix to SLOT.request (pending).
                   #       attempt 2: clear ASTs from cache (and then `t/c` entirely).
+                  #       mitigation 3: separate job to macos-15-intel (bonus: may be faster than Rosetta emulation)
                   #  Release.Darwin_x86_64:NotInriaParkas_Caml.ORTools@9.15.0
                   objects: |
                     Release.Darwin_arm64:NotInriaParkas_Caml.ORTools@9.15.0
