@@ -497,7 +497,7 @@ For example:
           {
             "name": "CommonsBase_Std",
             "mirrors": [
-              "https://github.com/jonahbeckford/dk/releases/download/2.4.202510100005"
+              "https://github.com/diskuv/dk/releases/download/2.4.202510100005"
             ]
           }
         ]
