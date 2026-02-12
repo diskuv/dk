@@ -41,7 +41,7 @@ confirm_ci_finish() {
   read -r answer
   case "$answer" in
     y|Y) ;;
-    *) echo "Aborting. Use '-s $confirm_ci_finish_package' to retry." >&2; exit 1 ;;
+    *) echo "Aborting. Use '-g $git_remote -s $confirm_ci_finish_package' to retry." >&2; exit 1 ;;
   esac
 }
 
@@ -49,11 +49,11 @@ dopush() {
   dopush_package="$1"
   ts=2.5.$(date -u +%Y%m%d%H%M)
   tag="${ts}+${dopush_package}"
-  printf "Will tag and push release %s. Proceed? (y/n) " "$tag"
+  printf "Will tag and push release %s to git remote '%s'. Proceed? (y/n) " "$tag" "$git_remote"
   read -r answer
   case "$answer" in
     y|Y) ;;
-    *) echo "Aborting. Use '-s $dopush_package' to retry." >&2; exit 1 ;;
+    *) echo "Aborting. Use '-g $git_remote -s $dopush_package' to retry." >&2; exit 1 ;;
   esac
 
   # GitHub Actions is wonky if there are multiple tags on the same commit.
