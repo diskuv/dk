@@ -22,7 +22,9 @@
             "precommands": {
                 "private": [
                     "post-object -d ${SLOT.Release.Darwin_arm64}/static NotGoogleDev_OR.Tools.F_Lib@9.15.0 static=1 targetabi=Release.Darwin_arm64",
-                    "post-object -d ${SLOT.Release.Darwin_arm64}/shared NotGoogleDev_OR.Tools.F_Lib@9.15.0 static=0 targetabi=Release.Darwin_arm64"
+                    "post-object -d ${SLOT.Release.Darwin_arm64}/shared NotGoogleDev_OR.Tools.F_Lib@9.15.0 static=0 targetabi=Release.Darwin_arm64",
+                    "post-object -d ${SLOT.Release.Darwin_x86_64}/static NotGoogleDev_OR.Tools.F_Lib@9.15.0 static=1 targetabi=Release.Darwin_x86_64",
+                    "post-object -d ${SLOT.Release.Darwin_x86_64}/shared NotGoogleDev_OR.Tools.F_Lib@9.15.0 static=0 targetabi=Release.Darwin_x86_64"
                 ]
             },
             "function": {
@@ -10591,7 +10593,8 @@
                             "include/highs/interfaces/highs_c_api.h"
                         ],
                         "slots": [
-                            "Release.Darwin_arm64"
+                            "Release.Darwin_arm64",
+                            "Release.Darwin_x86_64"
                         ]
                     },
                     // static libraries
@@ -11234,7 +11237,8 @@
                             "static/lib/libz.a"
                         ],
                         "slots": [
-                            "Release.Darwin_arm64"
+                            "Release.Darwin_arm64",
+                            "Release.Darwin_x86_64"
                         ]
                     },
                     // shared libraries
@@ -11983,7 +11987,8 @@
                             "shared/lib/pkgconfig/utf8_range.pc"
                         ],
                         "slots": [
-                            "Release.Darwin_arm64"
+                            "Release.Darwin_arm64",
+                            "Release.Darwin_x86_64"
                         ]
                     }
                 ]
