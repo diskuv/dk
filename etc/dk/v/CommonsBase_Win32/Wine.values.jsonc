@@ -24,9 +24,8 @@
             },
             "function": {
                 "envmods": [
-                    // add Bison
-                    "+BISON=$(--path=absnative get-object CommonsBase_GNU.Bison@3.8.2 -s Release.execution_abi -m ./bin/bison -e bin/bison -f bison)",
-                    "+BISON_PKGDATADIR=$(--path=absnative get-object CommonsBase_GNU.Bison@3.8.2 -s Release.execution_abi -d :)${/}share${/}bison)",
+                    // add Bison including its required share/bison/m4sugar/m4sugar.m4 support file
+                    "+BISON=$(--path=absnative get-object CommonsBase_GNU.Bison@3.8.2 -s Release.execution_abi -e bin/bison -d :)${/}bin${/}bison",
                     // add LLVM-MinGW toolchain for PE cross-compilation
                     "<PATH=$(get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.execution_abi -d : -e 'bin/*')${/}bin"
                 ],
