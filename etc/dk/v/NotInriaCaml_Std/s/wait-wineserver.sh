@@ -26,15 +26,35 @@ set -euf
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ##
 
-# Loop no more than 10 times
+usage() {
+    echo "Usage: wait-wineserver.sh [--max-seconds N]" >&2
+    exit 1
+}
+
+_maxsecs=10
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --max-seconds)
+            _maxsecs="$2"
+            shift 2
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+# Loop no more than _maxsecs times
 i=0
-while pgrep -x wineserver && [ $i -lt 10 ]; do
+while pgrep -x wineserver && [ $i -lt "$_maxsecs" ]; do
     sleep 1
     i=$((i + 1))
 done
 
-# If exceeds 10 times then fail.
+# If exceeds _maxsecs times then fail.
 if pgrep -x wineserver; then
-    echo 'FATAL: wineserver still running after 10 seconds'
+    echo "Processes with 'wine' in the name:" >&2
+    pgrep -f -l wine >&2
+    echo "FATAL: wineserver still running after $_maxsecs seconds" >&2
     exit 1
 fi

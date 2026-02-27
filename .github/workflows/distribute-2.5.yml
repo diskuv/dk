@@ -718,9 +718,6 @@ jobs:
                 echo delete dependencies ...; for d in $DEPENDENCIES; do rm -vrf etc/dk/v/$d.*.values.json* etc/dk/v/$d/*.values.json*; done
                 echo final imports ...; find etc/dk/i -type f
 
-                ls -l etc/dk/v/NotInriaCaml_Std/s
-                shasum -a 256 etc/dk/v/NotInriaCaml_Std/s/* | sort -k2
-
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
               with:
