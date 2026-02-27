@@ -98,6 +98,9 @@
                         //   00fc:err:ntoskrnl:ZwLoadDriver failed to create driver L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\winebth": c00000e5
                         //"--disable-winebth_sys"
 
+                        //   --without-x (undocumented; do not build the X11 driver; ex. lib/wine/i386-windows/winex11.drv)
+
+
                     // MACOS
                     // =====
                     // References: https://github.com/Gcenx/macOS_Wine_builds?tab=readme-ov-file#configure-options
@@ -139,6 +142,7 @@
                         "--disable-tests",
                         "--disable-winebth_sys",
                         "--enable-archs=i386,x86_64",
+                        "--without-x",
                         "--without-alsa",
                         "--without-capi",
                         "--without-coreaudio",
@@ -195,6 +199,7 @@
                         "--disable-tests",
                         "--disable-winebth_sys",
                         "--enable-archs=i386,x86_64",
+                        "--without-x",
                         "--without-alsa",
                         "--without-capi",
                         "--without-coreaudio",
@@ -2106,7 +2111,6 @@
                             "lib/wine/aarch64-windows/libd3dx10_39.a",
                             "lib/wine/aarch64-windows/packager.dll",
                             "lib/wine/aarch64-windows/t2embed.dll",
-                            "lib/wine/aarch64-windows/winex11.drv",
                             "lib/wine/aarch64-windows/updspapi.dll",
                             "lib/wine/aarch64-windows/libspoolss.a",
                             "lib/wine/aarch64-windows/mshtml.tlb",
@@ -3804,7 +3808,6 @@
                             "lib/wine/aarch64-windows/winepath.exe",
                             "lib/wine/aarch64-windows/wineps.drv",
                             "lib/wine/aarch64-windows/winevulkan.dll",
-                            "lib/wine/aarch64-windows/winex11.drv",
                             "lib/wine/aarch64-windows/winexinput.sys",
                             "lib/wine/aarch64-windows/wing32.dll",
                             "lib/wine/aarch64-windows/winhlp32.exe",
@@ -4872,7 +4875,6 @@
                             "lib/wine/i386-windows/wineps16.drv16",
                             "lib/wine/i386-windows/winevdm.exe",
                             "lib/wine/i386-windows/winevulkan.dll",
-                            "lib/wine/i386-windows/winex11.drv",
                             "lib/wine/i386-windows/winexinput.sys",
                             "lib/wine/i386-windows/wing.dll16",
                             "lib/wine/i386-windows/wing32.dll",
@@ -5915,7 +5917,6 @@
                             "lib/wine/x86_64-windows/winepath.exe",
                             "lib/wine/x86_64-windows/wineps.drv",
                             "lib/wine/x86_64-windows/winevulkan.dll",
-                            "lib/wine/x86_64-windows/winex11.drv",
                             "lib/wine/x86_64-windows/winexinput.sys",
                             "lib/wine/x86_64-windows/wing32.dll",
                             "lib/wine/x86_64-windows/winhlp32.exe",
