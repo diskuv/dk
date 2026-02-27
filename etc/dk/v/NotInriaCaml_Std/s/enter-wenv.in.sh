@@ -18,6 +18,7 @@ fi
 WINEDEBUG=${WINEDEBUG:-"-vulkan,fixme-file"}
 
 exec '@WINEHOME@/bin/enter-wine.sh' \
+    --winehome '@WINEHOME@' \
     --gnutls-libdir '@GNUTLS_LIBDIR@' \
     --inotify-libdir '@INOTIFY_LIBDIR@' \
     --krb5-libdir '@KRB5_LIBDIR@' \

@@ -85,7 +85,8 @@ function uirules.Create(command, request)
         p.outputid = "OurCaml_Wenv." .. request.rule.generatesymbol() .. "@1.0.0"
         p.fdexe = "$(get-object CommonsBase_Std.Fd@10.3.0 -s Release.execution_abi -m ./fd.exe -e '*' -f fd.exe)"
         p.coreutilsexe = "$(get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.execution_abi -m ./coreutils.exe -e '*' -f coreutils.exe)"
-        p.enterwine = "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh"
+        p.winehome = "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')"
+        p.enterwine = p.winehome .. "${/}bin${/}enter-wine.sh"
         p.gawkexe = "$(get-object CommonsBase_GNU.Awk@5.3.1 -s Release.execution_abi -d : -e 'bin/*')${/}bin/gawk"
         p.gnutlslib = "$(--path=absnative get-object CommonsBase_GNU.TLS@3.8.12 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib"
         p.inotifylib = "$(--path=absnative get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib"
@@ -94,7 +95,7 @@ function uirules.Create(command, request)
         local commands = {
             -- Do wineboot --init
             {
-                "/bin/sh", p.enterwine, "--gnutls-libdir", p.gnutlslib, "--inotify-libdir", p.inotifylib, "--krb5-libdir", p.krb5lib,
+                "/bin/sh", p.enterwine, "--winehome", p.winehome, "--gnutls-libdir", p.gnutlslib, "--inotify-libdir", p.inotifylib, "--krb5-libdir", p.krb5lib,
                 "--init", p.wenv
             },
 
@@ -134,7 +135,7 @@ function uirules.Create(command, request)
 
             -- PATH: add cygpath, OCaml and w64devkit
             {
-                "/bin/sh", p.enterwine, "--gnutls-libdir", p.gnutlslib, "--inotify-libdir", p.inotifylib, "--krb5-libdir", p.krb5lib,
+                "/bin/sh", p.enterwine, "--winehome", p.winehome, "--gnutls-libdir", p.gnutlslib, "--inotify-libdir", p.inotifylib, "--krb5-libdir", p.krb5lib,
                 --      add to HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment which is:
                 --          %SystemRoot%\system32;%SystemRoot%;%SystemRoot%\system32\wbem;%SystemRoot%\system32\WindowsPowershell\v1.0
                 p.wenv,

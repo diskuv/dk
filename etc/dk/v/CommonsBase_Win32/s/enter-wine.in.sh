@@ -1,7 +1,7 @@
 #!/bin/sh
 set -euf
-HERE=$(dirname "$0")
-HERE=$(cd "$HERE" && pwd)
+_winehome=$(dirname "$0")
+_winehome=$(cd "$_winehome/.." && pwd)
 
 usage() {
     echo "Usage: enter-wine.sh [--init] WINEPREFIX <Windows command> [args...]"
@@ -15,7 +15,6 @@ usage() {
 
 # Parse options
 _init=false
-_winehome="$HERE"
 _gnutls_libdir='@GNUTLS_LIBDIR@'
 _inotify_libdir='@INOTIFY_LIBDIR@'
 _krb5_libdir='@KRB5_LIBDIR@'
