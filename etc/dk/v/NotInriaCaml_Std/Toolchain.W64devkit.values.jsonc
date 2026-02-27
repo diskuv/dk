@@ -110,6 +110,20 @@
                         "mv", "-n", "s", "${CACHE}/NotInriaCaml_Std.Toolchain.W64devkit@5.4.1/src"
                     ],
 
+                    // TEMPORARY PATCH! Just checking if it works.
+                    // create bin/enter-wine.sh with awk. replace placeholders with real runtime library values
+                    [
+                        "$(get-object CommonsBase_GNU.Awk@5.3.1 -s Release.execution_abi -d : -e 'bin/*')${/}bin/gawk",
+                        "-v", "OUTPUT_FILE=enter-wine-patched.sh",
+                    // removeme WINEHOME
+                        "-v", "WINEHOME=$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')",
+                        "-v", "GNUTLS_LIBDIR=$(--path=absnative get-object CommonsBase_GNU.TLS@3.8.12 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "-v", "INOTIFY_LIBDIR=$(--path=absnative get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "-v", "KRB5_LIBDIR=$(--path=absnative get-object NotMitEdu_Kerberos.V5@1.22.2 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "-f", "$(get-asset NotInriaCaml_Std.Lookup@1.0.0 -p s -m ./enter-wine-patched-mk.awk -f enter-wine-mk.awk)",
+                        "$(get-asset NotInriaCaml_Std.Lookup@1.0.0 -p s -m ./enter-wine-patched.in.sh -f enter-wine.sh)"
+                    ],
+
                     // --- create Wine prefix ---
                     // note: a wineserver is 1-1 with a Wine prefix. it may be started in the background if not already running.
                     [
@@ -120,7 +134,12 @@
                     [
                         //      `enter-wine.sh --init WINEPREFIX`
                         "/bin/sh",
-                        "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        // "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        "enter-wine-patched.sh",
+                        "--gnutls-libdir", "$(--path=absnative get-object CommonsBase_GNU.TLS@3.8.12 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--inotify-libdir", "$(--path=absnative get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--krb5-libdir", "$(--path=absnative get-object NotMitEdu_Kerberos.V5@1.22.2 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+
                         "--init",
                         "${STATEABS}/wineprefixes/NotInriaCaml_Std.Toolchain.W64devkit.${SLOTNAME.request}@5.4.1"
                     ],
@@ -168,7 +187,12 @@
                     [
                         //      `enter-wine.sh WINEPREFIX REG ADD HKEY_CURRENT_USER\Environment ...`
                         "/bin/sh",
-                        "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        // "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        "enter-wine-patched.sh",
+                        "--gnutls-libdir", "$(--path=absnative get-object CommonsBase_GNU.TLS@3.8.12 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--inotify-libdir", "$(--path=absnative get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--krb5-libdir", "$(--path=absnative get-object NotMitEdu_Kerberos.V5@1.22.2 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+
                         "${STATEABS}/wineprefixes/NotInriaCaml_Std.Toolchain.W64devkit.${SLOTNAME.request}@5.4.1",
                         //      add to HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment which is:
                         //          %SystemRoot%\system32;%SystemRoot%;%SystemRoot%\system32\wbem;%SystemRoot%\system32\WindowsPowershell\v1.0
@@ -187,7 +211,12 @@
                     //  [Darwin_arm64.Windows_x86_64]
                     [
                         "/bin/sh",
-                        "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        // "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        "enter-wine-patched.sh",
+                        "--gnutls-libdir", "$(--path=absnative get-object CommonsBase_GNU.TLS@3.8.12 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--inotify-libdir", "$(--path=absnative get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--krb5-libdir", "$(--path=absnative get-object NotMitEdu_Kerberos.V5@1.22.2 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+
                         "${STATEABS}/wineprefixes/NotInriaCaml_Std.Toolchain.W64devkit.Release.Darwin_arm64.Windows_x86_64@5.4.1",
                         "sh.exe", "-l", "c:/src/NotInriaCaml_Std/w64devkit/5.4.1/bin/cdsrc.sh",
                         "./configure",
@@ -201,7 +230,12 @@
                     //  [Darwin_x86_64.Windows_x86_64]
                     [
                         "/bin/sh",
-                        "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        // "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        "enter-wine-patched.sh",
+                        "--gnutls-libdir", "$(--path=absnative get-object CommonsBase_GNU.TLS@3.8.12 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--inotify-libdir", "$(--path=absnative get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--krb5-libdir", "$(--path=absnative get-object NotMitEdu_Kerberos.V5@1.22.2 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+
                         "${STATEABS}/wineprefixes/NotInriaCaml_Std.Toolchain.W64devkit.Release.Darwin_x86_64.Windows_x86_64@5.4.1",
                         "sh.exe", "-l", "c:/src/NotInriaCaml_Std/w64devkit/5.4.1/bin/cdsrc.sh",
                         "./configure",
@@ -220,7 +254,12 @@
                         "env", "--chdir", "${CACHE}/NotInriaCaml_Std.Toolchain.W64devkit@5.4.1/src",
                         //      `enter-wine.sh WINEPREFIX sh.exe -l cdsrc.sh ./config.status`
                         "/bin/sh",
-                        "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        // "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        "enter-wine-patched.sh",
+                        "--gnutls-libdir", "$(--path=absnative get-object CommonsBase_GNU.TLS@3.8.12 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--inotify-libdir", "$(--path=absnative get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--krb5-libdir", "$(--path=absnative get-object NotMitEdu_Kerberos.V5@1.22.2 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+
                         "${STATEABS}/wineprefixes/NotInriaCaml_Std.Toolchain.W64devkit.${SLOTNAME.request}@5.4.1",
                         "sh.exe", "-l", "c:/src/NotInriaCaml_Std/w64devkit/5.4.1/bin/cdsrc.sh",
                         "./config.status",
@@ -239,7 +278,12 @@
                         "env", "--chdir", "${STATEABS}/wineprefixes/NotInriaCaml_Std.Toolchain.W64devkit.${SLOTNAME.request}@5.4.1/drive_c/src/NotInriaCaml_Std/w64devkit/5.4.1/src",
                         //      `enter-wine.sh WINEPREFIX sh.exe -l cdsrc.sh make.exe`
                         "/bin/sh",
-                        "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        // "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        "enter-wine-patched.sh",
+                        "--gnutls-libdir", "$(--path=absnative get-object CommonsBase_GNU.TLS@3.8.12 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--inotify-libdir", "$(--path=absnative get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--krb5-libdir", "$(--path=absnative get-object NotMitEdu_Kerberos.V5@1.22.2 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+
                         "${STATEABS}/wineprefixes/NotInriaCaml_Std.Toolchain.W64devkit.${SLOTNAME.request}@5.4.1",
                         "sh.exe", "-l", "c:/src/NotInriaCaml_Std/w64devkit/5.4.1/bin/cdsrc.sh",
                         "make.exe",
@@ -252,7 +296,12 @@
                     [
                         //      `enter-wine.sh WINEPREFIX sh.exe -l cdsrc.sh make.exe install`
                         "/bin/sh",
-                        "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        // "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh",
+                        "enter-wine-patched.sh",
+                        "--gnutls-libdir", "$(--path=absnative get-object CommonsBase_GNU.TLS@3.8.12 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--inotify-libdir", "$(--path=absnative get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+                        "--krb5-libdir", "$(--path=absnative get-object NotMitEdu_Kerberos.V5@1.22.2 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib",
+
                         "${STATEABS}/wineprefixes/NotInriaCaml_Std.Toolchain.W64devkit.${SLOTNAME.request}@5.4.1",
                         "sh.exe", "-l", "c:/src/NotInriaCaml_Std/w64devkit/5.4.1/bin/cdsrc.sh",
                         "make.exe", "'LN=cp -pf'", "install"
