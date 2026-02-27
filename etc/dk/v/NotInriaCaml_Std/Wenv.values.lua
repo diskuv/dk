@@ -87,11 +87,14 @@ function uirules.Create(command, request)
         p.coreutilsexe = "$(get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.execution_abi -m ./coreutils.exe -e '*' -f coreutils.exe)"
         p.enterwine = "$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')${/}bin${/}enter-wine.sh"
         p.gawkexe = "$(get-object CommonsBase_GNU.Awk@5.3.1 -s Release.execution_abi -d : -e 'bin/*')${/}bin/gawk"
+        p.gnutlslib = "$(--path=absnative get-object CommonsBase_GNU.TLS@3.8.12 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib"
+        p.inotifylib = "$(--path=absnative get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib"
+        p.krb5lib = "$(--path=absnative get-object NotMitEdu_Kerberos.V5@1.22.2 -s $(get-asset CommonsBase_Win32.Lookup@1.0.0 -p winerunlib-slot -m ./${SLOTNAME.Release.execution_abi}) -d :)${/}lib"
 
         local commands = {
             -- Do wineboot --init
             {
-                "/bin/sh", p.enterwine,
+                "/bin/sh", p.enterwine, "--gnutls-libdir", p.gnutlslib, "--inotify-libdir", p.inotifylib, "--krb5-libdir", p.krb5lib,
                 "--init", p.wenv
             },
 
@@ -131,7 +134,7 @@ function uirules.Create(command, request)
 
             -- PATH: add cygpath, OCaml and w64devkit
             {
-                "/bin/sh", p.enterwine,
+                "/bin/sh", p.enterwine, "--gnutls-libdir", p.gnutlslib, "--inotify-libdir", p.inotifylib, "--krb5-libdir", p.krb5lib,
                 --      add to HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment which is:
                 --          %SystemRoot%\system32;%SystemRoot%;%SystemRoot%\system32\wbem;%SystemRoot%\system32\WindowsPowershell\v1.0
                 p.wenv,
@@ -163,6 +166,9 @@ function uirules.Create(command, request)
                 "-v", "OUTPUT_FILE=" .. p.wenv .. "/bin/enter",
                 "-v", "WINEHOME=$(--path=absnative get-object CommonsBase_Win32.Wine@11.2.0 -s ${SLOTNAME.Release.execution_abi} -d : -e 'bin/*' -e 'lib/wine/*/*')",
                 "-v", "WINEPREFIX=" .. p.wenv,
+                "-v", "GNUTLS_LIBDIR=" .. p.gnutlslib,
+                "-v", "INOTIFY_LIBDIR=" .. p.inotifylib,
+                "-v", "KRB5_LIBDIR=" .. p.krb5lib,
                 "-f", "$(get-asset NotInriaCaml_Std.Lookup@1.0.0 -p s -m ./enter-wenv-mk.awk -f enter-wenv-mk.awk)",
                 "$(get-asset NotInriaCaml_Std.Lookup@1.0.0 -p s -m ./enter-wenv.in.sh -f enter-wenv.sh)"
             },

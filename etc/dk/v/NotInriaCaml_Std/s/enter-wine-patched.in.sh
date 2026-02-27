@@ -35,9 +35,6 @@ while [ "$#" -gt 0 ]; do
             _krb5_libdir="$2"
             shift 2
             ;;
-        --help)
-            usage
-            ;;
         *)
             break
             ;;
