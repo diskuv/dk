@@ -6,28 +6,24 @@ HERE=$(cd "$HERE" && pwd)
 usage() {
     echo "Usage: enter-wine.sh [--init] WINEPREFIX <Windows command> [args...]"
     echo "  --init: initialize the Wine prefix with 'wineboot --init'"
-    echo "  --winehome DIR: set the path for Wine installation. default assumes this script is <winehome>/bin/enter-wine.sh"
     echo "  --gnutls-libdir DIR: set the path for gnutls libraries. default is from build machine"
     echo "  --inotify-libdir DIR: set the path for inotify libraries. default is from build machine"
     echo "  --krb5-libdir DIR: set the path for krb5 libraries. default is from build machine"
+    echo "  --winehome DIR: set the path for Wine installation. default assumes this script is <winehome>/bin/enter-wine.sh"
     exit 1
 }
 
 # Parse options
 _init=false
-_winehome="$HERE"
 _gnutls_libdir='@GNUTLS_LIBDIR@'
 _inotify_libdir='@INOTIFY_LIBDIR@'
 _krb5_libdir='@KRB5_LIBDIR@'
+_winehome='@WINEHOME@'
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --init)
             _init=true
             shift
-            ;;
-        --winehome)
-            _winehome="$2"
-            shift 2
             ;;
         --gnutls-libdir)
             _gnutls_libdir="$2"
@@ -41,8 +37,9 @@ while [ "$#" -gt 0 ]; do
             _krb5_libdir="$2"
             shift 2
             ;;
-        --help)
-            usage
+        --winehome)
+            _winehome="$2"
+            shift 2
             ;;
         *)
             break

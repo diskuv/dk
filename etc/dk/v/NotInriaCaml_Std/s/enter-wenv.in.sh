@@ -17,4 +17,8 @@ fi
 # Set defaults for Wine debug messages. Exclude fixme:file
 WINEDEBUG=${WINEDEBUG:-"-vulkan,fixme-file"}
 
-exec '@WINEHOME@/bin/enter-wine.sh' '@WINEPREFIX@' "$@"
+exec '@WINEHOME@/bin/enter-wine.sh' \
+    --gnutls-libdir '@GNUTLS_LIBDIR@' \
+    --inotify-libdir '@INOTIFY_LIBDIR@' \
+    --krb5-libdir '@KRB5_LIBDIR@' \
+    '@WINEPREFIX@' "$@"
