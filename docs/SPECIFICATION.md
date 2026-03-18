@@ -171,6 +171,14 @@
       - [table.pack](#tablepack)
       - [table.remove](#tableremove)
       - [table.unpack](#tableunpack)
+    - [Lua unified library](#lua-unified-library)
+      - [unified.sections](#unifiedsections)
+      - [unified.scriptmodver](#unifiedscriptmodver)
+      - [unified.asset](#unifiedasset)
+      - [unified.envmod](#unifiedenvmod)
+      - [unified.output](#unifiedoutput)
+      - [unified.assign](#unifiedassign)
+      - [unified package target](#unified-package-target)
     - [Custom Lua Modules](#custom-lua-modules)
     - [Introduction to Custom Lua Rules](#introduction-to-custom-lua-rules)
     - [Free Rule Functions](#free-rule-functions)
@@ -3195,6 +3203,298 @@ Returns the elements from the given list. This function is equivalent to
 ```
 
 By default, `i` is 1 and `j` is #list.
+
+### Lua unified library
+
+This library provides the functions available to unified scripts.
+
+Library functions commonly return a *printer type constant* as their first
+return value. That constant helps text or graphical user interfaces decide
+how to print the remaining return values.
+
+#### unified.sections
+
+```shell
+# A literate script example - optional, ignored
+## OurLibrary_Std.A.B.C@1.0.0
+
+% return unified.sections()
+sections
+A literate script example - optional, ignored
+OurLibrary_Std.A.B.C
+```
+
+`unified.sections()` is the printer type constant `section` followed by the ATX headers.
+
+#### unified.scriptmodver
+
+```shell
+# A literate script example - optional, ignored
+## OurLibrary_Std.A.B.C@1.0.0
+
+% return unified.scriptmodver()
+modver
+OurLibrary_Std.A.B.C
+1.0.0
+```
+
+`scriptmodver` (the script module version) is three values:
+
+1. The printer type constant `modver`.
+2. The identifier for the script. Example: `OurLibrary_Std.A.B.C`
+3. The version of the script. Example: `1.0.0`
+
+The script module version comes from the previous level 2 ATX header:
+
+```markdown
+# A literate script example - optional, ignored
+
+## OurLibrary_Std.A.B.C@1.0.0
+
+... more of the unified script
+
+## OurLibrary_Std.D.E.F@2.0.0
+
+... more of the script that belongs to
+... another package in the same library
+```
+
+The first word in the level 2 ATX header that is a valid `MODULE@VERSION` becomes the `scriptmodver`.
+
+If there is no valid `MODULE@VERSION` then `scriptmodver` will be the values `nil` and an error message.
+
+#### unified.asset
+
+```shell
+# A literate script example - optional, ignored
+## OurLibrary_Std.A.B.C@1.0.0
+
+% return unified.asset { name="GawkTarball", file="data/gawk-5.3.1.tar.gz" }
+asset
+6264553
+sha256
+fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e
+
+% return unified.asset { name="GawkShare", dir="usr/share/gawk" }
+asset
+123456
+sha256
+0000003812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904
+```
+
+`unified.asset` loads the local file or directory, and makes a singleton bundle from the asset. The local file or directory must be strictly relative (ie. not an absolute path and no `..` path segments).
+
+- `name` must be a standard namespace term (ie. begins with a capital letter)
+- the bundle id is `<scriptid>.<name>@<scriptver>` where `scriptid` and `scriptver` are from [unified.scriptmodver](#unifiedscriptmodver)
+- the origin is named the library id of `scriptid` (ex. `OurLibrary_Std` if `scriptid = OurLibrary_Std.A.B.C`) and has mirrors set to the library cell (ex. `cell://OurLibrary_Std`).
+  - The `dk0` reference implementation sets the library cell to the **parent** directory of the unified script while the unified script is evaluated.
+  - The `dk0` reference implementation also has a `dk0 combine` command that can adjust the mirrors permanently during distribution.
+
+Returns `nil` and an error message, or four values:
+
+1. The printer type constant `asset`.
+2. The size of the asset. Example: `6264553`
+3. The comma-separated checksum types. Example: `sha256,sha1`
+4. The comma-separated checksum values. Example: `fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e,99baee504a1fe91a07bc66b6900bd39874191889`
+
+The singleton bundle in the above example would be:
+
+```json
+{
+    "id": "OurLibrary_Std.A.B.C.GawkShare@1.0.0",
+    "listing": {
+        "origins": [
+            {
+                "name": "OurLibrary_Std",
+                "mirrors": [
+                    "cell://OurLibrary_Std"
+                ]
+            }
+        ]
+    },
+    "assets": [
+        {
+            "origin": "OurLibrary_Std",
+            "path": "data/gawk-5.3.1.tar.gz",
+            "checksum": {
+                "sha256": "fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e"
+            },
+            "size": 6264553
+        }
+    ]
+}
+```
+
+#### unified.envmod
+
+**Not implemented yet.**
+
+```shell
+# A literate script example - optional, ignored
+## OurLibrary_Std.A.B.C@1.0.0
+### function!
+
+% unified.envmod "+YACC=$(get-object CommonsBase_GNU.Bison@3.8.2
+          -s Release.execution_abi -m ./bin/yacc -e bin/yacc -f yacc)"
+```
+
+`unified.envmod` adds an [environment modification](#environment-modifications) to the
+function `OurLibrary_Std.A.B.C.Fx@1.0.0` (the first valid word in the previous level 2 ATX header, with `Fx` added).
+
+The level 3 ATX header must be `function!`.
+
+#### unified.output
+
+**Not implemented yet.**
+
+```shell
+# A literate script example - optional, ignored
+## OurLibrary_Std.A.B.C@1.0.0
+### function!
+
+% unified.output
+[Release.Darwin_Arm64 Release.Darwin_x86_64 Release.Windows_x86_64]
+include/gawkapi.h
+
+[Release.Darwin_Arm64 Release.Darwin_x86_64]
+bin/awk bin/gawk "etc/profile.d/gawk.sh"
+"lib/gawk/time.so" "libexec/awk/grcat"
+
+[Release.Windows_x86_64]
+bin/awk.exe bin/gawk.exe "lib/gawk/time.dll"
+```
+
+`unified.output` defines the files that will be generated in the slot directores by the
+function `OurLibrary_Std.A.B.C.Fx@1.0.0` (the first valid word in the previous level 2 ATX header, with `Fx` added).
+
+The example above would be the equivalent of the [form output](#frm---form) in JSON:
+
+```json
+"assets": [
+  {
+    "slots": [
+      "Release.Darwin_arm64", "Release.Darwin_x86_64",
+      "Release.Windows_x86_64"
+    ],
+    "paths": [
+      "include/gawkapi.h"
+    ]
+  },
+  {
+    "slots": [
+      "Release.Darwin_arm64", "Release.Darwin_x86_64"
+    ],
+    "paths": [
+      "bin/awk", "bin/gawk",
+      "etc/profile.d/gawk.sh",
+      "lib/gawk/time.so", "libexec/awk/grcat"
+    ]
+  },
+  {
+    "slots": [
+      "Release.Windows_x86_64"
+    ],
+    "paths": [
+      "bin/awk.exe", "bin/gawk.exe",
+      "lib/gawk/time.dll"
+    ]
+  }
+]
+```
+
+The level 3 ATX header must be `function!`.
+
+The shell output is the list of files. That is, the `output`
+function slurps (reads all of) the shell output, partitions the output
+based on `[Slot1 ... SlotN]` sections, and then splits each section into
+whitespace separated words.
+
+Double quotes are required for any filename that has either whitespace or a
+double quote. An embedded double quote must be escaped with a second double
+quote. That is, `"there is a middle "" double quote"` is the filename
+`there is a middle " double quote`.
+
+The return values are either a `nil` and an error message, or the values:
+
+1. The printer type constant `outputpaths`.
+2. A table whose keys are the slots and whose values are path lists. The key is a lexographically ordered list of slots (ex. `{"Release.Darwin_arm64", "Release.Darwin_x86_64"}`). The value is a path list (ex. `{"bin/awk", "bin/gawk"}`).
+
+#### unified.assign
+
+**Not implemented yet.**
+
+```shell
+# A literate script example - optional, ignored
+## recipes!
+% unified.assign { "coreutils",
+    "$(get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.Windows_x86_64 -m ./coreutils.exe -f : -e '*')"
+  }
+VAR:coreutils:=...
+```
+
+`unified.assign { "xyz": "a-value" }` sets the variable `xyz` to the value `a-value`
+such that in subsequent shell commands in the `recipes!` section like:
+
+```shell
+## recipes!
+...
+### print-value
+Prints the value of xyz
+$ echo The value is ${VAR:xyz}.
+The value is a-value.
+```
+
+the `${VAR:xyz}` expands to `a-value`.
+
+The level 2 ATX header must be `recipes!`.
+
+#### unified package target
+
+**Not implemented yet.**
+
+```shell
+# A literate script example - optional, ignored
+## OurTargets_Std.TheName@0.1.0
+### targets!
+% local ml = require("NotInriaCaml_Std.Build").at("1.0.0")
+NotInriaCaml_Std.Build@1.0.0
+% ml.jsonschema["library"]
+url
+https://www.schemastore.org/ocaml-library.json
+% ml.library { name="something", ... }
+```
+
+The `ml.library { name="something", ... }` is interpreted as:
+
+```lua
+ml.target_library(command, request, continue_)
+```
+
+The `.target_library` behaves just like a [Free Rule Function](#free-rule-functions)
+except it does not need to be attached to "rules" in `rules, uirules = build.newrules(M)`.
+
+The initial `command` is `submit` and the initial `request` is the table:
+
+```lua
+{
+  user = {
+    context = {
+      sections={ "A literate script example", "OurTargets_Std.TheName@0.1.0", "targets!"},
+      targetid="OurTargets_Std.TheName",
+      targetver="0.1.0"
+    },
+    doc = { name="something", ... }
+  }
+}
+```
+
+If `.jsonschema` is present and the build implementation supports it, the
+inputs to the action (ex. `.library`) will be validated during interpretation with the
+JSON schema `.jsonschema["library"]`. The first return value is either `url` or `inline`.
+
+If `.luadefinition` is present and the build implementation supports it, an
+IDE (ex. a Visual Studio Code extension based on Markdown Language Server and
+Lua Language Server) can load `.luadefinition` into a [Lua .d.lua definition file](https://luals.github.io/wiki/definition-files/) to provide auto-complete.
 
 ### Custom Lua Modules
 
