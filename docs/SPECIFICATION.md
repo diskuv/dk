@@ -179,6 +179,9 @@
       - [unified.output](#unifiedoutput)
       - [unified.assign](#unifiedassign)
       - [unified package target](#unified-package-target)
+    - [Lua workspace globals](#lua-workspace-globals)
+      - [import](#import)
+        - [import type=github-l2](#import-typegithub-l2)
     - [Custom Lua Modules](#custom-lua-modules)
     - [Introduction to Custom Lua Rules](#introduction-to-custom-lua-rules)
     - [Free Rule Functions](#free-rule-functions)
@@ -3208,7 +3211,7 @@ By default, `i` is 1 and `j` is #list.
 
 This library provides the functions available to unified scripts.
 
-Library functions commonly return a *printer type constant* as their first
+Library functions return a *printer type constant* as their first
 return value. That constant helps text or graphical user interfaces decide
 how to print the remaining return values.
 
@@ -3218,13 +3221,13 @@ how to print the remaining return values.
 # A literate script example - optional, ignored
 ## OurLibrary_Std.A.B.C@1.0.0
 
-% return unified.sections()
+% unified.sections {}
 sections
 A literate script example - optional, ignored
 OurLibrary_Std.A.B.C
 ```
 
-`unified.sections()` is the printer type constant `section` followed by the ATX headers.
+`unified.sections {}` is the printer type constant `section` followed by the ATX headers.
 
 #### unified.scriptmodver
 
@@ -3232,7 +3235,7 @@ OurLibrary_Std.A.B.C
 # A literate script example - optional, ignored
 ## OurLibrary_Std.A.B.C@1.0.0
 
-% return unified.scriptmodver()
+% unified.scriptmodver {}
 modver
 OurLibrary_Std.A.B.C
 1.0.0
@@ -3269,17 +3272,15 @@ If there is no valid `MODULE@VERSION` then `scriptmodver` will be the values `ni
 # A literate script example - optional, ignored
 ## OurLibrary_Std.A.B.C@1.0.0
 
-% return unified.asset { name="GawkTarball", file="data/gawk-5.3.1.tar.gz" }
+% unified.asset { name="GawkTarball", file="data/gawk-5.3.1.tar.gz" }
 asset
 6264553
-sha256
-fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e
+sha256:fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e
 
-% return unified.asset { name="GawkShare", dir="usr/share/gawk" }
+% unified.asset { name="GawkShare", dir="usr/share/gawk" }
 asset
 123456
-sha256
-0000003812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904
+sha256:0000003812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904
 ```
 
 `unified.asset` loads the local file or directory, and makes a singleton bundle from the asset. The local file or directory must be strictly relative (ie. not an absolute path and no `..` path segments).
@@ -3294,8 +3295,7 @@ Returns `nil` and an error message, or four values:
 
 1. The printer type constant `asset`.
 2. The size of the asset. Example: `6264553`
-3. The comma-separated checksum types. Example: `sha256,sha1`
-4. The comma-separated checksum values. Example: `fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e,99baee504a1fe91a07bc66b6900bd39874191889`
+3. Comma-separated checksums of the asset. Example: `sha256:fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e,sha1:99baee504a1fe91a07bc66b6900bd39874191889`
 
 The singleton bundle in the above example would be:
 
@@ -3352,7 +3352,7 @@ The level 3 ATX header must be `function!`.
 ## OurLibrary_Std.A.B.C@1.0.0
 ### function!
 
-% unified.output
+% unified.output {}
 [Release.Darwin_Arm64 Release.Darwin_x86_64 Release.Windows_x86_64]
 include/gawkapi.h
 
@@ -3495,6 +3495,76 @@ JSON schema `.jsonschema["library"]`. The first return value is either `url` or 
 If `.luadefinition` is present and the build implementation supports it, an
 IDE (ex. a Visual Studio Code extension based on Markdown Language Server and
 Lua Language Server) can load `.luadefinition` into a [Lua .d.lua definition file](https://luals.github.io/wiki/definition-files/) to provide auto-complete.
+
+### Lua workspace globals
+
+Global functions are available to unified scripts in the `workspace` section.
+
+These functions return a *printer type constant* as their first
+return value. That constant helps text or graphical user interfaces decide
+how to print the remaining return values.
+
+#### import
+
+Imports a distribution.
+
+```shell
+## workspace
+
+  %% import {
+  ..   type="TYPE",
+  ..   ... depends on TYPE ... }
+  CommonsBase_Std@2.5.202603190707
+  sha256:356fba5a3dd6f47669f4c26c9edff678319dfd294dced95db4e420e2867786fe
+```
+
+The `import` will:
+
+- download the distribution metadata
+- validate the metadata
+- place distribution metadata in the trace store (deprecated; <https://github.com/diskuv/dk/issues/101>)
+- place distribution metadata in the source tree (the `dk0` reference implementation uses `<workspace>/etc/dk/i/<LIBRARY>-<VERSION>.values.json`)
+
+The return values are either `nil` and an error message, or the two values:
+
+1. comma-separated list of versioned libraries that were distributed
+in the GitHub release
+2. comma-separated list of checksums of the distribution metadata (`.../<LIBRARY>-<VERSION>.values.json`)
+
+However, *if* there is existing output (ie. `CommonsBase_Std@2.5.202603190707`)
+and *all* of the comma-separated `LIBRARY@VERSION` are present in the trace store or source tree,
+then the import command is skipped.
+
+> 📢 The imports `LIBRARY@VERSION` outputs in the workspace section, along with the distribution metadata in the source tree, behave like lock files in package managers like `npm` and `cargo`.
+
+The `dk0` reference implementation will also place:
+
+1. *lazy* value files in the value store by default to avoid the time and space to download
+   every binary artifact from the distribution
+
+##### import type=github-l2
+
+Imports a distribution from a GitHub release.
+
+```shell
+## workspace
+
+  %% import {
+  ..   type="github-l2",
+  ..   repo="OWNER/REPO",
+  ..   host="", 
+  ..   tag="" }
+  CommonsBase_Std@2.5.202603190707
+```
+
+`host` defaults to `github.com`.
+`tag`, if unspecified, is the latest release tag.
+
+`github-l2` will validate the release using GitHub's SLSA Level 2 attestations.
+
+The `dk0` reference implementation will download an internal copy of the GitHub CLI
+and use GitHub CLI to perform downloads from GitHub releases and validate
+attestations.
 
 ### Custom Lua Modules
 
