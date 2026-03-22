@@ -3222,9 +3222,9 @@ how to print the remaining return values.
 ## OurLibrary_Std.A.B.C@1.0.0
 
 % unified.sections {}
-sections
-A literate script example - optional, ignored
-OurLibrary_Std.A.B.C
+'sections'
+'A literate script example - optional, ignored'
+'OurLibrary_Std.A.B.C'
 ```
 
 `unified.sections {}` is the printer type constant `section` followed by the ATX headers.
@@ -3236,9 +3236,9 @@ OurLibrary_Std.A.B.C
 ## OurLibrary_Std.A.B.C@1.0.0
 
 % unified.scriptmodver {}
-modver
-OurLibrary_Std.A.B.C
-1.0.0
+'modver'
+'OurLibrary_Std.A.B.C'
+'1.0.0'
 ```
 
 `scriptmodver` (the script module version) is three values:
@@ -3273,14 +3273,16 @@ If there is no valid `MODULE@VERSION` then `scriptmodver` will be the values `ni
 ## OurLibrary_Std.A.B.C@1.0.0
 
 % unified.asset { name="GawkTarball", file="data/gawk-5.3.1.tar.gz" }
-asset
-6264553
-sha256:fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e
+'asset'
+'6264553'
+{ 'sha256:fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e',
+  'sha1:b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49' }
 
 % unified.asset { name="GawkShare", dir="usr/share/gawk" }
-asset
-123456
-sha256:0000003812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904
+'asset'
+'123456'
+{ 'sha256:0000003812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904',
+  'sha1:99baee504a1fe91a07bc66b6900bd39874191889' }
 ```
 
 `unified.asset` loads the local file or directory, and makes a singleton bundle from the asset. The local file or directory must be strictly relative (ie. not an absolute path and no `..` path segments).
@@ -3291,11 +3293,11 @@ sha256:0000003812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904
   - The `dk0` reference implementation sets the library cell to the **parent** directory of the unified script while the unified script is evaluated.
   - The `dk0` reference implementation also has a `dk0 combine` command that can adjust the mirrors permanently during distribution.
 
-Returns `nil` and an error message, or four values:
+Returns `nil` and an error message, or three values:
 
 1. The printer type constant `asset`.
-2. The size of the asset. Example: `6264553`
-3. Comma-separated checksums of the asset. Example: `sha256:fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e,sha1:99baee504a1fe91a07bc66b6900bd39874191889`
+2. The size of the asset.
+3. A numbered table of the checksums.
 
 The singleton bundle in the above example would be:
 
@@ -3514,8 +3516,11 @@ Imports a distribution.
   %% import {
   ..   type="TYPE",
   ..   ... depends on TYPE ... }
-  CommonsBase_Std@2.5.202603190707
-  sha256:356fba5a3dd6f47669f4c26c9edff678319dfd294dced95db4e420e2867786fe
+  { 'CommonsBase_Std@2.5.202603190707' = {
+      'blake2b-256:9d956430ebb347d46e0037e8094bb92b1fcbfa52603394b643685c40b489f7f0',
+      'sha256:8e37f1d16259b643fbd3ce447d53e97ef321d96555bf9c3ba23a328108848ec6',
+      'sha1:b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49'
+    } }
 ```
 
 The `import` will:
@@ -3525,11 +3530,10 @@ The `import` will:
 - place distribution metadata in the trace store (deprecated; <https://github.com/diskuv/dk/issues/101>)
 - place distribution metadata in the source tree (the `dk0` reference implementation uses `<workspace>/etc/dk/i/<LIBRARY>-<VERSION>.values.json`)
 
-The return values are either `nil` and an error message, or the two values:
+The return values are either `nil` and an error message, or a table value whose:
 
-1. comma-separated list of versioned libraries that were distributed
-in the GitHub release
-2. comma-separated list of checksums of the distribution metadata (`.../<LIBRARY>-<VERSION>.values.json`)
+1. keys are a versioned library that was distributed in the GitHub release
+2. values are a numbered table of the checksums of the distribution metadata (`.../<LIBRARY>-<VERSION>.values.json`)
 
 However, *if* there is existing output (ie. `CommonsBase_Std@2.5.202603190707`)
 and *all* of the comma-separated `LIBRARY@VERSION` are present in the trace store or source tree,
@@ -3554,11 +3558,16 @@ Imports a distribution from a GitHub release.
   ..   repo="OWNER/REPO",
   ..   host="", 
   ..   tag="" }
-  CommonsBase_Std@2.5.202603190707
+  { 'CommonsBase_Std@2.5.202603190707' = {
+      'blake2b-256:9d956430ebb347d46e0037e8094bb92b1fcbfa52603394b643685c40b489f7f0',
+      'sha256:8e37f1d16259b643fbd3ce447d53e97ef321d96555bf9c3ba23a328108848ec6',
+      'sha1:b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49'
+    } }
 ```
 
-`host` defaults to `github.com`.
-`tag`, if unspecified, is the latest release tag.
+- `host` defaults to `github.com`.
+- `repo` are the two URL segments after the host. For example, the `https://github.com/diskuv/dk.git` GitHub project has `repo=diskuv/dk`.
+- `tag`, if unspecified, is the latest release tag.
 
 `github-l2` will validate the release using GitHub's SLSA Level 2 attestations.
 
