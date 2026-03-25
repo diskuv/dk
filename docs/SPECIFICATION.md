@@ -3308,17 +3308,21 @@ If there is no valid `MODULE@VERSION` then `scriptmodver` will be the values `ni
 # A literate script example - optional, ignored
 ## OurLibrary_Std.A.B.C@1.0.0
 
-% unified.asset { name="GawkTarball", file="data/gawk-5.3.1.tar.gz" }
-'asset'
-'6264553'
-{ 'sha256:fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e',
-  'sha1:b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49' }
+Assumes that the script is .../*.u/run.u and that
+.../*.u/data/gawk-5.3.1.tar.gz exists.
+  % unified.asset { name="GawkTarball", file="data/gawk-5.3.1.tar.gz" }
+  'asset'
+  '6264553'
+  { 'sha256:fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e',
+    'sha1:b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49' }
 
-% unified.asset { name="GawkShare", dir="usr/share/gawk" }
-'asset'
-'123456'
-{ 'sha256:0000003812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904',
-  'sha1:99baee504a1fe91a07bc66b6900bd39874191889' }
+Assumes that the script is .../*.u/run.u and that
+.../*.u/user/share/gawk directory exists.
+  % unified.asset { name="GawkShare", dir="usr/share/gawk" }
+  'asset'
+  '123456'
+  { 'sha256:0000003812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904',
+    'sha1:99baee504a1fe91a07bc66b6900bd39874191889' }
 ```
 
 `unified.asset` loads the local file or directory, and makes a singleton bundle from the asset. The local file or directory must be strictly relative (ie. not an absolute path and no `..` path segments).
@@ -3326,7 +3330,7 @@ If there is no valid `MODULE@VERSION` then `scriptmodver` will be the values `ni
 - `name` must be a standard namespace term (ie. begins with a capital letter)
 - the bundle id is `<scriptid>.<name>@<scriptver>` where `scriptid` and `scriptver` are from [unified.scriptmodver](#unifiedscriptmodver)
 - the origin is named the library id of `scriptid` (ex. `OurLibrary_Std` if `scriptid = OurLibrary_Std.A.B.C`) and has mirrors set to the library cell (ex. `cell://OurLibrary_Std`).
-  - The `dk0` reference implementation sets the library cell to the **parent** directory of the unified script while the unified script is evaluated.
+  - The `dk0` reference implementation, when run with a directory-based unified script like `dk0 test unifiedscript.u/`, sets the library cell to the unified script directory while the unified script is evaluated.
   - The `dk0` reference implementation also has a `dk0 combine` command that can adjust the mirrors permanently during distribution.
 
 Returns `nil` and an error message, or three values:
