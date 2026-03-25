@@ -172,6 +172,7 @@
       - [table.remove](#tableremove)
       - [table.unpack](#tableunpack)
     - [Lua unified library](#lua-unified-library)
+      - [unified.existingoutput](#unifiedexistingoutput)
       - [unified.sections](#unifiedsections)
       - [unified.scriptmodver](#unifiedscriptmodver)
       - [unified.asset](#unifiedasset)
@@ -3211,9 +3212,44 @@ By default, `i` is 1 and `j` is #list.
 
 This library provides the functions available to unified scripts.
 
-Library functions return a *printer type constant* as their first
+Almost all library functions return a *type constant* as their first
 return value. That constant helps text or graphical user interfaces decide
 how to print the remaining return values.
+
+#### unified.existingoutput
+
+```shell
+% unified.existingoutput {}
+'whatever is here like this number'
+78
+'is printed again including multiline table constructors like'
+{
+  a=1,
+  b=2
+}
+```
+
+`unified.existingoutput {}` is the contents of the output.
+
+`unified.existingoutput {}`:
+
+- reads the contents of the output as a sequence of Lua values
+- returns the values from each Lua chunk
+
+where each value is subject to the restrictions:
+
+- there is at most one value per line
+- each Lua value must be a data constructor (ie. `nil`, a string, a number or a table constructor)
+
+In the example above, there are four (4) return values. The first is
+a Lua string, the second is a Lua number, the third is a Lua string,
+and the fourth is a Lua table.
+
+Any Lua function can use `unified.existingoutput {}` to have a persistent memory of what
+happened the last time the Lua function was called.
+
+Or any Lua function can use `unified.existingoutput {}` to read what
+was placed manually entered (ex. configuration values) in the output block.
 
 #### unified.sections
 
@@ -3227,7 +3263,7 @@ how to print the remaining return values.
 'OurLibrary_Std.A.B.C'
 ```
 
-`unified.sections {}` is the printer type constant `section` followed by the ATX headers.
+`unified.sections {}` is the type constant `section` followed by the ATX headers.
 
 #### unified.scriptmodver
 
@@ -3243,7 +3279,7 @@ how to print the remaining return values.
 
 `scriptmodver` (the script module version) is three values:
 
-1. The printer type constant `modver`.
+1. The type constant `modver`.
 2. The identifier for the script. Example: `OurLibrary_Std.A.B.C`
 3. The version of the script. Example: `1.0.0`
 
@@ -3295,7 +3331,7 @@ If there is no valid `MODULE@VERSION` then `scriptmodver` will be the values `ni
 
 Returns `nil` and an error message, or three values:
 
-1. The printer type constant `asset`.
+1. The type constant `asset`.
 2. The size of the asset.
 3. A numbered table of the checksums.
 
@@ -3418,7 +3454,7 @@ quote. That is, `"there is a middle "" double quote"` is the filename
 
 The return values are either a `nil` and an error message, or the values:
 
-1. The printer type constant `outputpaths`.
+1. The type constant `outputpaths`.
 2. A table whose keys are the slots and whose values are path lists. The key is a lexographically ordered list of slots (ex. `{"Release.Darwin_arm64", "Release.Darwin_x86_64"}`). The value is a path list (ex. `{"bin/awk", "bin/gawk"}`).
 
 #### unified.assign
@@ -3502,7 +3538,7 @@ Lua Language Server) can load `.luadefinition` into a [Lua .d.lua definition fil
 
 Global functions are available to unified scripts in the `workspace` section.
 
-These functions return a *printer type constant* as their first
+These functions return a *type constant* as their first
 return value. That constant helps text or graphical user interfaces decide
 how to print the remaining return values.
 
@@ -3516,11 +3552,13 @@ Imports a distribution.
   %% import {
   ..   type="TYPE",
   ..   ... depends on TYPE ... }
-  { 'CommonsBase_Std@2.5.202603190707' = {
+  'import'
+  'TYPE'
+  { { 'CommonsBase_Std', '2.5.202603190707', {
       'blake2b-256:9d956430ebb347d46e0037e8094bb92b1fcbfa52603394b643685c40b489f7f0',
       'sha256:8e37f1d16259b643fbd3ce447d53e97ef321d96555bf9c3ba23a328108848ec6',
       'sha1:b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49'
-    } }
+    } } }
 ```
 
 The `import` will:
@@ -3530,16 +3568,20 @@ The `import` will:
 - place distribution metadata in the trace store (deprecated; <https://github.com/diskuv/dk/issues/101>)
 - place distribution metadata in the source tree (the `dk0` reference implementation uses `<workspace>/etc/dk/i/<LIBRARY>-<VERSION>.values.json`)
 
-The return values are either `nil` and an error message, or a table value whose:
+The return values are either `nil` and an error message, or three values:
 
-1. keys are a versioned library that was distributed in the GitHub release
-2. values are a numbered table of the checksums of the distribution metadata (`.../<LIBRARY>-<VERSION>.values.json`)
+1. the type constant 'import'
+2. the value 'TYPE' from `import { type="TYPE", ... }`
+3. a table value whose:
+
+   - keys are a versioned library that was distributed in the GitHub release
+   - values are a numbered table of the checksums of the distribution metadata (`.../<LIBRARY>-<VERSION>.values.json`)
 
 However, *if* there is existing output (ie. `CommonsBase_Std@2.5.202603190707`)
-and *all* of the comma-separated `LIBRARY@VERSION` are present in the trace store or source tree,
+and *all* of the `LIBRARY@VERSION` are present in the trace store or source tree,
 then the import command is skipped.
 
-> 📢 The imports `LIBRARY@VERSION` outputs in the workspace section, along with the distribution metadata in the source tree, behave like lock files in package managers like `npm` and `cargo`.
+> 📢 The import's `LIBRARY@VERSION` outputs in the workspace section, along with the distribution metadata in the source tree, behave like lock files in package managers like `npm` and `cargo`.
 
 The `dk0` reference implementation will also place:
 
@@ -3558,11 +3600,13 @@ Imports a distribution from a GitHub release.
   ..   repo="OWNER/REPO",
   ..   host="", 
   ..   tag="" }
-  { 'CommonsBase_Std@2.5.202603190707' = {
+  'import'
+  'github-l2'
+  { { 'CommonsBase_Std', '2.5.202603190707', {
       'blake2b-256:9d956430ebb347d46e0037e8094bb92b1fcbfa52603394b643685c40b489f7f0',
       'sha256:8e37f1d16259b643fbd3ce447d53e97ef321d96555bf9c3ba23a328108848ec6',
       'sha1:b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49'
-    } }
+    } } }
 ```
 
 - `host` defaults to `github.com`.
