@@ -37,27 +37,27 @@ jobs:
               shell: pwsh
               # `--trial` helps cross-platform CI caches behave best since cache+data is under the project directory
               run: |
-                dksrc/dk0 --trial --print-config
+                dksrc/dk0 --print-config
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64   -m ./LICENSE -f target/LICENSE
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64   -m ./LICENSE -f target/LICENSE
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64   -m ./7zz.exe -f target/Release.Darwin_arm64.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64   -m ./7zz.exe -f target/Release.Darwin_arm64.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_x86_64  -m ./7zz.exe -f target/Release.Darwin_x86_64.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_x86_64  -m ./7zz.exe -f target/Release.Darwin_x86_64.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm      -m ./7zz.exe -f target/Release.Linux_arm.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm      -m ./7zz.exe -f target/Release.Linux_arm.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64    -m ./7zz.exe -f target/Release.Linux_arm64.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64    -m ./7zz.exe -f target/Release.Linux_arm64.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86      -m ./7zz.exe -f target/Release.Linux_x86.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86      -m ./7zz.exe -f target/Release.Linux_x86.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64   -m ./7zz.exe -f target/Release.Linux_x86_64.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64   -m ./7zz.exe -f target/Release.Linux_x86_64.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86    -m ./7zz.exe -f target/Release.Windows_x86.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86    -m ./7zz.exe -f target/Release.Windows_x86.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64 -m ./7zz.exe -f target/Release.Windows_x86_64.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64 -m ./7zz.exe -f target/Release.Windows_x86_64.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
             - name: Test ${{ github.workflow }}

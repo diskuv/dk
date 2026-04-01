@@ -3,7 +3,7 @@
 // - Release.Darwin_arm64 builds but does not run Windows ARM64/ARM64EC. Instead,
 //   it will run the x86-64 version of Wine under Rosetta 2.
 //
-// Test: ./dk0 --trial -v --trust-local-package CommonsBase_Win32 --trust-local-package NotMatveevKondratyev_Libinotify --trust-local-package NotMitEdu_Kerberos --trust-local-package CommonsBase_GNU --trust-local-package CommonsBase_LLVM -I etc/dk/v get-object CommonsBase_Win32.Wine@11.2.0 -s Release.execution_abi -e 'bin/*' -e 'lib/wine/*/*' -d target/wine
+// Test: ./dk0 -v --trust-local-package CommonsBase_Win32 --trust-local-package NotMatveevKondratyev_Libinotify --trust-local-package NotMitEdu_Kerberos --trust-local-package CommonsBase_GNU --trust-local-package CommonsBase_LLVM -I etc/dk/v get-object CommonsBase_Win32.Wine@11.2.0 -s Release.execution_abi -e 'bin/*' -e 'lib/wine/*/*' -d target/wine
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {
@@ -17,7 +17,7 @@
                 "sequential": true,
                 "private": [
                     // convert the .tar.xz to .zip
-                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_Win32.Wine.Zip@11.2.0 tarfile=$(get-asset CommonsBase_Win32.Wine.Bundle@11.2.0 -p wine-11.2.tar.xz -f wine.tar.xz)",
+                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_Win32.Wine.Zip@11.2.0 tarmodver=CommonsBase_Win32.Wine.Bundle@11.2.0 tarassetpath=wine-11.2.tar.xz",
                     // extract zip to current folder, stripping toplevel wine-11.2/ folder
                     "install-object CommonsBase_Win32.Wine.Zip@11.2.0 -s Release.Agnostic -m ./output.zip -n 1 -d . -e 'configure'"
                 ]

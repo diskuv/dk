@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial -v --trust-local-package CommonsBase_LLVM --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Make.Win32.LLVM_MinGW@4.4.1 -s Release.Darwin_arm64.Windows_x86_64 -d target/make-win32
+// Test: ./dk0 -v --trust-local-package CommonsBase_LLVM --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Make.Win32.LLVM_MinGW@4.4.1 -s Release.Darwin_arm64.Windows_x86_64 -d target/make-win32
 // Test: docker run -it --platform linux/amd64 -v $PWD:/work -w /work gcc:15.2.0 ./dk0 -v -d intermediate --trust-local-package CommonsBase_LLVM --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Make.Win32.LLVM_MinGW@4.4.1 -s Release.Linux_x86_64.Windows_x86_64 -d target/make-win32-from-linux
 // Slot FORMAT: Release.<execution_abi>.<target_abi>
 //
@@ -17,7 +17,7 @@
                 "sequential": true,
                 "private": [
                     // convert the .tar.gz to .zip
-                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.Make.Zip@4.4.1 tarfile=$(get-asset CommonsBase_GNU.Make.Bundle@4.4.1 -p make-4.4.1.tar.gz -f make.tar.gz)",
+                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.Make.Zip@4.4.1 tarmodver=CommonsBase_GNU.Make.Bundle@4.4.1 tarassetpath=make-4.4.1.tar.gz",
                     // extract zip to current folder, stripping toplevel make-4.4.1/ folder
                     "install-object CommonsBase_GNU.Make.Zip@4.4.1 -s Release.Agnostic -m ./output.zip -n 1 -d ."
                 ]

@@ -34,44 +34,44 @@ jobs:
               shell: pwsh
               # `--trial` helps cross-platform CI caches behave best since cache+data is under the project directory
               run: |
-                dksrc/dk0 --trial --print-config
+                dksrc/dk0 --print-config
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std -d parsetrace get-object CommonsBase_Std.S7z@25.1.0 -s Release.Windows_x86 -d target/ignore
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std -d parsetrace get-object CommonsBase_Std.S7z@25.1.0 -s Release.Windows_x86 -d target/ignore
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
             - name: Build ${{ github.workflow }} on Windows
               shell: pwsh
               # `--trial` helps cross-platform CI caches behave best since cache+data is under the project directory
               run: |
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64        -m ./LICENSE       -f target/LICENSE
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64        -m ./LICENSE       -f target/LICENSE
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64        -m ./coreutils.exe -f target/Release.Darwin_arm64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64        -m ./coreutils.exe -f target/Release.Darwin_arm64.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_x86_64       -m ./coreutils.exe -f target/Release.Darwin_x86_64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_x86_64       -m ./coreutils.exe -f target/Release.Darwin_x86_64.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64_gnu     -m ./coreutils.exe -f target/Release.Linux_arm64_gnu.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64_gnu     -m ./coreutils.exe -f target/Release.Linux_arm64_gnu.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64         -m ./coreutils.exe -f target/Release.Linux_arm64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64         -m ./coreutils.exe -f target/Release.Linux_arm64.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm           -m ./coreutils.exe -f target/Release.Linux_arm.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm           -m ./coreutils.exe -f target/Release.Linux_arm.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86           -m ./coreutils.exe -f target/Release.Linux_x86.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86           -m ./coreutils.exe -f target/Release.Linux_x86.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_gnu       -m ./coreutils.exe -f target/Release.Linux_x86_gnu.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_gnu       -m ./coreutils.exe -f target/Release.Linux_x86_gnu.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64        -m ./coreutils.exe -f target/Release.Linux_x86_64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64        -m ./coreutils.exe -f target/Release.Linux_x86_64.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64_gnu    -m ./coreutils.exe -f target/Release.Linux_x86_64_gnu.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64_gnu    -m ./coreutils.exe -f target/Release.Linux_x86_64_gnu.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_arm64       -m ./coreutils.exe -f target/Release.Windows_arm64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_arm64       -m ./coreutils.exe -f target/Release.Windows_arm64.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86         -m ./coreutils.exe -f target/Release.Windows_x86.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86         -m ./coreutils.exe -f target/Release.Windows_x86.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64      -m ./coreutils.exe -f target/Release.Windows_x86_64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64      -m ./coreutils.exe -f target/Release.Windows_x86_64.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64_gnu  -m ./coreutils.exe -f target/Release.Windows_x86_64_gnu.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64_gnu  -m ./coreutils.exe -f target/Release.Windows_x86_64_gnu.coreutils.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     build:
         runs-on: ubuntu-22.04
@@ -105,23 +105,23 @@ jobs:
               shell: pwsh
               # `--trial` helps cross-platform CI caches behave best since cache+data is under the project directory
               run: |
-                dksrc/dk0 --trial --print-config
+                dksrc/dk0 --print-config
 
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64        -m ./LICENSE       -f target/LICENSE
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64        -m ./LICENSE       -f target/LICENSE
 
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64        -m ./coreutils.exe -f target/Release.Darwin_arm64.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_x86_64       -m ./coreutils.exe -f target/Release.Darwin_x86_64.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64_gnu     -m ./coreutils.exe -f target/Release.Linux_arm64_gnu.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64         -m ./coreutils.exe -f target/Release.Linux_arm64.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm           -m ./coreutils.exe -f target/Release.Linux_arm.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86           -m ./coreutils.exe -f target/Release.Linux_x86.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_gnu       -m ./coreutils.exe -f target/Release.Linux_x86_gnu.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64        -m ./coreutils.exe -f target/Release.Linux_x86_64.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64_gnu    -m ./coreutils.exe -f target/Release.Linux_x86_64_gnu.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_arm64       -m ./coreutils.exe -f target/Release.Windows_arm64.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86         -m ./coreutils.exe -f target/Release.Windows_x86.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64      -m ./coreutils.exe -f target/Release.Windows_x86_64.coreutils.exe
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64_gnu  -m ./coreutils.exe -f target/Release.Windows_x86_64_gnu.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64        -m ./coreutils.exe -f target/Release.Darwin_arm64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_x86_64       -m ./coreutils.exe -f target/Release.Darwin_x86_64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64_gnu     -m ./coreutils.exe -f target/Release.Linux_arm64_gnu.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64         -m ./coreutils.exe -f target/Release.Linux_arm64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm           -m ./coreutils.exe -f target/Release.Linux_arm.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86           -m ./coreutils.exe -f target/Release.Linux_x86.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_gnu       -m ./coreutils.exe -f target/Release.Linux_x86_gnu.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64        -m ./coreutils.exe -f target/Release.Linux_x86_64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64_gnu    -m ./coreutils.exe -f target/Release.Linux_x86_64_gnu.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_arm64       -m ./coreutils.exe -f target/Release.Windows_arm64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86         -m ./coreutils.exe -f target/Release.Windows_x86.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64      -m ./coreutils.exe -f target/Release.Windows_x86_64.coreutils.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64_gnu  -m ./coreutils.exe -f target/Release.Windows_x86_64_gnu.coreutils.exe
 
             - name: Test ${{ github.workflow }}
               run: target/${{ env.TEST_SLOT }}.coreutils.exe --help

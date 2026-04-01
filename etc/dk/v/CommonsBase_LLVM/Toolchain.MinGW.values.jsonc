@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial -v -I etc/dk/v --trust-local-package CommonsBase_LLVM get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.execution_abi -e 'bin/*' -d target/llvm-mingw
+// Test: ./dk0 -v -I etc/dk/v --trust-local-package CommonsBase_LLVM get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.execution_abi -e 'bin/*' -d target/llvm-mingw
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {
@@ -37,6 +37,20 @@
             "rm",
             "-f",
             "${SLOT.request}/ignored.zip"
+          ],
+          // Remove files from __pycache__ folders.
+          // - ex. python/lib/python3.12/__pycache__/enum.cpython-312.pyc
+          // - mitigates Visual Studio Code extension `ms-python.python` for Python that compiles
+          //   Python files in any Python environment it detects, including the toolchain's python/bin/python.exe
+          //   Python environment.
+          [
+              "$(get-object CommonsBase_Std.Fd@10.3.0 -s Release.execution_abi -m ./fd.exe -e '*' -f fd.exe)",
+              "--glob", "--type", "d",
+              "-X",
+              "$(get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.execution_abi -m ./coreutils.exe -e '*' -f coreutils.exe)",
+              "rm", "-rf", "{}", ";", "--",
+              "__pycache__",
+              "${SLOT.request}"
           ]
         ]
       },

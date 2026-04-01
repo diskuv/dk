@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial --autofix -nosysinc --data-dir t/d-new -I etc/dk/v -x gh-uutils-0-6-0:subpath: --trust-local-package CommonsBase_Std get-bundle CommonsBase_Std.Coreutils.Bundle@0.6.0 -d target/coreutils
+// Test: ./dk0 --autofix -nosysinc --data-dir t/d-new -I etc/dk/v -x gh-uutils-0-6-0:subpath: --trust-local-package CommonsBase_Std get-bundle CommonsBase_Std.Coreutils.Bundle@0.6.0 -d target/coreutils
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": { "major": 1, "minor": 0 },

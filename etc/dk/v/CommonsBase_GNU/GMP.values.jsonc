@@ -1,5 +1,5 @@
 // GNU MP (GMP) is a portable library written in C for arbitrary precision arithmetic on integers, rational numbers, and floating-point numbers. It aims to provide the fastest possible arithmetic for all applications that need higher precision than is directly supported by the basic C types.
-// Test: ./dk0 --trial --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.GMP@6.3.0 -s Release.execution_abi -d target/gmp
+// Test: ./dk0 --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.GMP@6.3.0 -s Release.execution_abi -d target/gmp
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {
@@ -13,7 +13,7 @@
                 "sequential": true,
                 "private": [
                     // convert the .tar.xz to .zip
-                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.GMP.Zip@6.3.0 tarfile=$(get-asset CommonsBase_GNU.GMP.Bundle@6.3.0 -p gmp-6.3.0.tar.xz -f gmp.tar.xz)",
+                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.GMP.Zip@6.3.0 tarmodver=CommonsBase_GNU.GMP.Bundle@6.3.0 tarassetpath=gmp-6.3.0.tar.xz",
                     // extract zip to current folder, stripping toplevel gmp-6.3.0/ folder
                     "install-object CommonsBase_GNU.GMP.Zip@6.3.0 -s Release.Agnostic -m ./output.zip -n 1 -d . -e 'mpn/m4-ccas' -e 'install-sh'"
                 ]

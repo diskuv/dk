@@ -1,4 +1,4 @@
-// Test: ./dk0 -d intermediate --trial --trust-local-package CommonsBase_GNU -I etc/dk/v --autofix get-bundle CommonsBase_GNU.Make.Bundle@4.4.1 -d target/makesrc
+// Test: ./dk0 -d intermediate --trust-local-package CommonsBase_GNU -I etc/dk/v --autofix get-bundle CommonsBase_GNU.Make.Bundle@4.4.1 -d target/makesrc
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {

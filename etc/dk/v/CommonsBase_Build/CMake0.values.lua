@@ -1,14 +1,18 @@
 -- USAGE 1 OF 2: CommonsBase_Build.CMake0.Build@3.25.3
 -- (UI rule) Generates a CMake build system in the build directory.
 -- Configurations: One of the following sets of options must be provided:
---   installdir= src[]=
---   installdir= mirrors[]= urlpath=
+--   installdir= src[]= out[]=
+--   installdir= src[]= outexe[]=
+--   installdir= mirrors[]= urlpath= out[]=
+--   installdir= mirrors[]= urlpath= outexe[]=
 -- Options:
 --  src[]: list of glob patterns for the local source directory
 --  mirrors[]: HTTP base urls to download the CMake source directory
 --  urlpath: path added to the mirrors so full URL is a ZIP file of the CMake source directory
 --  installdir: (required) the install directory to pass to `cmake --install ... --prefix INSTALL_DIRECTORY`
---  generator: the cmake generator to use (defaults to "Ninja")
+--  generator: the cmake generator to use (defaults to "none" on Windows, "Ninja" on other OS-es).
+--     The special value "none" removes the "-G GENERATOR" CMake option so CMake selects any
+--     available compiler.
 --  sourcesubdir: subdirectory inside the asset or bundle that contains the CMakeLists.txt (defaults to root of asset or bundle)
 --  nstrip: levels of leading directories to nstrip while extract asset or bundle (defaults to 0)
 --  gargs[]: list of cmake generator arguments to pass to cmake executable.
@@ -16,13 +20,15 @@
 --        The -B build directory will already be set.
 --  bargs[]: list of cmake build arguments to pass to cmake executable.
 --  iargs[]: list of cmake install arguments to pass to cmake executable.
---  out[]: (required) list of expected output files in the build directory
+--  out[]: list of expected output files in the install directory
+--  outexe[]: list of expected executable files in the install directory. On Windows `.exe` is added automatically.
+--     ie. outexe[]=bin/xyz is the equivalent of out[]=bin/xyz.exe on Windows and out[]=bin/xyz on Unix
 --  outrmexact[]: list of exact strictly relative paths (relative to build directory) to remove
 --  outrmglob[]: list of "fd" filename glob patterns for files in the build directory to remove after outrmexact[].
---        Remove every file type except directories; use outrmexact for directories for safety.
+--     Remove every file type except directories; use outrmexact for directories for safety.
 --  exe[]: list of glob patterns for executables to set execute permissions (Unix) and locally codesign (macOS).
 -- examples:
---  dk0 --trial run CommonsBase_Build.CMake0.Build@3.25.3 \
+--  dk0 run CommonsBase_Build.CMake0.Build@3.25.3 \
 --    installdir=t/i \
 --    'mirrors[]=https://github.com/google/or-tools/archive/refs/tags' \
 --    'urlpath=v9.15.zip#920d8266b30a7a8f8572a5dc663fdf8d2701792101dd95f09e72397c16e12858,25297362' \
@@ -37,7 +43,9 @@
 --  bundlemodver=
 --  assetmodver= assetpath=
 -- Options:
---  generator: the cmake generator to use (defaults to "Ninja")
+--  generator: the cmake generator to use (defaults to "none" on Windows, "Ninja" on other OS-es).
+--    The special value "none" removes the "-G GENERATOR" CMake option so CMake selects any
+--    available compiler.
 --  assetmodver: asset module@version of CMake source directory
 --  assetpath: path inside the [assetmodver] asset module to the CMake source directory
 --  overlayassetpath: path inside the [assetmodver] asset module that gets layered on top of the source
@@ -50,13 +58,15 @@
 --        The -B build directory will already be set.
 --  bargs[]: list of cmake build arguments to pass to cmake executable.
 --  iargs[]: list of cmake install arguments to pass to cmake executable.
---  out[]: (required) list of expected output files in the build directory
+--  out[]: list of expected output files in the install directory
+--  outexe[]: list of expected executable files in the install directory. On Windows `.exe` is added automatically.
+--     ie. outexe[]=bin/xyz is the equivalent of out[]=bin/xyz.exe on Windows and out[]=bin/xyz on Unix
 --  outrmexact[]: list of exact strictly relative paths (relative to build directory) to remove
 --  outrmglob[]: list of "fd" filename glob patterns for files in the build directory to remove after outrmexact[].
 --        Remove every file type except directories; use outrmexact for directories for safety.
 --  exe[]: list of glob patterns for executables to set execute permissions (Unix) and locally codesign (macOS).
 -- examples:
---  dk0 --trial post-object CommonsBase_Build.CMake0.F_Build@3.25.3 \
+--  dk0 post-object CommonsBase_Build.CMake0.F_Build@3.25.3 \
 --    generator=Ninja 'iargs[]=-S' 'iargs[]=.' 'out[]=bin/cmake-generated.exe'
 -- what gets run:
 --   get-asset <assetmodver> -p <assetpath> -d s [-or-] get-bundle <bundlemodver> -d s
@@ -71,7 +81,8 @@
 -- COMPILERS
 --
 -- ::: Windows / Visual Studio
--- <TODO> The Ninja generator (the default) only works on Windows when the build is run in a Visual Studio Developer Command Prompt.
+-- The default generator is nothing on Windows. CMake will select any available compiler,
+-- which may be the latest Visual Studio if your build machine has Visual Studio installed.
 
 -- DESIGN QUESTIONS
 -- Q1: Why a rule instead of a simpler `get-object`?
@@ -102,6 +113,7 @@ CommonsBase_Build__CMake0__3_25_3 = {}
 rules, uirules = build.newrules(M)
 
 function CommonsBase_Build__CMake0__3_25_3.parse_common_args(request, p)
+  p.osfamily = request.execution.OSFamily
   p.execabi = request.execution.ABIv3
   p.gargs = request.user.gargs or {}
   p.bargs = request.user.bargs or {}
@@ -110,16 +122,27 @@ function CommonsBase_Build__CMake0__3_25_3.parse_common_args(request, p)
   p.overlaybundlemodver = request.user.overlaybundlemodver
   p.sourcesubdir = assert(stringdk.sanitizesubpath(request.user.sourcesubdir or "."))
   p.out = request.user.out
-  assert(type(p.out) == "table", "out must be a table. please provide `'out[]=FILE1' 'out[]=FILE2' ...`")
+  p.outexe = request.user.outexe
+  assert(type(p.out) == "table" or type(p.outexe) == "table", "out or outexe must be a table. please provide `'out[]=FILE1' 'outexe[]=EXECUTABLE2' ...`")
   p.outrmexact = request.user.outrmexact or {}
   p.outrmglob = request.user.outrmglob or {}
   p.exe = request.user.exe or {}
   p.nstrip = request.user.nstrip or 0
 end
 
+function CommonsBase_Build__CMake0__3_25_3.get_generator(request)
+  if request.user.generator then
+    return request.user.generator
+  elseif request.execution.OSFamily == "windows" then
+    return "none"
+  else
+    return "Ninja"
+  end
+end
+
 function uirules.Build(command, request)
   local installdir = assert(request.user.installdir, "please provide 'installdir=INSTALL_DIRECTORY'")
-  local generator = request.user.generator or "Ninja"
+  local generator = CommonsBase_Build__CMake0__3_25_3.get_generator(request)
 
   local src = request.user.src
   local mirrors = request.user.mirrors
@@ -219,11 +242,22 @@ function CommonsBase_Build__CMake0__3_25_3.ui_generate_build_install(command, re
 
     -- out
     local arg_out = {}
-    k, v = next(p.out)
+    local p_out = p.out or {}
+    k, v = next(p_out)
     while k do
       a = "out[]=" .. v -- "out[]=FILE" is F_Build option
       arg_out[k] = a
-      k, v = next(p.out, k)
+      k, v = next(p_out, k)
+    end
+
+    -- outexe
+    local arg_outexe = {}
+    local p_outexe = p.outexe or {}
+    k, v = next(p_outexe)
+    while k do
+      a = "outexe[]=" .. v -- "outexe[]=EXECUTABLE" is F_Build option
+      arg_outexe[k] = a
+      k, v = next(p_outexe, k)
     end
 
     -- outrmexact
@@ -286,13 +320,14 @@ function CommonsBase_Build__CMake0__3_25_3.ui_generate_build_install(command, re
       arg_nstrip = { "nstrip=" .. tostring(p.nstrip) } -- "nstrip=LEVELS" is F_Build option
     end
 
-    -- concatenate [arg_out] and [arg_exe] into command
+    -- concatenate [arg_out], [arg_outexe] and [arg_exe] into command
     local command = { "post-object", "CommonsBase_Build.CMake0.F_Build@3.25.3",
       "-d", p.installdir,
       "sourcesubdir=" .. p.sourcesubdir
     }
     table.move(arg_content, 1, table.getn(arg_content), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
     table.move(arg_out, 1, table.getn(arg_out), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
+    table.move(arg_outexe, 1, table.getn(arg_outexe), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
     table.move(arg_outrmexact, 1, table.getn(arg_outrmexact), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
     table.move(arg_outrmglob, 1, table.getn(arg_outrmglob), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
     table.move(arg_exe, 1, table.getn(arg_exe), table.getn(command) + 1, command) ---@diagnostic disable-line: deprecated, access-invisible
@@ -333,7 +368,7 @@ function rules.F_Build(command, request)
     CommonsBase_Build__CMake0__3_25_3.parse_common_args(request, p)
 
     p.outputid = request.submit.outputid
-    p.generator = request.user.generator or "Ninja"
+    p.generator = CommonsBase_Build__CMake0__3_25_3.get_generator(request)
     p.bundlemodver = request.user.bundlemodver
     p.assetmodver = request.user.assetmodver
     p.assetpath = request.user.assetpath
@@ -360,11 +395,11 @@ function rules.F_Build(command, request)
       return CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, p)
     elseif request.execution.OSFamily == "linux" then
       local cmakeabi
-      if request.execution.ABIv3 == "linux_x86_64" then
+      if request.execution.ABIv3 == "Linux_x86_64" then
         cmakeabi = "linux_x86_64"
-      elseif request.execution.ABIv3 == "linux_x86" then
+      elseif request.execution.ABIv3 == "Linux_x86" then
         cmakeabi = "linux_x86"
-      elseif request.execution.ABIv3 == "linux_arm64" then
+      elseif request.execution.ABIv3 == "Linux_arm64" then
         cmakeabi = "linux_arm64"
       else
         error("unsupported ABIv3: " .. request.execution.ABIv3)
@@ -375,17 +410,17 @@ function rules.F_Build(command, request)
       return CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, p)
     elseif request.execution.OSFamily == "windows" then
       local cmakeabi
-      if request.execution.ABIv3 == "windows_x86_64" then
-        cmakeabi = "windows_x86_64"
-      elseif request.execution.ABIv3 == "windows_x86" then
-        cmakeabi = "windows_x86"
-      elseif request.execution.ABIv3 == "windows_arm64" then
-        cmakeabi = "windows_arm64"
+      if request.execution.ABIv3 == "Windows_x86_64" then
+        cmakeabi = "windows-x86_64"
+      elseif request.execution.ABIv3 == "Windows_x86" then
+        cmakeabi = "windows-i386"
+      elseif request.execution.ABIv3 == "Windows_arm64" then
+        cmakeabi = "windows-arm64"
       else
         error("unsupported ABIv3: " .. request.execution.ABIv3)
       end
       p.cmakeexe =
-          "$(get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-" ..
+          "$(get-asset CommonsBase_Build.CMake0.Bundle@3.25.3 -p cmake-3.25.3-" ..
           cmakeabi .. ".zip -n 1 -d : -e 'bin/*')/bin/cmake.exe"
       -- use ninja.exe as the executable filename so it runs on Windows
       p.absninjaexe = "$(--path=absnative get-object CommonsBase_Build.Ninja0@1.12.1 -s Release." ..
@@ -441,10 +476,14 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
 
   -- concatenate [p.gargs] into string "generate_cmd"
   local gargs = {
-    p.cmakeexe, "-G", p.generator, "-S", sourcedir, "-B", "b",
+    p.cmakeexe, "-S", sourcedir, "-B", "b",
     -- CMAKE_INSTALL_PREFIX needs to be absolute path
     "-DCMAKE_INSTALL_PREFIX:FILEPATH=${SLOTABS.Release.Agnostic}"
   }
+  if p.generator ~= "none" then
+    table.insert(gargs, "-G")
+    table.insert(gargs, p.generator)
+  end
   table.move(p.gargs, 1, table.getn(p.gargs), table.getn(gargs) + 1, gargs) ---@diagnostic disable-line: deprecated, access-invisible
   table.move(gninjaargs, 1, table.getn(gninjaargs), table.getn(gargs) + 1, gargs) ---@diagnostic disable-line: deprecated, access-invisible
 
@@ -513,6 +552,25 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
     k, v = next(p.outrmglob, k)
   end
 
+  -- output paths
+  --   the union of p.out and p.outexe but p.outexe has .exe suffix on Windows
+  local outpaths = {}
+  local p_out = p.out or {}
+  local p_outexe = p.outexe or {}
+  k, v = next(p_out)
+  while k do
+    outpaths[k] = v
+    k, v = next(p_out, k)
+  end
+  k, v = next(p_outexe)
+  while k do
+    if p.osfamily == "windows" then
+      v = v .. ".exe"
+    end
+    outpaths[k] = v
+    k, v = next(p_outexe, k)
+  end
+
   return {
     submit = {
       values = {
@@ -531,7 +589,7 @@ function CommonsBase_Build__CMake0__3_25_3.free_generate_build_install(request, 
               assets = {
                 {
                   slots = { "Release.Agnostic" },
-                  paths = p.out
+                  paths = outpaths
                 }
               }
             }

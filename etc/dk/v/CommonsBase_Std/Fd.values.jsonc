@@ -2,7 +2,7 @@
 // It is faster than find and has a more user-friendly syntax, but it does not support all of the features of find (e.g. -exec).
 //
 // USAGE:
-// dk0 --trial get-object CommonsBase_Std.Fd@10.3.0 -s Release.Darwin_arm64 -d target/ -e fd.exe
+// dk0 get-object CommonsBase_Std.Fd@10.3.0 -s Release.Darwin_arm64 -d target/ -e fd.exe
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": { "major": 1, "minor": 0 },

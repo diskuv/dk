@@ -1,5 +1,5 @@
 -- Usage:
--- dk0 -v --trial -d explain -I ext/dk/etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Dotnet post-object CommonsBase_Dotnet.SDK.Files@10.0.100-rc.2.25502.107 -d target/dotnetsdk slot=Release.Linux_x86_64m
+-- dk0 -v -d explain -I ext/dk/etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Dotnet post-object CommonsBase_Dotnet.SDK.Files@10.0.100-rc.2.25502.107 -d target/dotnetsdk slot=Release.Linux_x86_64m
 
 -- Using a values.lua means the thousands-long list of asset files
 -- don't need to be duplicated, and it should be easy to provide
@@ -5863,16 +5863,13 @@ function CommonsBase_Std__Dotnet_SDK.form_values_unix(slot)
   end
   local paths_str        = table.concat(pathsarr, " ")
 
-  local getasset_tarfile =
-      string.format(
-        "$(get-asset CommonsBase_Dotnet.SDK.Bundle@10.0.100-rc.2.25502.107 -p dotnet-sdk-10.0.100-rc.2.25502.107-%s.tar.gz -f :)",
-        arch)
   local postobject       =
       string.format(
-        "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.%s} modver=CommonsBase_Dotnet.SDK.Unix.%s@10.0.100-rc.2.25502.107 tarfile=%s %s",
+        "post-object CommonsBase_Std.Extract.F_Untar@0.1.0 -d ${SLOT.%s} modver=CommonsBase_Dotnet.SDK.Unix.%s@10.0.100-rc.2.25502.107 tarmodver=%s tarassetpath=%s %s",
         slot,
         slot,
-        getasset_tarfile,
+        "CommonsBase_Dotnet.SDK.Bundle@10.0.100-rc.2.25502.107",
+        "dotnet-sdk-10.0.100-rc.2.25502.107-%s.tar.gz",
         paths_str)
   local precommands      = {
     private = {
@@ -6193,7 +6190,7 @@ end
 
 -- `dk0 run CommonsBase_Dotnet.SDK.Dotnet@10.0.100-rc.2.25502.107 [args...]` runs the `dotnet [args...]`
 function uirules.Dotnet(command, request)
-  -- ../dksdk-coder/_build/default/ext/MlFront/src/DkZero_Exec/Shell.exe -v --trial -d intermediate -d explain --cell dk0=ext/dk -I ext/dk/etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Dotnet --trust-local-package CommonsBase_Shell run CommonsBase_Dotnet.SDK.Dotnet@10.0.100-rc.2.25502.107 'args[]=run' 'args[]=ext/dk/samples/2025/AsciiArt.cs' 'args[]=--' 'args[]=test it'
+  -- ../dksdk-coder/_build/default/ext/MlFront/src/DkZero_Exec/Shell.exe -v -d intermediate -d explain --cell dk0=ext/dk -I ext/dk/etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Dotnet --trust-local-package CommonsBase_Shell run CommonsBase_Dotnet.SDK.Dotnet@10.0.100-rc.2.25502.107 'args[]=run' 'args[]=ext/dk/samples/2025/AsciiArt.cs' 'args[]=--' 'args[]=test it'
   -- 'args[]=--info'
   -- 'args[]=--list-runtimes'
   if command == "submit" then

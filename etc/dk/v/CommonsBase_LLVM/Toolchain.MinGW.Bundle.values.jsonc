@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial -I etc/dk/v --trust-local-package CommonsBase_LLVM get-bundle CommonsBase_LLVM.Toolchain.MinGW.Bundle@21.1.8+rev-20251216 -d target/llvm-mingw-src
+// Test: ./dk0 -I etc/dk/v --trust-local-package CommonsBase_LLVM get-bundle CommonsBase_LLVM.Toolchain.MinGW.Bundle@21.1.8+rev-20251216 -d target/llvm-mingw-src
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {

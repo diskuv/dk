@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial --trust-local-package CommonsBase_GNU --trust-local-package NotMitEdu_Kerberos -I etc/dk/v get-object NotMitEdu_Kerberos.V5.Unix@1.22.2 -s Release.Darwin_arm64 -d target/krb5
+// Test: ./dk0 --trust-local-package CommonsBase_GNU --trust-local-package NotMitEdu_Kerberos -I etc/dk/v get-object NotMitEdu_Kerberos.V5.Unix@1.22.2 -s Release.Darwin_arm64 -d target/krb5
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {
@@ -12,7 +12,7 @@
                 "sequential": true,
                 "private": [
                     // convert the .tar.gz to .zip
-                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=NotMitEdu_Kerberos.V5.Zip@1.22.2 tarfile=$(get-asset NotMitEdu_Kerberos.V5.Bundle@1.22.2 -p krb5-1.22.2.tar.gz -f krb5-1.22.2.tar.gz)",
+                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=NotMitEdu_Kerberos.V5.Zip@1.22.2 tarmodver=NotMitEdu_Kerberos.V5.Bundle@1.22.2 tarassetpath=krb5-1.22.2.tar.gz",
                     // extract zip to current folder, stripping toplevel krb5-1.22.2/ folder
                     "install-object NotMitEdu_Kerberos.V5.Zip@1.22.2 -s Release.Agnostic -m ./output.zip -n 1 -d . -e 'src/config/*'"
                 ]

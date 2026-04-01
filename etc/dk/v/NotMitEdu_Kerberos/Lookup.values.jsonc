@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial --autofix -I etc/dk/v -x commons-base-win32-table:subpath: --trust-local-package NotMitEdu_Kerberos get-bundle NotMitEdu_Kerberos.Lookup@1.0.0 -d target/krblookup
+// Test: ./dk0 --autofix -I etc/dk/v -x commons-base-win32-table:subpath: --trust-local-package NotMitEdu_Kerberos get-bundle NotMitEdu_Kerberos.Lookup@1.0.0 -d target/krblookup
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": { "major": 1, "minor": 0 },

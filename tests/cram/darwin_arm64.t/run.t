@@ -3,7 +3,7 @@ CommonsBase_Build
 =================
 
 . . since S7z package can only be built on Windows (currently), need distributed binary cache
-  $ dk0 --trial -isystem ../etc/dk/i get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.Darwin_arm64 -d i/coreutils-darwin-arm64
+  $ dk0 -isystem ../etc/dk/i get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.Darwin_arm64 -d i/coreutils-darwin-arm64
   [signify] New build key pair in t/k/build.pub and t/k/build.sec ...
   [signify] Distribute key pair among trusted coworkers only!
   [progress]: dla CommonsBase:CommonsBase_Build-10.x1t7iubaa.tracestore size 29375 ...
@@ -131,7 +131,7 @@ CommonsBase_Build
 Ninja0
 ------
 
-  $ dk0 --trial -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Build get-object CommonsBase_Build.Ninja0@1.12.1 -s Release.Darwin_arm64 -m ./ninja.exe -f o/ninja.exe
+  $ dk0 -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Build get-object CommonsBase_Build.Ninja0@1.12.1 -s Release.Darwin_arm64 -m ./ninja.exe -f o/ninja.exe
   [progress]: dla ninja-build:ninja-mac.zip size 281130 ...
   [progress]:   dlb https://github.com/ninja-build/ninja/releases/download/v1.12.1 ...
   [up-to-date] CommonsBase_Build.Ninja0@1.12.1+bn-20250101000000 -s Release.Darwin_arm64
@@ -147,7 +147,7 @@ Ninja0
 CMake0 (local)
 --------------
 
-  $ dk0 --trial -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Build run CommonsBase_Build.CMake0.Build@3.25.3 'src[]=*.c' 'src[]=CMakeLists.txt' 'out[]=bin/sample' 'iargs[]=--verbose' 'installdir=i/cmake0sample' 'exe[]=bin/*'
+  $ dk0 -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Build run CommonsBase_Build.CMake0.Build@3.25.3 'src[]=*.c' 'src[]=CMakeLists.txt' 'out[]=bin/sample' 'iargs[]=--verbose' 'installdir=i/cmake0sample' 'exe[]=bin/*'
   [progress]: dla dk-releases:cmake-darwin_universal.zip size 80161981 ...
   [progress]:   dlb https://github.com/diskuv/dk/releases/download/cmake-3.25.2+ci2 ...
   [progress]: dla dk-c-root:main.c size 91 ...
@@ -174,7 +174,7 @@ CMake0 (local)
 CMake0 (remote)
 ---------------
 
-  $ dk0 --trial -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Build run CommonsBase_Build.CMake0.Build@3.25.3 installdir=i/llama-cpp \
+  $ dk0 -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Build run CommonsBase_Build.CMake0.Build@3.25.3 installdir=i/llama-cpp \
   >   'mirrors[]=https://github.com/ggml-org/llama.cpp/archive/refs/tags' 'urlpath=b7974.zip#be9d624603e39cd4edee5fa85e8812eb8e1393537c8e4e4629bc4bd016388053,29881192' \
   >   'nstrip=1' 'gargs[]=-DBUILD_SHARED_LIBS:BOOL=OFF' \
   >   'exe[]=bin/*' \
@@ -302,10 +302,10 @@ NotGoogleDev_OR.Tools.F_Bin
 
 (too slow today)
 
-  $ echo dk0 --trial -nosysinc -I ../etc/dk/v \
+  $ echo dk0 -nosysinc -I ../etc/dk/v \
   >   --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Build --trust-local-package NotGoogleDev_OR \
   >   post-object NotGoogleDev_OR.Tools.F_Bin@9.15.0 -d i/ortools-bin/ targetabi=Release.Darwin_arm64
-  dk0 --trial -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Build --trust-local-package NotGoogleDev_OR post-object NotGoogleDev_OR.Tools.F_Bin@9.15.0 -d i/ortools-bin/ targetabi=Release.Darwin_arm64
+  dk0 -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Build --trust-local-package NotGoogleDev_OR post-object NotGoogleDev_OR.Tools.F_Bin@9.15.0 -d i/ortools-bin/ targetabi=Release.Darwin_arm64
 
 .  $ cat t/p/*/*/l/Release.Agnostic/command5.txt
   $ cat t/p/*/*/l/Release.Agnostic/stdout5.log

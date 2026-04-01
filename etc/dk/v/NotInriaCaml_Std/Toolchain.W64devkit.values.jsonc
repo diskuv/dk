@@ -18,7 +18,7 @@
 //
 // === EXAMPLES ===
 //
-// ./dk0 --trial -v -I etc/dk/v --trust-local-package CommonsBase_Win32 --trust-local-package NotMatveevKondratyev_Libinotify --trust-local-package CommonsBase_LLVM --trust-local-package CommonsBase_GNU --trust-local-package NotInriaCaml_Std --trust-local-package NotMitEdu_Kerberos get-object NotInriaCaml_Std.Toolchain.W64devkit@5.4.1 -s Release.Darwin_arm64.Windows_x86_64 -d target/ocaml-winx64
+// ./dk0 -v -I etc/dk/v --trust-local-package CommonsBase_Win32 --trust-local-package NotMatveevKondratyev_Libinotify --trust-local-package CommonsBase_LLVM --trust-local-package CommonsBase_GNU --trust-local-package NotInriaCaml_Std --trust-local-package NotMitEdu_Kerberos get-object NotInriaCaml_Std.Toolchain.W64devkit@5.4.1 -s Release.Darwin_arm64.Windows_x86_64 -d target/ocaml-winx64
 //
 // === FOLDERS ===
 //
@@ -50,7 +50,7 @@
                 "private": [
                     // --- ocaml-5.4.1.tar.gz ---
                     // convert the .tar.gz to .zip
-                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=NotInriaCaml_Std.OCaml.Zip@5.4.1 tarfile=$(get-asset NotInriaCaml_Std.OCaml.Bundle@5.4.1 -p ocaml-5.4.1.tar.gz -f ocaml-5.4.1.tar.gz)",
+                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=NotInriaCaml_Std.OCaml.Zip@5.4.1 tarmodver=NotInriaCaml_Std.OCaml.Bundle@5.4.1 tarassetpath=ocaml-5.4.1.tar.gz",
                     // extract zip to 's' folder, stripping toplevel ocaml-5.4.1/ folder
                     "install-object NotInriaCaml_Std.OCaml.Zip@5.4.1 -s Release.Agnostic -m ./output.zip -n 1 -d s -e 'configure' -e 'runtime/*.sh' -e 'lambda/*.sh'",
 

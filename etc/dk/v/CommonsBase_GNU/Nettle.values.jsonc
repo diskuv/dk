@@ -1,7 +1,7 @@
 // Nettle is a cryptographic library that is designed to fit easily in more or less any context: In crypto toolkits for object-oriented languages (C++, Python, Pike, ...), in applications like LSH or GNUPG, or even in kernel space.
 // GNU? It is available from https://ftp.gnu.org/gnu/nettle/
-// Test: ./dk0 --trial -x gnu-nettle:subpath: --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Nettle@3.10.2 -s Release.execution_abi -d target/nettle
-// Test: ./dk0 --trial -x gnu-nettle:subpath: --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Nettle@4.0.0 -s Release.execution_abi -d target/nettle
+// Test: ./dk0 -x gnu-nettle:subpath: --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Nettle@3.10.2 -s Release.execution_abi -d target/nettle
+// Test: ./dk0 -x gnu-nettle:subpath: --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Nettle@4.0.0 -s Release.execution_abi -d target/nettle
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {
@@ -15,7 +15,7 @@
                 "sequential": true,
                 "private": [
                     // convert the .tar.xz to .zip
-                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.Nettle.Zip@3.10.2 tarfile=$(get-asset CommonsBase_GNU.Nettle.Bundle@3.10.2 -p nettle-3.10.2.tar.gz -f nettle-3.10.2.tar.gz)",
+                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.Nettle.Zip@3.10.2 tarmodver=CommonsBase_GNU.Nettle.Bundle@3.10.2 tarassetpath=nettle-3.10.2.tar.gz",
                     // extract zip to current folder, stripping toplevel nettle-4.0/ folder
                     "install-object CommonsBase_GNU.Nettle.Zip@3.10.2 -s Release.Agnostic -m ./output.zip -n 1 -d . -e 'install-sh'"
                 ]
@@ -212,7 +212,7 @@
                 "sequential": true,
                 "private": [
                     // convert the .tar.xz to .zip
-                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.Nettle.Zip@4.0.0 tarfile=$(get-asset CommonsBase_GNU.Nettle.Bundle@4.0.0 -p nettle-4.0.tar.gz -f nettle.tar.gz)",
+                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.Nettle.Zip@4.0.0 tarmodver=CommonsBase_GNU.Nettle.Bundle@4.0.0 tarassetpath=nettle-4.0.tar.gz",
                     // extract zip to current folder, stripping toplevel nettle-4.0/ folder
                     "install-object CommonsBase_GNU.Nettle.Zip@4.0.0 -s Release.Agnostic -m ./output.zip -n 1 -d ."
                 ]

@@ -52,11 +52,11 @@ for package in "$@"; do
 
   printf -- "------------------------------------------------\n" >&2
   printf "Importing release %s for package %s from repository %s:\n" "$tag" "$package" "$repository"
-  printf "./dk0 --trial import-github-l2 --repo %s --tag %s --outdir %s/etc/dk/i/\n\n" "$repository" "$tag" "$PROJECTDIR"
+  printf "./dk0 import-github-l2 --repo %s --tag %s --outdir %s/etc/dk/i/\n\n" "$repository" "$tag" "$PROJECTDIR"
   if [ -n "$capturefile" ]; then
-    printf "./dk0 --trial import-github-l2 --repo %s --tag %s --outdir etc/dk/i/\n" "$repository" "$tag" >> "$capturefile"
+    printf "./dk0 import-github-l2 --repo %s --tag %s --outdir etc/dk/i/\n" "$repository" "$tag" >> "$capturefile"
   fi
-  ./dk0 --trial import-github-l2 --repo "$repository" --tag "$tag" --outdir "$PROJECTDIR"/etc/dk/i/
+  ./dk0 import-github-l2 --repo "$repository" --tag "$tag" --outdir "$PROJECTDIR"/etc/dk/i/
   printf -- "------------------------------------------------\n\n" >&2
 done
 

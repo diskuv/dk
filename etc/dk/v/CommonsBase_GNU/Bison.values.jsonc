@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Bison@3.8.2 -s Release.execution_abi -d target/bison
+// Test: ./dk0 --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Bison@3.8.2 -s Release.execution_abi -d target/bison
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {
@@ -12,7 +12,7 @@
                 "sequential": true,
                 "private": [
                     // convert the .tar.xz to .zip
-                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.Bison.Zip@3.8.2 tarfile=$(get-asset CommonsBase_GNU.Bison.Bundle@3.8.2 -p bison-3.8.2.tar.xz -f bison.tar.xz)",
+                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.Bison.Zip@3.8.2 tarmodver=CommonsBase_GNU.Bison.Bundle@3.8.2 tarassetpath=bison-3.8.2.tar.xz",
                     // extract zip to current folder, stripping toplevel bison-3.8.2/ folder
                     "install-object CommonsBase_GNU.Bison.Zip@3.8.2 -s Release.Agnostic -m ./output.zip -n 1 -d . -e 'build-aux/*'"
                 ]

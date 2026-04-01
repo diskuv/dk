@@ -34,31 +34,31 @@ jobs:
               shell: pwsh
               # `--trial` helps cross-platform CI caches behave best since cache+data is under the project directory
               run: |
-                dksrc/dk0 --trial --print-config
+                dksrc/dk0 --print-config
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std -d parsetrace get-object CommonsBase_Std.S7z@25.1.0 -s Release.Windows_x86 -d target/ignore
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std -d parsetrace get-object CommonsBase_Std.S7z@25.1.0 -s Release.Windows_x86 -d target/ignore
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
             - name: Build and test ${{ github.workflow }} on Windows
               shell: bash
               # `--trial` helps cross-platform CI caches behave best since cache+data is under the project directory
               run: |
-                dksrc/dk0.cmd --trial --print-config
+                dksrc/dk0.cmd --print-config
 
                 mkdir -p target
                 tar cvf target/nothing.tar README.md COPYRIGHT
 
-                dksrc/dk0.cmd --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f target/t2.zip tarfile=$PWD/target/nothing.tar modver=OurTest_Std.T2Zip.Windows_x86_64@0.1.0
-                dksrc/dk0.cmd --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object OurTest_Std.T2Zip.Windows_x86_64@0.1.0 -s Release.Agnostic -m ./output.zip -d target/unt2zip
+                dksrc/dk0.cmd -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f target/t2.zip tarfile=$PWD/target/nothing.tar modver=OurTest_Std.T2Zip.Windows_x86_64@0.1.0
+                dksrc/dk0.cmd -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object OurTest_Std.T2Zip.Windows_x86_64@0.1.0 -s Release.Agnostic -m ./output.zip -d target/unt2zip
                 ls -l target/unt2zip
                 test -f target/unt2zip/README.md
                 test -f target/unt2zip/COPYRIGHT
 
                 # Windows has a different subrule for .tar.gz/.tar.bz2 than .tar, so test independently
                 gzip target/nothing.tar
-                dksrc/dk0.cmd --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f target/t2b.zip tarfile=$PWD/target/nothing.tar.gz modver=OurTest_Std.TGz2Zip.Windows_x86_64@0.1.0
-                dksrc/dk0.cmd --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object OurTest_Std.TGz2Zip.Windows_x86_64@0.1.0 -s Release.Agnostic -m ./output.zip -d target/untgz2zip
+                dksrc/dk0.cmd -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f target/t2b.zip tarfile=$PWD/target/nothing.tar.gz modver=OurTest_Std.TGz2Zip.Windows_x86_64@0.1.0
+                dksrc/dk0.cmd -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object OurTest_Std.TGz2Zip.Windows_x86_64@0.1.0 -s Release.Agnostic -m ./output.zip -d target/untgz2zip
                 ls -l target/untgz2zip
                 test -f target/untgz2zip/README.md
                 test -f target/untgz2zip/COPYRIGHT
@@ -109,13 +109,13 @@ jobs:
               shell: pwsh
               # `--trial` helps cross-platform CI caches behave best since cache+data is under the project directory
               run: |
-                dksrc/dk0 --trial --print-config
+                dksrc/dk0 --print-config
 
                 install -d target
                 tar cvf target/nothing.tar README.md COPYRIGHT
 
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f target/t2.zip tarfile=$PWD/target/nothing.tar modver=OurTest_Std.T2Zip.${{ matrix.abi }}@0.1.0
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object OurTest_Std.T2Zip.${{ matrix.abi }}@0.1.0 -s Release.Agnostic -m ./output.zip -d target/unt2zip
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f target/t2.zip tarfile=$PWD/target/nothing.tar modver=OurTest_Std.T2Zip.${{ matrix.abi }}@0.1.0
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object OurTest_Std.T2Zip.${{ matrix.abi }}@0.1.0 -s Release.Agnostic -m ./output.zip -d target/unt2zip
                 ls -l target/unt2zip
                 test -f target/unt2zip/README.md
                 test -f target/unt2zip/COPYRIGHT

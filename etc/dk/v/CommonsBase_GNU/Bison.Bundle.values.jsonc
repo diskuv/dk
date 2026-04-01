@@ -1,4 +1,4 @@
-// Test: ./dk0 -d intermediate --trial --trust-local-package CommonsBase_GNU -I etc/dk/v --autofix get-bundle CommonsBase_GNU.Bison.Bundle@3.8.2 -d target/bisonsrc
+// Test: ./dk0 -d intermediate --trust-local-package CommonsBase_GNU -I etc/dk/v --autofix get-bundle CommonsBase_GNU.Bison.Bundle@3.8.2 -d target/bisonsrc
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {

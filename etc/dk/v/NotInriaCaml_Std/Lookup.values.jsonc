@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial --autofix -I etc/dk/v -x inria-caml-std:subpath: --trust-local-package NotInriaCaml_Std get-bundle NotInriaCaml_Std.Lookup@1.0.0 -d target/camllookup
+// Test: ./dk0 --autofix -I etc/dk/v -x inria-caml-std:subpath: --trust-local-package NotInriaCaml_Std get-bundle NotInriaCaml_Std.Lookup@1.0.0 -d target/camllookup
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {

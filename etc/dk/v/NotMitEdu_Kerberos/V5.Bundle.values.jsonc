@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial --autofix --trust-local-package NotMitEdu_Kerberos -I etc/dk/v --autofix get-bundle NotMitEdu_Kerberos.V5.Bundle@1.22.2 -d target/krb5src
+// Test: ./dk0 --autofix --trust-local-package NotMitEdu_Kerberos -I etc/dk/v --autofix get-bundle NotMitEdu_Kerberos.V5.Bundle@1.22.2 -d target/krb5src
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {

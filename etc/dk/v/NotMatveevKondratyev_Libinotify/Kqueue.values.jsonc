@@ -9,7 +9,7 @@
 // to monitor the file system activity.
 //
 // 0.x.x version since the API (libinotify) is stable across releases.
-// Test: ./dk0 --trial --trust-local-package NotMatveevKondratyev_Libinotify --trust-local-package CommonsBase_GNU -I etc/dk/v get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s Release.Darwin_arm64 -d target/libinotifykqueue
+// Test: ./dk0 --trust-local-package NotMatveevKondratyev_Libinotify --trust-local-package CommonsBase_GNU -I etc/dk/v get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s Release.Darwin_arm64 -d target/libinotifykqueue
 // Test: docker run -it --platform linux/amd64 -v $PWD:/work -w /work gcc:15.2.0 ./dk0 -v -d intermediate -x gnu-awk:subpath: --trust-local-package NotMatveevKondratyev_Libinotify --trust-local-package CommonsBase_GNU -I etc/dk/v get-object NotMatveevKondratyev_Libinotify.Kqueue@0.20240724.0 -s Release.Linux_x86_64 -d target/libinotifykqueue
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
@@ -24,7 +24,7 @@
                 "sequential": true,
                 "private": [
                     // convert the .tar.gz to .zip
-                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=NotMatveevKondratyev_Libinotify.Kqueue.Zip@0.20240724.0 tarfile=$(get-asset NotMatveevKondratyev_Libinotify.Kqueue.Bundle@0.20240724.0 -p libinotify-20240724.tar.gz -f libinotify-20240724.tar.gz)",
+                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=NotMatveevKondratyev_Libinotify.Kqueue.Zip@0.20240724.0 tarmodver=NotMatveevKondratyev_Libinotify.Kqueue.Bundle@0.20240724.0 tarassetpath=libinotify-20240724.tar.gz",
                     // extract zip to current folder, stripping toplevel gawk-0.20240724.0/ folder
                     "install-object NotMatveevKondratyev_Libinotify.Kqueue.Zip@0.20240724.0 -s Release.Agnostic -m ./output.zip -n 1 -d ."
                 ]

@@ -75,6 +75,7 @@
     - [OpenBSD signify keys](#openbsd-signify-keys)
     - [GitHub SLSA Level 2](#github-slsa-level-2)
     - [GitHub SLSA Level 3](#github-slsa-level-3)
+    - [Distribution Cram Tests](#distribution-cram-tests)
   - [Scripts](#scripts)
     - [Script Introduction](#script-introduction)
     - [Script Phases](#script-phases)
@@ -1908,6 +1909,22 @@ When accepting a known, vetted GitHub Actions script (SLSA Level 3), the:
 
 The build system will download the GitHub CLI (using the default trusted `CommonsBase_Std` library) to do verification of the builds.
 
+### Distribution Cram Tests
+
+🚧*missing docs*: make a section on cram tests indepedent of distributions
+
+When writing distribution cram tests:
+
+1. Running one rule in a script module will bring in the entire script module.
+   But it is best to run every rule for lightweight testing during distribution.
+2. Use `${CONFIG}` for files in the cram test directory. Set by `dk0 test`.
+3. Use `${RUNTIME}/<unique path to cram test>` for -f and -d options since outputs are relative to the
+   current dir like `dk0 post-object` and `dk0 run`. Set unique to the cram
+   test by `dk0 test`. The `<unique path to cram test>` is to avoid race conditions on Windows where
+   Windows Defender (etc.) may not make a file visible or rewritable immediately after creation.
+4. Get each asset used by rules since there are no static input dependencies for rules
+   (cf. <https://github.com/diskuv/dk/issues/100>).
+
 ## Scripts
 
 ### Script Introduction
@@ -2547,7 +2564,7 @@ The `OSFamily` of the execution platform. Values include `windows` and `macos`; 
 request.execution.ABIv3
 ```
 
-The third version of the DkML ABI of the execution platform described in [${SLOTNAME.SlotName}](#slotnameslotname). Examples include `windows_x86_64` and `darwin_arm64`.
+The third version of the DkML ABI of the execution platform described in [${SLOTNAME.SlotName}](#slotnameslotname). Examples include `Windows_x86_64` and `Darwin_arm64`.
 
 #### request.execution.OSv3
 

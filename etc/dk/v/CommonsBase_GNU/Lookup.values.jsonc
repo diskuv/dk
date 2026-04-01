@@ -1,5 +1,5 @@
-// Test: ./dk0 --trial --autofix -x commonsbase-gnu:subpath: -I etc/dk/v --trust-local-package CommonsBase_GNU get-bundle CommonsBase_GNU.Lookup@1.0.0 -d target/gnulookup
-// Test: ./dk0 --trial --autofix -x commonsbase-gnu-table:subpath: -I etc/dk/v --trust-local-package CommonsBase_GNU get-bundle CommonsBase_GNU.Lookup@1.0.0 -d target/gnutablelookup
+// Test: ./dk0 --autofix -x commonsbase-gnu:subpath: -I etc/dk/v --trust-local-package CommonsBase_GNU get-bundle CommonsBase_GNU.Lookup@1.0.0 -d target/gnulookup
+// Test: ./dk0 --autofix -x commonsbase-gnu-table:subpath: -I etc/dk/v --trust-local-package CommonsBase_GNU get-bundle CommonsBase_GNU.Lookup@1.0.0 -d target/gnutablelookup
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {

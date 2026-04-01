@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial -I etc/dk/v --trust-local-package NotInriaCaml_Std get-bundle NotInriaCaml_Std.OCaml.Bundle@5.4.1 -d target/ocaml-src
+// Test: ./dk0 -I etc/dk/v --trust-local-package NotInriaCaml_Std get-bundle NotInriaCaml_Std.OCaml.Bundle@5.4.1 -d target/ocaml-src
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {

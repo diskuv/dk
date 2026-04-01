@@ -19,15 +19,15 @@
 --    Darwin_x86_64 | Darwin_arm64 (might work; untested)
 --
 -- Examples:
---   dk0 --trial post-object -d target/ortools-macos-arm64-static/ NotGoogleDev_OR.Tools.F_Lib@9.15.0 \
+--   dk0 post-object -d target/ortools-macos-arm64-static/ NotGoogleDev_OR.Tools.F_Lib@9.15.0 \
 --     static=1 targetabi=Release.Darwin_arm64
 --
---   dk0 --trial post-object -d target/ortools-macos-x86_64-shared/ NotGoogleDev_OR.Tools.F_Lib@9.15.0 \
+--   dk0 post-object -d target/ortools-macos-x86_64-shared/ NotGoogleDev_OR.Tools.F_Lib@9.15.0 \
 --     static=0 targetabi=Release.Darwin_x86_64
 --
 --   {or local dev}
 --
---   dk0 --trial -I etc/dk/v \
+--   dk0 -I etc/dk/v \
 --     --trust-local-package CommonsBase_Build \
 --     --trust-local-package NotGoogleDev_OR \
 --     post-object -d target/ortools-macos-arm64-static/ NotGoogleDev_OR.Tools.F_Lib@9.15.0 \
@@ -38,7 +38,7 @@
 --   _build/default/ext/MlFront/src/DkZero_Exec/Shell.exe \
 --     -isystem ./ext/dk/etc/dk/i -I ext/dk/etc/dk/v \
 --     --trust-local-package CommonsBase_Std \
---     --trial post-object -d target/ortools-static/ NotGoogleDev_OR.Tools.F_Lib@9.15.0 \
+--     post-object -d target/ortools-static/ NotGoogleDev_OR.Tools.F_Lib@9.15.0 \
 --     ...
 --
 -- USAGE 2 of 2: NotGoogleDev_OR.Tools.F_Bin@9.15.0
@@ -47,7 +47,7 @@
 -- produces fully static binaries.
 --
 -- Examples:
---   dk0 --trial post-object -d target/ortools-macos-arm64-bin/ NotGoogleDev_OR.Tools.F_Bin@9.15.0 \
+--   dk0 post-object -d target/ortools-macos-arm64-bin/ NotGoogleDev_OR.Tools.F_Bin@9.15.0 \
 --     targetabi=Release.Darwin_arm64
 --
 

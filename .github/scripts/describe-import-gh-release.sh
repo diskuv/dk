@@ -43,9 +43,9 @@ if [ "$capturemarkdown" = true ] && [ -n "$capturefile" ]; then
   printf '```\n' >> "$capturefile"
 fi
 
-printf "./dk0 --trial import-github-l2 --repo %s --tag %s --outdir %s/etc/dk/i/\n" "$repository" "$tag" "$PROJECTDIR"
+printf "./dk0 import-github-l2 --repo %s --tag %s --outdir %s/etc/dk/i/\n" "$repository" "$tag" "$PROJECTDIR"
 if [ -n "$capturefile" ]; then
-  printf "./dk0 --trial import-github-l2 --repo %s --tag %s --outdir etc/dk/i/\n" "$repository" "$tag" >> "$capturefile"
+  printf "./dk0 import-github-l2 --repo %s --tag %s --outdir etc/dk/i/\n" "$repository" "$tag" >> "$capturefile"
 fi
 
 if [ "$capturemarkdown" = true ] && [ -n "$capturefile" ]; then

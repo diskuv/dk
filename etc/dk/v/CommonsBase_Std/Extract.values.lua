@@ -1,70 +1,3 @@
--- USAGE 1 of 2: CommonsBase_Std.Extract.F_Untar@0.1.0
--- (Free rule) Untars a tar, tar.gz, tar.xz or tar.bz2 file.
--- Configurations: One of the following sets of options must be provided:
---  tarfile= modver= paths[]=
--- Options:
---  tarfile=$PWD/target/nothing.tar.gz
---    The tar, tar.gz, tar.xz or tar.bz2 file to extract.
---  modver=OurTest_Std.Extract@0.1.0
---    The MODULE@VERSION of the form object that will contain the extracted files.
---    The slot for the form object will be `Release.Agnostic`.
---  paths[]=README.md
---    All of the extracted paths.
---    A future version may extract only the specified paths,
---    but for now we extract all files and expect you to declare them all.
--- Examples:
---   tar cvf target/nothing.tar README.md
---
---   dk0 --trial post-object CommonsBase_Std.Extract.F_Untar@0.1.0 \
---     -f target/untar modver=OurTest_Std.Extract@0.1.0 \
---     tarfile=$PWD/target/nothing.tar 'paths[]=README.md'
---
---   {or local dev}
---
---   _build/default/ext/MlFront/src/DkZero_Exec/Shell.exe \
---     -isystem ./ext/dk/etc/dk/i -I ext/dk/etc/dk/v \
---     --trust-local-package CommonsBase_Std \
---     --trial post-object CommonsBase_Std.Extract.F_Untar@0.1.0 \
---     -f target/untar modver=OurTest_Std.Extract@0.1.0 \
---     tarfile=$PWD/target/nothing.tar 'paths[]=README.md'
---
--- USAGE 2 of 2: CommonsBase_Std.Extract.F_TarToZip@0.1.0
--- (Free rule) Extracts a tar, tar.gz, tar.xz or tar.bz2 file and then re-compresses it
--- to a .zip file which has first-class support in the dk build system.
--- Configurations: One of the following sets of options must be provided:
---  tarfile= modver=
--- Options:
---  tarfile=$PWD/target/nothing.tar.gz
---    The tar, tar.gz, tar.xz or tar.bz2 file to extract.
---  modver=OurTest_Std.Extract@0.1.0
---    The MODULE@VERSION of the form object that will contain the "output.zip" file.
---    The slot for the form object will be `Release.Agnostic`.
--- Examples:
---   tar cvf target/nothing.tar README.md
---
---   dk0 --trial post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 \
---     -f target/t2.zip \
---     tarfile=$PWD/target/nothing.tar modver=OurTest_Std.T2Zip@0.1.0
---
---   dk0 --trial get-object OurTest_Std.T2Zip@0.1.0 -s Release.Agnostic \
---     -m ./output.zip -d target/unt2zip
---
---   ls target/unt2zip
---   > README.md
---
--- DESIGN QUESTIONS
---
--- Q1: Platforms?
--- A1: On macOS the /usr/bin/tar system binary is used.
--- On Linux the toybox tar command is fetched from an asset and used.
--- On Windows the 7z.exe from S7z command is fetched from an asset and used.
--- Also, for F_TarToZip: (macOS) /usr/bin/zip. (Others) the S7z object.
---
--- Q2: There is no way to filter which files I want.
--- A2: <FUTURE> This rule will be renamed to CommonsBase_Std.Extract0, and the new CommonsBase_Std.Extract
--- will run CommonsBase_Std.Fd on the extracted files to filter them. The split is because
--- CommonsBase_Std.Fd requires CommonsBase_Std.Extract0.
-
 local M = {
   id = "CommonsBase_Std.Extract@0.1.0"
 }
@@ -141,10 +74,11 @@ function rules.F_TarToZip(command, request)
 end
 
 function CommonsBase_Std__Extract__0_1_0.common_params(request, p)
-  local tarfile = assert(request.user.tarfile, "please provide `'tarfile=SOURCE'`")
-  local gzip = string.find(tarfile, "%.tar%.gz$") ~= nil
-  local xz = string.find(tarfile, "%.tar%.xz$") ~= nil
-  local bz2 = string.find(tarfile, "%.tar%.bz2$") ~= nil
+  local tarmodver = assert(request.user.tarmodver, "please provide `tarmodver=MODULE@VERSION`")
+  local tarassetpath = assert(request.user.tarassetpath, "please provide `tarassetpath=ASSETPATH`")
+  local gzip = string.find(tarassetpath, "%.tar%.gz$") ~= nil
+  local xz = string.find(tarassetpath, "%.tar%.xz$") ~= nil
+  local bz2 = string.find(tarassetpath, "%.tar%.bz2$") ~= nil
   local toyboxexe = string.format(
     "$(get-object CommonsBase_Std.Toybox@0.8.9 -s Release.%s -m ./toybox -f toybox.exe -e '*')",
     request.execution.ABIv3)
@@ -165,29 +99,30 @@ function CommonsBase_Std__Extract__0_1_0.common_params(request, p)
   local file_tar = ""
   if gzip then
     tarcompressflag = "z"
-    file_tar = string.sub(tarfile, 1, -4) -- remove .gz
+    file_tar = string.sub(tarassetpath, 1, -4) -- remove .gz
   elseif xz then
     tarcompressflag = "J"
-    file_tar = string.sub(tarfile, 1, -4) -- remove .xz
+    file_tar = string.sub(tarassetpath, 1, -4) -- remove .xz
   elseif bz2 then
     tarcompressflag = "j"
-    file_tar = string.sub(tarfile, 1, -5) -- remove .bz2
+    file_tar = string.sub(tarassetpath, 1, -5) -- remove .bz2
   else
-    file_tar = tarfile
+    file_tar = tarassetpath
   end
 
-  -- /a/b/c.tar -> c.tar
-  local baseidx = assert(string.find(file_tar, "[^/][^/]*$"), "`" .. tarfile .. "` tarball must have a basename")
+  -- file_tar=/a/b/c.tar        -> c.tar
+  -- tarassetpath=/a/b/c.tar.gz -> c.tar.gz
+  local baseidx = assert(string.find(file_tar, "[^/][^/]*$"), "`" .. tarassetpath .. "` tarball must have a basename")
   local file_tar_basename = string.sub(file_tar, baseidx)
+  local file_tarz_filename = string.sub(tarassetpath, baseidx)
 
   p.outputid = request.submit.outputid
   p.outputmodule = request.submit.outputmodule
   p.outputversion = request.submit.outputversion
 
-  p.tarfile = tarfile
+  p.tarfile = string.format("$(get-asset %s -p %s -f %s)", tarmodver, tarassetpath, file_tarz_filename)
   p.file_tar = file_tar
   p.file_tar_basename = file_tar_basename
-  p.abi = request.execution.ABIv3
   p.tarcompressflag = tarcompressflag
   p.gzip = gzip
   p.xz = xz

@@ -1,7 +1,7 @@
 // LIMITATIONS
 // 1. There are no gawk extensions.
 //
-// Test: ./dk0 --trial --trust-local-package CommonsBase_LLVM --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Awk.Win32.LLVM_MinGW@5.3.1 -s Release.Darwin_arm64.Windows_x86_64 -d target/gawk-win32
+// Test: ./dk0 --trust-local-package CommonsBase_LLVM --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Awk.Win32.LLVM_MinGW@5.3.1 -s Release.Darwin_arm64.Windows_x86_64 -d target/gawk-win32
 // Test: docker run -it --platform linux/amd64 -v $PWD:/work -w /work gcc:15.2.0 ./dk0 -v -d intermediate --trust-local-package CommonsBase_LLVM --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Awk.Win32.LLVM_MinGW@5.3.1 -s Release.Linux_x86_64.Windows_x86_64 -d target/gawk-win32-from-linux
 // Slot FORMAT: Release.<execution_abi>.<target_abi>
 //
@@ -20,7 +20,7 @@
                 "sequential": true,
                 "private": [
                     // convert the .tar.gz to .zip
-                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.Awk.Zip@5.3.1 tarfile=$(get-asset CommonsBase_GNU.Awk.Bundle@5.3.1 -p gawk-5.3.1.tar.gz -f gawk.tar.gz)",
+                    "post-object CommonsBase_Std.Extract.F_TarToZip@0.1.0 -f ignored.zip modver=CommonsBase_GNU.Awk.Zip@5.3.1 tarmodver=CommonsBase_GNU.Awk.Bundle@5.3.1 tarassetpath=gawk-5.3.1.tar.gz",
                     // extract zip to current folder, stripping toplevel gawk-5.3.1/ folder
                     "install-object CommonsBase_GNU.Awk.Zip@5.3.1 -s Release.Agnostic -m ./output.zip -n 1 -d ."
                 ]

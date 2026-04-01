@@ -3,8 +3,8 @@
 // Release.Windows_x86_64
 // Release.Windows_x86
 //
-// Test: ./dk0 --trial -v -I etc/dk/v --trust-local-package CommonsBase_GNU get-object CommonsBase_GNU.Toolchain.W64dev@2.5.0 -s Release.Windows_x86_64 -d target/w64devkit-x64
-// Test: ./dk0 --trial -v -I etc/dk/v --trust-local-package CommonsBase_GNU get-object CommonsBase_GNU.Toolchain.W64dev@2.5.0 -s Release.Windows_x86 -d target/w64devkit-x86
+// Test: ./dk0 -v -I etc/dk/v --trust-local-package CommonsBase_GNU get-object CommonsBase_GNU.Toolchain.W64dev@2.5.0 -s Release.Windows_x86_64 -d target/w64devkit-x64
+// Test: ./dk0 -v -I etc/dk/v --trust-local-package CommonsBase_GNU get-object CommonsBase_GNU.Toolchain.W64dev@2.5.0 -s Release.Windows_x86 -d target/w64devkit-x86
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": {

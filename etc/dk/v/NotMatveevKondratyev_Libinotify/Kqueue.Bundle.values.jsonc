@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial --autofix --trust-local-package NotMatveevKondratyev_Libinotify -I etc/dk/v --autofix get-bundle NotMatveevKondratyev_Libinotify.Kqueue.Bundle@0.20240724.0 -d target/libinotifykqueuesrc
+// Test: ./dk0 --autofix --trust-local-package NotMatveevKondratyev_Libinotify -I etc/dk/v --autofix get-bundle NotMatveevKondratyev_Libinotify.Kqueue.Bundle@0.20240724.0 -d target/libinotifykqueuesrc
 // 0.x.x version since the API (libinotify) is stable across releases.
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",

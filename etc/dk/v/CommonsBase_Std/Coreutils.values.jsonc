@@ -1,7 +1,7 @@
 // Testing local:
-//  ./dk0 --trial -I etc/dk/v -nosysinc --data-dir t/d-new -v --trust-local-package CommonsBase_Std get-object CommonsBase_Std.Coreutils@0.6.0 -s Release.Darwin_arm64 -d target/coreutils-macarm64
+//  ./dk0 -I etc/dk/v -nosysinc --data-dir t/d-new -v --trust-local-package CommonsBase_Std get-object CommonsBase_Std.Coreutils@0.6.0 -s Release.Darwin_arm64 -d target/coreutils-macarm64
 // Testing distribution:
-//  ./dk0 --trial get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.Windows_x86 -d target/coreutilswin64
+//  ./dk0 get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.Windows_x86 -d target/coreutilswin64
 //
 // === CHANGES ===
 // Major changes from 0.2.2 to 0.6.0:

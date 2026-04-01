@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial --autofix -I etc/dk/v -x commons-base-win32-table:subpath: --trust-local-package CommonsBase_Win32 get-bundle CommonsBase_Win32.Lookup@1.0.0 -d target/win32lookup
+// Test: ./dk0 --autofix -I etc/dk/v -x commons-base-win32-table:subpath: --trust-local-package CommonsBase_Win32 get-bundle CommonsBase_Win32.Lookup@1.0.0 -d target/win32lookup
 {
   "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
   "schema_version": { "major": 1, "minor": 0 },

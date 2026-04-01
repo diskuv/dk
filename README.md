@@ -133,7 +133,7 @@ This is *not* a toy problem! We would need the 7zip executable if our second tas
 For unpacking the 7zip executables, we'll submit a form several times (each time with different parameters):
 
 ```console
-$ dksrc/dk0 --trial get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_x86_64 -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
+$ dksrc/dk0 get-object 'CommonsBase_Std.S7z@25.1.0' -s Release.Darwin_x86_64 -m ./7zz.exe -f target/Darwin_x86_64.7zz.exe
 [signify] New build key pair in t/k/build.pub and t/k/build.sec ...
 [signify] Distribute key pair among trusted coworkers only!
 [progress]: ...
@@ -403,13 +403,13 @@ and we get:
 
 <!-- $MDX skip -->
 ```console
-$ dksrc/dk0 --trial --autofix -I 7zip-project -x 7zip-org:subpath: get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+$ dksrc/dk0 --autofix -I 7zip-project -x 7zip-org:subpath: get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 ...
 autofix applied to `7zip-project/OurZip_Demo.S7z1a.S7zr.values.jsonc`
 ```
 
 ```console
-$ dksrc/dk0 --trial -I 7zip-project -x 7zip-org:subpath: get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-asset 'OurZip_Demo.S7z1a.Assets@25.1.0' -p 7zr.exe -f target/7zr.exe
 [progress]: dla 7zip-org:7zr.exe size 601088 ...
 [progress]:   dlb https://github.com/ip7z/7zip/releases/download/25.01 ...
 [up-to-date] OurZip_Demo.S7z1a.Assets@25.1.0+bn-20250101000000 -p 7zr.exe
@@ -542,7 +542,7 @@ when you forgot to declare files or you declare too many files.
 We'll use `get-object` to submit our new form. With that we get:
 
 ```console
-$ dksrc/dk0 --trial -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z1b.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/7zr-win64
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z1b.S7zr@25.1.0' -s Release.Windows_x86_64 -d target/7zr-win64
 [up-to-date] OurZip_Demo.S7z1b.S7zr@25.1.0+bn-20250101000000 -s Release.Windows_x86_64
 ```
 
@@ -695,7 +695,7 @@ We'll be using a new command `get-bundle`.
 With that we get:
 
 ```console
-$ dksrc/dk0 --trial -I 7zip-project -x 7zip-org:subpath: get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -d target/7zr-assets
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -d target/7zr-assets
 [progress]: dla 7zip-org:7zr.exe size 601088 ...
 [progress]:   dlb https://github.com/ip7z/7zip/releases/download/25.01 ...
 [progress]: dla 7zip-org:7z2501-arm.exe size 1658315 ...
@@ -760,7 +760,7 @@ What happens if we output the bundle to a file rather than a directory.
 That is, what if we replaced `-d target/7zr-assets` with `-f target/7zr-file`?
 
 ```console
-$ dksrc/dk0 --trial -I 7zip-project -x 7zip-org:subpath: get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -f target/7zr-file
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-bundle 'OurZip_Demo.S7z1c.Assets@25.1.0' -f target/7zr-file
 [progress]: dla 7zip-org:7zr.exe size 601088 ...
 [progress]:   dlb https://github.com/ip7z/7zip/releases/download/25.01 ...
 [progress]: dla 7zip-org:7z2501-arm.exe size 1658315 ...
@@ -1076,7 +1076,7 @@ The use of `7zr.exe` means we can only run this step on Windows hardware, even t
 
 <!-- $MDX os_type=Win32 -->
 ```console
-$ dksrc/dk0 --trial -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z3.MacLinux7zTar@25.1.0' -s Release.Linux_arm64 -d target/7ztar-linuxarm64
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z3.MacLinux7zTar@25.1.0' -s Release.Linux_arm64 -d target/7ztar-linuxarm64
 [buildlog] [warning] failed to read all traces: missing correspondence for trace store key `CommonsBase_Std@2.5.202601180005{dist}`: value has no value id
 [progress]: dla CommonsBase_Std:part9.valuestore.zip offset 62465946 len 30 ...
 [progress]:   dlb https://github.com/diskuv/dk/releases/download/2.5.202601180005 ...
@@ -1199,7 +1199,7 @@ The use of `7z.exe` means we can only run this step on Windows hardware, even th
 
 <!-- $MDX os_type=Win32 -->
 ```console
-$ dksrc/dk0 --trial -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z4.MacLinux7zExe@25.1.0' -s Release.Darwin_x86_64 -d target/7zexe-macintel
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z4.MacLinux7zExe@25.1.0' -s Release.Darwin_x86_64 -d target/7zexe-macintel
 [buildlog] [warning] failed to read all traces: missing correspondence for trace store key `CommonsBase_Std@2.5.202601180005{dist}`: value has no value id
 [progress]: dla CommonsBase_Std:part9.valuestore.zip offset 62465946 len 30 ...
 [progress]:   dlb https://github.com/diskuv/dk/releases/download/2.5.202601180005 ...
@@ -1309,7 +1309,7 @@ With that our users can grab the `7zz.exe` executable for any operating system a
      a single run. -->
 <!-- $MDX os_type=Win32 -->
 ```console
-$ dksrc/dk0 --trial -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -d target/7z-linux64
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -d target/7z-linux64
 [buildlog] [warning] failed to read all traces: missing correspondence for trace store key `CommonsBase_Std@2.5.202601180005{dist}`: value has no value id
 [progress]: dla CommonsBase_Std:part9.valuestore.zip offset 62465946 len 30 ...
 [progress]:   dlb https://github.com/diskuv/dk/releases/download/2.5.202601180005 ...
@@ -1348,7 +1348,7 @@ Since `7zz.exe` is a standalone executable that doesn't need any DLLs or `.so` (
      a single run. -->
 <!-- $MDX os_type=Win32 -->
 ```console
-$ dksrc/dk0 --trial -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
+$ dksrc/dk0 -I 7zip-project -x 7zip-org:subpath: get-object 'OurZip_Demo.S7z5.S7zExe@25.1.0' -s Release.Linux_x86_64 -m ./7zz.exe -f target/7zz.exe
 [buildlog] [warning] failed to read all traces: missing correspondence for trace store key `CommonsBase_Std@2.5.202601180005{dist}`: value has no value id
 [progress]: dla CommonsBase_Std:part9.valuestore.zip offset 62465946 len 30 ...
 [progress]:   dlb https://github.com/diskuv/dk/releases/download/2.5.202601180005 ...
@@ -1420,27 +1420,27 @@ jobs:
               shell: pwsh
               # `--trial` helps cross-platform CI caches behave best since cache+data is under the project directory
               run: |
-                dksrc/dk0 --trial --print-config
+                dksrc/dk0 --print-config
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64   -m ./LICENSE -f target/LICENSE
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64   -m ./LICENSE -f target/LICENSE
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64   -m ./7zz.exe -f target/Release.Darwin_arm64.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_arm64   -m ./7zz.exe -f target/Release.Darwin_arm64.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_x86_64  -m ./7zz.exe -f target/Release.Darwin_x86_64.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Darwin_x86_64  -m ./7zz.exe -f target/Release.Darwin_x86_64.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm      -m ./7zz.exe -f target/Release.Linux_arm.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm      -m ./7zz.exe -f target/Release.Linux_arm.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64    -m ./7zz.exe -f target/Release.Linux_arm64.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_arm64    -m ./7zz.exe -f target/Release.Linux_arm64.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86      -m ./7zz.exe -f target/Release.Linux_x86.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86      -m ./7zz.exe -f target/Release.Linux_x86.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64   -m ./7zz.exe -f target/Release.Linux_x86_64.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Linux_x86_64   -m ./7zz.exe -f target/Release.Linux_x86_64.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86    -m ./7zz.exe -f target/Release.Windows_x86.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86    -m ./7zz.exe -f target/Release.Windows_x86.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                dksrc/dk0 --trial -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64 -m ./7zz.exe -f target/Release.Windows_x86_64.7zz.exe
+                dksrc/dk0 -v -nosysinc -I etc/dk/v --trust-local-package CommonsBase_Std get-object ${{ github.workflow }}@${{ env.LIBRARY_VERSION }} -s Release.Windows_x86_64 -m ./7zz.exe -f target/Release.Windows_x86_64.7zz.exe
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
             - name: Test ${{ github.workflow }}

@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Awk@5.3.1 -s Release.Darwin_arm64 -d target/gawk -e 'bin/*'
+// Test: ./dk0 --trust-local-package CommonsBase_GNU -I etc/dk/v get-object CommonsBase_GNU.Awk@5.3.1 -s Release.Darwin_arm64 -d target/gawk -e 'bin/*'
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {

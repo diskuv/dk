@@ -1,4 +1,4 @@
-// Test: ./dk0 --trial --autofix --trust-local-package CommonsBase_GNU -I etc/dk/v --autofix get-bundle CommonsBase_GNU.Awk.Bundle@5.3.1 -d target/gawksrc
+// Test: ./dk0 --autofix --trust-local-package CommonsBase_GNU -I etc/dk/v --autofix get-bundle CommonsBase_GNU.Awk.Bundle@5.3.1 -d target/gawksrc
 {
     "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
     "schema_version": {

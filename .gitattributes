@@ -34,6 +34,7 @@
 *.capnp text eol=lf
 configure text eol=lf
 dk text eol=lf
+dk0 text eol=lf
 dune text eol=lf
 dune-file text eol=lf
 dune-project text eol=lf

@@ -46,8 +46,14 @@ jobs:
         # tag(2.5.x+CommonsBase-Std) or branch(main)
         if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.') && endsWith(github.ref_name, '+CommonsBase-Std')) || github.ref_name == 'main'
 
-        # runs-on(Windows): CommonsBase_Std requires Windows to build S7z
-        runs-on: windows-2022
+        strategy:
+          fail-fast: true
+          matrix:
+            include:
+              - runs-on: windows-2022 # CommonsBase_Std requires Windows to build S7z
+                distbase: dist-win32
+
+        runs-on: ${{ matrix.runs-on }}
 
         permissions:
           contents: write # for action-gh-release
@@ -71,51 +77,16 @@ jobs:
                 ! [ "${{ github.ref_type }}" = "tag" ] || .github/scripts/describe-import-gh-release.sh -m -c "$GITHUB_STEP_SUMMARY" -t '${{ github.ref_name }}' -r '${{ github.repository }}'
 
             - name: Distribute Modules
-              uses: diskuv/dk-distribute@v1
+              uses: diskuv/dk-distribute@v2
               with:
-                  id: ${{ github.ref_type == 'tag' && format('CommonsBase_Std@{0}', github.ref_name) || format('CommonsBase_Std@{0}', env.dkdist_branch_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('{0}@{1}', github.job, github.ref_name) || format('{0}@{1}', github.job, env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   # dk0=<SOURCE_DIRECTORY>
                   options: -nosysinc -I etc/dk/v --cell "dk0=${{ github.workspace }}"
-                  objects: |
-                    Release.Windows_x86_64:CommonsBase_Std.S7z.S7zr@25.1.0
-                    Release.Windows_x86_64:CommonsBase_Std.S7z.Windows7zExe@25.1.0
-
-                    Release.Windows_x86:CommonsBase_Std.Coreutils@0.2.2
-                    Release.Windows_x86_64:CommonsBase_Std.Coreutils@0.2.2
-                    Release.Darwin_arm64:CommonsBase_Std.Coreutils@0.2.2
-                    Release.Darwin_x86_64:CommonsBase_Std.Coreutils@0.2.2
-                    Release.Linux_x86:CommonsBase_Std.Coreutils@0.2.2
-                    Release.Linux_x86_64:CommonsBase_Std.Coreutils@0.2.2
-
-                    Release.Windows_x86:CommonsBase_Std.Coreutils@0.6.0
-                    Release.Windows_x86_64:CommonsBase_Std.Coreutils@0.6.0
-                    Release.Darwin_arm64:CommonsBase_Std.Coreutils@0.6.0
-                    Release.Darwin_x86_64:CommonsBase_Std.Coreutils@0.6.0
-                    Release.Linux_x86:CommonsBase_Std.Coreutils@0.6.0
-                    Release.Linux_x86_64:CommonsBase_Std.Coreutils@0.6.0
-
-                    Release.Windows_x86:CommonsBase_Std.S7z@25.1.0
-                    Release.Windows_x86_64:CommonsBase_Std.S7z@25.1.0
-                    Release.Darwin_arm64:CommonsBase_Std.S7z@25.1.0
-                    Release.Darwin_x86_64:CommonsBase_Std.S7z@25.1.0
-                    Release.Linux_x86:CommonsBase_Std.S7z@25.1.0
-                    Release.Linux_x86_64:CommonsBase_Std.S7z@25.1.0
-
-                    Release.Windows_x86:CommonsBase_Std.Fd@10.3.0
-                    Release.Windows_x86_64:CommonsBase_Std.Fd@10.3.0
-                    Release.Darwin_arm64:CommonsBase_Std.Fd@10.3.0
-                    Release.Darwin_x86_64:CommonsBase_Std.Fd@10.3.0
-                    Release.Linux_x86:CommonsBase_Std.Fd@10.3.0
-                    Release.Linux_x86_64:CommonsBase_Std.Fd@10.3.0
-
-                    Release.Linux_arm64:CommonsBase_Std.Toybox@0.8.9
-                    Release.Linux_x86_64:CommonsBase_Std.Toybox@0.8.9
-                    Release.Linux_x86:CommonsBase_Std.Toybox@0.8.9
-                  scripts: |
-                    CommonsBase_Std.Extract@0.1.0
                   use-cache: true
+                  distscript: etc/dk/v/${{ github.job }}/${{ matrix.distbase }}.t
+                  experimental-dk-owner: ${{ github.repository_owner}}
                   #   Use MlFront HEAD when CI build is not from a tag
                   experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
                   #   Temporary: use HEAD until MlFront testing is done
@@ -134,7 +105,7 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
-            - name: Release ${{ github.workflow }}
+            - name: Release ${{ github.job }}
               if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
@@ -143,8 +114,14 @@ jobs:
         # tag(2.5.x+CommonsBase-Build) or branch(main)
         if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.') && endsWith(github.ref_name, '+CommonsBase-Build')) || github.ref_name == 'main'
 
-        # runs-on(anything). Linux is cheapest and quickest to boot in Github Actions
-        runs-on: ubuntu-24.04
+        strategy:
+          fail-fast: true
+          matrix:
+            include:
+              - runs-on: ubuntu-24.04
+                distbase: dist-any # Linux is cheapest and quickest to boot in Github Actions
+
+        runs-on: ${{ matrix.runs-on }}
 
         permissions:
           contents: write # for action-gh-release
@@ -176,30 +153,16 @@ jobs:
                 echo final imports ...; find etc/dk/i -type f
 
             - name: Distribute Modules
-              uses: diskuv/dk-distribute@v1
+              uses: diskuv/dk-distribute@v2
               with:
-                  id: ${{ github.ref_type == 'tag' && format('CommonsBase_Build@{0}', github.ref_name) || format('CommonsBase_Build@{0}', env.dkdist_branch_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('{0}@{1}', github.job, github.ref_name) || format('{0}@{1}', github.job, env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   options: -nosysinc -I etc/dk/i -I etc/dk/v  --cell "dk0=${{ github.workspace }}" # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
-                  # No `Release.Windows_x86:CommonsBase_Build.Ninja0@1.12.1` today
-                  objects: |
-                    Release.Windows_arm64:CommonsBase_Build.Ninja0@1.12.1
-                    Release.Windows_x86_64:CommonsBase_Build.Ninja0@1.12.1
-                    Release.Darwin_arm64:CommonsBase_Build.Ninja0@1.12.1
-                    Release.Darwin_x86_64:CommonsBase_Build.Ninja0@1.12.1
-                    Release.Linux_x86:CommonsBase_Build.Ninja0@1.12.1
-                    Release.Linux_x86_64:CommonsBase_Build.Ninja0@1.12.1
-                    Release.Linux_arm64:CommonsBase_Build.Ninja0@1.12.1
-
-                    Release.Agnostic:CommonsBase_Build.CMake0.Phony@3.25.3
-                  scripts: |
-                    CommonsBase_Build.CMake0@3.25.3
                   use-cache: true
-                  #   Use MlFront HEAD when CI build is not from a tag
+                  distscript: etc/dk/v/${{ github.job }}/${{ matrix.distbase }}.t
+                  experimental-dk-owner: ${{ github.repository_owner}}
                   experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
-                  #   Temporary: use HEAD until MlFront testing is done
-                  # experimental-mlfront-ref: HEAD
 
             - name: Archive Distribution
               if: github.ref_type != 'tag'
@@ -214,7 +177,7 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
-            - name: Release ${{ github.workflow }}
+            - name: Release ${{ github.job }}
               if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
@@ -223,7 +186,18 @@ jobs:
         # tag(2.5.x+CommonsBase-LLVM) or branch(main)
         if: (github.ref_type == 'tag' && startsWith(github.ref_name, '2.5.') && endsWith(github.ref_name, '+CommonsBase-LLVM')) || github.ref_name == 'main'
 
-        runs-on: ubuntu-24.04
+        strategy:
+          fail-fast: true
+          matrix:
+            include:
+              - runs-on: ubuntu-24.04
+                distbase: dist-linux
+              - runs-on: windows-2022
+                distbase: dist-win32
+              - runs-on: macos-latest
+                distbase: dist-macos
+
+        runs-on: ${{ matrix.runs-on }}
 
         permissions:
           contents: write # for action-gh-release
@@ -255,30 +229,15 @@ jobs:
                 echo final imports ...; find etc/dk/i -type f
 
             - name: Distribute Modules
-              uses: diskuv/dk-distribute@v1
+              uses: diskuv/dk-distribute@v2
               with:
-                  id: ${{ github.ref_type == 'tag' && format('CommonsBase_LLVM@{0}', github.ref_name) || format('CommonsBase_LLVM@{0}', env.dkdist_branch_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('{0}@{1}', github.job, github.ref_name) || format('{0}@{1}', github.job, env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   options: -nosysinc -I etc/dk/i -I etc/dk/v  --cell "dk0=${{ github.workspace }}" # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
-                  # These are not yet ready to be built ... they use precommands instead of subshells and they don't use the CommonsBase_Build package for CMake0.
-                  # Release.Darwin_arm64:CommonsBase_LLVM.Clang@19.1.3
-                  # Release.Darwin_x86_64:CommonsBase_LLVM.Clang@19.1.3
-                  # Release.Linux_x86:CommonsBase_LLVM.Clang@19.1.3
-                  # Release.Linux_x86_64:CommonsBase_LLVM.Clang@19.1.3
-                  # Release.Windows_x86_64:CommonsBase_LLVM.Clang@19.1.3
-                  # Release.Windows_x86:CommonsBase_LLVM.Clang@19.1.3
-                  #
-                  # One or more of these are too big ... each file in a GitHub release must not exceed 2GB (split zip into N smaller zips as part of dk0 consolidate?)
-                  # Release.Windows_x86_64:CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216
-                  # Release.Windows_x86:CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216
-                  # Release.Linux_arm64:CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216
-                  # Release.Linux_x86_64:CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216
-                  objects: |
-                    Release.Darwin_arm64:CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216
-                    Release.Darwin_x86_64:CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216
-
                   use-cache: true
+                  distscript: etc/dk/v/${{ github.job }}/${{ matrix.distbase }}.t
+                  experimental-dk-owner: ${{ github.repository_owner}}
                   experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
 
             - name: Archive Distribution
@@ -294,7 +253,7 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
-            - name: Release ${{ github.workflow }}
+            - name: Release ${{ github.job }}
               if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
@@ -339,7 +298,7 @@ jobs:
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
               with:
-                  id: ${{ github.ref_type == 'tag' && format('CommonsBase_GNU@{0}', github.ref_name) || format('CommonsBase_GNU@{0}', env.dkdist_branch_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('{0}@{1}', github.job, github.ref_name) || format('{0}@{1}', github.job, env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   options: -nosysinc -I etc/dk/i -I etc/dk/v  --cell "dk0=${{ github.workspace }}" # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
@@ -446,7 +405,7 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
-            - name: Release ${{ github.workflow }}
+            - name: Release ${{ github.job }}
               if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
@@ -490,7 +449,7 @@ jobs:
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
               with:
-                  id: ${{ github.ref_type == 'tag' && format('NotMatveevKondratyev_Libinotify@{0}', github.ref_name) || format('NotMatveevKondratyev_Libinotify@{0}', env.dkdist_branch_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('{0}@{1}', github.job, github.ref_name) || format('{0}@{1}', github.job, env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   options: -nosysinc -I etc/dk/i -I etc/dk/v  --cell "dk0=${{ github.workspace }}" # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
@@ -514,7 +473,7 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
-            - name: Release ${{ github.workflow }}
+            - name: Release ${{ github.job }}
               if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
@@ -558,7 +517,7 @@ jobs:
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
               with:
-                  id: ${{ github.ref_type == 'tag' && format('NotMitEdu_Kerberos@{0}', github.ref_name) || format('NotMitEdu_Kerberos@{0}', env.dkdist_branch_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('{0}@{1}', github.job, github.ref_name) || format('{0}@{1}', github.job, env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   options: -nosysinc -I etc/dk/i -I etc/dk/v  --cell "dk0=${{ github.workspace }}" # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
@@ -597,7 +556,7 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
-            - name: Release ${{ github.workflow }}
+            - name: Release ${{ github.job }}
               if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
@@ -641,7 +600,7 @@ jobs:
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
               with:
-                  id: ${{ github.ref_type == 'tag' && format('CommonsBase_Win32@{0}', github.ref_name) || format('CommonsBase_Win32@{0}', env.dkdist_branch_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('{0}@{1}', github.job, github.ref_name) || format('{0}@{1}', github.job, env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   options: -nosysinc -I etc/dk/i -I etc/dk/v  --cell "dk0=${{ github.workspace }}" # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
@@ -677,7 +636,7 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
-            - name: Release ${{ github.workflow }}
+            - name: Release ${{ github.job }}
               if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
@@ -721,7 +680,7 @@ jobs:
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
               with:
-                  id: ${{ github.ref_type == 'tag' && format('NotInriaCaml_Std@{0}', github.ref_name) || format('NotInriaCaml_Std@{0}', env.dkdist_branch_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('{0}@{1}', github.job, github.ref_name) || format('{0}@{1}', github.job, env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   options: -nosysinc -I etc/dk/i -I etc/dk/v  --cell "dk0=${{ github.workspace }}" # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
@@ -759,7 +718,7 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
-            - name: Release ${{ github.workflow }}
+            - name: Release ${{ github.job }}
               if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
@@ -803,7 +762,7 @@ jobs:
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
               with:
-                  id: ${{ github.ref_type == 'tag' && format('NotGoogleDev_OR@{0}', github.ref_name) || format('NotGoogleDev_OR@{0}', env.dkdist_branch_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('{0}@{1}', github.job, github.ref_name) || format('{0}@{1}', github.job, env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   options: -nosysinc -I etc/dk/i -I etc/dk/v  --cell "dk0=${{ github.workspace }}" # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
@@ -828,7 +787,7 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
-            - name: Release ${{ github.workflow }}
+            - name: Release ${{ github.job }}
               if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
@@ -872,7 +831,7 @@ jobs:
             - name: Distribute Modules
               uses: diskuv/dk-distribute@v1
               with:
-                  id: ${{ github.ref_type == 'tag' && format('NotInriaParkas_Caml@{0}', github.ref_name) || format('NotInriaParkas_Caml@{0}', env.dkdist_branch_version) }}
+                  id: ${{ github.ref_type == 'tag' && format('{0}@{1}', github.job, github.ref_name) || format('{0}@{1}', github.job, env.dkdist_branch_version) }}
                   pubkey: ${{ secrets.distribute_2_5_pubkey }}
                   seckey: ${{ secrets.distribute_2_5_seckey }}
                   options: -d parsetrace -d import -nosysinc -I etc/dk/i -I etc/dk/v --cell "dk0=${{ github.workspace }}" # "Import and Summarize Packages" etc/dk/i rather than default system dependencies dksrc/etc/dk/i
@@ -915,7 +874,7 @@ jobs:
               uses: actions/attest-build-provenance@v3
               with: { subject-path: dk-dist/* }
 
-            - name: Release ${{ github.workflow }}
+            - name: Release ${{ github.job }}
               if: github.ref_type == 'tag'
               uses: softprops/action-gh-release@f38efdea4c5ffe13e9424b0aa2833bee28f1e34c # v2. Oct. 6, 2025
               with: { files: dk-dist/* }
