@@ -5,15 +5,14 @@
 
 ## Intro
 
-Unified scripts combine input and output in the same document in a
-readable format (*"literate programming"*).
+Unified scripts combine input and output within the same readable document.
 
 Commands are *marked into* a document with two spaces and a prompt.
 For example, we can have the command `echo Hello World` marked into
-a Markdown document with `<SPACE> <SPACE> $ <SPACE>`:
+a `.md` document with `<SPACE> <SPACE> $ <SPACE>`:
 
 ```unified
-# My Markdown Document
+# My Document
 We'll run the "echo" command.
 
   $ echo Hello World
@@ -21,10 +20,10 @@ We'll run the "echo" command.
 
 The power of unified scripts is that they are both readable documents *and* runnable scripts.
 Running the script above creates an update that
-includes the output of the `echo` command:
+includes the response from the `echo` command:
 
 ```unified
-# My Markdown Document
+# My Document
 We'll run the "echo" command.
 
   $ echo Hello World
@@ -39,8 +38,8 @@ Every line in a unified script is either:
 
 In fact, several kinds of main documents can be unified scripts.
 
-Depending on the kind of main document, after a unified script is run, the mark-in command and responses should be *rendered* to produce a prettier main document.
-For Markdown main documents, the commands and responses are prettier if they are wrapped in code blocks:
+After a unified script is run, the mark-in command and responses can be *rendered* to produce a prettier main document.
+For Markdown documents, the commands and responses are prettier if they are wrapped in code blocks:
 
     # My Markdown Document
     We'll run the "echo" command.
@@ -65,286 +64,9 @@ You can use the following main document guides for more information, including h
 [OCaml Modules]: #ocaml-modules
 [mark-in kind]: #mark-in-kinds
 [mark-in executables]: #executables
+[unified ecosystem]: #unified-ecosystem
 
-## Main Document Kinds
-
-### Plain Text
-
-| Filename extension | Notes                                                |
-| ------------------ | ---------------------------------------------------- |
-| `.MARKIN.u`        | `MARKIN` is the file extension of the [mark-in kind] |
-
-Plain text means there is no rendering post-processing step.
-
-Steps:
-
-1. Run the `MARKIN` executable from the [mark-in executables] table. You will not need a renderer.
-
-### Markdown
-
-| Filename extension | Notes                                                |
-| ------------------ | ---------------------------------------------------- |
-| `.md.MARKIN.u`     | `MARKIN` is the file extension of the [mark-in kind] |
-
-For Markdown documents, avoid Markdown indented code blocks. Those indented code blocks might be mistaken for unified command prompts.
-
-Steps:
-
-1. Run the `MARKIN` executable from the [mark-in executables] table. You will not need a renderer.
-2. Run the `U2Markup` executable from the [mark-in executables] table, which will convert your Markdown unified script into a prettified Markdown.
-
-> [!IMPORTANT]
-> Unified scripts require that lines starting with `<SPACE> <SPACE> <SOME PROMPT>`
-> are not present in your main Markdown document.
-> So wrap the shell commands and their output in fenced code
-> blocks; do not use indented code blocks.
-
-### OCaml Modules
-
-| Filename extension | Notes |
-| ------------------ | ----- |
-| `.ml`              |       |
-
-Ordinary OCaml module files can be used **without any special markup**.
-However, the [toplevel module expressions](https://ocaml.org/manual/5.4/modules.html)
-in the OCaml module file must be formatted. In particular:
-
-- the toplevel module expressions must start at column 1
-- the first word (ex. ["let"], ["module"], ["open"], etc.) of each toplevel module
-  expression must be followed by an ASCII space (0x20). No other whitespace is allowed.
-
-`ocamlformat` conforms to the formatting requirements.
-
-When run as a unified script, each toplevel module expression is run through the OCaml
-toplevel interpreter.
-Here is an `ocamlformat`-ed OCaml module that has not been run as a unified script:
-
-```ocaml
-let lyrics =
-  "Everybody step to the left."
-
-let (_ : string) =
-  Printf.sprintf "Now let's sing: %s" lyrics
-
-module UnifiedShowExample =
-  struct
-  let contents () = "This is the contents of the module!"
-end
-```
-
-After running as a unified script (see *Steps* below), OCaml comments are added to
-both **top-level `let` expressions** and **modules prefixed with `UnifiedShow`**:
-
-```ocaml
-let lyrics =
-  "Everybody step to the left."
-  (* val lyrics : string = "Everybody step to the left." *)[@ocamlformat "disable"]
-
-let (_ : string) =
-  Printf.sprintf "Now let's sing: %s" lyrics
-  (* - : string = "Now let's sing: Everybody step to the left." *)[@ocamlformat "disable"]
-
-module UnifiedShowExample =
-  struct
-  let contents () = "This is the contents of the module!"
-end
-  (* - : string = "This is the contents of the module!" *)[@ocamlformat "disable"]
-```
-
-Steps:
-
-1. Run the `UMlModuleRunner` from the [mark-in executables] table. You will not need a renderer.
-   The generated OCaml comments are indented which messes up formatters like `ocamlformat`.
-   Use `--disable-ocamlformat` to disable ocamlformat for each command response.
-
-### Typst
-
-| Filename extension | Notes                                                |
-| ------------------ | ---------------------------------------------------- |
-| `.typ.MARKIN.u`    | `MARKIN` is the file extension of the [mark-in kind] |
-
-> [!WARNING]
-> Typst documents have not been tested.
-
-### AsciiDoc
-
-| Filename extension | Notes                                                |
-| ------------------ | ---------------------------------------------------- |
-| `.adoc.MARKIN.u`   | `MARKIN` is the file extension of the [mark-in kind] |
-
-> [!WARNING]
-> AsciiDoc main documents have not been tested.
-
-## Mark-in Kinds
-
-The precise prompt and continuation/terminator is determined by the *kind*
-(the file extension) of unified script:
-
-| Kind                            | Prompt | Multiline          | Runs                |
-| ------------------------------- | ------ | ------------------ | ------------------- |
-| Cram test `.t`                  | `$`    | `>`                | POSIX shell command |
-| Mercurial test (dormant; `.t`)  | `$`    | `>`                | POSIX shell command |
-|                                 | `>>>`  | `...`              | Python              |
-| OCaml unified cram test `.ml.u` | `#`    | `;;`               | OCaml expression    |
-|                                 | `>>>`  | `...`              | OCaml expression    |
-| OCaml module test `.mlm.u`      | `#`    | `;;`               | OCaml expression    |
-|                                 | `>>>`  | `...`              | OCaml expression    |
-| `dk` build script `.dk.u`       | `$`    | `>`                | Build shell command |
-|                                 | `%`    | *end of Lua chunk* | Lua command         |
-
-### Cram Tests
-
-The **cram test** is the most widely supported unified script format across the industry, but it has the least features.
-
-Mercurial [invented this format for their test scripts](https://web.archive.org/web/20101023031400/http://www.selenic.com/blog/?p=663).
-[Bitheap (Python)](https://bitheap.org/cram/) and
-[Dune (OCaml)](https://dune.readthedocs.io/en/stable/reference/cram.html)
-adopted the format and called their scripts {b cram tests}.
-
-| Kind           | Prompt | Multiline | Runs                |
-| -------------- | ------ | --------- | ------------------- |
-| Cram test `.t` | `$`    | `>`       | POSIX shell command |
-
-```cramtest
-Run any shell command:
-
-  $ echo Twas brillig, and the slithy toves
-  > did gyre and gimble in the wabe;
-  > All mimsy were the borogoves,
-  > And the mome raths outgrabe.
-  Twas brillig, and the slithy toves
-  did gyre and gimble in the wabe;
-  All mimsy were the borogoves,
-  And the mome raths outgrabe.
-
-Errors will be reported:
-
-  $ hg this-does-not-exist
-  hg: 'this-does-not-exist' is not a hg command. See 'hg --help'.
-```
-
-### Mercurial Unified Tests
-
-Mercurial later added support for inline Python code and multiline commands:
-
-```python
-Some Python code can be run as part of the test:
-
-   >>> from datetime import date
-   >>> print(date(2020, 1, 1))
-   2020-01-01
-
-Split the command across multiple lines if needed:
-   >>> for i in range(3):
-   ...     print(i)
-   0
-   1
-   2
-```
-
-Bitheap (Python cram tests) and Dune (OCaml cram tests) did not adopt the `>>>`
-prompt.
-
-| Kind                           | Prompt | Multiline | Runs                |
-| ------------------------------ | ------ | --------- | ------------------- |
-| Mercurial test (dormant; `.t`) | `$`    | `>`       | POSIX shell command |
-|                                | `>>>`  | `...`     | Python              |
-
-### dk Build Scripts
-
-Three extra requirements in the `dk0` build tool led to the full unified
-script syntax.
-
-- *Arbitrary languages*: Where cram tests allowed one language (shell) and
-  Mercurial unified tests allowed two languages (shell and Python), there
-  was a need for two different languages (Lua and a variation of
-  PowerShell/POSIX shell) with a third reserved for future use.
-- *Section headings*: There was a need to document and assign meaning to
-  sections of each script. Markdown is commonplace, so ATX headings (lines
-  beginning with one or more "#") were a natural choice for section
-  headings.
-- *Output metadata*: Metadata in the output makes it possible to render
-  the output differently based on the tags. For example, when rendering a
-  unified script in Markdown, the code blocks should be rendered with the
-  correct highlighting language (ex. Lua syntax highlighting for `%`
-  code blocks).
-
-The full unified script syntax satisfies the three requirements.
-
-| Kind                      | Prompt | Multiline          | Runs                |
-| ------------------------- | ------ | ------------------ | ------------------- |
-| `dk` build script `.dk.u` | `$`    | `>`                | Build shell command |
-|                           | `%`    | *end of Lua chunk* | Lua command         |
-
-```unified
-## CommonsBase_Build.Apparatus@0.1.0
-
-Bundle a small CMake project in the hello-src/ directory
-using the Lua command "unified.asset"
-  % unified.asset { name="HelloWorld", dir="hello-src" }
-  \dkasset
-  '790'
-  { 'sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d' }
-
-Run the "post-object" shell command to build HelloWorld
-with CMake
-  $ post-object CommonsBase_Build.CMake0.F_Build@3.25.3 -d t/o/somewhere/
-  > assetmodver=CommonsBase_Build.Apparatus.HelloWorld@0.1.0 assetpath=hw
-  > gargs[]=-DCMAKE_BUILD_TYPE=Release
-  > bargs[]=--config bargs[]=Release
-  > iargs[]=--config iargs[]=Release
-  > outexe[]=bin/hello
-  \pass\;object:oor4kvp5hp7wtwtzfba2ayfhpanwjyhxnsryjssyr5nxt5zslkycq:OurCMake_F_Build.Xhmcju4uhjoh54b35k3iobgdz4q@1.0.0
-```
-
-## Syntax
-
-There are three revisions of the unified syntax. Each revision is a subset
-of the next revision.
-
-```mermaid
-flowchart TB
-  subgraph U["3: Unified Scripts"]
-    subgraph M["2: Mercurial Unified Tests"]
-      subgraph T["1: Cram Tests"]
-      end
-    end
-  end
-```
-
-The unified syntax is:
-
-- Lines beginning with two spaces, a prompt (ex. `$` for cram tests), and a space are run.
-- Lines beginning with two spaces, a continuation (ex. `>` for cram tests), and a space introduce
-  the second, third and beyond lines in a multi-line command.
-  - Alternatively, multi-line commands can end with a terminator (ex. `;;` for OCaml)
-  - Alternatively, multi-line commands can end if the language has rules to know what a statement is complete (ex. Lua chunks)
-- All other lines beginning with two spaces are considered command output.
-- Output lines ending with a space and the keyword `(re)` are matched as
-  regular expressions *if* a regular expression matcher is provided in the
-  configuration (not configured today!).
-- Lines ending with a space and the keyword `(glob)` are matched with a
-  glob-like syntax *if* a glob matcher is provided in the configuration (not configured today!).
-  The only special characters supported are `*` and `?`. Both characters
-  can be escaped using `\`, and the backslash can be escaped itself.
-- Output lines ending with either of the above keywords are always first
-  matched literally with actual command output.
-- Lines ending with a space and the keyword `(no-eol)` will match actual
-  output that doesn't end in a newline.
-- Actual output lines containing unprintable characters are escaped and
-  suffixed with a space and the keyword `(esc)`. Lines matching
-  unprintable output must also contain the keyword.
-- Anything else is the main document.
-
-## Other
-
-> [!Tip]
-> Each update captures the behavior of the script commands.
-> Put the updates into source control (ex. `git`) and you have a persistent
-> record of how the behavior changed.
-
-Unified scripts are not limited to just running shell commands.
-In fact, there are several different kinds of unified scripts.
+## Quick Exploration
 
 A `.ml.u` unified script runs OCaml toplevel commands (the same
 ones an OCaml developer would run in `/usr/bin/ocaml` or `opam exec -- ocaml`).
@@ -377,7 +99,7 @@ Here are some simple OCaml expressions that have been rendered into Markdown wit
 
 If you looked directly in the `.ml.u` script ... the file you edit ... you would see:
 
-```
+```text
    # let _ = 2 + 4 ;;
    - : int = 6
 
@@ -388,7 +110,322 @@ If you looked directly in the `.ml.u` script ... the file you edit ... you would
    - : string = "helloworld"
 ```
 
-A `.dk.u` unified script runs Lua and shell build commands:
+A `.dk.u` unified script runs Lua and shell build commands. After running it,
+important information about the build is placed back into the `.dk.u` file:
+
+```unified
+## CommonsBase_Build.Apparatus@0.1.0
+
+Bundle a small CMake project in the hello-src/ directory
+using the Lua command "unified.asset"
+  % unified.asset { name="HelloWorld", dir="hello-src" }
+  \dkasset\;
+  '790'
+  { 'sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d' }
+
+Run the "post-object" shell command to build HelloWorld
+with CMake
+  $ post-object CommonsBase_Build.CMake0.F_Build@3.25.3 -d t/o/somewhere/
+  > assetmodver=CommonsBase_Build.Apparatus.HelloWorld@0.1.0 assetpath=hw
+  > gargs[]=-DCMAKE_BUILD_TYPE=Release
+  > bargs[]=--config bargs[]=Release
+  > iargs[]=--config iargs[]=Release
+  > outexe[]=bin/hello
+  \testpass\;object:oor4kvp5hp7wtwtzfba2ayfhpanwjyhxnsryjssyr5nxt5zslkycq:OurCMake_F_Build.Xhmcju4uhjoh54b35k3iobgdz4q@1.0.0
+```
+
+Notice the odd-looking `\dkasset\;` and `\testpass\;` text in the output. These
+are response metadata that [renderers](#executables) can use to make pretty output.
+
+## Syntax
+
+### Unified Script Syntax
+
+A unified script is a document with [markin](#terminology).
+
+The [markin](#terminology) regions are:
+
+- Lines beginning with two spaces, a prompt (ex. `$` for cram tests), and a space are commands to be run.
+- Lines beginning with two spaces, a continuation (ex. `>` for cram tests), and a space introduce
+  the second, third and beyond lines in a multi-line command.
+  - Alternatively, multi-line commands can end with a terminator (ex. `;;` for OCaml)
+  - Alternatively, multi-line commands can end if the language has rules to know what a statement is complete (ex. Lua chunks)
+- All other lines beginning with two spaces are considered the command response.
+- Response lines ending with a space and the keyword `(re)` are matched as
+  regular expressions *if* a regular expression matcher is provided in the
+  configuration (not configured today!).
+- Response lines ending with a space and the keyword `(glob)` are matched with a
+  glob-like syntax *if* a glob matcher is provided in the configuration (not configured today!).
+  The only special characters supported are `*` and `?`. Both characters
+  can be escaped using `\`, and the backslash can be escaped itself.
+- Response lines ending with either of the above keywords are always first
+  matched literally with the actual command response.
+- Response lines ending with a space and the keyword `(no-eol)` will match an actual
+  response that doesn't end in a newline.
+- Actual response lines containing unprintable characters are escaped and
+  suffixed with a space and the keyword `(esc)`. Lines matching
+  unprintable responses must also contain the keyword.
+
+Any other line is part of the main document.
+
+### Metadata Syntax
+
+Metadata can be placed before the true response (the body) of a [command response](#unified-script-syntax).
+
+The model for metadata is similar to TeX and Typst. Metadata has a named node with optional attributes and optional arguments:
+
+```text
+\name(attr1, attr2:"text", attr3:(d=1))[ arg1 ] [ arg2 \more ]
+```
+
+The node attributes `attr1` (etc.) are separated by whitespace and/or optional commas. Node attribute values, if given, can be text or nested node attributes. Attribute value text must be double-quoted and the only the `\\`, `\r`, `\n` and `\"` escape codes are allowed inside the double-quotes.
+
+Node arguments can include text and nested nodes. Only the `\\` and `\]` escape codes are allowed inside argument text.
+
+The EBNF grammar for a [command response](#unified-script-syntax) is:
+
+```text
+output          = metadata? body ;
+
+metadata        = topnode* last_markup ;
+topnode         = whitespace | top_markup ;
+top_markup      = "\\" , markup ;
+whitespace      = ( " " | "\t" | "\n" | "\r" )+ ;
+
+last_markup     = top_markup | ( "\\" , ";" ) ;
+(* "\;" is a special terminator: it has name ";", no attributes, and no arguments,
+   and immediately ends metadata scanning; the body begins right after "\;" *)
+
+body            = (* everything remaining after the last metadata markup *) ;
+
+markup          = name , attributes? , arglist ;
+name            = name_char+ ;
+name_char       = letter | digit | "." | "!" | "?" | ";" | "'" ;
+letter          = "a".."z" | "A".."Z" ;
+digit           = "0".."9" ;
+
+attributes      = "(" , attribute_list , ")" ;
+attribute_list  = ( ws? , attribute , ws? , ","? )* , ws? ;
+attribute       = name , ws? , ( ":" , ws? , attrval )? ;
+attrval         = "(" , attribute_list , ")"    (* nested attrs *)
+                | '"' , attrtext , '"'          (* quoted string *)
+                ;
+ws              = ( " " | "\t" | "\n" | "\r" )+ ;
+attrtext        = ( attr_char | attrtext_escape )* ;
+attr_char       = (* any character except '"' and '\\' *) ;
+attrtext_escape = "\\\\"                        (* literal backslash *)
+                | "\\\""                        (* literal double-quote *)
+                | "\\n"                         (* newline *)
+                | "\\r"                         (* carriage return *)
+                ;
+
+arglist         = ( "[" , content , "]" )* ;
+
+content         = node* ;
+node            = markup_ref | nodetext ;
+markup_ref      = "\\" , name , attributes? , arglist ;
+nodetext        = nodetext_atom+ ;
+nodetext_atom   = node_char                     (* any non-special character *)
+                | "\\" , ( "\\" | "]" )         (* recognized escape → literal char *)
+                ;
+node_char       = (* any character except '\\' and ']' *) ;
+```
+
+## Terminology
+
+**to mark-up**: An action to *mark* arbitrary plain text with information. Confer: [gingerBill]
+
+**to mark-in**: An action to *mark* regions inside a document with information.
+A valid document plus the regions added to a valid document (the "markin") remains a valid document.
+
+[gingerBill]: https://www.gingerbill.org/article/2026/01/19/two-families-of-markup-languages/
+
+## Mark-in Kinds
+
+The standard prompts and continuation/terminators of the [syntax](#syntax) are:
+
+| Kind                           | Prompt              | Multiline           | Runs                |
+| ------------------------------ | ------------------- | ------------------- | ------------------- |
+| [Cram test] `.t`               | `$`                 | `>`                 | POSIX shell command |
+| [Mercurial test] `.t`          | `$`                 | `>`                 | POSIX shell command |
+|                                | `>>>`               | `...`               | Python              |
+| [OCaml REPL cram test] `.ml.u` | `#`                 | `;;`                | OCaml expression    |
+|                                | `>>>`               | `...`               | OCaml expression    |
+| [OCaml Module Script] `.ml`    | *module expression* | *end of expression* | OCaml expression    |
+| [dk Build Script] `.dk.u`      | `$`                 | `>`                 | Build shell command |
+|                                | `%`                 | *end of Lua chunk*  | Lua command         |
+
+[Cram test]: #cram-tests
+[Mercurial test]: #mercurial-unified-tests
+[OCaml REPL cram test]: #ocaml-repl-cram-test
+[OCaml Module Script]: #ocaml-module-script
+[dk Build Script]: #dk-build-scripts
+
+### Cram Tests
+
+| File  | Prompt | Multiline | Runs                |
+| ----- | ------ | --------- | ------------------- |
+| `*.t` | `$`    | `>`       | POSIX shell command |
+
+The **cram test** is the most widely supported unified script format across the industry, but it has the least features and needs a POSIX (ie. non-Windows) shell.
+
+> [!NOTE]
+> You can use [Dune Cram Tests](https://dune.readthedocs.io/en/latest/reference/cram.html) or the Python `cram` package to run cram tests. Eventually a first-class cram runner may be added to the [unified ecosystem] for use outside OCaml and Python, but for now jonahbeckford@ dislikes the requirement that Windows needs a heavyweight POSIX shell to run cram tests.
+
+Mercurial [invented this format for their test scripts](https://web.archive.org/web/20101023031400/http://www.selenic.com/blog/?p=663).
+[Bitheap (Python)](https://bitheap.org/cram/) and
+[Dune (OCaml)](https://dune.readthedocs.io/en/stable/reference/cram.html)
+adopted the format and called their scripts {b cram tests}.
+
+```cramtest
+Run any shell command:
+
+  $ echo Twas brillig, and the slithy toves
+  > did gyre and gimble in the wabe;
+  > All mimsy were the borogoves,
+  > And the mome raths outgrabe.
+  Twas brillig, and the slithy toves
+  did gyre and gimble in the wabe;
+  All mimsy were the borogoves,
+  And the mome raths outgrabe.
+
+Errors will be reported:
+
+  $ hg this-does-not-exist
+  hg: 'this-does-not-exist' is not a hg command. See 'hg --help'.
+```
+
+### Mercurial Unified Tests
+
+| File  | Prompt | Multiline | Runs                |
+| ----- | ------ | --------- | ------------------- |
+| `*.t` | `$`    | `>`       | POSIX shell command |
+|       | `>>>`  | `...`     | Python              |
+
+> [!NOTE]
+> This kind of mark-in is dormant but documented here for devs extending the [unified ecosystem].
+
+After Mercurial created the [cram test format](#cram-tests), they later added
+support for inline Python code and multiline commands:
+
+    ```python
+    Some Python code can be run as part of the test:
+
+      >>> from datetime import date
+      >>> print(date(2020, 1, 1))
+      2020-01-01
+
+    Split the command across multiple lines if needed:
+      >>> for i in range(3):
+      ...     print(i)
+      0
+      1
+      2
+    ```
+
+Bitheap (Python cram tests) and Dune (OCaml cram tests) did not adopt the `>>>`
+prompt.
+
+### OCaml Module Script
+
+| File   | Prompt              | Multiline           | Runs             |
+| ------ | ------------------- | ------------------- | ---------------- |
+| `*.ml` | *module expression* | *end of expression* | OCaml expression |
+
+Ordinary OCaml module files can be used *without any special markup*.
+However, the [toplevel module expressions](https://ocaml.org/manual/5.4/modules.html)
+in the OCaml module file must be formatted. In particular:
+
+- the toplevel module expressions must start at column 1
+- the first word (ex. ["let"], ["module"], ["open"], etc.) of each toplevel module
+  expression must be followed by an ASCII space (0x20). No other whitespace is allowed.
+
+`ocamlformat` conforms to the formatting requirements.
+
+When run as a unified script, each toplevel module expression is run through the OCaml
+toplevel interpreter.
+Here is an `ocamlformat`-ed OCaml module, before it has been run:
+
+```ocaml
+let lyrics =
+  "Everybody step to the left."
+
+let (_ : string) =
+  Printf.sprintf "Now let's sing: %s" lyrics
+
+module UnifiedShowExample =
+  struct
+  let contents () = "This is the contents of the module!"
+end
+```
+
+After the script is run (see [OCaml Modules](#ocaml-modules)),
+OCaml comments are added to both **top-level `let` expressions** and **modules prefixed with `UnifiedShow`**:
+
+```ocaml
+let lyrics =
+  "Everybody step to the left."
+  (* val lyrics : string = "Everybody step to the left." *)[@ocamlformat "disable"]
+
+let (_ : string) =
+  Printf.sprintf "Now let's sing: %s" lyrics
+  (* - : string = "Now let's sing: Everybody step to the left." *)[@ocamlformat "disable"]
+
+module UnifiedShowExample =
+  struct
+  let contents () = "This is the contents of the module!"
+end
+  (* - : string = "This is the contents of the module!" *)[@ocamlformat "disable"]
+```
+
+All other module expressions are evaluated but do not generate any comments.
+
+Steps:
+
+1. Run the `UMlModuleRunner` executable from the [mark-in executables] table. You will not need a renderer.
+   - However, formatters like `ocamlformat` may dedent the generated OCaml comments, breaking the [unified script syntax](#syntax). You can **avoid that with the `UMlModuleRunner --disable-ocamlformat` option**, which adds the `[@ocamlformat "disable"]` extension to each command response.
+2. Optional: Run a renderer that corresponds to your [main document](#main-document-kinds)
+
+### OCaml REPL Cram Test
+
+| File     | Prompt | Multiline | Runs             |
+| -------- | ------ | --------- | ---------------- |
+| `*.ml.u` | `#`    | `;;`      | OCaml expression |
+|          | `>>>`  | `...`     | OCaml expression |
+
+Steps:
+
+1. Run the `UCramRunner` executable from the [mark-in executables] table.
+2. Optional: Run a renderer that corresponds to your [main document](#main-document-kinds)
+
+### dk Build Scripts
+
+| File               | Prompt | Multiline          | Runs                |
+| ------------------ | ------ | ------------------ | ------------------- |
+| `dk.u` or `*.dk.u` | `$`    | `>`                | Build shell command |
+|                    | `%`    | *end of Lua chunk* | Lua command         |
+
+> [!CAUTION]
+> dk build scripts are implemented but not yet fully tested.
+
+Three extra requirements in the `dk0` build tool led to the full unified
+script syntax.
+
+- *Arbitrary languages*: Where cram tests allowed one language (shell) and
+  Mercurial unified tests allowed two languages (shell and Python), there
+  was a need for two different languages (Lua and a variation of
+  PowerShell/POSIX shell) with a third reserved for future use.
+- *Section headings*: There was a need to document and assign meaning to
+  sections of each script. Markdown is commonplace, so ATX headings (lines
+  beginning with one or more "#") were a natural choice for section
+  headings.
+- *Output metadata*: Metadata in the output makes it possible to render
+  the output differently based on the tags. For example, when rendering a
+  unified script in Markdown, the code blocks should be rendered with the
+  correct highlighting language (ex. Lua syntax highlighting for `%`
+  code blocks).
+
+The full unified script syntax satisfies the three requirements.
 
 ```unified
 ## CommonsBase_Build.Apparatus@0.1.0
@@ -411,9 +448,86 @@ with CMake
   \pass\;object:oor4kvp5hp7wtwtzfba2ayfhpanwjyhxnsryjssyr5nxt5zslkycq:OurCMake_F_Build.Xhmcju4uhjoh54b35k3iobgdz4q@1.0.0
 ```
 
-> [!NOTE]
-> You don't see the above `.dk.u` code rendered because this documentation is
-> rendered from a `.ml.u` (OCaml only) unified script.
+## Main Document Kinds
+
+### Plain Text
+
+| Filename extension | Notes                                                |
+| ------------------ | ---------------------------------------------------- |
+| `.MARKIN.u`        | `MARKIN` is the file extension of the [mark-in kind] |
+
+Plain text means there is no rendering post-processing step.
+
+Steps:
+
+1. Run the `MARKIN` executable from the [mark-in executables] table. You will not need a renderer.
+
+### Markdown
+
+| Filename extension | Notes                                                |
+| ------------------ | ---------------------------------------------------- |
+| `.md.MARKIN.u`     | `MARKIN` is the file extension of the [mark-in kind] |
+
+For Markdown documents, avoid Markdown indented code blocks. Those indented code blocks might be mistaken for unified command prompts.
+
+Steps:
+
+1. Run the `MARKIN` executable from the [mark-in executables] table.
+2. Run the `U2Markup` executable from the [mark-in executables] table, which will convert your Markdown unified script into a prettified Markdown.
+
+> [!IMPORTANT]
+> Unified scripts require that lines starting with `<SPACE> <SPACE> <SOME PROMPT>`
+> are not present in your main Markdown document.
+> Wrap the shell commands and their output in fenced code blocks;
+> **do not use indented code blocks**.
+
+### OCaml Modules
+
+| Filename extension | Notes |
+| ------------------ | ----- |
+| `.ml`              |       |
+
+Ordinary OCaml module files can be used *without any special markup*.
+However, the [toplevel module expressions](https://ocaml.org/manual/5.4/modules.html)
+in the OCaml module file must be formatted. In particular:
+
+- the toplevel module expressions must start at column 1
+- the first word (ex. ["let"], ["module"], ["open"], etc.) of each toplevel module
+  expression must be followed by an ASCII space (0x20). No other whitespace is allowed.
+
+`ocamlformat` conforms to the formatting requirements.
+
+Steps:
+
+1. Run the `UMlModuleRunner` and options from [OCaml Module Script](#ocaml-module-script). You will not need a renderer.
+
+### Typst
+
+| Filename extension | Notes                                                |
+| ------------------ | ---------------------------------------------------- |
+| `.typ.MARKIN.u`    | `MARKIN` is the file extension of the [mark-in kind] |
+
+> [!WARNING]
+> Typst documents have not been tested.
+
+### AsciiDoc
+
+| Filename extension | Notes                                                |
+| ------------------ | ---------------------------------------------------- |
+| `.adoc.MARKIN.u`   | `MARKIN` is the file extension of the [mark-in kind] |
+
+> [!WARNING]
+> AsciiDoc main documents have not been tested.
+
+## Other
+
+> [!Tip]
+> Each update captures the behavior of the script commands.
+> Put the updates into source control (ex. `git`) and you have a persistent
+> record of how the behavior changed.
+
+Unified scripts are not limited to just running shell commands.
+In fact, there are several different kinds of unified scripts.
 
 ## Unified Ecosystem
 
