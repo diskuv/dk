@@ -24,7 +24,8 @@
   - [Typst](#typst)
   - [AsciiDoc](#asciidoc)
 - [Unified Ecosystem](#unified-ecosystem)
-  - [Executables](#executables)
+  - [Runners](#runners)
+  - [Renderers](#renderers)
   - [OCaml Users](#ocaml-users)
   - [Supporting a new mark-in kind](#supporting-a-new-mark-in-kind)
 
@@ -107,10 +108,12 @@ and then an appropriate [mark-in] guide:
 [Typst]: #typst
 [OCaml Modules]: #ocaml-modules
 [mark-in kind]: #mark-in-kinds
-[mark-in executables]: #executables
+[mark-in runners]: #runners
+[mark-in renderers]: #renderers
 [unified ecosystem]: #unified-ecosystem
 [Manually Configured Options]: #manually-configured-options
 [Automatically Discovered Dune Options]: #automatically-discovered-dune-options
+[`ocamlformat`]: https://ocaml.org/p/ocamlformat/latest/doc/getting_started.html
 
 ## Quick Exploration
 
@@ -181,7 +184,7 @@ with CMake
 ```
 
 Notice the odd-looking `\dkasset\;` and `\testpass\;` text in the output. These
-are response metadata that [renderers](#executables) can use to make pretty output.
+are response metadata that [renderers] can use to make pretty output.
 
 ## Syntax
 
@@ -226,14 +229,14 @@ The model for metadata is similar to TeX and Typst. Metadata has a named node wi
 
 Node names and attribute names must consist of only:
 
-- lowercase letters ["a-z"]
-- uppercase letters ["A-Z"]
-- digits ["0-9"]
-- some punctuation marks [".!?;'"]
+- lowercase letters `a-z`
+- uppercase letters `A-Z`
+- digits `0-9`
+- some punctuation marks `.!?;'"`
 
-The node attributes `attr1` (etc.) are separated by whitespace and/or optional commas. Node attribute values, if given, can be nested attributes surrounded by parentheses, or double-quoted text. Only the `\\`, `\r`, `\n` and `\"` escape codes are allowed inside the double-quoted attribute value text.
+The node attributes `attr1` (etc.) are separated by whitespace and/or optional commas. Node attribute values, if given, are nested attributes surrounded by parentheses or double-quoted text. Only the `\\`, `\r`, `\n` and `\"` escape codes are allowed inside the double-quoted attribute value text.
 
-Node arguments can include text and nested nodes. Only the `\\` and `\]` escape codes are allowed inside argument text.
+Node arguments are text and/or nested nodes. Only the `\\` and `\]` escape codes are allowed inside argument text.
 
 The EBNF grammar for a [command response](#unified-script-syntax) is:
 
@@ -284,33 +287,42 @@ nodetext_atom   = node_char                     (* any non-special character *)
 node_char       = (* any character except '\\' and ']' *) ;
 ```
 
+The following metadata is recognized by the [renderers] today:
+
+| Metadata                | What                                             |
+| ----------------------- | ------------------------------------------------ |
+| `\ocaml`                | Render as an OCaml code block                    |
+| `\ocaml(type: "#show")` | Render as an OCaml code block, translating `...` |
+|                         | with `(* … *)` to make valid OCaml               |
+| `\markdown`             | Render as raw Markdown                           |
+
 ## Terminology
 
-**to mark-up**: An action to *mark* arbitrary plain text with information. Confer: [gingerBill]
+**to mark-up**: An action to *mark* arbitrary plain text with information. Confer [gingerBill]
 
 **to mark-in**: An action to *mark* regions inside a document with information.
 A valid document plus the regions added to a valid document (the "markin") remains a valid document.
 For unified scripts, the "markin" is a command and the evaluator's response to the command.
 
-**evaluator**: Code or an executable that, given a command, creates a response. Common evaluators include POSIX/Windows shells and programming language interpreters (REPL). A service's REST API can be an evaluator.
+**evaluator**: Code or an executable that, given a command, creates a response. Common evaluators include POSIX/Windows shells and programming language interpreters (aka. REPLs). A service's request/reply REST API can also be an evaluator.
 
 [gingerBill]: https://www.gingerbill.org/article/2026/01/19/two-families-of-markup-languages/
 
 ## Mark-in Kinds
 
-The standard prompts and continuation/terminators of the [syntax](#syntax) are:
+The standard prompts and continuation/terminators (see [syntax](#syntax)) are:
 
 | Kind                           | Prompt              | Multiline           | Runs                |
 | ------------------------------ | ------------------- | ------------------- | ------------------- |
 | *[built-in evaluator]* `*`     | `%%%`               | `...`               | Builtin commands    |
 | [Cram test] `.t`               | `$`                 | `>`                 | POSIX shell command |
 | [Mercurial test] `.t`          | `$`                 | `>`                 | POSIX shell command |
-|                                | `>>>`               | `...`               | Python              |
+| [Mercurial test] `.t`          | `>>>`               | `...`               | Python              |
 | [OCaml REPL cram test] `.ml.u` | `#`                 | `;;`                | OCaml expression    |
-|                                | `>>>`               | `...`               | OCaml expression    |
+| [OCaml REPL cram test] `.ml.u` | `>>>`               | `...`               | OCaml expression    |
 | [OCaml Module Script] `.ml`    | *module expression* | *end of expression* | OCaml expression    |
 | [dk Build Script] `.dk.u`      | `$`                 | `>`                 | Build shell command |
-|                                | `%`                 | *end of Lua chunk*  | Lua command         |
+| [dk Build Script] `.dk.u`      | `%`                 | *end of Lua chunk*  | Lua command         |
 
 [built-in evaluator]: #builtin-evaluators
 [Cram test]: #cram-tests
@@ -327,7 +339,7 @@ The standard prompts and continuation/terminators of the [syntax](#syntax) are:
 
 These builtin commands are primarily used for debugging.
 
-Builtin evaluators are not always available; consult your [mark-in kind].
+Builtin evaluators are not always available; consult your [mark-in kind] documentation.
 
 The `verbatim` command lets you see exactly what the unified script sees.
 
@@ -371,10 +383,10 @@ The `metadata'` command is similar to `metadata`, except it produces a more verb
 | ----- | ------ | --------- | ------------------- |
 | `*.t` | `$`    | `>`       | POSIX shell command |
 
-The **cram test** is the most widely supported unified script format across the industry, but it has the least features and needs a POSIX (ie. non-Windows) shell.
+The "cram test" is the most widely supported unified script format across the [unified ecosystem], but it has the least features and needs a POSIX (ie. non-Windows) shell.
 
 > [!NOTE]
-> You can use [Dune Cram Tests](https://dune.readthedocs.io/en/latest/reference/cram.html) or the Python `cram` package to run cram tests. Eventually a first-class cram runner may be added to the [unified ecosystem] for use outside OCaml and Python, but for now jonahbeckford@ dislikes the requirement that Windows needs a heavyweight POSIX shell to run cram tests.
+> You can use [Dune Cram Tests](https://dune.readthedocs.io/en/latest/reference/cram.html) or the [Python `cram` package](https://pypi.org/project/cram/) to run cram tests. Eventually a first-class cram runner may be added to the [unified ecosystem] for use outside OCaml and Python, but for now jonahbeckford@ dislikes that Windows needs a heavyweight POSIX shell to run cram tests.
 
 Mercurial [invented this format for their test scripts](https://web.archive.org/web/20101023031400/http://www.selenic.com/blog/?p=663).
 [Bitheap (Python)](https://bitheap.org/cram/) and
@@ -443,15 +455,15 @@ Ordinary OCaml module files can be used *without any special markup*.
 However, the [toplevel module expressions]
 in the OCaml module file must be formatted. In particular:
 
-- the toplevel module expressions must start at column 1
+- the toplevel module expressions must start at column 1, and
 - the first word (ex. ["let"], ["module"], ["open"], etc.) of each toplevel module
-  expression must be followed by an ASCII space (0x20). No other whitespace is allowed.
+  expression must be followed by at least one ASCII space (0x20).
 
-`ocamlformat` conforms to the formatting requirements.
+[`ocamlformat`] conforms to the formatting requirements.
 
 When run as a unified script, each toplevel module expression is run through the OCaml
 toplevel interpreter.
-Here is an `ocamlformat`-ed OCaml module, before it has been run:
+Here is an [`ocamlformat`]-ed OCaml module, before it has been run:
 
 ```ocaml
 let lyrics =
@@ -467,7 +479,7 @@ end
 ```
 
 After the script is run (see [OCaml Modules](#ocaml-modules)),
-OCaml comments are added to both **top-level `let` expressions** and **modules prefixed with `UnifiedShow`**:
+OCaml comments are added to a) top-level **`let`** expressions and b) modules whose names are prefixed with **`UnifiedShow`**:
 
 ```ocaml
 let lyrics =
@@ -485,12 +497,14 @@ end
   (* - : string = "This is the contents of the module!" *)[@ocamlformat "disable"]
 ```
 
+A `UnifiedShow*` module is required to have a `val contents : unit -> 'a` function.
+
 All other module expressions are evaluated but do not generate any comments.
 
 #### OCaml Module Script Setup
 
-1. Run the `UMlModuleRunner` executable from the [mark-in executables] table. You will not need a renderer.
-   - Pick ``UMlModuleRunner` command line options from either the [Automatically Discovered Dune Options] (only if Dune is your build tool) or the [Manually Configured Options].
+1. Run the `UMlModuleRunner` executable from the [mark-in runners] table. You will not need a renderer.
+   - Pick `UMlModuleRunner` command line options from either the [Automatically Discovered Dune Options] (only if Dune is your build tool) or the [Manually Configured Options].
 2. Optional: Run a renderer that corresponds to your [main document](#main-document-kinds)
 
 > [!NOTE]
@@ -498,7 +512,7 @@ All other module expressions are evaluated but do not generate any comments.
 > Instead it will have access to the *dependencies* of MAINPACKAGE so there are no dependency cycles.
 
 > [!IMPORTANT]
-> Formatters like `ocamlformat` may dedent the generated OCaml comments, breaking the [unified script syntax](#syntax). You can **avoid that with the `UMlModuleRunner --disable-ocamlformat` option**, which adds the `[@ocamlformat "disable"]` extension to each command response.
+> Formatters like [`ocamlformat`] may dedent the generated OCaml comments, breaking the [unified script syntax](#syntax). You can **avoid breaking the syntax using the `UMlModuleRunner --disable-ocamlformat` option**, which adds the `[@ocamlformat "disable"]` extension to each command response.
 
 ### OCaml REPL Cram Test
 
@@ -518,10 +532,10 @@ A `.ml.u` script uses the OCaml REPL internally: the same REPL you run with `/us
 - [OCaml module expressions] like `let x = 1` or `module X = struct end`, or
 - [OCaml expressions] like `1 + 1`
 
-`.ml.u` accept the toplevel phrases in two different forms:
+`.ml.u` scripts accept the toplevel phrases in two different forms:
 
-- the `#` form mimics the OCaml REPL. The command ends when a line ends with `;;`.
-- the `>>>` form mimics the Python REPL. The command ends when there is no subsequent continuation line `...`
+- the `#` form mimics the OCaml REPL. Each command ends when a line ends with `;;`.
+- the `>>>` form mimics the Python REPL. Each command ends when there is no subsequent continuation line `...`
 
 For example, these two forms inside a `.ml.u` file are equivalent:
 
@@ -536,7 +550,7 @@ For example, these two forms inside a `.ml.u` file are equivalent:
 > [!IMPORTANT]
 > To keep `.ml.u` files readable, [toplevel directives] must use the `>>>` form.
 
-`.ml.u` also allows built-in commands (`%%%`) from the [built-in evaluator].
+`.ml.u` scripts also allow built-in commands (`%%%`) from the [built-in evaluator].
 
 *Printing*
 
@@ -548,6 +562,7 @@ confer with the OCaml manual's [#install_printer documentation](https://ocaml.or
 
     >>> 'A'
     - : char = 'A'
+
     >>> let hexpp ppf c = Format.fprintf ppf "0x%02x" (Char.code c)
     val hexpp : Format.formatter -> char -> unit = <fun>
 
@@ -555,6 +570,7 @@ confer with the OCaml manual's [#install_printer documentation](https://ocaml.or
 
     >>> 'A'
     - : char = 0x41
+
     >>> #remove_printer hexpp
 
 Additionally, anything your code prints using [Format.std_formatter](https://ocaml.org/manual/5.4/api/Format.html#VALstd_formatter)
@@ -566,14 +582,13 @@ will be captured and included in the output.
 However, direct use of `stdout` or `stderr` goes to the real standard output
 and standard error. In particular, if your code uses `print_endline`
 or `Printf.printf` then that output will appear on your console while
-running the cram test rather than inside the cram test output. What is
-more, the dune rule will capture the output.
+running the cram test rather than inside the cram test response.
 
     >>> print_endline "This will not be captured in the output."
 
 *Renderers*
 
-Let's go back to the original example:
+Let's go back to the introductory OCaml example:
 
       # 1 + 2 + 3 ;;
       - : int = 6
@@ -582,7 +597,7 @@ Let's go back to the original example:
       ... 2 + 3
       - : int = 6
 
-With the [Markdown renderer](#markdown), the two forms will render with the valid, syntax highlighted OCaml code blocks. However, the rendering is slightly different:
+With the [Markdown renderer](#markdown), the two forms will render with valid, syntax highlighted OCaml code blocks. However, the rendering is slightly different:
 
 
 ```ocaml
@@ -607,7 +622,7 @@ With the [Markdown renderer](#markdown), the two forms will render with the vali
 ```
 
 
-The renderers *should* respect the [metadata syntax](#metadata-syntax). So:
+The renderers respect the `\ocaml` [metadata](#metadata-syntax). So directly printing OCaml metadata:
 
     >>> Format.printf "%s@." {|
     ...   \ocaml\;let x = 1
@@ -628,12 +643,41 @@ let x = 1
 ```
 
 
+and directly printing Markdown metadata:
+
+    >>> Format.printf "%s@." {|
+    ... \markdown\;| Key | Value |
+    ... | ---      | ---       |
+    ... | Username | `someone` |
+    ... | Domain   | `aol.com` |
+    ... |}
+
+should render into Markdown:
+
+
+```ocaml
+(* >>> *) Format.printf "%s@." {|
+\markdown\;| Key | Value |
+| ---      | ---       |
+| Username | `someone` |
+| Domain   | `aol.com` |
+|}
+```
+
+| Key | Value |
+| ---      | ---       |
+| Username | `someone` |
+| Domain   | `aol.com` |
+
+> [!TIP]
+> Use `#install_printer someprinter`, where `let someprinter ppf (value : sometype) = Format.fprintf ppf "%s%a" {|\whatever\metadata\you\want\;|} your_real_printer value`, to always output metadata that produces a nice render for the `sometype` type.
+
 The [metadata syntax](#metadata-syntax) is how [toplevel directives] like `#show`
-render with syntax highlighting. A command
+render with syntax highlighting. The command:
 
     >>> #show Unit
 
-will include the response
+will be updated to include the `#show` response:
 
     >>> #show Unit
     \ocaml(type: "#show")\;module Unit :
@@ -644,7 +688,7 @@ will include the response
         val to_string : t -> string
       end
 
-and render as
+and render as:
 
 
 ```ocaml
@@ -690,7 +734,7 @@ The supported [toplevel directives] are:
 [`#warn_error "warning-list"`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
 [`#warnings "warning-list"`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
 
-Some toplevel directives need to be given directly to the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup] below):
+Some toplevel directives need to be given directly to the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup]):
 
 - [`#directory "dir-name"`] and [`#load "file-name"`]. There are `UCramRunner --load <file-name>` and `UCramRunner --load-with-dune <file-name>` options that can be used instead. Examples are available in [OCaml REPL Cram Test Setup].
 
@@ -710,7 +754,7 @@ Other toplevel directives are not yet supported but may be in the future:
 *Error Handling*
 
 If any of your script commands have syntax errors or raise exceptions (including `assert` statements),
-the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup] below) will exit with code 3.
+the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup]) will exit with code 3.
 
 > [!TIP]
 > Consider allowing partial matches with:
@@ -724,7 +768,7 @@ the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup] below)
 >   val found : string = "b2"
 > ```
 >
-> Compare that to verbose production code:
+> That is more readable than the full code:
 >
 > ```text
 >   >>> let found =
@@ -743,7 +787,7 @@ the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup] below)
 
 #### OCaml REPL Cram Test Setup
 
-1. Run the `UCramRunner` executable from the [mark-in executables] table.
+1. Run the `UCramRunner` executable from the [mark-in runners] table.
    - Pick ``UCramRunner` command line options from either the [Automatically Discovered Dune Options] (only if Dune is your build tool) or the [Manually Configured Options].
 2. Optional: Run a renderer that corresponds to your [main document](#main-document-kinds)
 
@@ -751,8 +795,6 @@ the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup] below)
 > `UCramRunner` will set the script filename and the position. If the command line were `UCramRunner somefile.u` then `__FILE__` will be available as `somefile.u`.
 
 #### Automatically Discovered Dune Options
-
-You must use the [](#manually-configured-options)
 
 1. Run `opam install UnifiedScript_Top`
 2. Create a directory (we'll refer to it as `<testdir>`) that will hold your `.ml.u` scripts. You may place them in the same directory as your `.ml` source code.
@@ -762,10 +804,10 @@ You must use the [](#manually-configured-options)
    - *RECOMMENDED*: There are two important options:
      - `--package PACKAGE` is the name of the Dune `(package)` your `.ml.u` scripts will belong to. In a multi-package Dune project you **must** set this. If you use the `MlModuleRunner` you **must** set this or you may get dependency cycles.
      - `--require-project-library PACKAGE1 --require-project-library PACKAGE2 ...` are the names of public or private libraries in your Dune workspace that your `.ml.u` scripts depend on (even transitively).
-   - *RECOMMENDED*: Unless you never will use `ocamlformat`, add the `--disable-ocamlformat` option for the reasons given in [OCaml Modules].
+   - *RECOMMENDED*: Unless you never will use [`ocamlformat`], add the `--disable-ocamlformat` option for the reasons given in [OCaml Module Script Setup](#ocaml-module-script-setup).
    - *IMPORTANT*: If you want [OCaml Module Script]s, use the `--ml-glob GLOB_PATTERN` to say which files in `<testdir>` should be built as a [OCaml Module Script].
    - A full example is: `opam exec -- dune ocaml top ext/MlFront/src/MlFront_Cache/MlFront_Cache | opam exec -- UDuneImport.exe --package MlFront_Cache --ml-glob 'test*.ml' -o ext/MlFront/src/MlFront_Cache/dune-utest.inc --require-project-library MlFront_Core --disable-ocamlformat ext/MlFront/src/MlFront_Cache`
-4. Add a `(include OUTPUT.inc)` to the `dune` file in the `<testdir>` directory. If the `dune` file does not exist, create it. For the above example, your `dune` file might look like:
+4. Add a `(include OUTPUT.inc)` to the `dune` file in the `<testdir>` directory. If the `dune` file does not exist, create it as an empty file and then add the `(include OUTPUT.inc)`. For the above example, your `dune` file might look like:
 
    ```scheme
    ; file: ext/MlFront/src/MlFront_Cache/dune
@@ -774,7 +816,7 @@ You must use the [](#manually-configured-options)
 
 #### Manually Configured Options
 
-- **`UMlModuleRunner` only**: Unless you never will use `ocamlformat`, add the `--disable-ocamlformat` option for the reasons given in [OCaml Modules].
+- **`UMlModuleRunner` only**: Will you use [`ocamlformat`] *ever*? Then add the `--disable-ocamlformat` option for the reasons given in [OCaml Modules].
 - To load a .cma or .cmo file (that is, to do a `#directory "dir-name"` followed by a `#load "file-name"`), use the `--load` or `--load-with-dune` command line option.
   For example, to make the OCaml `UnifiedScript_Std` library in your Dune workspace with the `UCramRunner`,
   the external `digestif` library, and the `unix` OCaml library available in a `.ml.u` script
@@ -815,8 +857,7 @@ You must use the [](#manually-configured-options)
 > [!CAUTION]
 > dk build scripts are implemented but not yet fully tested.
 
-Three extra requirements in the `dk0` build tool led to the full unified
-script syntax.
+Three requirements in the `dk0` build tool led to the full [unified script syntax](#unified-script-syntax) and the [metadata syntax](#metadata-syntax).
 
 - *Arbitrary languages*: Where cram tests allowed one language (shell) and
   Mercurial unified tests allowed two languages (shell and Python), there
@@ -832,7 +873,7 @@ script syntax.
   correct highlighting language (ex. Lua syntax highlighting for `%`
   code blocks). [Metadata syntax](#metadata-syntax) describes how that is done.
 
-The full unified script syntax satisfies the three requirements.
+Unified scripts satisfies the three requirements.
 
 ```unified
 ## CommonsBase_Build.Apparatus@0.1.0
@@ -867,7 +908,7 @@ Plain text means there is no rendering post-processing step.
 
 Setup:
 
-1. Run the `MARKIN` executable from the [mark-in executables] table. You will not need a renderer.
+1. Run the `MARKIN` executable from the [mark-in runners] table. You will not need a renderer.
 
 ### Markdown
 
@@ -875,12 +916,24 @@ Setup:
 | ------------------ | ---------------------------------------------------- |
 | `.md.MARKIN.u`     | `MARKIN` is the file extension of the [mark-in kind] |
 
-For Markdown documents, avoid Markdown indented code blocks. Those indented code blocks might be mistaken for unified command prompts.
+For Markdown documents, avoid Markdown indented code blocks like:
+
+```text
+    This is an indented code block.
+```
+
+Those indented code blocks might be mistaken for unified command prompts.
+
+Instead use fenced code blocks:
+
+    ```text
+    This is a fenced code block.
+    ```
 
 Setup:
 
-1. Run the `MARKIN` executable from the [mark-in executables] table.
-2. Run the `U2Markup` executable from the [mark-in executables] table, which will convert your Markdown unified script into a prettified Markdown.
+1. Run the `MARKIN` executable from the [mark-in runners] table.
+2. Run the `U2Markup` executable from the [mark-in renderers] table, which will convert your Markdown unified script into a prettified Markdown.
 
 > [!IMPORTANT]
 > Unified scripts require that lines starting with `<SPACE> <SPACE> <SOME PROMPT>`
@@ -902,7 +955,7 @@ in the OCaml module file must be formatted. In particular:
 - the first word (ex. ["let"], ["module"], ["open"], etc.) of each toplevel module
   expression must be followed by an ASCII space (0x20). No other whitespace is allowed.
 
-`ocamlformat` conforms to the formatting requirements.
+[`ocamlformat`] conforms to the formatting requirements.
 
 Setup:
 
@@ -928,17 +981,26 @@ Setup:
 
 ## Unified Ecosystem
 
-### Executables
+### Runners
 
-| Executable        | Description                                            |
-| ----------------- | ------------------------------------------------------ |
-| `UCramRunner`     | Runs `.ml.u` scripts with OCaml mark-ins               |
-| `UMlModuleRunner` | Runs `.mlm.u` scripts with OCaml mark-ins              |
-| `U2Markdown`      | Renders commands and responses as Markdown code blocks |
+| Executable        | Description                              |
+| ----------------- | ---------------------------------------- |
+| `UCramRunner`     | Runs `.ml.u` scripts with OCaml mark-ins |
+| `UMlModuleRunner` | Runs `.ml` scripts with OCaml mark-ins   |
+
+[runners]: #runners
+
+### Renderers
+
+| Executable   | Description                                            |
+| ------------ | ------------------------------------------------------ |
+| `U2Markdown` | Renders commands and responses as Markdown code blocks |
+
+[renderers]: #renderers
 
 ### OCaml Users
 
-You can install the [executables](#executables) using opam:
+You can install the [runners] and [renderers] using opam:
 
 ```sh
 opam install UnifiedScript_Std UnifiedScript_Top
@@ -947,9 +1009,9 @@ opam install UnifiedScript_Std UnifiedScript_Top
 You can also use the bleeding edge:
 
 ```sh
-opam pin add UnifiedScript_Std https://gitlab.com/dkml/build-tools/MlFront/-/releases/permalink/downloads/MlFront.tar.gz
+opam pin add UnifiedScript_Std https://gitlab.com/dkml/build-tools/MlFront/-/releases/permalink/latest/downloads/MlFront.tar.gz
 
-opam pin add UnifiedScript_Top https://gitlab.com/dkml/build-tools/MlFront/-/releases/permalink/downloads/MlFront.tar.gz
+opam pin add UnifiedScript_Top https://gitlab.com/dkml/build-tools/MlFront/-/releases/permalink/latest/downloads/MlFront.tar.gz
 ```
 
 ### Supporting a new mark-in kind
