@@ -11,7 +11,11 @@
   - [Cram Tests](#cram-tests)
   - [Mercurial Unified Tests](#mercurial-unified-tests)
   - [OCaml Module Script](#ocaml-module-script)
+    - [OCaml Module Script Setup](#ocaml-module-script-setup)
   - [OCaml REPL Cram Test](#ocaml-repl-cram-test)
+    - [OCaml REPL Cram Test Setup](#ocaml-repl-cram-test-setup)
+    - [Automatically Discovered Dune Options](#automatically-discovered-dune-options)
+    - [Manually Configured Options](#manually-configured-options)
   - [dk Build Scripts](#dk-build-scripts)
 - [Main Document Kinds](#main-document-kinds)
   - [Plain Text](#plain-text)
@@ -105,6 +109,8 @@ and then an appropriate [mark-in] guide:
 [mark-in kind]: #mark-in-kinds
 [mark-in executables]: #executables
 [unified ecosystem]: #unified-ecosystem
+[Manually Configured Options]: #manually-configured-options
+[Automatically Discovered Dune Options]: #automatically-discovered-dune-options
 
 ## Quick Exploration
 
@@ -481,11 +487,18 @@ end
 
 All other module expressions are evaluated but do not generate any comments.
 
-Steps:
+#### OCaml Module Script Setup
 
 1. Run the `UMlModuleRunner` executable from the [mark-in executables] table. You will not need a renderer.
-   - However, formatters like `ocamlformat` may dedent the generated OCaml comments, breaking the [unified script syntax](#syntax). You can **avoid that with the `UMlModuleRunner --disable-ocamlformat` option**, which adds the `[@ocamlformat "disable"]` extension to each command response.
+   - Pick ``UMlModuleRunner` command line options from either the [Automatically Discovered Dune Options] (only if Dune is your build tool) or the [Manually Configured Options].
 2. Optional: Run a renderer that corresponds to your [main document](#main-document-kinds)
+
+> [!NOTE]
+> Your `.ml` script will *not* have access to the code in the main package (`UMlModuleRunner --package MAINPACKAGE`).
+> Instead it will have access to the *dependencies* of MAINPACKAGE so there are no dependency cycles.
+
+> [!IMPORTANT]
+> Formatters like `ocamlformat` may dedent the generated OCaml comments, breaking the [unified script syntax](#syntax). You can **avoid that with the `UMlModuleRunner --disable-ocamlformat` option**, which adds the `[@ocamlformat "disable"]` extension to each command response.
 
 ### OCaml REPL Cram Test
 
@@ -512,20 +525,23 @@ A `.ml.u` script uses the OCaml REPL internally: the same REPL you run with `/us
 
 For example, these two forms inside a `.ml.u` file are equivalent:
 
-      # 1 + 2 + 3 ;;
-      - : int = 6
+    # 1 +
+      2 + 3 ;;
+    - : int = 6
 
-      >>> 1 +
-      ... 2 + 3
-      - : int = 6
+    >>> 1 +
+    ... 2 + 3
+    - : int = 6
 
 > [!IMPORTANT]
 > To keep `.ml.u` files readable, [toplevel directives] must use the `>>>` form.
 
 `.ml.u` also allows built-in commands (`%%%`) from the [built-in evaluator].
 
+*Printing*
+
 Toplevel values are printed using OCaml's toplevel printing, except unit values are not printed. You
-can influence those with the `>>> #install_printer printer-name` directive;
+can influence the printing of toplevel values with the `>>> #install_printer printer-name` directive;
 confer with the OCaml manual's [#install_printer documentation](https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives).
 
     >>> ()
@@ -545,7 +561,6 @@ Additionally, anything your code prints using [Format.std_formatter](https://oca
 will be captured and included in the output.
 
     >>> Format.printf "This will be captured!@."
-    - : unit = ()
     This will be captured!
 
 However, direct use of `stdout` or `stderr` goes to the real standard output
@@ -555,7 +570,8 @@ running the cram test rather than inside the cram test output. What is
 more, the dune rule will capture the output.
 
     >>> print_endline "This will not be captured in the output."
-    - : unit = ()
+
+*Renderers*
 
 Let's go back to the original example:
 
@@ -647,30 +663,147 @@ module Unit :
 ```
 
 
-The [toplevel directives] supported are:
+*Toplevel directives*
 
-|                |                     |                    |
-| :------------- | :-----------------: | -----------------: |
-| `#show-class`  | `#show_class_type`  |  `#show_exception` |
-| `#show_module` | `#show_module_type` |       `#show_type` |
-| `#show_val`    |       `#show`       | `#install_printer` |
-| `#print_depth` |   `#print_length`   |  `#remove_printer` |
-| `#warnings`    |    `#warn_error`    |                    |
+The supported [toplevel directives] are:
 
-Some [toplevel directives] need to be given directly to the unified script runner `UCramRunner` (see *Steps* below):
+|                              |                                    |                                   |
+| :--------------------------- | :--------------------------------: | --------------------------------: |
+| [`#show_class class-path`]   |  [`#show_class_type class-path`]   |         [`#show_exception ident`] |
+| [`#show_module module-path`] | [`#show_module_type modtype-path`] |         [`#show_type typeconstr`] |
+| [`#show_val value-path`]     |          [`#show ident`]           | [`#install_printer printer-name`] |
+| [`#print_depth n`]           |        [`#print_length n`]         |  [`#remove_printer printer-name`] |
+| [`#warnings "warning-list"`] |   [`#warn_error "warning-list"`]   |                                   |
 
-- `#directory DIR` and `#load FILE`. There are `UCramRunner --load <FILE>` and `UCramRunner --load-with-dune <FILE>` options that can be used instead.
+[`#show_class class-path`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#show_class_type class-path`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#show_exception ident`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#show_module module-path`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#show_module_type modtype-path`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#show_type typeconstr`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#show_val value-path`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#show ident`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#install_printer printer-name`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#print_depth n`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#print_length n`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#remove_printer printer-name`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#warn_error "warning-list"`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#warnings "warning-list"`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
 
-Other [toplevel directives] are not yet supported but may be in the future:
+Some toplevel directives need to be given directly to the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup] below):
 
-|          |            |                |
-| :------- | :--------: | -------------: |
-| `#trace` | `#untrace` | `#untrace_all` |
+- [`#directory "dir-name"`] and [`#load "file-name"`]. There are `UCramRunner --load <file-name>` and `UCramRunner --load-with-dune <file-name>` options that can be used instead. Examples are available in [OCaml REPL Cram Test Setup].
 
-Steps:
+[`#directory "dir-name"`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#load "file-name"`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
 
-1. Run the `UCramRunner` executable from the [mark-in executables] table. `UCramRunner somefile.u` will set the script filename and the position; that means `__FILE__` will be available as `somefile.u`.
+Other toplevel directives are not yet supported but may be in the future:
+
+|                          |                            |                  |
+| :----------------------- | :------------------------: | ---------------: |
+| [`#trace function-name`] | [`#untrace function-name`] | [`#untrace_all`] |
+
+[`#trace function-name`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#untrace function-name`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+[`#untrace_all`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+
+*Error Handling*
+
+If any of your script commands have syntax errors or raise exceptions (including `assert` statements),
+the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup] below) will exit with code 3.
+
+> [!TIP]
+> Consider allowing partial matches with:
+>
+> ```text
+>   >>> #warnings "-partial-match"
+>
+>   >>> let (Some found) = List.find_opt
+>   ...   (String.starts_with ~prefix:"b")
+>   ...   ["a1"; "b2"; "c3"; "d4"]
+>   val found : string = "b2"
+> ```
+>
+> Compare that to verbose production code:
+>
+> ```text
+>   >>> let found =
+>   ...   match
+>   ...     List.find_opt
+>   ...       (String.starts_with ~prefix:"b")
+>   ...       ["a1"; "b2"; "c3"; "d4"]
+>   ...   with
+>   ...   | Some found -> found
+>   ...   | None -> (* handle error *)
+>   ...     invalid_arg "no 'b' found"
+>   val found : string = "b2"
+> ```
+
+[OCaml REPL Cram Test Setup]: #ocaml-repl-cram-test-setup
+
+#### OCaml REPL Cram Test Setup
+
+1. Run the `UCramRunner` executable from the [mark-in executables] table.
+   - Pick ``UCramRunner` command line options from either the [Automatically Discovered Dune Options] (only if Dune is your build tool) or the [Manually Configured Options].
 2. Optional: Run a renderer that corresponds to your [main document](#main-document-kinds)
+
+> [!TIP]
+> `UCramRunner` will set the script filename and the position. If the command line were `UCramRunner somefile.u` then `__FILE__` will be available as `somefile.u`.
+
+#### Automatically Discovered Dune Options
+
+You must use the [](#manually-configured-options)
+
+1. Run `opam install UnifiedScript_Top`
+2. Create a directory (we'll refer to it as `<testdir>`) that will hold your `.ml.u` scripts. You may place them in the same directory as your `.ml` source code.
+3. Run `opam exec -- dune ocaml top <srcdir> | opam exec -- UDuneImport [options] <testdir>`:
+   - *REQUIRED*: The `<srcdir>` is the directory containing which `*.ml` modules you want to test.
+   - *REQUIRED*: The `<testdir>` is the directory containing your `.ml.u` scripts from the previous step.
+   - *RECOMMENDED*: There are two important options:
+     - `--package PACKAGE` is the name of the Dune `(package)` your `.ml.u` scripts will belong to. In a multi-package Dune project you **must** set this. If you use the `MlModuleRunner` you **must** set this or you may get dependency cycles.
+     - `--require-project-library PACKAGE1 --require-project-library PACKAGE2 ...` are the names of public or private libraries in your Dune workspace that your `.ml.u` scripts depend on (even transitively).
+   - *RECOMMENDED*: Unless you never will use `ocamlformat`, add the `--disable-ocamlformat` option for the reasons given in [OCaml Modules].
+   - *IMPORTANT*: If you want [OCaml Module Script]s, use the `--ml-glob GLOB_PATTERN` to say which files in `<testdir>` should be built as a [OCaml Module Script].
+   - A full example is: `opam exec -- dune ocaml top ext/MlFront/src/MlFront_Cache/MlFront_Cache | opam exec -- UDuneImport.exe --package MlFront_Cache --ml-glob 'test*.ml' -o ext/MlFront/src/MlFront_Cache/dune-utest.inc --require-project-library MlFront_Core --disable-ocamlformat ext/MlFront/src/MlFront_Cache`
+4. Add a `(include OUTPUT.inc)` to the `dune` file in the `<testdir>` directory. If the `dune` file does not exist, create it. For the above example, your `dune` file might look like:
+
+   ```scheme
+   ; file: ext/MlFront/src/MlFront_Cache/dune
+   (include dune-utest.inc)
+   ```
+
+#### Manually Configured Options
+
+- **`UMlModuleRunner` only**: Unless you never will use `ocamlformat`, add the `--disable-ocamlformat` option for the reasons given in [OCaml Modules].
+- To load a .cma or .cmo file (that is, to do a `#directory "dir-name"` followed by a `#load "file-name"`), use the `--load` or `--load-with-dune` command line option.
+  For example, to make the OCaml `UnifiedScript_Std` library in your Dune workspace with the `UCramRunner`,
+  the external `digestif` library, and the `unix` OCaml library available in a `.ml.u` script
+  use the dune rules:
+
+  ```scheme
+  (rule
+    (target unit-actual.ml.u)
+    (deps unit.ml.u
+      ; add the opam packages that contain the findlib
+      ; libraries your cram test needs.
+    (package UnifiedScript_Std)
+    (package digestif))
+    (action
+    ; load the .cma for each library.
+    (run %{bin:UCramRunner} unit.ml.u
+          -o %{target} --workspace %{workspace_root}
+          --load unix.cma
+          --load %{lib:digestif:c/digestif_c.cma}
+          --load-with-dune %{cma:../UnifiedScript_Std/UnifiedScript_Std}
+    )))
+    
+  (rule
+    (alias runtest)
+    (action (diff unit.ml.u unit-actual.ml.u)))
+  ```
+
+  The `--load-with-dune` requires relative paths from the `<testdir>` directory to where the
+  the Dune library (without the `.cma` extension) would be located in your project tree.
 
 ### dk Build Scripts
 
@@ -732,7 +865,7 @@ with CMake
 
 Plain text means there is no rendering post-processing step.
 
-Steps:
+Setup:
 
 1. Run the `MARKIN` executable from the [mark-in executables] table. You will not need a renderer.
 
@@ -744,7 +877,7 @@ Steps:
 
 For Markdown documents, avoid Markdown indented code blocks. Those indented code blocks might be mistaken for unified command prompts.
 
-Steps:
+Setup:
 
 1. Run the `MARKIN` executable from the [mark-in executables] table.
 2. Run the `U2Markup` executable from the [mark-in executables] table, which will convert your Markdown unified script into a prettified Markdown.
@@ -771,7 +904,7 @@ in the OCaml module file must be formatted. In particular:
 
 `ocamlformat` conforms to the formatting requirements.
 
-Steps:
+Setup:
 
 1. Run the `UMlModuleRunner` and options from [OCaml Module Script](#ocaml-module-script). You will not need a renderer.
 
