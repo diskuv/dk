@@ -32,11 +32,9 @@ We'll run the "echo" command.
 
 Every line in a unified script is either:
 
-- the main document (Markdown in the example above)
-- a mark-in command
+- the main document (Markdown in the example above), or
+- a mark-in command, or
 - a mark-in response to a command
-
-In fact, several kinds of main documents can be unified scripts.
 
 After a unified script is run, the mark-in command and responses can be *rendered* to produce a prettier main document.
 For Markdown documents, the commands and responses are prettier if they are wrapped in code blocks:
@@ -52,8 +50,8 @@ For Markdown documents, the commands and responses are prettier if they are wrap
 You can use the following main document guides for more information, including how to do pretty rendering:
 
 |              |                 |
-| ------------ | --------------- |
-| [Plain Text] | [AsciiDoc]      |
+| :----------- | --------------: |
+| [Plain Text] |      [AsciiDoc] |
 | [Markdown]   | [OCaml Modules] |
 | [Typst]      |                 |
 
@@ -178,7 +176,14 @@ The model for metadata is similar to TeX and Typst. Metadata has a named node wi
 \name(attr1, attr2:"text", attr3:(d=1))[ arg1 ] [ arg2 \more ]
 ```
 
-The node attributes `attr1` (etc.) are separated by whitespace and/or optional commas. Node attribute values, if given, can be text or nested node attributes. Attribute value text must be double-quoted and the only the `\\`, `\r`, `\n` and `\"` escape codes are allowed inside the double-quotes.
+Node names and attribute names must consist of only:
+
+- lowercase letters ["a-z"]
+- uppercase letters ["A-Z"]
+- digits ["0-9"]
+- some punctuation marks [".!?;'"]
+
+The node attributes `attr1` (etc.) are separated by whitespace and/or optional commas. Node attribute values, if given, can be nested attributes surrounded by parentheses, or double-quoted text. Only the `\\`, `\r`, `\n` and `\"` escape codes are allowed inside the double-quoted attribute value text.
 
 Node arguments can include text and nested nodes. Only the `\\` and `\]` escape codes are allowed inside argument text.
 
@@ -332,8 +337,11 @@ prompt.
 | ------ | ------------------- | ------------------- | ---------------- |
 | `*.ml` | *module expression* | *end of expression* | OCaml expression |
 
+[OCaml module expressions]: https://ocaml.org/manual/5.4/modules.html
+[toplevel module expressions]: https://ocaml.org/manual/5.4/modules.html
+
 Ordinary OCaml module files can be used *without any special markup*.
-However, the [toplevel module expressions](https://ocaml.org/manual/5.4/modules.html)
+However, the [toplevel module expressions]
 in the OCaml module file must be formatted. In particular:
 
 - the toplevel module expressions must start at column 1
@@ -393,9 +401,180 @@ Steps:
 | `*.ml.u` | `#`    | `;;`      | OCaml expression |
 |          | `>>>`  | `...`     | OCaml expression |
 
+A `.ml.u` script uses the OCaml REPL internally: the same REPL you run with `/usr/bin/ocaml` or `opam exec -- ocaml`.
+
+[OCaml expressions]: https://ocaml.org/manual/5.4/expr.html
+[toplevel directives]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
+
+"Toplevel phrases" are the commands you give to the REPL. They are either:
+
+- [toplevel directives] like `#show SomeModule`, or
+- [OCaml module expressions] like `let x = 1` or `module X = struct end`, or
+- [OCaml expressions] like `1 + 1`
+
+`.ml.u` accept these toplevel phrases in two different forms:
+
+- the `#` form mimics the OCaml REPL. The command ends when a line ends with `;;`.
+- the `>>>` form mimics the Python REPL. The command ends when there is no subsequent continuation line `...`
+
+For example, these two forms inside a `.ml.u` file are equivalent:
+
+      # 1 + 2 + 3 ;;
+      - : int = 6
+
+      >>> 1 +
+      ... 2 + 3
+      - : int = 6
+
+> [!IMPORTANT]
+> To keep `.ml.u` files readable, [toplevel directives] must use the `>>>` form.
+
+Toplevel values are printed using OCaml's toplevel printing, except unit values are not printed. You
+can influence those with the `>>> #install_printer printer-name` directive;
+confer with the OCaml manual's [#install_printer documentation](https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives).
+
+    >>> ()
+
+    >>> 'A'
+    - : char = 'A'
+    >>> let hexpp ppf c = Format.fprintf ppf "0x%02x" (Char.code c)
+    val hexpp : Format.formatter -> char -> unit = <fun>
+
+    >>> #install_printer hexpp
+
+    >>> 'A'
+    - : char = 0x41
+    >>> #remove_printer hexpp
+
+Additionally, anything your code prints using [Format.std_formatter](https://ocaml.org/manual/5.4/api/Format.html#VALstd_formatter)
+will be captured and included in the output.
+
+    >>> Format.printf "This will be captured!@."
+    - : unit = ()
+    This will be captured!
+
+However, direct use of `stdout` or `stderr` goes to the real standard output
+and standard error. In particular, if your code uses `print_endline`
+or `Printf.printf` then that output will appear on your console while
+running the cram test rather than inside the cram test output. What is
+more, the dune rule will capture the output.
+
+    >>> print_endline "This will not be captured in the output."
+    - : unit = ()
+
+Let's go back to the original example:
+
+      # 1 + 2 + 3 ;;
+      - : int = 6
+
+      >>> 1 +
+      ... 2 + 3
+      - : int = 6
+
+With the [Markdown renderer](#markdown), the two forms will render with the valid, syntax highlighted OCaml code blocks. However, the rendering is slightly different:
+
+
+```ocaml
+(* # *) 1 + 2 + 3 ;;
+```
+
+
+```text
+- : int = 6
+```
+
+
+
+```ocaml
+(* >>> *) 1 +
+2 + 3
+```
+
+
+```text
+- : int = 6
+```
+
+
+The renderers *should* respect the [metadata syntax](#metadata-syntax). So:
+
+    >>> Format.printf "%s@." {|
+    ...   \ocaml\;let x = 1
+    ... |}
+
+should render into an OCaml code block:
+
+
+```ocaml
+(* >>> *) Format.printf "%s@." {|
+  \ocaml\;let x = 1
+|}
+```
+
+
+```ocaml
+let x = 1
+```
+
+
+The [metadata syntax](#metadata-syntax) is how [toplevel directives] like `#show`
+render with syntax highlighting. A command
+
+    >>> #show Unit
+
+will include the response
+
+    >>> #show Unit
+    \ocaml(type: "#show")\;module Unit :
+      sig
+        type t = unit = ()
+        val equal : t -> t -> bool
+        val compare : t -> t -> int
+        val to_string : t -> string
+      end
+
+and render as
+
+
+```ocaml
+(* >>> *) #show Unit
+```
+
+
+```ocaml
+module Unit :
+  sig
+    type t = unit = ()
+    val equal : t -> t -> bool
+    val compare : t -> t -> int
+    val to_string : t -> string
+  end
+```
+
+
+The [toplevel directives] supported are:
+
+|                |                     |                    |
+| :------------- | :-----------------: | -----------------: |
+| `#show-class`  | `#show_class_type`  |  `#show_exception` |
+| `#show_module` | `#show_module_type` |       `#show_type` |
+| `#show_val`    |       `#show`       | `#install_printer` |
+| `#print_depth` |   `#print_length`   |  `#remove_printer` |
+| `#warnings`    |    `#warn_error`    |                    |
+
+Some [toplevel directives] need to be given directly to the unified script runner `UCramRunner` (see *Steps* below):
+
+- `#directory DIR` and `#load FILE`. There are `UCramRunner --load <FILE>` and `UCramRunner --load-with-dune <FILE>` options that can be used instead.
+
+Other [toplevel directives] are not yet supported but may be in the future:
+
+|          |            |                |
+| :------- | :--------: | -------------: |
+| `#trace` | `#untrace` | `#untrace_all` |
+
 Steps:
 
-1. Run the `UCramRunner` executable from the [mark-in executables] table.
+1. Run the `UCramRunner` executable from the [mark-in executables] table. `UCramRunner somefile.u` will set the script filename and the position; that means `__FILE__` will be available as `somefile.u`.
 2. Optional: Run a renderer that corresponds to your [main document](#main-document-kinds)
 
 ### dk Build Scripts
@@ -419,11 +598,11 @@ script syntax.
   sections of each script. Markdown is commonplace, so ATX headings (lines
   beginning with one or more "#") were a natural choice for section
   headings.
-- *Output metadata*: Metadata in the output makes it possible to render
-  the output differently based on the tags. For example, when rendering a
+- *Response metadata*: Metadata in the response makes it possible to render
+  the response differently based on the tags. For example, when rendering a
   unified script in Markdown, the code blocks should be rendered with the
   correct highlighting language (ex. Lua syntax highlighting for `%`
-  code blocks).
+  code blocks). [Metadata syntax](#metadata-syntax) describes how that is done.
 
 The full unified script syntax satisfies the three requirements.
 
