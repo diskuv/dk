@@ -1012,6 +1012,10 @@ You can also use the bleeding edge:
 opam pin add UnifiedScript_Std https://gitlab.com/dkml/build-tools/MlFront/-/releases/permalink/latest/downloads/MlFront.tar.gz
 
 opam pin add UnifiedScript_Top https://gitlab.com/dkml/build-tools/MlFront/-/releases/permalink/latest/downloads/MlFront.tar.gz
+
+# then update periodically with
+opam update UnifiedScript_Std UnifiedScript_Top
+opam upgrade UnifiedScript_Std UnifiedScript_Top
 ```
 
 ### Supporting a new mark-in kind
