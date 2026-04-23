@@ -1,8 +1,9 @@
 (cram
  (applies_to darwin_arm64)
  (enabled_if
-  (and 
+  (and %{bin-available:sh} ; no dune cram tests if no `sh` in PATH
+   (and 
     (= %{system} macosx)
-    (= %{architecture} arm64)))
+    (= %{architecture} arm64))))
  (deps
   (source_tree etc/)))
