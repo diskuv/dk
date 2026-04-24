@@ -13,22 +13,29 @@
                     "type": "string",
                     "default": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json"
                 },
-                "return_form": {
-                    "description": "The form value that will be returned from the rule function.",
+                "return_objects": {
+                    "description": "The objects that will be returned from the rule function.",
                     "type": "object",
                     "properties": {
                         "id": {
-                            "description": "The MODULE@VERSION that will be returned from the rule function. The MODULE@VERSION may come from a sibling [values].",
+                            "description": "The MODULE@VERSION of the form that will be returned from the rule function. The MODULE@VERSION form may be defined in a sibling [values].",
                             "type": "string"
                         },
-                        "slot": {
-                            "description": "The slot of the form to return.",
+                        "slots": {
+                            "description": "The object slots created by the form.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "execution_slot": {
+                            "description": "The slot that will be used for execution when the rule is executed. Use slot wildcards like `Release.execution_abi` for cross-platform. If not specified, the first slot in [slots] will be used.",
                             "type": "string"
-                        }
+                         }
                     },
                     "required": [
                         "id",
-                        "slot"
+                        "slots"
                     ]
                 },
                 "return_asset": {
@@ -53,7 +60,7 @@
             "oneOf": [
                 {
                     "required": [
-                        "return_form"
+                        "return_objects"
                     ]
                 },
                 {

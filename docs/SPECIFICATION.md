@@ -3751,9 +3751,9 @@ The next sections describe what each command does.
 
 ### Free Rule Command - `declareoutput`
 
-The `declareoutput` command is the build system asking the free rule to declare the output key *before* the rule adds tasks to the task graph.
+The `declareoutput` command is the build system asking the free rule to declare the output keys *before* the rule adds tasks to the task graph.
 
-The output key can be a [form](#forms) key:
+The output keys can be [object](#objects) keys:
 
 ```lua
 function rules.YourFreeRule(command, request)
@@ -3761,10 +3761,11 @@ function rules.YourFreeRule(command, request)
     return {
       -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json",
       declareoutput = {
-        return_form = {
-          -- parse [request.user] to calculate `id` and `slot`
+        return_objects = {
+          -- parse [request.user] to calculate `id` and `slots`
           id = "UserLibrary_Std.A.B.UserModule.OutputForm@1.0.0",
-          slot = "Release.Agnostic"
+          slots = { "Release.Windows_x86_64", "Release.Darwin_arm64" },
+          execution_slot = "Release.execution_abi"
         }
       }
     }
@@ -3790,6 +3791,12 @@ function rules.YourFreeRule(command, request)
   end
 end
 ```
+
+For objects, the `execution_slot` is a literal or [wildcard](#slotnameslotname) slot that translates the current execution platform to one of the `return_object` slots.
+Build system implementations will schedule the running of a task for the object that corresponds to the `execution_slot`.
+
+In a [distribution](#distributions), the responsibility of the CI system is to ensure the graph is built on all execution platforms so all slots are available.
+Consider, for example, a C language build. The CI system must provide virtual machines or cross-compilers so that C binary artifacts (executables and libraries) are created for all the ABIs.
 
 Historical Note: This pattern of declaring the output *before* doing the building was inspired by [Buck2's dynamic dependencies](https://buck2.build/docs/rule_authors/dynamic_dependencies/).
 
