@@ -29,13 +29,14 @@
                             }
                         },
                         "execution_slot": {
-                            "description": "The slot that will be used for execution when the rule is executed. Use slot wildcards like `Release.execution_abi` for cross-platform. If not specified, the first slot in [slots] will be used.",
+                            "description": "The slot that will be used for execution when the rule is executed. Use slot wildcards like `Release.execution_abi` for cross-platform.",
                             "type": "string"
                          }
                     },
                     "required": [
                         "id",
-                        "slots"
+                        "slots",
+                        "execution_slot"
                     ]
                 },
                 "return_asset": {
