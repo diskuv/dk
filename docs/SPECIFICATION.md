@@ -8,6 +8,7 @@
     - [Composition by Distribution](#composition-by-distribution)
     - [(pending re-organization) Concepts](#pending-re-organization-concepts)
   - [Project Structure](#project-structure)
+    - [Workspace script](#workspace-script)
   - [Assets](#assets)
     - [Asset Identity](#asset-identity)
     - [Web assets](#web-assets)
@@ -574,6 +575,18 @@ Cells exist to make efficient builds and to locating source code even when sourc
 
 - In small projects the `root` may be the only cell; all project source code belongs to `root`.
 - In large projects (ex. monorepos), the project tree can be broken into smaller cells. Only parts of the build that depend on smaller cells will be rebuilt when a single project source file changes.
+
+### Workspace script
+
+When a build system command that takes a [unified script](UNIFIED_SCRIPTS.md) (for example `dk0 test <script>` or `dk0 distribute <script>`) runs, the *workspace script* is the first unified script — searched in the order below — that contains a `## workspace` section:
+
+1. `<script>` itself.
+2. A file named `dk.u` in the directory containing `<script>`, if it exists.
+3. A file named `dk.u` in the first ancestor directory of `<script>` that contains one.
+
+If no such file is found, workspace-only features like imports and workspace-scoped [unified.asset](#unifiedasset) declarations are unavailable.
+
+When a [workspace script](#workspace-script) is found and the workspace script is not `<script>` itself, the workspace script's [unified.asset](#unifiedasset) declarations in non-workspace sections are available to `<script>`.
 
 ## Assets
 
@@ -3344,11 +3357,27 @@ Assumes that the script is .../*.u/run.u and that
 
 `unified.asset` loads the local file or directory, and makes a singleton bundle from the asset. The local file or directory must be strictly relative (ie. not an absolute path and no `..` path segments).
 
+`unified.asset` is available in any unified script that has a section name `<standard module id>@<semantic version>`, including the [workspace script](#workspace-script).
+
 - `name` must be a standard namespace term (ie. begins with a capital letter)
 - the bundle id is `<scriptid>.<name>@<scriptver>` where `scriptid` and `scriptver` are from [unified.scriptmodver](#unifiedscriptmodver)
 - the origin is named the library id of `scriptid` (ex. `OurLibrary_Std` if `scriptid = OurLibrary_Std.A.B.C`) and has mirrors set to the library cell (ex. `cell://OurLibrary_Std`).
   - The `dk0` reference implementation, when run with a directory-based unified script like `dk0 test unifiedscript.u/`, sets the library cell to the unified script directory while the unified script is evaluated.
+  - The `dk0` reference implementation, when the unified script being evaluated is the [workspace script](#workspace-script), sets the library cell to the directory containing the [workspace script](#workspace-script).
   - The `dk0` reference implementation also has a `dk0 combine` command that can adjust the mirrors permanently during distribution.
+
+> [!NOTE]
+> *`dk0` reference implementation behavior*
+>
+> In the [workspace script](#workspace-script), if the [existing output block](#unifiedexistingoutput) has a size and checksum then the asset's size and checksum won't be recomputed. The workspace script is re-evaluated only when the `update` command is issued.
+>
+> The precise behavior depends on which unified script the `unified.asset` declaration is in and how it was reached:
+>
+> | When `unified.asset` runs in… | What happens |
+> | --- | --- |
+> | A unified tet or distribution script that is *not* the [workspace script](#workspace-script) | The asset's file or directory contents are always read to calculate its size and checksum. |
+> | The [workspace script](#workspace-script) | If the [existing output block](#unifiedexistingoutput) under the asset's command already contains size and checksum, those values are reused. Otherwise the asset is always read to recompute the size and checksum are recomputed. |
+> | An `update`-style build system command refreshing the [workspace script](#workspace-script) | The asset is always read to recompute the size and checksum are recomputed. |
 
 Returns `nil` and an error message, or three values:
 
