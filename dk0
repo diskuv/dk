@@ -29,11 +29,11 @@ set -euf
 # Empty value if the architecture is not supported.
 # In particular, use empty instead of 9491d4737000e80bcbdd7a39e9dc13c2178ff865beff7d800d6159bfc395e8fa which is checksum for HTTP 404 error.
 # -------------------------------------
-majminpat_ver=2.4.2.141
-cksum256_darwin_arm64=b7074d44145c2f0faa1d3ce2c5b380d0be5bd5ef82428950f1179f0a3ea3d397
-cksum256_darwin_x86_64=f72edd80c6eb302e3aaafe2add40ddf2ad3644462a46eca7850acf8e1cfb933f
-cksum256_linux_x86_64=efedca3ee346881dc9340c6d697ea955fd7624cdfa0799a8cee14c82cd65ac0b
-cksum256_linux_x86=96d127d7008e3a9d1cd4597cf13f5230e4da7ed5b4ff9fa161f44ad8ce80aeef
+majminpat_ver=2.4.2.142
+cksum256_darwin_arm64=9a4164e59bd09e0116ba0fb3f91e1b87c6eff19b06a63a8157bda04a8af3c536
+cksum256_darwin_x86_64=f37773036af2df7f8e20efe7e06d23bdacd16799cb5685c60d915040dda6465a
+cksum256_linux_x86_64=4a7d21f55c22f94c3004dc6d1f71b2da563454febebf89705f53f395494b1369
+cksum256_linux_x86=32d38dc233cfff030eb25521c1cd8feb1236fd1686f9901e9bd5ecac1075b794
 
 dk_pwd=$PWD
 
