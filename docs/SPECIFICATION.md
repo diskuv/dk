@@ -580,13 +580,14 @@ Cells exist to make efficient builds and to locating source code even when sourc
 
 When a build system command that takes a [unified script](UNIFIED_SCRIPTS.md) (for example `dk0 test <script>` or `dk0 distribute <script>`) runs, the *workspace script* is the first unified script — searched in the order below — that contains a `## workspace` section:
 
-1. `<script>` itself.
+1. The user `<script>` itself.
 2. A file named `dk.u` in the directory containing `<script>`, if it exists.
 3. A file named `dk.u` in the first ancestor directory of `<script>` that contains one.
 
-If no such file is found, workspace-only features like imports and workspace-scoped [unified.asset](#unifiedasset) declarations are unavailable.
+Having a workspace makes available:
 
-When a [workspace script](#workspace-script) is found and the workspace script is not `<script>` itself, the workspace script's [unified.asset](#unifiedasset) declarations in non-workspace sections are available to `<script>`.
+- [importing third party distributions](#import)
+- [workspace-scoped assets](#unifiedasset). The workspace script's [unified.asset](#unifiedasset) declarations in non-workspace sections are available to the user `<script>`. In the `dk0` reference implementation the asset libraries are implicitly trusted, so no `--trust-local-package ASSET_LIBRARY` is needed to access the workspace assets.
 
 ## Assets
 
