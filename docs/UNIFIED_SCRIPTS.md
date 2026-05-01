@@ -190,7 +190,7 @@ are response metadata that [renderers] can use to make pretty output.
 
 ### Unified Script Syntax
 
-A unified script is a document with [markin](#terminology).
+A unified script is a UTF-8 document with [markin](#terminology). A UTF-8 BOM is allowed.
 
 The [markin](#terminology) regions are:
 
