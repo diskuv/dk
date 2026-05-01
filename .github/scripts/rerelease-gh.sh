@@ -1,4 +1,5 @@
 #!/bin/sh
+# AI? Consider https://github.com/diskuv/dk-ai.git's release-dk-project-graph agent
 set -euf
 
 # parse options
