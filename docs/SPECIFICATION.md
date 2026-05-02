@@ -2548,14 +2548,14 @@ Each Lua value has its digest calculated according to:
 
 ### Lua request.execution library
 
-This library is available to [free rule functions](#free-rule-functions) and [UI rule functions](#ui-rule-functions) through the `request.execution` field.
+This library is available only to [UI rule functions](#ui-rule-functions) through the `request.execution` field.
 
-For example:
+An example for an execution specific UI rule:
 
 ```lua
 local M = { id = '...' }
-rules = build.newrules(M)
-function rules.SomeRule(command,request)
+rules, uirules = build.newrules(M)
+function uirules.SomeRule(command,request)
   if command == "submit" then
     -- use the [request.execution] library
     local osfamily = request.execution.OSFamily
@@ -2565,6 +2565,76 @@ function rules.SomeRule(command,request)
   end
 end
 return M
+```
+
+> [!TIP]
+> [Free rule functions](#free-rule-functions) do not have `request.execution`
+> because free rule outputs must stay reproducible across execution platforms.
+> When a free rule needs platform specific outputs, use
+> `declareoutput.execution_slot` together with slot expansions like
+> [${SLOTNAME.Release.execution_abi}](#slotnameslotname).
+
+An example for an execution specific free rule that does *not* use `request.execution`:
+
+```lua
+function rules.F_Build(command, request)
+  if command == "declareoutput" then
+    return {
+      declareoutput = {
+        return_objects = {
+          id = "UserLibrary_Std.A.B.FreeRule.OutputObject@1.0.0",
+          slots = { "Release.Windows_x86_64", "Release.Darwin_arm64" },
+          execution_slot = "Release.execution_abi"
+        }
+      }
+    }
+  elseif command == "submit" then
+    return {
+      values = {
+        schema_version = { major = 1, minor = 0 },
+        forms = {
+          {
+            id = p.outputid,
+            function_ = {
+              commands = {
+                -- using one named slot (ex. SLOT.Release.Windows_x86_64) restricts the command to only Release.Windows_x86_64.
+                -- when [env -u SOMETHING -- ...] runs, it delegates to the "..." part
+                {
+                    "$(get-object CommonsBase_Std.Coreutils@0.6.0 -s ${SLOTNAME.Release.execution_abi} -m ./coreutils.exe -f coreutils.exe -e '*')",
+                    "env", "-u", "${SLOT.Release.Windows_x86_64}", "--",
+                    "cmd", "/c", "\"call build.bat msvc64 & exit /b %ERRORLEVEL%\""
+                },
+                {
+                    "$(get-object CommonsBase_Std.Coreutils@0.6.0 -s ${SLOTNAME.Release.execution_abi} -m ./coreutils.exe -f coreutils.exe -e '*')",
+                    "env", "-u", "${SLOT.Release.Darwin_arm64}", "--",
+                    "/bin/sh", "-c", "./configure && make && make install"
+                }
+              },
+            },
+            outputs = {
+              assets = {
+                -- files in common to all slots
+                {
+                  slots = { "Release.Windows_x86_64", "Release.Darwin_arm64" },
+                  paths = { "LICENSE.txt" }
+                },
+                -- files specific to each ABI
+                {
+                  slots = { "Release.Windows_x86_64" },
+                  paths = { "sample.exe" }
+                },
+                {
+                  slots = { "Release.Darwin_arm64" },
+                  paths = { "sample" }
+                },
+              }
+            }
+          }
+        }
+      }
+    }
+  end
+end
 ```
 
 #### request.execution.OSFamily
@@ -3652,7 +3722,7 @@ Imports a distribution from a GitHub release.
   %% import {
   ..   type="github-l2",
   ..   repo="OWNER/REPO",
-  ..   host="", 
+  ..   host="",
   ..   tag="" }
   'import'
   'github-l2'
@@ -3796,7 +3866,7 @@ function rules.YourFreeRule(command, request)
       declareoutput = {
         return_objects = {
           -- parse [request.user] to calculate `id` and `slots`
-          id = "UserLibrary_Std.A.B.UserModule.OutputForm@1.0.0",
+          id = "UserLibrary_Std.A.B.UserModule.OutputObject@1.0.0",
           slots = { "Release.Windows_x86_64", "Release.Darwin_arm64" },
           execution_slot = "Release.execution_abi"
         }
@@ -3995,8 +4065,7 @@ The details about the build request will be available as follows:
 |                                | [Free Rule submit](#free-rule-command---submit)               |                                                                                                               |
 |                                | [UI Rule submit](#ui-rule-command---submit)                   |                                                                                                               |
 |                                | [UI Rule ui](#ui-rule-command---ui)                           |                                                                                                               |
-| `request.execution`            | [Free Rule submit](#free-rule-command---submit)               | [request.execution](#lua-requestexecution-library)                                                            |
-|                                | [UI Rule submit](#ui-rule-command---submit)                   |                                                                                                               |
+| `request.execution`            | [UI Rule submit](#ui-rule-command---submit)                   | [request.execution](#lua-requestexecution-library)                                                            |
 |                                | [UI Rule ui](#ui-rule-command---ui)                           |                                                                                                               |
 | `request.io`                   | [Free Rule submit](#free-rule-command---submit)               | [request.io](#lua-requestio-library)                                                                          |
 |                                | [UI Rule submit](#ui-rule-command---submit)                   |                                                                                                               |
