@@ -686,12 +686,15 @@ file://C:/source
 C:\source
 file:///usr/src/main.tar.gz
 /usr/src/main.tar.gz
+a/b/c
 ```
 
-A local asset must be located with an absolute path, and may be either:
+A local asset may be either:
 
 - a file
 - a directory
+
+A relative file or directory is relative to the [workspace directory](#workspace-script).
 
 A local directory path is always zipped into a zip archive file, where the [Zip Archive Reproducibility (next section)](#zip-archive-reproducibility) standards will be followed.
 
