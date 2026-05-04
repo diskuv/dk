@@ -1283,11 +1283,13 @@ which is compromised of a subshell which could expand to `some/dir/clang-1.0.0/b
 
 The lexical rules allow for a subshell to be nested in another subshell, although nested subshells should not be required until form parameters are added. For completeness, the bare word `$(get-asset MyAssets_Std.Bundle@1.0.0 -p $(get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -d :) -d :)` is valid, although nonsensical.
 
-VSL words can also have quotes surrounding them so that spaces can be handled. The three type of words are:
+VSL words can also have quotes surrounding them so that spaces can be handled. The three types of words are:
 
-1. Bare words (we've already covered these) with characters that are not whitespace, single quotes (`'`), double quotes (`"`) or backticks (`` ` ``).
+1. Bare words (we've already covered these) with characters that are not whitespace, single quotes (`'`) or double quotes (`"`).
 2. **Single-quoted** words like `'C:\My Documents'`
 3. **Double-quoted** words like `"${CONFIG}\Floor Plans\Master Bedroom.rvt"`
+
+Backticks (`` ` ``) are ordinary literal characters in bare words. They do **not** escape the following character unless they are inside a double-quoted word.
 
 Single-quoted words (`'...'`) evaluate *literally* to the text inside the single quotes, including any whitespace and newlines.
 
@@ -1298,12 +1300,15 @@ Double-quoted words (`"..."`) squash many *bare* words into a single word by:
 
 The inner bare words and the whitespace between the inner words are concatenated into a single word.
 
-Within double-quotes, you should escape:
+Within double-quotes:
 
-- all double-quote (`"`) characters using the `` ` `` (backtick, aka. grave accent) as the escape character
-- all backtick (`` ` ``) characters using the `` ` `` (backtick, aka. grave accent) as the escape character
+- single-quote (`'`) characters are ordinary literal characters
+- literal double-quote (`"`) characters must be escaped using the `` ` `` (backtick, aka. grave accent) as the escape character
+- literal backtick (`` ` ``) characters must be escaped using the `` ` `` (backtick, aka. grave accent) as the escape character
 
 > *Historical reasoning: Backticks were chosen for compatibility with Windows paths and familiarity with PowerShell; carets `^` were rejected since in Windows Batch the caret has complex rules.*
+
+See [ESCAPING.md](ESCAPING.md) for worked examples of simple and complex VSL escaping.
 
 ### Variables available in VSL
 
