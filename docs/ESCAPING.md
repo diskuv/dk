@@ -11,10 +11,11 @@
 - [8. In a bare word, backtick is just a literal character](#8-in-a-bare-word-backtick-is-just-a-literal-character)
 - [9. To suppress `${...}` expansion, quote the literal form](#9-to-suppress--expansion-quote-the-literal-form)
 - [10. Variables and literals can be concatenated into one bare word](#10-variables-and-literals-can-be-concatenated-into-one-bare-word)
-- [11. Subshells can be concatenated with literals in one bare word](#11-subshells-can-be-concatenated-with-literals-in-one-bare-word)
-- [12. A literal backtick can appear immediately before an expandable variable](#12-a-literal-backtick-can-appear-immediately-before-an-expandable-variable)
-- [13. Single quotes inside double quotes are ordinary characters](#13-single-quotes-inside-double-quotes-are-ordinary-characters)
-- [14. For `cmd /c`, keep the inner Windows quoting and then escape the whole payload as one literal](#14-for-cmd-c-keep-the-inner-windows-quoting-and-then-escape-the-whole-payload-as-one-literal)
+- [11. Expandable terms without spaces stay bare](#11-expandable-terms-without-spaces-stay-bare)
+- [12. Subshells can be concatenated with literals in one bare word](#12-subshells-can-be-concatenated-with-literals-in-one-bare-word)
+- [13. A literal backtick can appear immediately before an expandable variable](#13-a-literal-backtick-can-appear-immediately-before-an-expandable-variable)
+- [14. Single quotes inside double quotes are ordinary characters](#14-single-quotes-inside-double-quotes-are-ordinary-characters)
+- [15. For `cmd /c`, keep the inner Windows quoting and then escape the whole payload as one literal](#15-for-cmd-c-keep-the-inner-windows-quoting-and-then-escape-the-whole-payload-as-one-literal)
 
 
 These examples are the source-of-truth worked examples for escaping in the
@@ -364,7 +365,7 @@ val show_roundtrip : scenario:string -> input:string -> notes:string -> unit =
 (* >>> *) show_roundtrip
   ~scenario:"Literal text around an expandable variable"
   ~input:{|foo${SLOT.Baz}bar|}
-  ~notes:"Use double quotes so the variable expands and the surrounding text stays in one word."
+  ~notes:"Escaping not needed; a whitespace-free variable-plus-literal word can stay bare."
 ```
 
 
@@ -373,10 +374,29 @@ val show_roundtrip : scenario:string -> input:string -> notes:string -> unit =
 | **Scenario** | Literal text around an expandable variable |
 | **Helper** | `parse_evalableterm -> evalable_term_to_valueshell` |
 | **Raw Text** | `foo${SLOT.Baz}bar` |
-| **Escaped VSL** | `"foo${SLOT.Baz}bar"` |
-| **How To Escape** | Use double quotes so the variable expands and the surrounding text stays in one word. |
+| **Escaped VSL** | `foo${SLOT.Baz}bar` |
+| **How To Escape** | Escaping not needed; a whitespace-free variable-plus-literal word can stay bare. |
 
-## 11. Subshells can be concatenated with literals in one bare word
+## 11. Expandable terms without spaces stay bare
+
+
+```ocaml
+(* >>> *) show_roundtrip
+  ~scenario:"The `-f ${SLOT.File.Darwin_arm64}/dk` output path stays bare"
+  ~input:{|${SLOT.File.Darwin_arm64}/dk|}
+  ~notes:"Escaping not needed; keep `${SLOT.File.Darwin_arm64}/dk` bare after `-f`."
+```
+
+
+| Field | Value |
+| --- | --- |
+| **Scenario** | The `-f ${SLOT.File.Darwin_arm64}/dk` output path stays bare |
+| **Helper** | `parse_evalableterm -> evalable_term_to_valueshell` |
+| **Raw Text** | `${SLOT.File.Darwin_arm64}/dk` |
+| **Escaped VSL** | `${SLOT.File.Darwin_arm64}/dk` |
+| **How To Escape** | Escaping not needed; keep `${SLOT.File.Darwin_arm64}/dk` bare after `-f`. |
+
+## 12. Subshells can be concatenated with literals in one bare word
 
 
 ```ocaml
@@ -395,7 +415,7 @@ val show_roundtrip : scenario:string -> input:string -> notes:string -> unit =
 | **Escaped VSL** | `"$(get-object SomeLib_Std.Thing@1.0.0 -s Release.Agnostic -d :)/filename"` |
 | **How To Escape** | Use double quotes so the subshell expands and the suffix stays in the same word. |
 
-## 12. A literal backtick can appear immediately before an expandable variable
+## 13. A literal backtick can appear immediately before an expandable variable
 
 
 ```ocaml
@@ -414,7 +434,7 @@ val show_roundtrip : scenario:string -> input:string -> notes:string -> unit =
 | **Escaped VSL** | ```"C:\``${SLOT.Speedy}"``` |
 | **How To Escape** | Use double quotes, and inside them write two backticks before ${SLOT.Speedy}. |
 
-## 13. Single quotes inside double quotes are ordinary characters
+## 14. Single quotes inside double quotes are ordinary characters
 
 
 ```ocaml
@@ -433,7 +453,7 @@ val show_roundtrip : scenario:string -> input:string -> notes:string -> unit =
 | **Escaped VSL** | `"it's ${SLOT.Speedy}"` |
 | **How To Escape** | Use double quotes; no extra escaping is needed for the single quote. |
 
-## 14. For `cmd /c`, keep the inner Windows quoting and then escape the whole payload as one literal
+## 15. For `cmd /c`, keep the inner Windows quoting and then escape the whole payload as one literal
 
 When building a single `cmd /c` argument that itself contains quoted paths,
 prefer the Windows `cmd.exe` convention of doubled outer double-quotes around
