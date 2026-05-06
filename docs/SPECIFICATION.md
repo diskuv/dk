@@ -1496,6 +1496,8 @@ In the reference implementation, the only recognized options are:
 | `--path=STYLE` | Sets the subshell to return a path in one of the styles:           |
 |                | - `rel`: default. relative path, Unix style                        |
 |                | - `absnative`: absolute Windows path on Windows, Unix path on Unix |
+|                | - `absunix`: absolute Unix-style path (ex. `/a/b`, `C:/a/b`) if    |
+|                | possible. Unchanged if not (ex. Windows UNC paths).                |
 
 ### subshell: get-object MODULE@VERSION -s REQUEST_SLOT
 
