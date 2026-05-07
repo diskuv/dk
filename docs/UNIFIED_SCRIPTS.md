@@ -737,6 +737,9 @@ The supported [toplevel directives] are:
 Some toplevel directives need to be given directly to the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup]):
 
 - [`#directory "dir-name"`] and [`#load "file-name"`]. There are `UCramRunner --load <file-name>` and `UCramRunner --load-with-dune <file-name>` options that can be used instead. Examples are available in [OCaml REPL Cram Test Setup].
+- Transitivity: When `--load` points at a findlib package archive that is listed in a sibling `META` file, `UCramRunner` and `UMlModuleRunner` will auto-load the same package prerequisites from that `META` first.
+  If the requested archive is not listed in that `META`, the runners ignore that `--load`.
+  Package dependencies named in `requires` are then loaded transitively from their own `META` files, and already loaded packages are not loaded again.
 
 [`#directory "dir-name"`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
 [`#load "file-name"`]: https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives
@@ -818,6 +821,8 @@ the unified script runner `UCramRunner` (see [OCaml REPL Cram Test Setup]) will 
 
 - **`UMlModuleRunner` only**: Will you use [`ocamlformat`] *ever*? Then add the `--disable-ocamlformat` option for the reasons given in [OCaml Modules].
 - To load a .cma or .cmo file (that is, to do a `#directory "dir-name"` followed by a `#load "file-name"`), use the `--load` or `--load-with-dune` command line option.
+  For findlib packages, `--load` first consults the package `META` file so same package prerequisites and transitive `requires` packages are loaded before the requested
+  archive, and a requested archive that is absent from that `META` is ignored.  
   For example, to make the OCaml `UnifiedScript_Std` library in your Dune workspace with the `UCramRunner`,
   the external `digestif` library, and the `unix` OCaml library available in a `.ml.u` script
   use the dune rules:
