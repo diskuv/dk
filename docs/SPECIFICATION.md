@@ -3239,7 +3239,12 @@ Returns a string that is quoted as a single word in the [Value Shell Language](#
 
 `stringdk.quote_windows_batch (s)`
 
-Returns a string that is quoted as a single word in a Windows Batch file.
+Returns a string that can be inserted verbatim as one whitespace-delimited
+word in a [Windows cmd.exe](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cmd)
+command line or Windows batch script command that launches an executable.
+In other words, cmd.exe should parse the result as exactly one command word whose value is `s`.
+
+This is intended for building command invocations such as executable paths and arguments. It is not a general-purpose escaping function for every batch-file construct such as `if`, `set`, or other contexts with additional cmd.exe parsing rules.
 
 #### stringdk.sanitizesubpath
 
