@@ -43,7 +43,10 @@
       - [+NAME=VALUE](#namevalue)
       - [-NAME](#-name)
       - [\<NAME=VALUE](#namevalue-1)
-    - [Form Order of Processing](#form-order-of-processing)
+    - [Form Processing](#form-processing)
+      - [Processing Order](#processing-order)
+      - [Windows command-line quoting](#windows-command-line-quoting)
+      - [Windows `--cmd.exe` special form](#windows---cmdexe-special-form)
   - [Objects](#objects)
     - [Saving and Loading Objects](#saving-and-loading-objects)
     - [Object Slots](#object-slots)
@@ -1087,7 +1090,9 @@ For example, `<PATH=C:\Windows\system32` prepends `C:\Windows\system32;` to the 
 In this example, the Unix prepending does not make sense, which is why the best practice is to use [variables](#form-variables) for the `VALUE`
 like `<PATH=${CACHE}${/}bin` so the modification is portable across operating systems.
 
-### Form Order of Processing
+### Form Processing
+
+#### Processing Order
 
 The order of processing is as follows:
 
@@ -1105,6 +1110,44 @@ The order of processing is as follows:
 
 5. The form's output files are verified to exist.
 6. The [`${SLOT.slotname}`](#slotslotname) that are part of the form's arguments and precommands are made available to other forms.
+
+#### Windows command-line quoting
+
+On Windows, `function.commands` are rendered into one
+`lpCommandLine` string parameter to the Windows API function call
+[CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw).
+The string is assembled by `cmd.exe` (Windows Batch) quoting of each
+`function.commands` command (ie. commands with spaces will be surrounded with double quotes, etc.),
+then concatenating them all with spaces.
+
+#### Windows `--cmd.exe` special form
+
+When a form needs `cmd.exe /c`, prefer the special `function.commands` form
+whose exact shape is `["--cmd.exe", "/c", "<VSL-quoted string>"]`. Spaces added for clarity:
+
+```json
+{
+  "function": {
+    "commands": [
+      "--cmd.exe",
+      "/c",
+      "\"  echo hi > `\"${SLOT.Release.Agnostic}\\some-file.txt`\"   \""
+    ]
+  }
+}
+```
+
+Stripped of the [VSL quoting](#vsl-lexical-rules) the unquoted argument to `/c` is:
+
+```text
+   echo hi > "${SLOT.Release.Agnostic}\some-file.txt"   
+```
+
+That expands to being the `lpCommandLine` parameter to the Windows API function call [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw):
+
+```text
+cmd.exe /c "   echo hi > "...\somewhere\Release.Agnostic\some-file.txt"   "
+```
 
 ## Objects
 
@@ -4607,6 +4650,12 @@ Each *command line* is constructed as the concatenation of:
 6. The `{"options": "fields": [...]}` with a `group: 1` field (if any)
 7. ... and so on up to and including group 9
 8. If `{"options": "document": {...}}` is present, an option and a location of a file containing the entire JSON form document
+
+On Windows, that command line is rendered using `cmd.exe` command-word quoting
+and spacing rules because `CreateProcessW` takes one command-line string rather
+than a native argv array. The `["--cmd.exe", "/c", "<string>"]` special form
+described above is the exception: it builds one explicit `cmd.exe /c "..."`
+payload from the supplied string with its own inner quoting rules.
 
 #### Option Groups
 

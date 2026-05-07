@@ -1,21 +1,22 @@
 # VSL escaping examples
 
-- [Helpers](#helpers)
-- [1. Simple bare words stay bare](#1-simple-bare-words-stay-bare)
-- [2. Windows paths with backslashes do not need escaping by themselves](#2-windows-paths-with-backslashes-do-not-need-escaping-by-themselves)
-- [3. Whitespace requires quoting](#3-whitespace-requires-quoting)
-- [4. Single quotes are a readable wrapper when the word is fully literal](#4-single-quotes-are-a-readable-wrapper-when-the-word-is-fully-literal)
-- [5. Double quotes keep variables expandable while preserving spaces](#5-double-quotes-keep-variables-expandable-while-preserving-spaces)
-- [6. Inside double quotes, escape a literal double quote with backtick](#6-inside-double-quotes-escape-a-literal-double-quote-with-backtick)
-- [7. Inside double quotes, escape a literal backtick with backtick](#7-inside-double-quotes-escape-a-literal-backtick-with-backtick)
-- [8. In a bare word, backtick is just a literal character](#8-in-a-bare-word-backtick-is-just-a-literal-character)
-- [9. To suppress `${...}` expansion, quote the literal form](#9-to-suppress--expansion-quote-the-literal-form)
-- [10. Variables and literals can be concatenated into one bare word](#10-variables-and-literals-can-be-concatenated-into-one-bare-word)
-- [11. Expandable terms without spaces stay bare](#11-expandable-terms-without-spaces-stay-bare)
-- [12. Subshells can be concatenated with literals in one bare word](#12-subshells-can-be-concatenated-with-literals-in-one-bare-word)
-- [13. A literal backtick can appear immediately before an expandable variable](#13-a-literal-backtick-can-appear-immediately-before-an-expandable-variable)
-- [14. Single quotes inside double quotes are ordinary characters](#14-single-quotes-inside-double-quotes-are-ordinary-characters)
-- [15. For `cmd /c`, keep the inner Windows quoting and then escape the whole payload as one literal](#15-for-cmd-c-keep-the-inner-windows-quoting-and-then-escape-the-whole-payload-as-one-literal)
+- [VSL escaping examples](#vsl-escaping-examples)
+  - [Helpers](#helpers)
+  - [1. Simple bare words stay bare](#1-simple-bare-words-stay-bare)
+  - [2. Windows paths with backslashes do not need escaping by themselves](#2-windows-paths-with-backslashes-do-not-need-escaping-by-themselves)
+  - [3. Whitespace requires quoting](#3-whitespace-requires-quoting)
+  - [4. Single quotes are a readable wrapper when the word is fully literal](#4-single-quotes-are-a-readable-wrapper-when-the-word-is-fully-literal)
+  - [5. Double quotes keep variables expandable while preserving spaces](#5-double-quotes-keep-variables-expandable-while-preserving-spaces)
+  - [6. Inside double quotes, escape a literal double quote with backtick](#6-inside-double-quotes-escape-a-literal-double-quote-with-backtick)
+  - [7. Inside double quotes, escape a literal backtick with backtick](#7-inside-double-quotes-escape-a-literal-backtick-with-backtick)
+  - [8. In a bare word, backtick is just a literal character](#8-in-a-bare-word-backtick-is-just-a-literal-character)
+  - [9. To suppress `${...}` expansion, quote the literal form](#9-to-suppress--expansion-quote-the-literal-form)
+  - [10. Variables and literals can be concatenated into one bare word](#10-variables-and-literals-can-be-concatenated-into-one-bare-word)
+  - [11. Expandable terms without spaces stay bare](#11-expandable-terms-without-spaces-stay-bare)
+  - [12. Subshells can be concatenated with literals in one bare word](#12-subshells-can-be-concatenated-with-literals-in-one-bare-word)
+  - [13. A literal backtick can appear immediately before an expandable variable](#13-a-literal-backtick-can-appear-immediately-before-an-expandable-variable)
+  - [14. Single quotes inside double quotes are ordinary characters](#14-single-quotes-inside-double-quotes-are-ordinary-characters)
+  - [15. For `cmd /c`, keep the inner Windows quoting and then escape the whole payload as one literal](#15-for-cmd-c-keep-the-inner-windows-quoting-and-then-escape-the-whole-payload-as-one-literal)
 
 
 These examples are the source-of-truth worked examples for escaping in the
@@ -459,6 +460,11 @@ When building a single `cmd /c` argument that itself contains quoted paths,
 prefer the Windows `cmd.exe` convention of doubled outer double-quotes around
 the inner command string. A concise explanation is in
 [this Stack Overflow answer](https://stackoverflow.com/a/12892791).
+
+If you are writing `function.commands` in a values file, prefer the
+`["--cmd.exe", "/c", "<string>"]` special form documented in
+[SPECIFICATION.md](SPECIFICATION.md); this example is only for places where you must still
+hand-author one literal `cmd /c` payload string.
 
 
 ```ocaml
