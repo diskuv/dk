@@ -4651,6 +4651,9 @@ Each *command line* is constructed as the concatenation of:
 7. ... and so on up to and including group 9
 8. If `{"options": "document": {...}}` is present, an option and a location of a file containing the entire JSON form document
 
+If `<program>` is a relative path, it is resolved against the function working
+directory before spawning on all platforms.
+
 On Windows, that command line is rendered using `cmd.exe` command-word quoting
 and spacing rules because `CreateProcessW` takes one command-line string rather
 than a native argv array. The `["--cmd.exe", "/c", "<string>"]` special form
