@@ -324,50 +324,111 @@
                                         "type": "string",
                                         "description": "The canonical identifier for the bundle, a lowercase hex-encoded SHA-256 of the critical fields of an bundle JSON document."
                                     },
-                                    "traces": {
-                                        "type": "array",
-                                        "description": "A snapshot of the tracestore(s) that were created/updated after the distributions' builds completed.",
-                                        "items": {
-                                            "type": "object",
-                                            "description": "The location in the bundle of a tracestore.",
-                                            "properties": {
-                                                "tag": {
-                                                    "type": "string",
-                                                    "description": "The compatibility tag of the tracestore, like `oc414_wd64`."
-                                                },
-                                                "path": {
-                                                    "type": "string",
-                                                    "description": "The path within the bundle to the tracestore."
+                                    "distmeta": {
+                                        "type": "object",
+                                        "description": "Transitive distributions, script modules, and \"meta\" values that can define other values (values.json and values.lua).",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "traces": {
+                                                "type": "array",
+                                                "description": "A snapshot of the tracestore(s) that were created/updated after the distributions' builds completed.",
+                                                "items": {
+                                                    "type": "object",
+                                                    "description": "The location in the bundle of a tracestore.",
+                                                    "properties": {
+                                                        "tag": {
+                                                            "type": "string",
+                                                            "description": "The compatibility tag of the tracestore, like `cts.1`."
+                                                        },
+                                                        "path": {
+                                                            "type": "string",
+                                                            "description": "The path within the bundle to the tracestore."
+                                                        }
+                                                    },
+                                                    "additionalProperties": false,
+                                                    "required": [
+                                                        "tag",
+                                                        "path"
+                                                    ]
                                                 }
                                             },
-                                            "additionalProperties": false,
-                                            "required": [
-                                                "tag",
-                                                "path"
-                                            ]
-                                        }
-                                    },
-                                    "values": {
-                                        "type": "array",
-                                        "description": "Snapshots of the valuestores that were populated after the distributions' builds completed.",
-                                        "items": {
-                                            "type": "object",
-                                            "description": "A zip snapshot of the valuestore that was populated after the distributions' builds completed. Entries in the zipfile must be `./{value_id}` like `./vnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq`.",
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "path": {
-                                                    "type": "string",
-                                                    "description": "The path within the bundle to the zipped value store."
+                                            "values": {
+                                                "type": "array",
+                                                "description": "Snapshots of the distmeta valuestores that were populated after the distributions' builds completed.",
+                                                "items": {
+                                                    "type": "object",
+                                                    "description": "A zip snapshot of the valuestore that was populated after the distributions' builds completed. Entries in the zipfile must be `./{value_id}` like `./vnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq`.",
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "path": {
+                                                            "type": "string",
+                                                            "description": "The path within the bundle to the zipped value store."
+                                                        }
+                                                    }
                                                 }
                                             }
-                                        }
+                                        },
+                                        "required": [
+                                            "traces",
+                                            "values"
+                                        ]
+                                    },
+                                    "package": {
+                                        "type": "object",
+                                        "description": "Objects, bundles, assets and asset indexes.",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "traces": {
+                                                "type": "array",
+                                                "description": "A snapshot of the tracestore(s) that were created/updated after the distributions' builds completed.",
+                                                "items": {
+                                                    "type": "object",
+                                                    "description": "The location in the bundle of a tracestore.",
+                                                    "properties": {
+                                                        "tag": {
+                                                            "type": "string",
+                                                            "description": "The compatibility tag of the tracestore, like `cts.1`."
+                                                        },
+                                                        "path": {
+                                                            "type": "string",
+                                                            "description": "The path within the bundle to the tracestore."
+                                                        }
+                                                    },
+                                                    "additionalProperties": false,
+                                                    "required": [
+                                                        "tag",
+                                                        "path"
+                                                    ]
+                                                }
+                                            },
+                                            "values": {
+                                                "type": "array",
+                                                "description": "Snapshots of the package valuestores that were populated after the distributions' builds completed.",
+                                                "items": {
+                                                    "type": "object",
+                                                    "description": "A zip snapshot of the valuestore that was populated after the distributions' builds completed. Entries in the zipfile must be `./{value_id}` like `./vnmfdhn7lw4wepx2qiunrmgm4o5lx4wwsf2yfj7xyxggkg5kdsltq`.",
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "path": {
+                                                            "type": "string",
+                                                            "description": "The path within the bundle to the zipped value store."
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "required": [
+                                            "traces",
+                                            "values"
+                                        ]
                                     }
                                 },
                                 "required": [
                                     "producer_accepts",
                                     "bundle_id",
                                     "bundle_canonical",
-                                    "traces",
+                                    "distmeta",
+                                    "package",
                                     "modules"
                                 ]
                             }
