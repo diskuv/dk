@@ -79,7 +79,7 @@
     - [OpenBSD signify keys](#openbsd-signify-keys)
     - [GitHub SLSA Level 2](#github-slsa-level-2)
     - [GitHub SLSA Level 3](#github-slsa-level-3)
-    - [Distribution Cram Tests](#distribution-cram-tests)
+    - [Distribution Scripts](#distribution-scripts)
   - [Scripts](#scripts)
     - [Script Introduction](#script-introduction)
     - [Script Phases](#script-phases)
@@ -1976,11 +1976,11 @@ When accepting a known, vetted GitHub Actions script (SLSA Level 3), the:
 
 The build system will download the GitHub CLI (using the default trusted `CommonsBase_Std` library) to do verification of the builds.
 
-### Distribution Cram Tests
+### Distribution Scripts
 
 🚧*missing docs*: make a section on cram tests indepedent of distributions
 
-When writing distribution cram tests:
+When writing distribution scripts:
 
 1. Running one rule in a script module will bring in the entire script module.
    But it is best to run every rule for lightweight testing during distribution.
@@ -1989,8 +1989,7 @@ When writing distribution cram tests:
    current dir like `dk0 post-object` and `dk0 run`. Set unique to the cram
    test by `dk0 test`. The `<unique path to cram test>` is to avoid race conditions on Windows where
    Windows Defender (etc.) may not make a file visible or rewritable immediately after creation.
-4. Get each asset used by rules since there are no static input dependencies for rules
-   (cf. <https://github.com/diskuv/dk/issues/100>).
+4. Declare each static rule input in the rule's `declareoutput` response.
 
 ## Scripts
 
@@ -3909,7 +3908,9 @@ The next sections describe what each command does.
 
 ### Free Rule Command - `declareoutput`
 
-The `declareoutput` command is the build system asking the free rule to declare the output keys *before* the rule adds tasks to the task graph.
+The `declareoutput` command is the build system asking the free rule to declare
+the output keys and any static input dependencies *before* the rule adds tasks
+to the task graph.
 
 The output keys can be [object](#objects) keys:
 
@@ -3950,11 +3951,45 @@ function rules.YourFreeRule(command, request)
 end
 ```
 
+Static rule inputs are declared in the same `declareoutput` table:
+
+```lua
+function rules.YourFreeRule(command, request)
+  if command == "declareoutput" then
+    return {
+      -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json",
+      declareoutput = {
+        return_asset = {
+          id = "UserLibrary_Std.A.B.UserModule.OutputAsset@1.0.0",
+          path = "some/file"
+        },
+        input_bundles = {
+          { id = "UserLibrary_Std.A.B.SourceBundle@1.0.0" }
+        },
+        input_assets = {
+          { id = "UserLibrary_Std.A.B.SourceBundle@1.0.0", path = "src.tar.gz" }
+        },
+        input_objects = {
+          {
+            id = "UserLibrary_Std.A.B.Tool@1.0.0",
+            slots = { "Release.Windows_x86_64", "Release.Linux_x86_64" },
+            execution_slot = "Release.execution_abi"
+          }
+        }
+      }
+    }
+  end
+end
+```
+
 For objects, the `execution_slot` is a literal or [wildcard](#slotnameslotname) slot that translates the current execution platform to one of the `return_object` slots.
 Build system implementations will schedule the running of a task for the object that corresponds to the `execution_slot`.
 
 In a [distribution](#distributions), the responsibility of the CI system is to ensure the graph is built on all execution platforms so all slots are available.
 Consider, for example, a C language build. The CI system must provide virtual machines or cross-compilers so that C binary artifacts (executables and libraries) are created for all the ABIs.
+
+`input_bundles`, `input_assets`, and `input_objects` are the static dependencies
+of the rule itself.
 
 Historical Note: This pattern of declaring the output *before* doing the building was inspired by [Buck2's dynamic dependencies](https://buck2.build/docs/rule_authors/dynamic_dependencies/).
 

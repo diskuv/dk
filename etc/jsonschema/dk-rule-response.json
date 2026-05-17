@@ -56,6 +56,72 @@
                         "id",
                         "path"
                     ]
+                },
+                "input_bundles": {
+                    "description": "Static bundle inputs that the rule depends on.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The MODULE@VERSION bundle dependency of the rule.",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id"
+                        ]
+                    }
+                },
+                "input_assets": {
+                    "description": "Static asset inputs that the rule depends on.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The MODULE@VERSION asset dependency of the rule.",
+                                "type": "string"
+                            },
+                            "path": {
+                                "description": "The asset path dependency of the rule.",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "path"
+                        ]
+                    }
+                },
+                "input_objects": {
+                    "description": "Static object inputs that the rule depends on.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The MODULE@VERSION form dependency of the rule.",
+                                "type": "string"
+                            },
+                            "slots": {
+                                "description": "The object slots published by the dependency.",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "execution_slot": {
+                                "description": "The slot that will be used for execution when the rule is executed. Use slot wildcards like `Release.execution_abi` for cross-platform.",
+                                "type": "string"
+                             }
+                        },
+                        "required": [
+                            "id",
+                            "slots",
+                            "execution_slot"
+                        ]
+                    }
                 }
             },
             "oneOf": [
