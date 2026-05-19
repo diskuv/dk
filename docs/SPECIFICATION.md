@@ -7,6 +7,8 @@
     - [Composition by Rules](#composition-by-rules)
     - [Composition by Distribution](#composition-by-distribution)
     - [(pending re-organization) Concepts](#pending-re-organization-concepts)
+  - [Terminology](#terminology)
+    - [strictly relative path](#strictly-relative-path)
   - [Project Structure](#project-structure)
     - [Workspace script](#workspace-script)
   - [Assets](#assets)
@@ -56,10 +58,12 @@
       - [Types of Words](#types-of-words)
     - [Variables available in VSL](#variables-available-in-vsl)
     - [get-object MODULE@VERSION -s REQUEST\_SLOT (-f FILE | -d DIR/)](#get-object-moduleversion--s-request_slot--f-file---d-dir)
+    - [run-object MODULE@VERSION -s REQUEST\_SLOT (-c COMMAND | -m MEMBER)](#run-object-moduleversion--s-request_slot--c-command---m-member)
     - [run-rule MODULE@VERSION (-f FILE | -d DIR/) -- CLI\_FORM\_DOC](#run-rule-moduleversion--f-file---d-dir----cli_form_doc)
     - [enter-object MODULE@VERSION -s REQUEST\_SLOT -- CLI\_FORM\_DOC](#enter-object-moduleversion--s-request_slot----cli_form_doc)
     - [merge-object MODULE@VERSION -s REQUEST\_SLOT (-f FILE | -d DIR/)](#merge-object-moduleversion--s-request_slot--f-file---d-dir)
     - [get-asset MODULE@VERSION FILE\_PATH (-f FILE | -d DIR/)](#get-asset-moduleversion-file_path--f-file---d-dir)
+    - [run-asset MODULE@VERSION FILE\_PATH (-c COMMAND | -m MEMBER)](#run-asset-moduleversion-file_path--c-command---m-member)
     - [get-bundle MODULE@VERSION (-f FILE | -d DIR/)](#get-bundle-moduleversion--f-file---d-dir)
     - [Options: -f FILE and -d DIR and -x GLOB and -e GLOB](#options--f-file-and--d-dir-and--x-glob-and--e-glob)
     - [Option: \[-n STRIP\]](#option--n-strip)
@@ -558,6 +562,14 @@ We use the generic term **value** to mean an bundle, a form or an object.
 All values have names like `YourLibrary_Std.YourPackage.YourThing`. Think of the name as if it were a serial number, as the name uniquely identifies each bundle, form and object.
 
 All values also have versions like `1.0.0`. Making a change to a value means creating a new value with the same name but with an increased version. For example, if the text of your 2025-09-04 privacy policy is in the bundle `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904`, an end-of-year update to the privacy policy could be `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20251231`. These *semantic* versions offer a lot of flexibility and are industry-standard: [external link: semver 2.0](https://semver.org/). The important point is that values do not change; versions do.
+
+## Terminology
+
+### strictly relative path
+
+- Not an absolute path
+- After the path is normalized, there are no path segments that start with `..` will raise an error.
+- After the path is normalized, there are no path segments that contain a forward or backward slash. For example, even though Unix filenames can contain backslashes, but they cannot be strictly relative paths.
 
 ## Project Structure
 
@@ -1381,6 +1393,24 @@ See [Options: -f FILE, -d DIR, -x GLOB, and -e GLOB](#options--f-file-and--d-dir
 
 The object `ID` implicitly or explicitly contains build metadata; see [ID with Build Metadata](#object-id-with-build-metadata).
 
+### run-object MODULE@VERSION -s REQUEST_SLOT (-c COMMAND | -m MEMBER)
+
+Run a command from the object slot `REQUEST_SLOT` for the object uniquely identified by `MODULE@VERSION`.
+
+| Option         | Description                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------ |
+| `-c COMMAND`   | Run the strictly relative `COMMAND` inside the anonymous directory tree produced by `get-object -d :`.       |
+| `-m MEMBER`    | Extract only `MEMBER`, normalize it as a file path, and use that normalized path as the command to run.      |
+| `-n STRIP`     | See [Option: [-n STRIP]](#option--n-strip). Only valid with `-c COMMAND`.                                    |
+| `-x GLOB`      | Exclude globbed files from the anonymous directory. May be repeated.                                         |
+| `-e GLOB`      | Make globbed files executable in the anonymous directory. May be repeated.                                   |
+| `-- [ARGS...]` | Interpret `ARGS` as a value shell command line with variables and subshells, like `function.commands` words. |
+
+The command is executed with the same current working directory model as [run-rule](#run-rule-moduleversion--f-file---d-dir----cli_form_doc) and [post-object], but the executable path is always resolved relative to the anonymous command directory. `COMMAND` and normalized `MEMBER` must be [strictly relative file paths](#strictly-relative-path).
+
+The command records the execution ABI, stream numbers and captured contents.
+That is, a single `run-object` execution records the standard output in `stream = 1` and one the standard error in `stream = 2`.
+
 ### run-rule MODULE@VERSION (-f FILE | -d DIR/) -- CLI_FORM_DOC
 
 Run the dynamic [Lua rule](#introduction-to-custom-lua-rules) uniquely identified by `MODULE@VERSION` using the JSON constructed from `CLI_FORM_DOC`.
@@ -1416,14 +1446,14 @@ The object `MODULE@VERSION` implicitly or explicitly contains build metadata; se
 
 Build the object uniquely identified by `MODULE@VERSION` and merge the contents of the slot `REQUEST_SLOT` into the requested output.
 
-| Option      | Description                                                                                            |
-| ----------- | ------------------------------------------------------------------------------------------------------ |
-| `-f FILE`   | Place merged object in `FILE`                                                                          |
+| Option      | Description                                                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------------- |
+| `-f FILE`   | Place merged object in `FILE`                                                                           |
 | `-d DIR/`   | Merge contents of the zip archive into the existing directory `DIR/`. The object must be a zip archive. |
-| `-n STRIP`  | See [Option: [-n STRIP]](#option--n-strip)                                                             |
-| `-m MEMBER` | See [Option: [-m MEMBER](#option--m-member)]                                                           |
-| `-x GLOB`   | Exclude globbed files from `-d DIR/`. May be repeated.                                                 |
-| `-e GLOB`   | Make globbed files executable in `-d DIR/` and `-f FILE`. May be repeated.                             |
+| `-n STRIP`  | See [Option: [-n STRIP]](#option--n-strip)                                                              |
+| `-m MEMBER` | See [Option: [-m MEMBER](#option--m-member)]                                                            |
+| `-x GLOB`   | Exclude globbed files from `-d DIR/`. May be repeated.                                                  |
+| `-e GLOB`   | Make globbed files executable in `-d DIR/` and `-f FILE`. May be repeated.                              |
 
 **More than one `merge-object` can use the same output directory `DIR`**.
 
@@ -1445,6 +1475,24 @@ Get the contents of the asset at `FILE_PATH` for the bundle `MODULE@VERSION`.
 | `-e GLOB`   | Make globbed files executable in `-d DIR/` and `-f FILE`. May be repeated.   |
 
 See [Options: -f FILE, -d DIR, -x GLOB, and -e GLOB](#options--f-file-and--d-dir-and--x-glob-and--e-glob) for output behavior.
+
+### run-asset MODULE@VERSION FILE_PATH (-c COMMAND | -m MEMBER)
+
+Run a command from the asset `FILE_PATH` in the bundle `MODULE@VERSION`.
+
+| Option         | Description                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------ |
+| `-c COMMAND`   | Run the strictly relative `COMMAND` inside the anonymous directory tree produced by `get-asset -d :`.        |
+| `-m MEMBER`    | Extract only `MEMBER`, normalize it as a file path, and use that normalized path as the command to run.      |
+| `-n STRIP`     | See [Option: [-n STRIP]](#option--n-strip). Only valid with `-c COMMAND`.                                    |
+| `-x GLOB`      | Exclude globbed files from the anonymous directory. May be repeated.                                         |
+| `-e GLOB`      | Make globbed files executable in the anonymous directory. May be repeated.                                   |
+| `-- [ARGS...]` | Interpret `ARGS` as a value shell command line with variables and subshells, like `function.commands` words. |
+
+The command is executed with the same current working directory model as [run-rule](#run-rule-moduleversion--f-file---d-dir----cli_form_doc) and [post-object], but the executable path is always resolved relative to the anonymous command directory. `COMMAND` and normalized `MEMBER` must be [strictly relative file paths](#strictly-relative-path).
+
+The command records the execution ABI, stream numbers and captured contents.
+That is, a single `run-asset` execution records the standard output in `stream = 1` and one the standard error in `stream = 2`.
 
 ### get-bundle MODULE@VERSION (-f FILE | -d DIR/)
 
@@ -2761,7 +2809,7 @@ The mode string can be any of the following:
 
 Unlike the C library function `fopen`, the file will be opened in binary mode rather than text mode. (Text mode adds CRLF on Windows systems and is non-reproducible when cross-compiling.)
 
-The `filename_or_dirname` must be a *strictly* relative path:
+The `filename_or_dirname` must be a [strictly relative path](#strictly-relative-path):
 
 - An absolute path will raise an error.
 - After the path is normalized, any path segments that start with `..` will raise an error.
@@ -2882,7 +2930,7 @@ Converts the file or directory to an asset and closes the file.
 
 In the options only `path` is mandatory.
 
-`path`: Two assets at the same `path` is an error. Each `path` must be [strictly relative](#requestioopen) or an error will be raised.
+`path`: Two assets at the same `path` is an error. Each `path` must be [strictly relative](#strictly-relative-path) or an error will be raised.
 
 `origin_name`: The name of the origin. The origin is a label used to invalidate assets. Many assets can share the same origin.
 
@@ -3483,7 +3531,7 @@ Assumes that the script is .../*.u/run.u and that
     'sha1:99baee504a1fe91a07bc66b6900bd39874191889' }
 ```
 
-`unified.asset` loads the local file or directory, and makes a singleton bundle from the asset. The local file or directory must be strictly relative (ie. not an absolute path and no `..` path segments).
+`unified.asset` loads the local file or directory, and makes a singleton bundle from the asset. The local file or directory must be a [strictly relative path](#strictly-relative-path).
 
 `unified.asset` is available in any unified script that has a section name `<standard module id>@<semantic version>`, including the [workspace script](#workspace-script).
 
