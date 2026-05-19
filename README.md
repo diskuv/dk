@@ -1158,13 +1158,13 @@ This is a new form with a function that will call `7z.exe` with the right parame
       "id": "OurZip_Demo.S7z4.MacLinux7zExe@25.1.0",
       "precommands": {
         "private": [
-          // need macOS and Linux tar files. since same destination directory need [install-object]
-          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm -d tarballs",
-          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm64 -d tarballs",
-          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_x86 -d tarballs",
-          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_x86_64 -d tarballs",
-          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Darwin_arm64 -d tarballs",
-          "install-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Darwin_x86_64 -d tarballs"
+          // need macOS and Linux tar files. since same destination directory need [merge-object]
+          "merge-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm -d tarballs",
+          "merge-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_arm64 -d tarballs",
+          "merge-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_x86 -d tarballs",
+          "merge-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Linux_x86_64 -d tarballs",
+          "merge-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Darwin_arm64 -d tarballs",
+          "merge-object OurZip_Demo.S7z3.MacLinux7zTar@25.1.0 -s Release.Darwin_x86_64 -d tarballs"
         ]
       },
       "function": {

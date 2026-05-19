@@ -56,9 +56,9 @@
       - [Types of Words](#types-of-words)
     - [Variables available in VSL](#variables-available-in-vsl)
     - [get-object MODULE@VERSION -s REQUEST\_SLOT (-f FILE | -d DIR/)](#get-object-moduleversion--s-request_slot--f-file---d-dir)
-    - [post-object MODULE@VERSION (-f FILE | -d DIR/) -- CLI\_FORM\_DOC](#post-object-moduleversion--f-file---d-dir----cli_form_doc)
+    - [run-rule MODULE@VERSION (-f FILE | -d DIR/) -- CLI\_FORM\_DOC](#run-rule-moduleversion--f-file---d-dir----cli_form_doc)
     - [enter-object MODULE@VERSION -s REQUEST\_SLOT -- CLI\_FORM\_DOC](#enter-object-moduleversion--s-request_slot----cli_form_doc)
-    - [install-object MODULE@VERSION -s REQUEST\_SLOT (-f FILE | -d DIR/)](#install-object-moduleversion--s-request_slot--f-file---d-dir)
+    - [merge-object MODULE@VERSION -s REQUEST\_SLOT (-f FILE | -d DIR/)](#merge-object-moduleversion--s-request_slot--f-file---d-dir)
     - [get-asset MODULE@VERSION FILE\_PATH (-f FILE | -d DIR/)](#get-asset-moduleversion-file_path--f-file---d-dir)
     - [get-bundle MODULE@VERSION (-f FILE | -d DIR/)](#get-bundle-moduleversion--f-file---d-dir)
     - [Options: -f FILE and -d DIR and -x GLOB and -e GLOB](#options--f-file-and--d-dir-and--x-glob-and--e-glob)
@@ -67,7 +67,7 @@
   - [Subshells](#subshells)
     - [subshell options](#subshell-options)
     - [subshell: get-object MODULE@VERSION -s REQUEST\_SLOT](#subshell-get-object-moduleversion--s-request_slot)
-    - [subshell: post-object MODULE@VERSION -- CLI\_FORM\_DOC](#subshell-post-object-moduleversion----cli_form_doc)
+    - [subshell: run-rule MODULE@VERSION -- CLI\_FORM\_DOC](#subshell-run-rule-moduleversion----cli_form_doc)
     - [subshell: get-asset MODULE@VERSION FILE\_PATH](#subshell-get-asset-moduleversion-file_path)
     - [Anonymous Files: `-f :` or `-f BASENAME`](#anonymous-files--f--or--f-basename)
     - [Anonymous Directories: `-d :`](#anonymous-directories--d-)
@@ -466,7 +466,7 @@ return M
 When the rule is run with the value shell:
 
 ```sh
-post-object OurTest_Exec.PostObject.TestRequest.EchoRequest@1.0.0 -f out-file pet[0][species]=Dahut pet[0][name]=Hypatia "pet[1][species]=Felis Stultus" pet[1][name]=Billie
+run-rule OurTest_Exec.PostObject.TestRequest.EchoRequest@1.0.0 -f out-file pet[0][species]=Dahut pet[0][name]=Hypatia "pet[1][species]=Felis Stultus" pet[1][name]=Billie
 ```
 
 the build system will create a task for one [asset](#assets), fetch that asset and save it to the output file `out-file`:
@@ -1381,9 +1381,9 @@ See [Options: -f FILE, -d DIR, -x GLOB, and -e GLOB](#options--f-file-and--d-dir
 
 The object `ID` implicitly or explicitly contains build metadata; see [ID with Build Metadata](#object-id-with-build-metadata).
 
-### post-object MODULE@VERSION (-f FILE | -d DIR/) -- CLI_FORM_DOC
+### run-rule MODULE@VERSION (-f FILE | -d DIR/) -- CLI_FORM_DOC
 
-Submit the JSON constructed from `CLI_FORM_DOC` to the [Lua rule](#introduction-to-custom-lua-rules) uniquely identified by `MODULE@VERSION`.
+Run the dynamic [Lua rule](#introduction-to-custom-lua-rules) uniquely identified by `MODULE@VERSION` using the JSON constructed from `CLI_FORM_DOC`.
 
 | Option      | Description                                                                   |
 | ----------- | ----------------------------------------------------------------------------- |
@@ -1412,20 +1412,20 @@ See [Form Document](#form-document) for form parameters. If there are none, the 
 
 The object `MODULE@VERSION` implicitly or explicitly contains build metadata; see [ID with Build Metadata](#object-id-with-build-metadata).
 
-### install-object MODULE@VERSION -s REQUEST_SLOT (-f FILE | -d DIR/)
+### merge-object MODULE@VERSION -s REQUEST_SLOT (-f FILE | -d DIR/)
 
-Install the contents of the slot `REQUEST_SLOT` for the object uniquely identified by `MODULE@VERSION`.
+Build the object uniquely identified by `MODULE@VERSION` and merge the contents of the slot `REQUEST_SLOT` into the requested output.
 
 | Option      | Description                                                                                            |
 | ----------- | ------------------------------------------------------------------------------------------------------ |
-| `-f FILE`   | Install object to `FILE`                                                                               |
-| `-d DIR/`   | Install contents of the zip archive to the install directory `DIR/`. The object must be a zip archive. |
+| `-f FILE`   | Place merged object in `FILE`                                                                          |
+| `-d DIR/`   | Merge contents of the zip archive into the existing directory `DIR/`. The object must be a zip archive. |
 | `-n STRIP`  | See [Option: [-n STRIP]](#option--n-strip)                                                             |
 | `-m MEMBER` | See [Option: [-m MEMBER](#option--m-member)]                                                           |
 | `-x GLOB`   | Exclude globbed files from `-d DIR/`. May be repeated.                                                 |
 | `-e GLOB`   | Make globbed files executable in `-d DIR/` and `-f FILE`. May be repeated.                             |
 
-**More than one `install-object` can use the same install directory `DIR`**.
+**More than one `merge-object` can use the same output directory `DIR`**.
 
 See [Options: -f FILE, -d DIR, -x GLOB, and -e GLOB](#options--f-file-and--d-dir-and--x-glob-and--e-glob) for output behavior.
 
@@ -1486,12 +1486,12 @@ When an output file is made executable:
 
 No command may write to the same output file. Specifically:
 
-- It is an error to have more than one `get-object` or `get-bundle` or `get-asset` or `resume-object` or `install-object` use the same `FILE`.
+- It is an error to have more than one `get-object` or `get-bundle` or `get-asset` or `resume-object` or `merge-object` use the same `FILE`.
 - It is an error to have more than one `get-object` or `get-bundle` or `get-asset` or `resume-object` use the same `DIR` or otherwise overlap the same `DIR`. Overlapping means one command can't write to the subdirectory of another command's `DIR`.
 
-Use [`install-object`](#install-
+Use [`merge-object`](#merge-
 --s-request_slot--f-file---d-dir----cli_form_doc) when you want to write into the same directory.
-Even so, no `install-object` may extracted the same file in the same install directory.
+Even so, no `merge-object` may extract the same file in the same output directory.
 
 ### Option: [-n STRIP]
 
@@ -1561,7 +1561,7 @@ If none of the `-f :`, `-f BASENAME`, or `-d :` options are specified, the conte
 - no translation is performed on the bytes (UTF-16 is not translated to UTF-8, etc.)
 - the byte 0 (ASCII NUL) may not be in the content as a security measure
 
-### subshell: post-object MODULE@VERSION -- CLI_FORM_DOC
+### subshell: run-rule MODULE@VERSION -- CLI_FORM_DOC
 
 Submit the JSON constructed from `CLI_FORM_DOC` to the rule uniquely identified by `MODULE@VERSION`.
 
@@ -1626,8 +1626,8 @@ Place the object or asset in an anonymous directory and return the directory pat
 These rules apply to the `*-object` commands **only**:
 
 - `get-object MODULE@VERSION ...`
-- `install-object MODULE@VERSION ...`
-- `post-object MODULE@VERSION ...`
+- `merge-object MODULE@VERSION ...`
+- `run-rule MODULE@VERSION ...`
 - `enter-object MODULE@VERSION ...`
 
 The purpose of these rules is to ensure that unique builds can be uniquely and deterministically identified.
@@ -1986,7 +1986,7 @@ When writing distribution scripts:
    But it is best to run every rule for lightweight testing during distribution.
 2. Use `${CONFIG}` for files in the cram test directory. Set by `dk0 test`.
 3. Use `${RUNTIME}/<unique path to cram test>` for -f and -d options since outputs are relative to the
-   current dir like `dk0 post-object` and `dk0 run`. Set unique to the cram
+   current dir like `dk0 run-rule` and `dk0 run`. Set unique to the cram
    test by `dk0 test`. The `<unique path to cram test>` is to avoid race conditions on Windows where
    Windows Defender (etc.) may not make a file visible or rewritable immediately after creation.
 4. Declare each static rule input in the rule's `declareoutput` response.
@@ -2771,7 +2771,7 @@ Directory operations:
 
 - For the `r` read-only mode when `filename_or_dirname` is a directory, the usable functions are `request.io.list` and `request.io.toasset`.
 
-The file *may* be closed after the request is finished (ie. the `post-object` is finished), but it is the author's responsibility to close the file with [request.io.close](#requestioclose) or with [request.io.toasset](#requestiotoasset).
+The file *may* be closed after the request is finished (ie. the `run-rule` command is finished), but it is the author's responsibility to close the file with [request.io.close](#requestioclose) or with [request.io.toasset](#requestiotoasset).
 
 #### request.io.read
 
@@ -3848,7 +3848,7 @@ return M
 The rule above can be run from the command line:
 
 ```sh
-dk0 post-object MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2
+dk0 run-rule MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2
 ```
 
 or from a subshell in a `values.json` build file:
@@ -3860,7 +3860,7 @@ or from a subshell in a `values.json` build file:
     "function": {
       "commands": [
         "echo",
-        "$(post-object MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2)"
+        "$(run-rule MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2)"
       ]
     }
   ]
@@ -4038,7 +4038,7 @@ return {
       }
     },
     commands = {
-      {"post-object", "OurExample_Std.SomeRule@3.4.5"}
+      {"run-rule", "OurExample_Std.SomeRule@3.4.5"}
     },
     andthen = {
       continue_ = {
@@ -4090,7 +4090,7 @@ YourFreeRule(
 UI rules (ie. `uirules`) are rules that:
 
 - only an end-user can run these rules; using UI rules inside a `values.json[c]` file will fail the build
-- the reference implementation has the subcommand `run` for UI rules, while `post-object` is reserved for free rules
+- the reference implementation has the subcommand `run` for UI rules, while `run-rule` is reserved for free rules
 - interact with the end-user through a console or a graphical user interface
 - only one UI rule may run at a time even if the build system implementation parallelizes noninteractive rules
 - have access to the project source code directories
@@ -4147,7 +4147,7 @@ The details about the build request will be available as follows:
 
 | Field                          | Commands Applicable To                                        | What                                                                                                          |
 | ------------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `request.user`                 | [Free Rule submit](#free-rule-command---submit)               | Rule request document translated from the arguments to `post-object`                                          |
+| `request.user`                 | [Free Rule submit](#free-rule-command---submit)               | Rule request document translated from the arguments to `run-rule`                                             |
 |                                | [UI Rule submit](#ui-rule-command---submit)                   | ... The request document is described later in the [Rule Request Documents](#rule-request-documents) section. |
 |                                | [UI Rule ui](#ui-rule-command---ui)                           |                                                                                                               |
 |                                | *but not* [Embedded File Scripts](#embedded-file-scripts)     |                                                                                                               |
@@ -4185,7 +4185,7 @@ assert(request.user.filename, "Please provide `filename=FILENAME`")
 
 ### Rule Argument - `continue_`
 
-The `continue_` argument is the state of a request. A request's boundaries is the start and stop of a single `post-object` command submitted by a user or a [precommand](#precommands) or a [subshell](#subshell-post-object-moduleversion----cli_form_doc).
+The `continue_` argument is the state of a request. A request's boundaries is the start and stop of a single `run-rule` command submitted by a user or a [precommand](#precommands) or a [subshell](#subshell-run-rule-moduleversion----cli_form_doc).
 
 The `continue_` value will be:
 
@@ -4309,7 +4309,7 @@ That means a Lua `nil` is considered equivalent to a missing value.
 The introduction example also submitted a request to a rule through the command line:
 
 ```sh
-dk0 post-object MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2
+dk0 run-rule MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2
 ```
 
 Those command line arguments `a=1 b=2` get converted into the same JSON document as before:
@@ -4445,7 +4445,7 @@ The algorithm is:
 
 2. Add the `arg` table as a global variable populated with the actual command line arguments.
 3. Add libraries and statements given to the Lua interpreter (`-e` and `-l` options)
-4. Run the equivalent of `post-object OurScript_Std.XTheIdentifier.Run@0.1.0` with no arguments. That runs the rule.
+4. Run the equivalent of `run-rule OurScript_Std.XTheIdentifier.Run@0.1.0` with no arguments. That runs the rule.
 5. If `-i` given to the Lua interpreter, start a REPL.
 
 #### Embedded Language Codes
@@ -4659,7 +4659,7 @@ Best Practices:
 
 Information is supplied to a rule as a JSON document.
 
-The primary way today to supply this JSON document is through the command line syntax `post-object MODULE@VERSION -- CLI_FORM_DOC`, where **CLI_FORM_DOC** is a CLI-based recipe to construct a JSON document.
+The primary way today to supply this JSON document is through the command line syntax `run-rule MODULE@VERSION -- CLI_FORM_DOC`, where **CLI_FORM_DOC** is a CLI-based recipe to construct a JSON document.
 
 The form has a `options` JSON object to describe how the JSON document submitted to a form maps to command line options, arguments and variables. *nit: This should be "command==queryschema" given to rule ... it has nothing to do with the misnamed 'form' object in values.json!*
 
@@ -4784,7 +4784,7 @@ Each time a task is executed, the following items are captured into a single **t
 
 The *key* is one of two types:
 
-- A *module key* is what you -- the user -- specify in a shell command as the MODULE_ID and SLOT or PATH in the [Value Shell Language](#value-shell-language-vsl). The module key can be large for `post-object` since its parameters includes a JSON request.
+- A *module key* is what you -- the user -- specify in a shell command as the MODULE_ID and SLOT or PATH in the [Value Shell Language](#value-shell-language-vsl). The module key can be large for `run-rule` since its parameters includes a JSON request.
 - A *checksum key* is the SHA-256 of some content
 
 The *value* is not directly stored in the trace. Instead, an identifier (the **value id**)

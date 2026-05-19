@@ -172,9 +172,9 @@ using the Lua command "unified.asset"
   '790'
   { 'sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d' }
 
-Run the "post-object" shell command to build HelloWorld
+Run the "run-rule" shell command to build HelloWorld
 with CMake
-  $ post-object CommonsBase_Build.CMake0.F_Build@3.25.3 -d t/o/somewhere/
+  $ run-rule CommonsBase_Build.CMake0.F_Build@3.25.3 -d t/o/somewhere/
   > assetmodver=CommonsBase_Build.Apparatus.HelloWorld@0.1.0 assetpath=hw
   > gargs[]=-DCMAKE_BUILD_TYPE=Release
   > bargs[]=--config bargs[]=Release
@@ -890,9 +890,9 @@ using the Lua command "unified.asset"
   '790'
   { 'sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d' }
 
-Run the "post-object" shell command to build HelloWorld
+Run the "run-rule" shell command to build HelloWorld
 with CMake
-  $ post-object CommonsBase_Build.CMake0.F_Build@3.25.3 -d t/o/somewhere/
+  $ run-rule CommonsBase_Build.CMake0.F_Build@3.25.3 -d t/o/somewhere/
   > assetmodver=CommonsBase_Build.Apparatus.HelloWorld@0.1.0 assetpath=hw
   > gargs[]=-DCMAKE_BUILD_TYPE=Release
   > bargs[]=--config bargs[]=Release
