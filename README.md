@@ -93,6 +93,8 @@ We'll start explaining the build system by unpackaging the popular zip compressi
 - [dk - A build system](#dk---a-build-system)
   - [Introduction](#introduction)
   - [Concepts and Theory](#concepts-and-theory)
+    - [Commands](#commands)
+  - [Concepts and Theory (old)](#concepts-and-theory-old)
     - [Theory](#theory)
     - [Principles - Security](#principles---security)
   - [Using the Build Tool to create a multi-platform package](#using-the-build-tool-to-create-a-multi-platform-package)
@@ -113,6 +115,28 @@ We'll start explaining the build system by unpackaging the popular zip compressi
   - [Open-Source](#open-source)
 
 ## Concepts and Theory
+
+In the `dk` build system, **rules** produce **objects** and **bundles** contain **assets**:
+
+- **fixed rule**: A rule with predefined outputs.
+- **dynamic rule**: A rule whose outputs depend on supplied inputs.
+- **object**: A file or directory tree produced by a fixed rule or dynamic rule.
+- **asset**: One file or URL contained in a bundle.
+- **bundle**: A collection of assets.
+
+### Commands
+
+| Command        | Description                                                                       |
+| -------------- | --------------------------------------------------------------------------------- |
+| `get-object`   | Build an object from a fixed rule and write it to a new file or directory.        |
+| `merge-object` | Build an object from a fixed rule and merge its files into an existing directory. |
+| `get-asset`    | Retrieve one asset from a bundle and write it to a new file or directory.         |
+| `get-bundle`   | Retrieve all assets from a bundle as one archive.                                 |
+| `run-rule`     | Run a dynamic rule and write the resulting object to a file or directory.         |
+| `run-object`   | Run an executable built by a fixed rule.                                          |
+| `run-asset`    | Run an executable fetched from an asset.                                          |
+
+## Concepts and Theory (old)
 
 In the `dk` build system, you submit *forms* that produce *objects* created from *assets*.
 
