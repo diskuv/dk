@@ -71,10 +71,10 @@
   - [Subshells](#subshells)
     - [subshell options](#subshell-options)
     - [subshell: get-object MODULE@VERSION -s REQUEST\_SLOT](#subshell-get-object-moduleversion--s-request_slot)
-    - [subshell: run-object MODULE@VERSION -s REQUEST\_SLOT (-c COMMAND | -m MEMBER)](#subshell-run-object-moduleversion--s-request_slot--c-command--or--m-member)
+    - [subshell: run-object MODULE@VERSION -s REQUEST\_SLOT (-c COMMAND | -m MEMBER)](#subshell-run-object-moduleversion--s-request_slot--c-command---m-member)
     - [subshell: run-rule MODULE@VERSION -- CLI\_FORM\_DOC](#subshell-run-rule-moduleversion----cli_form_doc)
     - [subshell: get-asset MODULE@VERSION FILE\_PATH](#subshell-get-asset-moduleversion-file_path)
-    - [subshell: run-asset MODULE@VERSION FILE\_PATH (-c COMMAND | -m MEMBER)](#subshell-run-asset-moduleversion-file_path--c-command--or--m-member)
+    - [subshell: run-asset MODULE@VERSION FILE\_PATH (-c COMMAND | -m MEMBER)](#subshell-run-asset-moduleversion-file_path--c-command---m-member)
     - [Anonymous Files: `-f :` or `-f BASENAME`](#anonymous-files--f--or--f-basename)
     - [Anonymous Directories: `-d :`](#anonymous-directories--d-)
     - [Object ID with Build Metadata](#object-id-with-build-metadata)
@@ -1410,8 +1410,14 @@ Run a command from the object slot `REQUEST_SLOT` for the object uniquely identi
 
 The command is executed with the same current working directory model as [run-rule](#run-rule-moduleversion--f-file---d-dir----cli_form_doc) and [post-object], but the executable path is always resolved relative to the anonymous command directory. `COMMAND` and normalized `MEMBER` must be [strictly relative file paths](#strictly-relative-path).
 
-The command records the execution ABI, stream numbers and captured contents.
-That is, a single `run-object` execution records the standard output in `stream = 1` and one the standard error in `stream = 2`.
+The standard output and standard error streams are captured in separate files but stored as a single `x<ID>` value in the valuestore.
+
+The output and error stream files are capped at 16777211 bytes, which is the
+lower of the approximate Cap'n Proto `Text` payload limit of 512 MB and the
+reference implementation's `Sys.max_string_length` limit on 32-bit systems.
+
+> [!TIP]
+> For larger content, redirect the command's standard output or standard error to fixed rule output files using shell redirection or a log capture executable.
 
 ### run-rule MODULE@VERSION (-f FILE | -d DIR/) -- CLI_FORM_DOC
 
@@ -1493,8 +1499,14 @@ Run a command from the asset `FILE_PATH` in the bundle `MODULE@VERSION`.
 
 The command is executed with the same current working directory model as [run-rule](#run-rule-moduleversion--f-file---d-dir----cli_form_doc) and [post-object], but the executable path is always resolved relative to the anonymous command directory. `COMMAND` and normalized `MEMBER` must be [strictly relative file paths](#strictly-relative-path).
 
-The command records the execution ABI, stream numbers and captured contents.
-That is, a single `run-asset` execution records the standard output in `stream = 1` and one the standard error in `stream = 2`.
+The standard output and standard error streams are captured in separate files but stored as a single `x<ID>` value in the valuestore.
+
+The output and error stream files are capped at 16777211 bytes, which is the
+lower of the approximate Cap'n Proto `Text` payload limit of 512 MB and the
+reference implementation's `Sys.max_string_length` limit on 32-bit systems.
+
+> [!TIP]
+> For larger content, redirect the command's standard output or standard error to fixed rule output files using shell redirection or a log capture executable.
 
 ### get-bundle MODULE@VERSION (-f FILE | -d DIR/)
 
@@ -1616,14 +1628,9 @@ If none of the `-f :`, `-f BASENAME`, or `-d :` options are specified, the conte
 Run the executable selected by `-c COMMAND` or `-m MEMBER` from the object slot
 `REQUEST_SLOT` in `MODULE@VERSION`.
 
-The subshell returns the captured standard output stream (stream `1`).
-Standard error (stream `2`) is recorded in the cached execution trace but is
-not returned by the subshell.
+The `-f :`, `-f BASENAME`, and `-d :` options are accepted.
 
-The `-f :`, `-f BASENAME`, and `-d :` options are accepted. They materialize
-the captured standard output stream (stream `1`) as the subshell output and
-return its path. With `-d :`, stream `1` is written as the file `1` in the
-anonymous directory. The `-x GLOB`, `-e GLOB` and `-n STRIP` options keep the
+The `-x GLOB`, `-e GLOB` and `-n STRIP` options keep the
 same meanings they have for the top-level `run-object` command when selecting
 the command tree.
 
@@ -1679,14 +1686,9 @@ If none of the `-f :`, `-f BASENAME`, or `-d :` options are specified, the conte
 Run the executable selected by `-c COMMAND` or `-m MEMBER` from the asset at
 `FILE_PATH` in `MODULE@VERSION`.
 
-The subshell returns the captured standard output stream (stream `1`).
-Standard error (stream `2`) is recorded in the cached execution trace but is
-not returned by the subshell.
+The `-f :`, `-f BASENAME`, and `-d :` options are accepted.
 
-The `-f :`, `-f BASENAME`, and `-d :` options are accepted. They materialize
-the captured standard output stream (stream `1`) as the subshell output and
-return its path. With `-d :`, stream `1` is written as the file `1` in the
-anonymous directory. The `-x GLOB`, `-e GLOB` and `-n STRIP` options keep the
+The `-x GLOB`, `-e GLOB` and `-n STRIP` options keep the
 same meanings they have for the top-level `run-asset` command when selecting
 the command tree.
 
