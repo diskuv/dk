@@ -71,8 +71,10 @@
   - [Subshells](#subshells)
     - [subshell options](#subshell-options)
     - [subshell: get-object MODULE@VERSION -s REQUEST\_SLOT](#subshell-get-object-moduleversion--s-request_slot)
+    - [subshell: run-object MODULE@VERSION -s REQUEST\_SLOT (-c COMMAND | -m MEMBER)](#subshell-run-object-moduleversion--s-request_slot--c-command--or--m-member)
     - [subshell: run-rule MODULE@VERSION -- CLI\_FORM\_DOC](#subshell-run-rule-moduleversion----cli_form_doc)
     - [subshell: get-asset MODULE@VERSION FILE\_PATH](#subshell-get-asset-moduleversion-file_path)
+    - [subshell: run-asset MODULE@VERSION FILE\_PATH (-c COMMAND | -m MEMBER)](#subshell-run-asset-moduleversion-file_path--c-command--or--m-member)
     - [Anonymous Files: `-f :` or `-f BASENAME`](#anonymous-files--f--or--f-basename)
     - [Anonymous Directories: `-d :`](#anonymous-directories--d-)
     - [Object ID with Build Metadata](#object-id-with-build-metadata)
@@ -1609,6 +1611,29 @@ If none of the `-f :`, `-f BASENAME`, or `-d :` options are specified, the conte
 - no translation is performed on the bytes (UTF-16 is not translated to UTF-8, etc.)
 - the byte 0 (ASCII NUL) may not be in the content as a security measure
 
+### subshell: run-object MODULE@VERSION -s REQUEST_SLOT (-c COMMAND | -m MEMBER)
+
+Run the executable selected by `-c COMMAND` or `-m MEMBER` from the object slot
+`REQUEST_SLOT` in `MODULE@VERSION`.
+
+The subshell returns the captured standard output stream (stream `1`).
+Standard error (stream `2`) is recorded in the cached execution trace but is
+not returned by the subshell.
+
+The `-f :`, `-f BASENAME`, and `-d :` options are accepted. They materialize
+the captured standard output stream (stream `1`) as the subshell output and
+return its path. With `-d :`, stream `1` is written as the file `1` in the
+anonymous directory. The `-x GLOB`, `-e GLOB` and `-n STRIP` options keep the
+same meanings they have for the top-level `run-object` command when selecting
+the command tree.
+
+The returned content has the same restrictions as the other content-returning
+subshells:
+
+- the content may not exceed 1024 bytes
+- no translation is performed on the bytes (UTF-16 is not translated to UTF-8, etc.)
+- the byte 0 (ASCII NUL) may not be in the content as a security measure
+
 ### subshell: run-rule MODULE@VERSION -- CLI_FORM_DOC
 
 Submit the JSON constructed from `CLI_FORM_DOC` to the rule uniquely identified by `MODULE@VERSION`.
@@ -1644,6 +1669,29 @@ Get the contents of the asset at `FILE_PATH` for the bundle `MODULE@VERSION`.
 | `-e GLOB`               | Make globbed files executable in `-d DIR/` and `-f ...`. May be repeated.                                                  |
 
 If none of the `-f :`, `-f BASENAME`, or `-d :` options are specified, the contents are captured and returned with the following restrictions:
+
+- the content may not exceed 1024 bytes
+- no translation is performed on the bytes (UTF-16 is not translated to UTF-8, etc.)
+- the byte 0 (ASCII NUL) may not be in the content as a security measure
+
+### subshell: run-asset MODULE@VERSION FILE_PATH (-c COMMAND | -m MEMBER)
+
+Run the executable selected by `-c COMMAND` or `-m MEMBER` from the asset at
+`FILE_PATH` in `MODULE@VERSION`.
+
+The subshell returns the captured standard output stream (stream `1`).
+Standard error (stream `2`) is recorded in the cached execution trace but is
+not returned by the subshell.
+
+The `-f :`, `-f BASENAME`, and `-d :` options are accepted. They materialize
+the captured standard output stream (stream `1`) as the subshell output and
+return its path. With `-d :`, stream `1` is written as the file `1` in the
+anonymous directory. The `-x GLOB`, `-e GLOB` and `-n STRIP` options keep the
+same meanings they have for the top-level `run-asset` command when selecting
+the command tree.
+
+The returned content has the same restrictions as the other content-returning
+subshells:
 
 - the content may not exceed 1024 bytes
 - no translation is performed on the bytes (UTF-16 is not translated to UTF-8, etc.)
