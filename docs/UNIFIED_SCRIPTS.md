@@ -249,14 +249,14 @@ top_markup      = "\\" , markup ;
 whitespace      = ( " " | "\t" | "\n" | "\r" )+ ;
 
 last_markup     = top_markup | ( "\\" , ";" ) ;
-(* "\;" is a special terminator: it has name ";", no attributes, and no arguments,
-   and immediately ends metadata scanning; the body begins right after "\;" *)
+(* "\;" is a special terminator: it immediately ends metadata scanning;
+   the body begins right after "\;" *)
 
 body            = (* everything remaining after the last metadata markup *) ;
 
 markup          = name , attributes? , arglist ;
 name            = name_char+ ;
-name_char       = letter | digit | "." | "!" | "?" | ";" | "'" ;
+name_char       = letter | digit | "." | "!" | "?" | "'" ;
 letter          = "a".."z" | "A".."Z" ;
 digit           = "0".."9" ;
 
