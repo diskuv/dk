@@ -867,11 +867,14 @@ The namespace terms and context variables can be combined in any order.
 For example, `${SLOTNAME.Release.execution_abi}` has two parts:
 
 1. `Release` is a namespace term.
-2. `execution_abi` is a context variable, which is expanded according to the table below.
+2. `execution_abi` is a context variable. Context variables are expanded according to the table below.
 
 | Context Variable | Example Value    | Description                                                                    |
 | ---------------- | ---------------- | ------------------------------------------------------------------------------ |
 | execution_abi    | Windows_x86_64   | The ABI for the [execution platform](https://bazel.build/extending/platforms). |
+| target_abi       | Windows_x86      | The ABI of the generated executables and libraries.                            |
+|                  |                  | Defaults to the execution ABI. Can be set by dk0 reference implementation      |
+|                  |                  | option `--target-abi`                                                          |
 | request          | Release.Agnostic | The *request slot* from the `-s REQUEST_SLOT` command line option              |
 |                  |                  | (ex. `get-object MODULE@VERSION -s Release.Agnostic`)                          |
 
