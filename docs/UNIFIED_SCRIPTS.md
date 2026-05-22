@@ -232,7 +232,8 @@ Node names and attribute names must consist of only:
 - lowercase letters `a-z`
 - uppercase letters `A-Z`
 - digits `0-9`
-- some punctuation marks `.!?;'"`
+- some punctuation marks `.!?;'"` for node names
+- some punctuation marks `-_!?;'"` for attribute names
 
 The node attributes `attr1` (etc.) are separated by whitespace and/or optional commas. Node attribute values, if given, are nested attributes surrounded by parentheses or double-quoted text. Only the `\\`, `\r`, `\n` and `\"` escape codes are allowed inside the double-quoted attribute value text.
 
@@ -254,16 +255,18 @@ last_markup     = top_markup | ( "\\" , ";" ) ;
 
 body            = (* everything remaining after the last metadata markup *) ;
 
-markup          = name , attributes? , arglist ;
-name            = name_char+ ;
-name_char       = letter | digit | "." | "!" | "?" | "'" ;
+markup          = markup_name , attributes? , arglist ;
+markup_name     = markup_namechar+ ;
+markup_namechar = letter | digit | "."       | "!" | "?" | "'" ;
+attr_name       = attr_namechar+ ;
+attr_namechar   = letter | digit | "-" | "_" | "!" | "?" | "'" ;
 letter          = "a".."z" | "A".."Z" ;
 digit           = "0".."9" ;
 
 attributes      = "(" , attribute_list , ")" ;
 attribute_list  = ( ws? , attribute , ws? , ","? )* , ws? ;
-attribute       = name , ws? , ( ":" , ws? , attrval )? ;
-attrval         = "(" , attribute_list , ")"    (* nested attrs *)
+attribute       = attr_name , ws? , ( ":" , ws? , attr_val )? ;
+attr_val        = "(" , attribute_list , ")"    (* nested attrs *)
                 | '"' , attrtext , '"'          (* quoted string *)
                 ;
 ws              = ( " " | "\t" | "\n" | "\r" )+ ;
@@ -279,13 +282,16 @@ arglist         = ( "[" , content , "]" )* ;
 
 content         = node* ;
 node            = markup_ref | nodetext ;
-markup_ref      = "\\" , name , attributes? , arglist ;
+markup_ref      = "\\" , markup_name , attributes? , arglist ;
 nodetext        = nodetext_atom+ ;
 nodetext_atom   = node_char                     (* any non-special character *)
                 | "\\" , ( "\\" | "]" )         (* recognized escape → literal char *)
                 ;
 node_char       = (* any character except '\\' and ']' *) ;
 ```
+
+Conventionally the attribute names are kebab case (ex. `some-word`) like Typst,
+and node names are lowercase.
 
 The following metadata is recognized by the [renderers] today:
 
