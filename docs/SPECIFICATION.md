@@ -593,6 +593,8 @@ Cells exist to make efficient builds and to locating source code even when sourc
 - In small projects the `root` may be the only cell; all project source code belongs to `root`.
 - In large projects (ex. monorepos), the project tree can be broken into smaller cells. Only parts of the build that depend on smaller cells will be rebuilt when a single project source file changes.
 
+However, since cells must be given on the command line or some other user-specific configuration file, a **distributed package** for use by other packages should **never use cells**. Instead [workspace scripts](#workspace-script) have workspace assets that can be used.
+
 ### Workspace script
 
 When a build system command that takes a [unified script](UNIFIED_SCRIPTS.md) (for example `dk0 test <script>` or `dk0 distribute <script>`) runs, the *workspace script* is the first unified script — searched in the order below — that contains a `## workspace` section:
