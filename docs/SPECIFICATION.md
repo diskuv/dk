@@ -176,7 +176,8 @@
       - [string.upper](#stringupper)
     - [Lua stringdk library](#lua-stringdk-library)
       - [stringdk.quote\_posix\_shell](#stringdkquote_posix_shell)
-      - [stringdk.quote\_value\_shell](#stringdkquote_value_shell)
+      - [stringdk.quote\_value\_shell\_literal](#stringdkquote_value_shell_literal)
+      - [stringdk.quote\_value\_shell\_evalable](#stringdkquote_value_shell_evalable)
       - [stringdk.quote\_windows\_batch](#stringdkquote_windows_batch)
       - [stringdk.sanitizesubpath](#stringdksanitizesubpath)
     - [Lua table library](#lua-table-library)
@@ -3541,11 +3542,43 @@ Receives a string and returns a copy of this string with all ASCII lowercase let
 
 Returns a string that is quoted as a single word in a POSIX shell.
 
-#### stringdk.quote_value_shell
+#### stringdk.quote_value_shell_literal
 
-`stringdk.quote_value_shell (s)`
+`stringdk.quote_value_shell_literal (s)`
 
-Returns a string that is quoted as a single word in the [Value Shell Language](#vsl-lexical-rules).
+Returns a string that is quoted as one literal word in the
+[Value Shell Language](#vsl-lexical-rules). The returned word evaluates to
+the exact text `s`, so any `${...}` sequences inside `s` are treated as data
+rather than as VSL expansions.
+
+Examples:
+
+- `stringdk.quote_value_shell_literal ("hello world")` returns
+  `'hello world'`
+- `stringdk.quote_value_shell_literal ("abc${/}def")` returns
+  `'abc${/}def'`
+
+#### stringdk.quote_value_shell_evalable
+
+`stringdk.quote_value_shell_evalable (s)`
+
+Treats `s` as VSL code. It parses `s` as exactly one evalable Value Shell
+Language term and then re-emits that term in canonical single-word VSL form.
+
+This means the function validates the syntax of `s`, preserves expandable
+constructs such as variables and subshells, and rejects strings that are not
+one valid evalable VSL term. If the input is already a canonical evalable
+term, the output may be unchanged.
+
+Examples:
+
+- `stringdk.quote_value_shell_evalable ("abc${/}def")` returns
+  `abc${/}def`
+- `stringdk.quote_value_shell_evalable ("${SRC}")` returns `${SRC}`
+- `stringdk.quote_value_shell_evalable ("hello world")` returns two values:
+  `nil` and a string explaining why it is not one evalable VSL term
+- `stringdk.quote_value_shell_evalable ("${SRC")` returns two values:
+  `nil` and a string indicating the VSL syntax is invalid
 
 #### stringdk.quote_windows_batch
 
