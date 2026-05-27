@@ -57,6 +57,7 @@
     - [VSL Lexical Rules](#vsl-lexical-rules)
       - [Types of Words](#types-of-words)
     - [Variables available in VSL](#variables-available-in-vsl)
+    - [remote UI\_MODULE@VERSION COMMAND](#remote-ui_moduleversion-command)
     - [get-object MODULE@VERSION -s REQUEST\_SLOT (-f FILE | -d DIR/)](#get-object-moduleversion--s-request_slot--f-file---d-dir)
     - [run-object MODULE@VERSION -s REQUEST\_SLOT (-c COMMAND | -m MEMBER)](#run-object-moduleversion--s-request_slot--c-command---m-member)
     - [run-rule MODULE@VERSION (-f FILE | -d DIR/) -- CLI\_FORM\_DOC](#run-rule-moduleversion--f-file---d-dir----cli_form_doc)
@@ -160,6 +161,10 @@
     - [Lua request.ui library](#lua-requestui-library)
       - [request.ui.glob](#requestuiglob)
       - [request.ui.spawn](#requestuispawn)
+      - [request.ui.capture](#requestuicapture)
+      - [request.ui.checksum](#requestuichecksum)
+      - [request.ui.signify](#requestuisignify)
+      - [request.ui.sleep](#requestuisleep)
     - [Lua string library](#lua-string-library)
       - [string.byte](#stringbyte)
       - [string.find](#stringfind)
@@ -1382,6 +1387,83 @@ See [ESCAPING.md](ESCAPING.md) for worked examples of simple and complex VSL esc
 - `${CONFIG}`
 - `${STATE}`
 - `${RUNTIME}`
+
+### remote UI_MODULE@VERSION COMMAND
+
+`remote UI_MODULE@VERSION [REMOTE_OPTION=VALUE...] [REPOSITORY] COMMAND...`
+
+Run a local value shell command, or a top-level `test`, `lua`, or `run`
+command, on a remote execution engine.
+
+If `UI_MODULE@VERSION` is not fully qualified, short forms `NAME@VER` are expanded to `CommonsBase_Remote.NAME@VER` like:
+
+```text
+remote GitHub@0.1.0 run-object MODULE@VERSION -s REQUEST_SLOT -m ./tool -- --help
+```
+
+into:
+
+```text
+remote CommonsBase_Remote.GitHub@0.1.0 run-object MODULE@VERSION -s REQUEST_SLOT -m ./tool -- --help
+```
+
+and short forms `VENDOR.QUALIFIER@VER` are expanded to `VENDOR.QUALIFIER_Remote@VER` like:
+
+```text
+remote BuildBuddy.Cloud@0.1.0 run-object MODULE@VERSION -s REQUEST_SLOT -m ./tool -- --help
+```
+
+into:
+
+```text
+remote BuildBuddy_Remote.Cloud@0.1.0 run-object MODULE@VERSION -s REQUEST_SLOT -m ./tool -- --help
+```
+
+The `REPOSITORY` argument is optional when the remote rule can infer or has
+configured a repository. GitHub repositories are written in a form accepted by
+the remote rule, such as `github.com/OWNER/REPO`.
+
+Leading `REMOTE_OPTION=VALUE` words are passed to the remote rule before the
+optional repository and inner command are parsed.
+
+> [!TIP]
+> The CommonsBase_Remote.GitHub rule recognizes the following options (with
+> defaults):
+>
+> - `workspace=dk.u`
+> - `sessions=4`
+> - `retention=8`
+> - `create_repo=false`
+> - `dry_run=false`
+>
+> The GitHub remote rule uses a workspace script, defaulting to `dk.u`, and a
+> maximum session count, defaulting to 4. It stores the age recipient and its
+> OpenBSD signify signature in GitHub Actions repository variables, stores the
+> age secret key in a GitHub secret, and transfers staged local assets through
+> GitHub prereleases. Each polling iteration for workflow runs or prereleases is
+> reported as progress. If a `git fetch` followed by `git rebase` updates a
+> session branch, the session is treated as contended; the implementation waits
+> 30 seconds and tries another session.
+
+The words after the remote options and optional repository are parsed as the
+inner command. For value shell commands, the inner command uses the same VSL
+variable and subshell expansion as a direct local invocation. In particular,
+`run-object` and `run-asset` command-line arguments may contain variables and
+subshells such as `$(get-object ...)`. The audited command stored in the
+session branch is a single-line POSIX shell command, so the GitHub workflow
+(etc.) can pass the exact argument vector to `dk0`.
+
+Before submitting work, the reference implementation prints the resolved inner
+command in value shell syntax, using two spaces between top-level terms. This
+is intentionally different from shell syntax and is shown so the user can see
+exactly what command is being sent to the remote execution engine.
+
+Remote value shell commands must return results in the same observable shape
+as local commands. For example, `run-object` and `run-asset` still produce the
+same captured stdout/stderr value shape, and the local implementation imports
+the returned valuestore/tracestore data before presenting output. Remote
+`test`, `lua`, and `run` return the remote exit status and display the remote
+stdout, stderr, and log output.
 
 ### get-object MODULE@VERSION -s REQUEST_SLOT (-f FILE | -d DIR/)
 
@@ -3276,6 +3358,91 @@ nil, "The program exited with code 55", "exit"
 nil, "The program terminated due to signal 15", "signal", 15
 nil, "The program stopped due to signal 19", "stop", 19
 ```
+
+#### request.ui.capture
+
+```lua
+result = request.ui.capture {
+  program = "gh"
+  [, args = { "auth", "status" }]
+  [, cwd = "/some/dir"]
+  [, envmods = { "+GH_HOST=github.com", "..." }]
+  [, max_output_bytes = 16777211]
+}
+```
+
+Runs the `program` with the arguments `args...`, captures stdout and stderr,
+and returns a result table instead of streaming output to the terminal. The
+program will have its environment modified by `envmods` in accordance to
+[Environment Modifications](#environment-modifications). The `cwd` field
+defaults to the project directory.
+
+The default maximum captured size is 16777211 bytes for each stream. On process
+start failure, the three return values are `nil`, an error message, and the
+string `error`. On captured output limit failure, the three return values are
+`nil`, an error message, and the string `output-limit`.
+
+On process completion, one table is returned:
+
+```lua
+{
+  status = "exit" | "signal" | "stop",
+  code = 0,
+  stdout = "...",
+  stderr = "..."
+}
+```
+
+#### request.ui.checksum
+
+```lua
+metadata = request.ui.checksum {
+  path = "relative/project/file"
+}
+```
+
+Calculates metadata for a project-local file. The `path` field must be a
+[strictly relative](#strictly-relative-path) project path.
+
+Returns:
+
+```lua
+{
+  sha256 = "...",
+  size = 123
+}
+```
+
+#### request.ui.signify
+
+```lua
+signed = request.ui.signify {
+  operation = "sign",
+  message = "INDEX",
+  signature = "INDEX.sig"
+}
+
+verified = request.ui.signify {
+  operation = "verify",
+  message = "INDEX",
+  signature = "INDEX.sig"
+}
+```
+
+Signs or verifies a project-local file using the [OpenBSD signify build keys](#openbsd-signify-keys)
+local to your host and possibly shared with your team.
+
+All path fields must be [strictly relative](#strictly-relative-path) project paths.
+On signing, the signature is written to the `signature` path.
+On verify failure, the three return values are `nil`, an error message, and the string `verify`.
+
+#### request.ui.sleep
+
+```lua
+request.ui.sleep { seconds = 10 }
+```
+
+Suspends the UI rule for the requested number of seconds.
 
 ### Lua string library
 
