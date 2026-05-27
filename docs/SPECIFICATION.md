@@ -1466,6 +1466,20 @@ the returned valuestore/tracestore data before presenting output. Remote
 `test`, `lua`, and `run` return the remote exit status and display the remote
 stdout, stderr, and log output.
 
+> [!NOTE]
+> For remote execution, CommonsBase_Remote.GitHub creates exactly one
+> [object value](#objects). That object contains a Cap'n Proto metadata
+> file plus payload files: stdout/stderr text files or a zip holding directory
+> contents. The single object value and its single leaf trace (that is, no
+> dependency trace) are then exported and re-imported with the same
+> orchestration as `distribute` and `import-github-l2`.
+>
+> To avoid a single leaf trace from interfering with conventional traces,
+> a synthetic key is used. Only the `get-asset` and `get-bundle` commands,
+> the commands that naturally have no dependencies, do not use synthetic keys.
+>
+> Local `-f FILE` and `-d DIR` extraction happens after import.
+
 ### get-object MODULE@VERSION -s REQUEST_SLOT (-f FILE | -d DIR/)
 
 Get the contents of the slot `REQUEST_SLOT` for the object uniquely identified by `MODULE@VERSION`.
