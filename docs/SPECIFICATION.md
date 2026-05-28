@@ -1396,7 +1396,7 @@ See [ESCAPING.md](ESCAPING.md) for worked examples of simple and complex VSL esc
 Run a local value shell command, or a top-level `test`, `lua`, or `run`
 command, on a remote execution engine.
 
-If `UI_MODULE@VERSION` is not fully qualified, short forms `NAME@VER` are expanded to `CommonsBase_Remote.NAME@VER` like:
+If `UI_MODULE@VERSION` is not fully qualified, short forms `<NamespaceTerm>*@<Ver>` are expanded to `CommonsBase_Remote.<NamespaceTerm>*@<Ver>` like:
 
 ```text
 remote GitHub@0.1.0 run-object MODULE@VERSION -s REQUEST_SLOT -m ./tool -- --help
@@ -1408,7 +1408,7 @@ into:
 remote CommonsBase_Remote.GitHub@0.1.0 run-object MODULE@VERSION -s REQUEST_SLOT -m ./tool -- --help
 ```
 
-and short forms `VENDOR.QUALIFIER@VER` are expanded to `VENDOR.QUALIFIER_Remote@VER` like:
+and short forms `<Vendor><Qualifier>.<NamespaceTerm>*@<Ver>` are expanded to `<Vendor><Qualifier>_Remote.<NamespaceTerm>*@<Ver>` like:
 
 ```text
 remote BuildBuddy.Cloud@0.1.0 run-object MODULE@VERSION -s REQUEST_SLOT -m ./tool -- --help
