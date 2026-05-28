@@ -2207,12 +2207,17 @@ The build system will download the GitHub CLI (using the default trusted `Common
 
 ### Distribution Scripts
 
-🚧*missing docs*: make a section on cram tests indepedent of distributions
+🚧*missing docs*: make a section on cram tests independent of distributions
 
 When writing distribution scripts:
 
 1. Running one rule in a script module will bring in the entire script module.
-   But it is best to run every rule for lightweight testing during distribution.
+   In particular, if a distribution script runs a free rule from a
+   `*.values.lua` scriptmodule, the entire `*.values.lua` scriptmodule is
+   distributed. Free rules should follow the `F_<Name>` naming convention to
+   avoid colliding with UI rule names in the same scriptmodule.
+
+   It is best to run every free rule for lightweight testing during distribution.
 2. Use `${CONFIG}` for files in the cram test directory. Set by `dk0 test`.
 3. Use `${RUNTIME}/<unique path to cram test>` for -f and -d options since outputs are relative to the
    current dir like `dk0 run-rule` and `dk0 run`. Set unique to the cram
@@ -4239,6 +4244,15 @@ MyRule.use { a=1, b=2 }
 Free rules (ie. `M.freerules`) are rules that are free to be used everywhere: in `values.json` files and directly by the end-user.
 
 Free rules should be *pure* functions (ie. repeat and get the same results on a different machine) so they do *not* have direct access to changeable project source code directories.
+
+When a distribution script runs a free rule from a `*.values.lua`
+scriptmodule, the whole scriptmodule is included in the distributed package.
+That is the normal way to distribute Lua-only rule modules that do not also
+ship separate `*.values.json[c]` declarations.
+
+By convention, free rule names are prefixed with `F_` (for example
+`F_Run` or `F_Untar`). That keeps free rules distinct from interactive rule
+names like `Run` in the same scriptmodule.
 
 The form of a free rule function named `YourFreeRule` is:
 
