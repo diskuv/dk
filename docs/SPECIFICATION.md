@@ -3352,6 +3352,8 @@ request.ui.spawn {
 Runs the `program` with the arguments `args...`.
 The program will have its environment modified by `envmods` in accordance to [Environment Modifications](#environment-modifications).
 
+The default `cwd` is the user's working directory.
+
 Build system implementations are required to have security controls.
 The reference implementation prompts the user and asks for confirmation before running the program.
 
@@ -3389,8 +3391,9 @@ result = request.ui.capture {
 Runs the `program` with the arguments `args...`, captures stdout and stderr,
 and returns a result table instead of streaming output to the terminal. The
 program will have its environment modified by `envmods` in accordance to
-[Environment Modifications](#environment-modifications). The `cwd` field
-defaults to the project directory.
+[Environment Modifications](#environment-modifications).
+
+The default `cwd` is the user's working directory.
 
 The default maximum captured size is 16777211 bytes for each stream. On process
 start failure, the three return values are `nil`, an error message, and the
@@ -4410,9 +4413,14 @@ UI rules (ie. `uirules`) are rules that:
 - the reference implementation has the subcommand `run` for UI rules, while `run-rule` is reserved for free rules
 - interact with the end-user through a console or a graphical user interface
 - only one UI rule may run at a time even if the build system implementation parallelizes noninteractive rules
-- have access to the project source code directories
+- have access to the project source code directories through the [request.ui](#lua-requestui-library) library
 
-UI rules are *impure* functions that have outputs that are not reproducible because they direct access to changing project source code. Because they are impure, UI rules are never cached. With project library functions like [request.ui.glob](#requestuiglob) these impure UI rules can take immutable snapshots of the project source code (ie. [assets](#assets)); these immutable assets can be used directly or passed to *pure* [free rules](#free-rule-functions).
+UI rules are *impure* functions that have outputs that are not reproducible because they have direct access to changing project source code:
+
+- [request.ui.glob](#requestuiglob) reads from the project source tree
+- [request.ui.spawn](#requestuispawn) and [request.ui.capture](#requestuicapture) default to running in the user's working directory unless a `cwd` is supplied
+
+Because UI rules are impure, UI rules are never cached. With [request.ui.glob](#requestuiglob) these impure UI rules can take immutable snapshots of the project source code (ie. [assets](#assets)); these immutable assets can be used directly or passed to *pure* [free rules](#free-rule-functions).
 
 The form of a UI rule function named `YourUiRule` is:
 
