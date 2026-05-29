@@ -3429,6 +3429,8 @@ and returns a result table instead of streaming output to the terminal. The
 program will have its environment modified by `envmods` in accordance to
 [Environment Modifications](#environment-modifications).
 
+`program` may be a `.cmd` or `.bat` file on Windows.
+
 The default `cwd` is the user's working directory.
 
 The default maximum captured size is 16777211 bytes for each stream. On process
