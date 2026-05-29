@@ -165,6 +165,7 @@
       - [request.ui.checksum](#requestuichecksum)
       - [request.ui.signify](#requestuisignify)
       - [request.ui.sleep](#requestuisleep)
+      - [request.ui.buildpubkey](#requestuibuildpubkey)
     - [Lua string library](#lua-string-library)
       - [string.byte](#stringbyte)
       - [string.find](#stringfind)
@@ -3461,6 +3462,16 @@ request.ui.sleep { seconds = 10 }
 ```
 
 Suspends the UI rule for the requested number of seconds.
+
+#### request.ui.buildpubkey
+
+```lua
+local key = request.ui.buildpubkey
+```
+
+The contents of the build public key, read in binary mode. This is the same
+public key used by [`request.ui.signify`](#requestuisignify) to verify
+signatures.
 
 ### Lua string library
 
