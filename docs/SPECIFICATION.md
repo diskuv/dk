@@ -1467,8 +1467,10 @@ optional repository and inner command are parsed.
 > - `dry_run=false`
 >
 > The GitHub remote rule uses a workspace script, defaulting to `dk.u`, and a
-> maximum session count, defaulting to 4. It stores the age recipient and its
-> OpenBSD signify signature in GitHub Actions repository variables, stores the
+> maximum session count, defaulting to 4. If `create_repo=true`, the rule
+> creates a **private** GitHub repository when the requested repository
+> does not already exist. It stores the age recipient and its OpenBSD
+> signify public signature in GitHub Actions repository variables, stores the
 > age secret key in a GitHub secret, and transfers staged local assets through
 > GitHub prereleases. Each polling iteration for workflow runs or prereleases is
 > reported as progress. If a `git fetch` followed by `git rebase` updates a
