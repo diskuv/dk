@@ -47,6 +47,7 @@
       - [\<NAME=VALUE](#namevalue-1)
     - [Form Processing](#form-processing)
       - [Processing Order](#processing-order)
+      - [Execution Step Cacheing](#execution-step-cacheing)
       - [Windows command-line quoting](#windows-command-line-quoting)
       - [Windows `--cmd.exe` special form](#windows---cmdexe-special-form)
   - [Objects](#objects)
@@ -1136,6 +1137,33 @@ The order of processing is as follows:
 
 5. The form's output files are verified to exist.
 6. The [`${SLOT.slotname}`](#slotslotname) that are part of the form's arguments and precommands are made available to other forms.
+
+#### Execution Step Cacheing
+
+Each precommand and each function command is a [build task](#task-model). A task is skipped (that is, its previous result is reused) when both of the following are unchanged from the previous run:
+
+1. Task key: the command's argument values
+2. Dependencies: the `$(...)` subshells. If any subshell dependency produces a different value (because the asset or object content changed), the dependencies differ and the step re-executes.
+
+> [!TIP]
+> Avoid `precommands` that place values in intermediate directories rather than `${SLOT.*}` directories. Instead use subshells.
+>
+> The dk0 reference implementation updates workspace asset checksums with `dk0 update` and invalidates values with `dk0 invalidate` or `dk0 -x EXPRESSION`.
+> If you use intermediate directories the intermediate files won't be updated or invalidated.
+>
+> ```json
+> // WRONG — precommand + cp = cached:
+> "precommands": { "private": ["get-asset MOD@VER -p path/to/script.py -f script.py"] },
+> "commands": [
+>   ["coreutils", "cp", "script.py", "${SLOT.request}/script.py"],
+>   ["python3", "script.py"]
+> ]
+> 
+> // CORRECT — subshell creates dependency, re-runs when asset is updated or invalidated:
+> "commands": [
+>   ["python3", "$(get-asset MOD@VER -p path/to/script.py -f script.py)"]
+> ]
+> ```
 
 #### Windows command-line quoting
 
