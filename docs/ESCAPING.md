@@ -48,7 +48,7 @@ val ctx : MlFront_Thunk.ThunkExecutionContext.t = <abstr>
 
 ```ocaml
 (* >>> *) let roundtrip s =
-  MlFront_Thunk.ThunkCommand.parse_evalableterm ctx s
+  MlFront_Thunk.ThunkCommand.parse_evalableterm ~on_warning:ignore ctx s
   |> Result.map MlFront_Thunk.ThunkCommand.evalable_term_to_valueshell
 ```
 
