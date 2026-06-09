@@ -118,9 +118,9 @@ We'll start explaining the build system by unpackaging the popular zip compressi
 
 In the `dk` build system, **rules** produce **objects** and **bundles** contain **assets**:
 
-- **fixed rule**: A rule with predefined outputs.
-- **dynamic rule**: A rule whose outputs depend on supplied inputs.
-- **object**: A file or directory tree produced by a fixed rule or dynamic rule.
+- **form rule**: A rule with predefined outputs.
+- **function rule**: A rule whose outputs depend on supplied inputs.
+- **object**: A file or directory tree produced by a form rule or function rule.
 - **asset**: One file or URL contained in a bundle.
 - **bundle**: A collection of assets.
 
@@ -128,12 +128,12 @@ In the `dk` build system, **rules** produce **objects** and **bundles** contain 
 
 | Command        | Description                                                                       |
 | -------------- | --------------------------------------------------------------------------------- |
-| `get-object`   | Build an object from a fixed rule and write it to a new file or directory.        |
-| `merge-object` | Build an object from a fixed rule and merge its files into an existing directory. |
+| `get-object`   | Build an object from a form rule and write it to a new file or directory.         |
+| `merge-object` | Build an object from a form rule and merge its files into an existing directory.  |
 | `get-asset`    | Retrieve one asset from a bundle and write it to a new file or directory.         |
 | `get-bundle`   | Retrieve all assets from a bundle as one archive.                                 |
-| `run-rule`     | Run a dynamic rule and write the resulting object to a file or directory.         |
-| `run-object`   | Run an executable built by a fixed rule.                                          |
+| `run-function` | Run a function rule and write the resulting object to a file or directory.        |
+| `run-object`   | Run an executable built by a form rule.                                           |
 | `run-asset`    | Run an executable fetched from an asset.                                          |
 
 ## Concepts and Theory (old)

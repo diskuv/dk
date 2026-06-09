@@ -304,8 +304,8 @@ NotGoogleDev_OR.Tools.F_Bin
 
   $ echo dk0 -nosysinc -I ../etc/dk/v \
   >   --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Build --trust-local-package NotGoogleDev_OR \
-  >   post-object NotGoogleDev_OR.Tools.F_Bin@9.15.0 -d i/ortools-bin/ targetabi=Release.Darwin_arm64
-  dk0 -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Build --trust-local-package NotGoogleDev_OR post-object NotGoogleDev_OR.Tools.F_Bin@9.15.0 -d i/ortools-bin/ targetabi=Release.Darwin_arm64
+  >   run-function NotGoogleDev_OR.Tools.F_Bin@9.15.0 -d i/ortools-bin/ targetabi=Release.Darwin_arm64
+  dk0 -nosysinc -I ../etc/dk/v --trust-local-package CommonsBase_Std --trust-local-package CommonsBase_Build --trust-local-package NotGoogleDev_OR run-function NotGoogleDev_OR.Tools.F_Bin@9.15.0 -d i/ortools-bin/ targetabi=Release.Darwin_arm64
 
 .  $ cat t/p/*/*/l/Release.Agnostic/command5.txt
   $ cat t/p/*/*/l/Release.Agnostic/stdout5.log

@@ -446,19 +446,19 @@
             }
         },
         "forms": {
-            "description": "The forms defined in this values document",
+            "description": "The form rules defined in this values document",
             "type": "array",
             "items": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
                     "id": {
-                        "description": "The identifier for the form, in the format 'PACKAGE.NAME@VERSION'. It must be unique across the value store. The PACKAGE is optional if the build system supplies an implicit package, but best practice is to supply it. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system. The form may be called from a MlFront script using the function call '<PACKAGE.NAME>.form ()'.",
+                        "description": "The identifier for the form rule, in the format 'PACKAGE.NAME@VERSION'. It must be unique across the value store. The PACKAGE is optional if the build system supplies an implicit package, but best practice is to supply it. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system. The form rule may be called from a MlFront script using the function call '<PACKAGE.NAME>.form ()'.",
                         "type": "string"
                     },
                     "options": {
                         "type": "object",
-                        "description": "A mapping from the JSON document given when invoking the form to command line options and variables. The JSON document has an effect on .function.args. Also, the JSON document's top-level fields can be referenced in the .precommands and .function.envmods using the syntax `${PARAM.name}`.",
+                        "description": "A mapping from the JSON document given when invoking the form rule to command line options and variables. The JSON document has an effect on .function.args. Also, the JSON document's top-level fields can be referenced in the .precommands and .function.envmods using the syntax `${PARAM.name}`.",
                         "additionalProperties": false,
                         "properties": {
                             "fields": {
@@ -508,7 +508,7 @@
                             },
                             "responsefile": {
                                 "type": "object",
-                                "description": "If specified, the command line arguments will be written to a temporary file and the form executable will be passed a reference to the temporary file. This is useful when the command line arguments are too long for the operating system to handle.",
+                                "description": "If specified, the command line arguments will be written to a temporary file and the form rule executable will be passed a reference to the temporary file. This is useful when the command line arguments are too long for the operating system to handle.",
                                 "additionalProperties": false,
                                 "properties": {
                                     "subpath": {
@@ -558,7 +558,7 @@
                             },
                             "document": {
                                 "type": "object",
-                                "description": "If specified, the form will add the full JSON document to the command line.",
+                                "description": "If specified, the form rule will add the full JSON document to the command line.",
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
@@ -586,7 +586,7 @@
                         }
                     },
                     "precommands": {
-                        "description": "The commands used to fetch objects that must be available to execute the form. The commands are written in the Value Shell Language (VSL). For example, 'get-object VGKot5hBsd81kMupNCXHaqbhv3huEbxAFMLnpcX2hniwn Release.Agnostic > gcc'.",
+                        "description": "The commands used to fetch objects that must be available to execute the form rule. The commands are written in the Value Shell Language (VSL). For example, 'get-object VGKot5hBsd81kMupNCXHaqbhv3huEbxAFMLnpcX2hniwn Release.Agnostic > gcc'.",
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
@@ -606,14 +606,14 @@
                                 ]
                             },
                             "private": {
-                                "description": "The commands used to fetch objects that must be available to execute the form. The commands are written in the Value Shell Language (VSL). When installing the form with an installer value controller, these \"private\" objects are not installed with this form's output.",
+                                "description": "The commands used to fetch objects that must be available to execute the form rule. The commands are written in the Value Shell Language (VSL). When installing the form rule with an installer value controller, these \"private\" objects are not installed with this form rule's output.",
                                 "type": "array",
                                 "items": {
                                     "type": "string"
                                 }
                             },
                             "public": {
-                                "description": "The commands used to fetch objects that must be available to execute the form. The commands are written in the Value Shell Language (VSL). When installing the form with an installer value controller, these \"public\" objects are installed with this form's output. Any \"public\" objects of the \"public\" form objects are installed transitively.",
+                                "description": "The commands used to fetch objects that must be available to execute the form rule. The commands are written in the Value Shell Language (VSL). When installing the form rule with an installer value controller, these \"public\" objects are installed with this form rule's output. Any \"public\" objects of the \"public\" form rule objects are installed transitively.",
                                 "type": "array",
                                 "items": {
                                     "type": "string"
@@ -622,12 +622,12 @@
                         }
                     },
                     "function": {
-                        "description": "The command line invocation that will execute the form. If no .function is specified, the \"identity\" function which does nothing will be used instead.",
+                        "description": "The command line invocation that will execute the form rule. If no .function is specified, the \"identity\" function which does nothing will be used instead.",
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
                             "commands": {
-                                "description": "One or more command lines. A flat list is the command line arguments for a single command line; a two-level list is a list of command lines. All form variables (ex. ${SLOT.Release.Agnostic}) may be used.",
+                                "description": "One or more command lines. A flat list is the command line arguments for a single command line; a two-level list is a list of command lines. All form rule variables (ex. ${SLOT.Release.Agnostic}) may be used.",
                                 "type": "array",
                                 "items": {
                                     "oneOf": [
@@ -677,11 +677,11 @@
                         "type": "object",
                         "properties": {
                             "assets": {
-                                "description": "These files will be assigned and validated as output after the form executable is finished running.",
+                                "description": "These files will be assigned and validated as output after the form rule executable is finished running.",
                                 "type": "array",
                                 "items": {
                                     "type": "object",
-                                    "description": "A set of output files produced by the form where all of the given [slots] will produce all of the given relative file [paths]. The file paths are relative to the object slot ${SLOT.name}. The object slot is a namespace that may be used to refer to the file from other thunks.",
+                                    "description": "A set of output files produced by the form rule where all of the given [slots] will produce all of the given relative file [paths]. The file paths are relative to the object slot ${SLOT.name}. The object slot is a namespace that may be used to refer to the file from other thunks.",
                                     "properties": {
                                         "slots": {
                                             "type": "array",

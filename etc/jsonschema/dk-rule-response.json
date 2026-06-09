@@ -181,7 +181,7 @@
                 },
                 "commands": {
                     "type": "array",
-                    "description": "Value shell commands like `post-object ...`.",
+                    "description": "Value shell commands like `run-function ...`.",
                     "items": {
                         "type": "array",
                         "description": "Value shell words for a single value shell command",
