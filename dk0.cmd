@@ -47,8 +47,8 @@ REM
 REM   Empty value if the architecture is not supported.
 REM   In particular, use empty instead of 9491d4737000e80bcbdd7a39e9dc13c2178ff865beff7d800d6159bfc395e8fa which is checksum for HTTP 404 error.
 REM -------------------------------------
-SET DK_VER=2.4.2.185
-SET DK_CKSUM_WINDOWS_X86_64=5cb253487ba63ecf7b3d5d9e3610b1d0a6f6a7126f49431c2a785642a3aec91c
+SET DK_VER=2.4.2.186
+SET DK_CKSUM_WINDOWS_X86_64=c87c8e2d9f119d30300443aa080363977a50b18af0823711d81a983752fda5b9
 SET DK_CKSUM_WINDOWS_X86=
 
 REM --------- Quiet Detection ---------
