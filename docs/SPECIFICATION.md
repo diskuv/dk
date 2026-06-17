@@ -15,6 +15,7 @@
     - [Asset Identity](#asset-identity)
     - [Web assets](#web-assets)
     - [Cell assets](#cell-assets)
+    - [Workspace assets](#workspace-assets)
     - [Self assets](#self-assets)
     - [Local assets](#local-assets)
     - [Zip Archive Reproducibility](#zip-archive-reproducibility)
@@ -634,7 +635,13 @@ Assets are located with one or more URL or file path mirrors:
 | `file://`  | [Local asset](#local-assets)           |
 | *none*     | [Local asset](#local-assets)           |
 
-However, the assets are uniquely identified by their SHA256 checksums.
+Assets are also created on-demand:
+
+| Location | What                                 |
+| -------- | ------------------------------------ |
+| `dk.u`   | [Workspace asset](#workspace-assets) |
+
+Each asset is uniquely identified by its SHA256 checksums.
 That unique identification means that mirrors for assets can be added
 at any time (including in the future) without triggering rebuilds.
 
@@ -658,6 +665,23 @@ cell://dk0/etc/table/dotnet
 Cells are local directories within the [project structure](#project-structure). For the reference implementation, the option `dk0 --cell NAME=LOCATION` is available to specify cells, and both the `root` and `dk0` cells are predefined.
 
 For example, `cell://dk0/etc/table/dotnet` is the local directory `etc/table/dotnet` within the cell `dk0`.
+
+### Workspace assets
+
+Assets are created by `dk.u` workspace script's [unified.asset](#unifiedasset) declarations. The module-version in the non-workspace section title becomes the base of the asset.
+
+So:
+
+```text
+### CommonsBase_GNU.Make.Apparatus@4.4.1
+
+  % unified.asset { name="BuildW32Bat", file="assets/p/patched-make-build_w32.bat" }
+  'asset'
+  '11131'
+  'sha256:3f9825744b486bc5413806cccbae36a4d354e944765fba68c26d37884369a06d'
+```
+
+creates an asset `CommonsBase_GNU.Make.Apparatus.BuildW32Bat@4.4.1` with path `-p assets/p/patched-make-build_w32.bat`.
 
 ### Self assets
 
