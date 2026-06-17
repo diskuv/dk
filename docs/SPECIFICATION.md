@@ -5203,13 +5203,10 @@ The value will be of a type that depends on the build key:
 | Build Key                             | Value Type | Id Material                                | Value File                                                               |
 | ------------------------------------- | ---------- | ------------------------------------------ | ------------------------------------------------------------------------ |
 | [asset](#assets)                      | `a`        | [P256](#p256---sha256-of-asset)            | contents of asset                                                        |
-|                                       |            | `::` [BLD](#bld---build-metadata)          |                                                                          |
 |                                       | `i`        | [Z256](#z256---sha256-of-zip-archive-file) | [index](#i---index-file)                                                 |
 | [bundle](#bundles)                    | `b`        | [Z256](#z256---sha256-of-zip-archive-file) | contents of zip archive file                                             |
-|                                       |            | `::` [BLD](#bld---build-metadata)          |                                                                          |
 | [object](#objects)                    | `o`        | [FRM](#frm---form)                         | output of form function                                                  |
 |                                       |            | `::<SLOT>`                                 |                                                                          |
-|                                       |            | `::` [BLD](#bld---build-metadata)          |                                                                          |
 |                                       | `i`        | [Z256](#z256---sha256-of-zip-archive-file) | [index file](#i---index-file)                                            |
 | [V256](#v256---sha256-of-values-file) | `j`        | [V256](#v256---sha256-of-values-file)      | dos2unix json `{schema_version:,forms:,bundles:}`                        |
 | [V256](#v256---sha256-of-values-file) | `l`        | [V256](#v256---sha256-of-values-file)      | dos2unix lua script                                                      |
@@ -5291,6 +5288,10 @@ The modifications mean the `i` value files are valid ZIP files. In other words:
 The dot (`.`) separated build metadata from the semver version.
 
 For example, `OurZip_Demo.S7z2.Windows7zExe@25.1.0+bn-20250101000000+diff` has build metadata `bn-20250101000000.diff`.
+
+Build metadata is deliberately **not** part of any value id. The `a`, `b` and `o` value ids are content-addressed (from the asset/bundle/form canonical id and, for objects, the slot), so identical content gets the same value id regardless of the build number (the `bn-*` build metadata). This keeps distributions reproducible: changing the build number (for example via dk0's `-n` option or a git tag) does not change the object, bundle or asset ids.
+
+Build metadata still participates in keys and versions (see [ID with Build Metadata](#object-id-with-build-metadata)); it is only excluded from value ids.
 
 #### V256 - SHA256 of Values File
 
