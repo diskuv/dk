@@ -1,5 +1,6 @@
 # VSL escaping examples
 
+- [Context](#context)
 - [Helpers](#helpers)
 - [1. Simple bare words stay bare](#1-simple-bare-words-stay-bare)
 - [2. Windows paths with backslashes do not need escaping by themselves](#2-windows-paths-with-backslashes-do-not-need-escaping-by-themselves)
@@ -18,19 +19,29 @@
 - [15. For `cmd /c`, keep the inner Windows quoting and then escape the whole payload as one literal](#15-for-cmd-c-keep-the-inner-windows-quoting-and-then-escape-the-whole-payload-as-one-literal)
 
 
-These examples are the source-of-truth worked examples for escaping in the
-Value Shell Language (VSL).
+## Context
 
-They use the current `MlFront_Thunk.ValueShellLexer` behavior:
+VSL (the Value Shell Language) is how you fetch and run **values** with the
+`get-object`, `get-asset`, and `run-object` commands you write in `dk.u`, in
+distribution scripts (`dist-*/run.u`), and in the precommands of `.values.jsonc` files.
+Often arguments to value commands like `get-object` have spaces, quotes,
+backticks, and other special characters.
+
+This guide will help you write or understand the value commands that have
+special characters in their arguments.
+
+The general rules for special characters are:
 
 - bare words may contain literal backticks
-- inside double quotes, backtick escapes a literal double quote or a literal backtick
-- variables and subshells stay expandable unless you deliberately quote a literal
+- inside double quotes, backtick **escapes** a literal double quote or a literal backtick
+- variables and subshells stay expandable unless you deliberately **quote** a literal
+
+The examples below show how to apply those general rules in specific situations.
 
 ## Helpers
 
 A few helpers render the example results as Markdown tables so the output is
-easy to read in the generated `ESCAPING.md`.
+easy to read.
 
 
 ```ocaml
@@ -462,7 +473,7 @@ the inner command string. A concise explanation is in
 
 If you are writing `function.commands` in a values file, prefer the
 `["--cmd.exe", "/c", "<string>"]` special form documented in
-[SPECIFICATION.md](SPECIFICATION.md); this section is only for places where you must still
+the [SPECIFICATION](/specification/); this section is only for places where you must still
 hand-author one literal `cmd /c` payload string.
 
 
