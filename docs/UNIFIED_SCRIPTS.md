@@ -78,13 +78,15 @@ Every line in a unified script is either:
 After a unified script is run, the mark-in command and responses can be *rendered* to produce a prettier main document.
 For Markdown documents, the commands and responses are prettier if they are wrapped in code blocks:
 
-    # My Markdown Document
-    We'll run the "echo" command.
+````text
+# My Markdown Document
+We'll run the "echo" command.
 
-    ```sh
-      $ echo Hello World
-      Hello World
-    ```
+```sh
+  $ echo Hello World
+  Hello World
+```
+````
 
 Because unified scripts always have a main document (ex. Markdown above) and a [mark-in] command evaluator (ex. a shell command above), you should first read the appropriate main document guide:
 
@@ -168,7 +170,7 @@ important information about the build is placed back into the `.dk.u` file:
 Bundle a small CMake project in the hello-src/ directory
 using the Lua command "unified.asset"
   % unified.asset { name="HelloWorld", dir="hello-src" }
-  \dkasset\;
+  \dk.asset\;
   '790'
   { 'sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d' }
 
@@ -180,10 +182,11 @@ with CMake
   > bargs[]=--config bargs[]=Release
   > iargs[]=--config iargs[]=Release
   > outexe[]=bin/hello
-  \testpass\;object:oor4kvp5hp7wtwtzfba2ayfhpanwjyhxnsryjssyr5nxt5zslkycq:OurCMake_F_Build.Xhmcju4uhjoh54b35k3iobgdz4q@1.0.0
+  \test(pass)
+  \dk.object(abi: "Release.Windows_x86", value-id: "oey3zcwqi3bodhkdahazywr4ikitvpthpwsveinsixe3lq7zhcfxq")\;
 ```
 
-Notice the odd-looking `\dkasset\;` and `\testpass\;` text in the output. These
+Notice the odd-looking `\dk.asset\;` and `\test(pass)\dk.object(...)\;` text in the output. These
 are response metadata that [renderers] can use to make pretty output.
 
 ## Syntax
@@ -349,39 +352,45 @@ Builtin evaluators are not always available; consult your [mark-in kind] documen
 
 The `verbatim` command lets you see exactly what the unified script sees.
 
-    %%% verbatim
-    ... Repeat after me, please.
-    ... This is verbatim output.
-    Repeat after me, please.
-    This is verbatim output.
+```text
+%%% verbatim
+... Repeat after me, please.
+... This is verbatim output.
+Repeat after me, please.
+This is verbatim output.
+```
 
 The `metadata` command strips out all but the metadata, with possible formatting changes:
 
-    %%% metadata
-    ... \barename
-    ... \hasattributes0()
-    ... \hasattributes2(one two)
-    ... \hasarguments1nested[ \hasarguments1plain[ inner text ] ]
-    ... \meta[The last metadata before main content]  This is the main content.
-    ... It should not be shown.
-    \barename\hasattributes0\hasattributes2(one, two)
-    \hasarguments1nested[ \hasarguments1plain[ inner text ] ]
-    \meta[The last metadata before main content]
+```text
+%%% metadata
+... \barename
+... \hasattributes0()
+... \hasattributes2(one two)
+... \hasarguments1nested[ \hasarguments1plain[ inner text ] ]
+... \meta[The last metadata before main content]  This is the main content.
+... It should not be shown.
+\barename\hasattributes0\hasattributes2(one, two)
+\hasarguments1nested[ \hasarguments1plain[ inner text ] ]
+\meta[The last metadata before main content]
+```
 
 The `metadata'` command is similar to `metadata`, except it produces a more verbose format:
 
-    %%% metadata'
-    ... \barename
-    ... \hasattributes0()
-    ... \hasattributes2(one two)
-    ... \hasarguments1nested[ \hasarguments1plain[ inner text ] ]
-    ... \meta[The last metadata before main content]  This is the main content.
-    ... It should not be shown.
-    (markup barename)ws("\n")(markup hasattributes0)ws("\n")
-    (markup hasattributes2((attr one), (attr two)))ws("\n")
-    (markup hasarguments1nested[txt(" ")
-      (markup hasarguments1plain[txt(" inner text ")])txt(" ")])ws("\n")
-    (markup meta[txt("The last metadata before main content")])
+```text
+%%% metadata'
+... \barename
+... \hasattributes0()
+... \hasattributes2(one two)
+... \hasarguments1nested[ \hasarguments1plain[ inner text ] ]
+... \meta[The last metadata before main content]  This is the main content.
+... It should not be shown.
+(markup barename)ws("\n")(markup hasattributes0)ws("\n")
+(markup hasattributes2((attr one), (attr two)))ws("\n")
+(markup hasarguments1nested[txt(" ")
+  (markup hasarguments1plain[txt(" inner text ")])txt(" ")])ws("\n")
+(markup meta[txt("The last metadata before main content")])
+```
 
 ### Cram Tests
 
@@ -430,20 +439,22 @@ Errors will be reported:
 After Mercurial created the [cram test format](#cram-tests), they later added
 support for inline Python code and multiline commands:
 
-    ```python
-    Some Python code can be run as part of the test:
+````text
+```python
+Some Python code can be run as part of the test:
 
-      >>> from datetime import date
-      >>> print(date(2020, 1, 1))
-      2020-01-01
+   >>> from datetime import date
+   >>> print(date(2020, 1, 1))
+   2020-01-01
 
-    Split the command across multiple lines if needed:
-      >>> for i in range(3):
-      ...     print(i)
-      0
-      1
-      2
-    ```
+Split the command across multiple lines if needed:
+   >>> for i in range(3):
+   ...     print(i)
+   0
+   1
+   2
+```
+````
 
 Bitheap (Python cram tests) and Dune (OCaml cram tests) did not adopt the `>>>`
 prompt.
@@ -545,13 +556,15 @@ A `.ml.u` script uses the OCaml REPL internally: the same REPL you run with `/us
 
 For example, these two forms inside a `.ml.u` file are equivalent:
 
-    # 1 +
-      2 + 3 ;;
-    - : int = 6
+```text
+# 1 +
+  2 + 3 ;;
+- : int = 6
 
-    >>> 1 +
-    ... 2 + 3
-    - : int = 6
+>>> 1 +
+... 2 + 3
+- : int = 6
+```
 
 > [!IMPORTANT]
 > To keep `.ml.u` files readable, [toplevel directives] must use the `>>>` form.
@@ -564,44 +577,52 @@ Toplevel values are printed using OCaml's toplevel printing, except unit values 
 can influence the printing of toplevel values with the `>>> #install_printer printer-name` directive;
 confer with the OCaml manual's [#install_printer documentation](https://ocaml.org/manual/5.4/toplevel.html#s%3Atoplevel-directives).
 
-    >>> ()
+```text
+>>> ()
 
-    >>> 'A'
-    - : char = 'A'
+>>> 'A'
+- : char = 'A'
 
-    >>> let hexpp ppf c = Format.fprintf ppf "0x%02x" (Char.code c)
-    val hexpp : Format.formatter -> char -> unit = <fun>
+>>> let hexpp ppf c = Format.fprintf ppf "0x%02x" (Char.code c)
+val hexpp : Format.formatter -> char -> unit = <fun>
 
-    >>> #install_printer hexpp
+>>> #install_printer hexpp
 
-    >>> 'A'
-    - : char = 0x41
+>>> 'A'
+- : char = 0x41
 
-    >>> #remove_printer hexpp
+>>> #remove_printer hexpp
+```
 
 Additionally, anything your code prints using [Format.std_formatter](https://ocaml.org/manual/5.4/api/Format.html#VALstd_formatter)
 will be captured and included in the output.
 
-    >>> Format.printf "This will be captured!@."
-    This will be captured!
+```text
+>>> Format.printf "This will be captured!@."
+This will be captured!
+```
 
 However, direct use of `stdout` or `stderr` goes to the real standard output
 and standard error. In particular, if your code uses `print_endline`
 or `Printf.printf` then that output will appear on your console while
 running the cram test rather than inside the cram test response.
 
-    >>> print_endline "This will not be captured in the output."
+```text
+>>> print_endline "This will not be captured in the output."
+```
 
 *Renderers*
 
 Let's go back to the introductory OCaml example:
 
-      # 1 + 2 + 3 ;;
-      - : int = 6
+```text
+# 1 + 2 + 3 ;;
+- : int = 6
 
-      >>> 1 +
-      ... 2 + 3
-      - : int = 6
+>>> 1 +
+... 2 + 3
+- : int = 6
+```
 
 With the [Markdown renderer](#markdown), the two forms will render with valid, syntax highlighted OCaml code blocks. However, the rendering is slightly different:
 
@@ -630,9 +651,11 @@ With the [Markdown renderer](#markdown), the two forms will render with valid, s
 
 The renderers respect the `\ocaml` [metadata](#metadata-syntax). So directly printing OCaml metadata:
 
-    >>> Format.printf "%s@." {|
-    ...   \ocaml\;let x = 1
-    ... |}
+```text
+>>> Format.printf "%s@." {|
+...   \ocaml\;let x = 1
+... |}
+```
 
 should render into an OCaml code block:
 
@@ -651,12 +674,14 @@ let x = 1
 
 and directly printing Markdown metadata:
 
-    >>> Format.printf "%s@." {|
-    ... \markdown\;| Key | Value |
-    ... | ---      | ---       |
-    ... | Username | `someone` |
-    ... | Domain   | `aol.com` |
-    ... |}
+```text
+>>> Format.printf "%s@." {|
+... \markdown\;| Key | Value |
+... | ---      | ---       |
+... | Username | `someone` |
+... | Domain   | `aol.com` |
+... |}
+```
 
 should render into Markdown:
 
@@ -681,18 +706,22 @@ should render into Markdown:
 The [metadata syntax](#metadata-syntax) is how [toplevel directives] like `#show`
 render with syntax highlighting. The command:
 
-    >>> #show Unit
+```text
+>>> #show Unit
+```
 
 will be updated to include the `#show` response:
 
-    >>> #show Unit
-    \ocaml(type: "#show")\;module Unit :
-      sig
-        type t = unit = ()
-        val equal : t -> t -> bool
-        val compare : t -> t -> int
-        val to_string : t -> string
-      end
+```text
+>>> #show Unit
+\ocaml(type: "#show")\;module Unit :
+  sig
+    type t = unit = ()
+    val equal : t -> t -> bool
+    val compare : t -> t -> int
+    val to_string : t -> string
+  end
+```
 
 and render as:
 
@@ -892,7 +921,7 @@ Unified scripts satisfies the three requirements.
 Bundle a small CMake project in the hello-src/ directory
 using the Lua command "unified.asset"
   % unified.asset { name="HelloWorld", dir="hello-src" }
-  \dkasset
+  \dk.asset
   '790'
   { 'sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d' }
 
@@ -937,9 +966,11 @@ Those indented code blocks might be mistaken for unified command prompts.
 
 Instead use fenced code blocks:
 
-    ```text
-    This is a fenced code block.
-    ```
+````text
+```text
+This is a fenced code block.
+```
+````
 
 Setup:
 
