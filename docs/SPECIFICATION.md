@@ -239,10 +239,6 @@
       - [VCK - Values Checksum](#vck---values-checksum)
       - [FRM - Form](#frm---form)
   - [Evaluation](#evaluation)
-  - [Platforms](#platforms)
-    - [Windows](#windows)
-    - [macOS](#macos)
-    - [Linux/BSDs/MSYS2/Cygwin](#linuxbsdsmsys2cygwin)
 
 ## Introduction
 
@@ -588,14 +584,14 @@ The build system borrows terminology from the [Buck2 build system](https://buck2
 
 A **project**:
 
-- has a **project directory**. In the `dk0` reference build system, the directory containing the `dk0` shell script and `dk0.cmd` Windows batch script is the project directory.
+- has a **project directory**.
 - is a container for cells (more on this shortly)
 
 A **cell** is:
 
 - a subdivision of the project source code
   - there is at least one subdivision called `root`
-  - in the `dk0` reference build system, the option `--cell CELLNAME=path/to/source/code` define the cells. Other build system implementations can use conventions and/or project configuration files.
+  - build system implementations define the cells using conventions, project configuration files, and/or command-line options.
 
 Cells exist to make efficient builds and to locating source code even when source code is vendored.
 
@@ -615,7 +611,7 @@ When a build system command that takes a [unified script](UNIFIED_SCRIPTS.md) (f
 Having a workspace makes available:
 
 - [importing third party distributions](#import)
-- [workspace-scoped assets](#unifiedasset). The workspace script's [unified.asset](#unifiedasset) declarations in non-workspace sections are available to the user `<script>`. In the `dk0` reference implementation the asset libraries are implicitly trusted, so no `--trust-local-package ASSET_LIBRARY` is needed to access the workspace assets.
+- [workspace-scoped assets](#unifiedasset). The workspace script's [unified.asset](#unifiedasset) declarations in non-workspace sections are available to the user `<script>`.
 
 ## Assets
 
@@ -659,12 +655,12 @@ http://example.com/asset2/
 Examples:
 
 ```text
-cell://dk0/etc/table/dotnet
+cell://root/etc/table/dotnet
 ```
 
-Cells are local directories within the [project structure](#project-structure). For the reference implementation, the option `dk0 --cell NAME=LOCATION` is available to specify cells, and both the `root` and `dk0` cells are predefined.
+Cells are local directories within the [project structure](#project-structure). The `root` cell is predefined to be the working directory that the build system was called from.
 
-For example, `cell://dk0/etc/table/dotnet` is the local directory `etc/table/dotnet` within the cell `dk0`.
+For example, `cell://root/etc/table/dotnet` is the local directory `etc/table/dotnet` within the cell `root`.
 
 ### Workspace assets
 
@@ -907,8 +903,7 @@ For example, `${SLOTNAME.Release.execution_abi}` has two parts:
 | ---------------- | ---------------- | ------------------------------------------------------------------------------ |
 | execution_abi    | Windows_x86_64   | The ABI for the [execution platform](https://bazel.build/extending/platforms). |
 | target_abi       | Windows_x86      | The ABI of the generated executables and libraries.                            |
-|                  |                  | Defaults to the execution ABI. Can be set by dk0 reference implementation      |
-|                  |                  | option `--target-abi`                                                          |
+|                  |                  | Defaults to the execution ABI.                                                 |
 | request          | Release.Agnostic | The *request slot* from the `-s REQUEST_SLOT` command line option              |
 |                  |                  | (ex. `get-object MODULE@VERSION -s Release.Agnostic`)                          |
 
@@ -1020,8 +1015,6 @@ Form functions may have execution constraints like the following that restricts 
 ```
 
 These names and values follow the *Platform Lexicon* defined by the Bazel build tool: <https://github.com/bazelbuild/remote-apis/blob/main/build/bazel/remote/execution/v2/platform.md/>.
-
-The reference implementation, as of 2025-11-09, only recognizes the `OSFamily` property.
 
 > Tip: be careful! If you specify the `ISA` property pair, it may be ignored today but recognized in a future version.
 
@@ -1170,10 +1163,7 @@ Each precommand and each function command is a [build task](#task-model). A task
 2. Dependencies: the `$(...)` subshells. If any subshell dependency produces a different value (because the asset or object content changed), the dependencies differ and the step re-executes.
 
 > [!TIP]
-> Avoid `precommands` that place values in intermediate directories rather than `${SLOT.*}` directories. Instead use subshells.
->
-> The dk0 reference implementation updates workspace asset checksums with `dk0 update` and invalidates values with `dk0 invalidate` or `dk0 -x EXPRESSION`.
-> If you use intermediate directories the intermediate files won't be updated or invalidated.
+> Avoid `precommands` that place values in intermediate directories rather than `${SLOT.*}` directories. Instead use subshells. If you use intermediate directories the intermediate files won't be updated or invalidated.
 >
 > ```json
 > // WRONG — precommand + cp = cached:
@@ -1188,6 +1178,8 @@ Each precommand and each function command is a [build task](#task-model). A task
 >   ["python3", "$(get-asset MOD@VER -p path/to/script.py -f script.py)"]
 > ]
 > ```
+>
+> Alternatively, each build system implementation has a way to update workspace asset checksums and invalidate values.
 
 #### Windows command-line quoting
 
@@ -1305,7 +1297,7 @@ will get the object with the id `OurStd_Std.Build.Clang@1.0.0` and place it in t
 
 There are two ways to run these shell commands:
 
-1. Directly from the command line with the efficient `dk` implementation or the reference implementation `dk0`. For example, `dk get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -f clang.exe`.
+1. Directly from the command line. For example, `${dk_build_system} get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -f clang.exe` where `${dk_build_system}` could be the `dk0` reference implementation.
 2. Embedded as "precommands" in a values file. For example,
 
    ```json
@@ -1507,9 +1499,9 @@ variable and subshell expansion as a direct local invocation. In particular,
 `run-object` and `run-asset` command-line arguments may contain variables and
 subshells such as `$(get-object ...)`. The audited command stored in the
 session branch is a single-line POSIX shell command, so the GitHub workflow
-(etc.) can pass the exact argument vector to `dk0`.
+(etc.) can pass the exact argument vector to the build tool.
 
-Before submitting work, the reference implementation prints the resolved inner
+Before submitting work, an implementation prints the resolved inner
 command in value shell syntax, using two spaces between top-level terms. This
 is intentionally different from shell syntax and is shown so the user can see
 exactly what command is being sent to the remote execution engine.
@@ -1571,7 +1563,7 @@ The standard output and standard error streams are captured in separate files bu
 
 The output and error stream files are capped at 16777211 bytes, which is the
 lower of the approximate Cap'n Proto `Text` payload limit of 512 MB and the
-reference implementation's `Sys.max_string_length` limit on 32-bit systems.
+maximum string length on 32-bit platforms.
 
 > [!TIP]
 > For larger content, redirect the command's standard output or standard error to form rule output files using shell redirection or a log capture executable.
@@ -1660,7 +1652,7 @@ The standard output and standard error streams are captured in separate files bu
 
 The output and error stream files are capped at 16777211 bytes, which is the
 lower of the approximate Cap'n Proto `Text` payload limit of 512 MB and the
-reference implementation's `Sys.max_string_length` limit on 32-bit systems.
+maximum string length on 32-bit platforms.
 
 > [!TIP]
 > For larger content, redirect the command's standard output or standard error to form rule output files using shell redirection or a log capture executable.
@@ -1751,7 +1743,7 @@ For example, `$(--path=absnative -q '-x=still one word' get-object ...)` has thr
 
 Any options that are not recognized by the build system must be ignored.
 
-In the reference implementation, the only recognized options are:
+The recognized options are:
 
 | Option         | Description                                                        |
 | -------------- | ------------------------------------------------------------------ |
@@ -1895,9 +1887,9 @@ In the above example the object is locked to build number `20250801235901` becau
 
 When the version `VERSION` has no explicit build metadata, or the version `VERSION`'s build metadata does not include a `bn-*` field, then the first matching rule of the following rules determines what the build metadata will be:
 
-1. If a lockfile (not available yet in the reference implementation) has a build metadata reference (ex. `1.0.0` = `bn-20250801235901+commit-054d5983`), the build metadata is used.
+1. If a lockfile has a build metadata reference (ex. `1.0.0` = `bn-20250801235901+commit-054d5983`), the build metadata is used.
 2. The constructive trace store list of traces `key(i), dependencies(i), result(i)` is scanned. If there is a trace `i` where the version of `key(i)` matches the `VERSION` and where `result(i)` is an object value, then the build metadata of the *latest* such `key(i)` will be used.
-3. The build metadata will be constructed from dk0's or dk's `-t TIMESTAMP` command line option, with the `bn-YYYYMMDDhhmmss` format.
+3. The build metadata will be constructed from the `-t TIMESTAMP` command line option, with the `bn-YYYYMMDDhhmmss` format.
 4. The build metadata will be `bn-20250101000000`.
 
 Important: the system clock is never consulted.
@@ -1919,7 +1911,10 @@ Here are some examples for using the source control commit timestamp:
 # CI System: GitHub Actions
 # Variable Name: github.event.head_commit-timestamp
 - name: Build project
-  run: dk0 -t "${{ github.event.head_commit-timestamp }}" ...
+  env:
+    # Any dk build system is fine. dk0 is the reference implementation.
+    dk_build_system: dk0
+  run: ${dk_build_system} -t "${{ github.event.head_commit-timestamp }}" ...
 ```
 
 ```yaml
@@ -1929,9 +1924,12 @@ Here are some examples for using the source control commit timestamp:
 # Docs: https://docs.gitlab.com/ci/variables/predefined_variables/#predefined-variables
 # Variable Name: CI_COMMIT_TIMESTAMP
 # Variable Example: 2022-01-31T16:47:55-08:00
+variables:
+  # Any dk build system is fine. dk0 is the reference implementation.
+  dk_build_system: dk0
 job:
   script:
-    - dk0 -t "$CI_COMMIT_TIMESTAMP" ...
+    - ${dk_build_system} -t "$CI_COMMIT_TIMESTAMP" ...
 ```
 
 Here are some example of using a monotonically increasing build number:
@@ -1955,10 +1953,6 @@ The build system is resilient to CRLF line endings:
 
 - The [values canonical id](#vci---values-canonical-id) normalizes the JSON with all carriage returns removed before calculating the canonical id
 - The [values checksums](#vck---values-checksum) normalizes the JSON with all carriage returns removed before conversion to an AST
-
-However, there is one limitation:
-
-- The byte positions, lines and columns are embedded by the reference implementation in the AST for error reporting. The byte positions are Unix byte positions. During error reporting, the byte positions on Windows will not be accurate if the JSON file is checked out by `git` with CRLF endings. This limitation may be fixed in the future if the reference implementation moves exclusively to lines and columns.
 
 ### JSON Canonicalization
 
@@ -2085,7 +2079,7 @@ A **distribution** is a build that generates [values](#values). In the build sys
 
 To increase supply chain security guarantees, the build system will reject assets and objects that are produced by humans or machines without attestations that you have explicitly trusted.
 
-The following sources of attestation are recognized by the reference implementation:
+The following sources of attestation are recognized:
 
 - A human can sign a build by using an [OpenBSD signify key](https://www.openbsd.org/papers/bsdcan-signify.html).
 - GitHub Actions can sign a build using one of two [SLSA security levels](https://slsa.dev/spec/v1.0/levels):
@@ -2244,10 +2238,10 @@ When writing distribution scripts:
    avoid colliding with UI rule names in the same scriptmodule.
 
    It is best to run every function rule for lightweight testing during distribution.
-2. Use `${CONFIG}` for files in the cram test directory. Set by `dk0 test`.
+2. Use `${CONFIG}` for files in the cram test directory.
 3. Use `${RUNTIME}/<unique path to cram test>` for -f and -d options since outputs are relative to the
-   current dir like `dk0 run-function`, `dk0 dialog`, and `dk0 exec`. Set unique to the cram
-   test by `dk0 test`. The `<unique path to cram test>` is to avoid race conditions on Windows where
+   current dir like `run-function`, `dialog`, and `exec`. It is set unique to the cram
+   test. The `<unique path to cram test>` is to avoid race conditions on Windows where
    Windows Defender (etc.) may not make a file visible or rewritable immediately after creation.
 4. Declare each static rule input in the rule's `declareoutput` response.
 
@@ -2260,7 +2254,7 @@ The build system has first-class support for Lua as a scripting language.
 Lua scripts are processed by the build system in a couple places:
 
 - REGULAR SCRIPT: In `values.lua` or `*.values.lua` files in the same include directories (`-I`) as the [Values](#values) (`values.json[c]` and `*.values.json[c]`) files
-- EMBEDDED SCRIPT: Embedded in comments at the top of **single-file** scripts. The reference implementation supports `*.ml` single-file scripts; more will be added.
+- EMBEDDED SCRIPT: Embedded in comments at the top of **single-file** scripts.
 
 For example, a regular script may be:
 
@@ -2300,7 +2294,7 @@ All scripts in a running build share the same Lua state, and Lua is interpreted 
 That means two things:
 
 - All Lua scripts must be fast. The "continuation" mechanism, described in a later subsection, lets scripts give parallelizable work to the build engine through [subshells](#subshells).
-- Lua scripts must be written to minimize use of global variables. The reference implementation does not yet enforce the complete removal of global variables but it [will in the future](https://github.com/diskuv/dk/issues/55).
+- Lua scripts must be written to minimize use of global variables.
 
 ### Script Phases
 
@@ -2332,8 +2326,6 @@ The overall design goal is to maintain conventional Lua behavior as much as poss
 The build system uses Lua 2.5 for its syntax (no `for` loops) and its data model (no metatables), but uses functions available from Lua 5.1+ (ex. `require`).
 
 > Historical note: Lua 2.5 was published in 1996 and lacks several features of modern-day Lua: `for` loops, metaprogramming for metatables, and coroutines. However, rules are mostly configuration, and a full programming language makes hermetic, bounded-time builds difficult or impossible. So even if a future specification uses a later Lua version, several features will be disabled.
-
-The reference implementation uses a pure OCaml version of Lua (`lua-ml`) which has full type-safety, is re-entrant, and, if needed, can have Lua evaluations bounded in time and sandboxed to the project directories.
 
 ---
 
@@ -2379,18 +2371,15 @@ and the Lua 5.4 reserved words:
 `arg`
 
 A table defined only when Lua is run [embedded](#embedded-file-scripts)
-*or* a file is run directly as a Lua script. The reference implementation `dk0`
-will run a file directly as a Lua script with `dk0 run some-script.lua` when
-the file ends with `.lua` and some other file extensions; see `dk0 --help` for
-authoritative options.
+*or* a file is run directly as a Lua script.
 
 Before running any code, lua collects all command-line arguments in a global table called
 `arg`. The script name goes to index 0, the first argument after the script name goes to index 1, and so on.
 Any arguments before the script name (that is, the interpreter name plus its options) go to negative indices.
-For instance, in the call
+For example, in the call:
 
 ```sh
-dk0 lua -la b.lua t1 t2
+${dk_build_system} lua -la b.lua t1 t2
 ```
 
 the table is like this:
@@ -2404,7 +2393,7 @@ arg = { [-2] = "lua", [-1] = "-la",
 If there is no script in the call, the interpreter name goes to index 0, followed by the other arguments. For instance, the call
 
 ```sh
-dk0 lua -e "print(arg[1])"
+${dk_build_system} lua -e "print(arg[1])"
 ```
 
 will print `-e`. If there is a script, the script is called with arguments `arg[1], ···, arg[#arg]`.
@@ -2809,8 +2798,6 @@ Once imported with `require`, standard modules are enriched with constants as pe
 `package.registrykey`
 
 A opaque variable holding a key to an internal table of packages that are loaded.
-
-In the reference implementation, the internal table of packages is stored in an OCaml analog of the [Lua C registry](https://www.lua.org/manual/5.4/manual.html#4.3).
 
 ### Lua request.rule library
 
@@ -3296,7 +3283,7 @@ The `patterns` and `excludes` are glob expressions on project files that conform
 
 The same project file may belong to different assets.
 
-The specification does not mandate how change detection is implemented. The `dk0` reference implementation scans all the globs at startup, and has optimizations to skip over directories when it can prove that the directories will never be matched by a glob expression. Other implementations may cache the globbed files and only update the globbed files when an invalidation is given to the build system (`--invalidate <origin>:subpath:` option in the reference implementation).
+The specification does not mandate how change detection is implemented. An implementation may scan all the globs at startup, or cache the globbed files and only update them when an invalidation is given to the build system.
 
 The project directory structure will be maintained in the asset. For example, given the project:
 
@@ -3415,7 +3402,6 @@ The program will have its environment modified by `envmods` in accordance to [En
 The default `cwd` is the user's working directory.
 
 Build system implementations are required to have security controls.
-The reference implementation prompts the user and asks for confirmation before running the program.
 
 The caller is expected to check the return values. Using the Lua convention `assert(request.ui.spawn { ... })` is sufficient to pass only on exit code zero.
 The return values are:
@@ -3592,8 +3578,6 @@ The specifier `p` formats the pointer returned by `lua_topointer` in Lua 5.1+, b
 `string.len (s)`
 
 Receives a string and returns its length. The empty string `""` has length 0. Embedded zeros are counted, so `"a\000bc\000"` has length 5.
-
-*bug:* `string.len( "a\000bc000" )` is 9 in the reference implementation. <https://github.com/diskuv/dk/issues/54>
 
 #### string.lower
 
@@ -3882,22 +3866,6 @@ Assumes that the script is .../*.u/run.u and that
 - `name` must be a standard namespace term (ie. begins with a capital letter)
 - the bundle id is `<scriptid>.<name>@<scriptver>` where `scriptid` and `scriptver` are from [unified.scriptmodver](#unifiedscriptmodver)
 - the origin is named the library id of `scriptid` (ex. `OurLibrary_Std` if `scriptid = OurLibrary_Std.A.B.C`) and has mirrors set to the library cell (ex. `cell://OurLibrary_Std`).
-  - The `dk0` reference implementation, when run with a directory-based unified script like `dk0 test unifiedscript.u/`, sets the library cell to the unified script directory while the unified script is evaluated.
-  - The `dk0` reference implementation, when the unified script being evaluated is the [workspace script](#workspace-script), sets the library cell to the directory containing the [workspace script](#workspace-script).
-  - The `dk0` reference implementation also has a `dk0 combine` command that can adjust the mirrors permanently during distribution.
-
-> [!NOTE]
-> *`dk0` reference implementation behavior*
->
-> In the [workspace script](#workspace-script), if the [existing output block](#unifiedexistingoutput) has a size and checksum then the asset's size and checksum won't be recomputed. The workspace script is re-evaluated only when the `update` command is issued.
->
-> The precise behavior depends on which unified script the `unified.asset` declaration is in and how it was reached:
->
-> | When `unified.asset` runs in… | What happens |
-> | --- | --- |
-> | A unified tet or distribution script that is *not* the [workspace script](#workspace-script) | The asset's file or directory contents are always read to calculate its size and checksum. |
-> | The [workspace script](#workspace-script) | If the [existing output block](#unifiedexistingoutput) under the asset's command already contains size and checksum, those values are reused. Otherwise the asset is always read to recompute the size and checksum are recomputed. |
-> | An `update`-style build system command refreshing the [workspace script](#workspace-script) | The asset is always read to recompute the size and checksum are recomputed. |
 
 Returns `nil` and an error message, or three values:
 
@@ -4136,7 +4104,7 @@ The `import` will:
 - download the distribution metadata
 - validate the metadata
 - place distribution metadata in the trace store (deprecated; <https://github.com/diskuv/dk/issues/101>)
-- place distribution metadata in the source tree (the `dk0` reference implementation uses `<workspace>/etc/dk/i/<LIBRARY>-<VERSION>.values.json`)
+- place distribution metadata in the source tree
 
 The return values are either `nil` and an error message, or three values:
 
@@ -4153,7 +4121,7 @@ then the import command is skipped.
 
 > 📢 The import's `LIBRARY@VERSION` outputs in the workspace section, along with the distribution metadata in the source tree, behave like lock files in package managers like `npm` and `cargo`.
 
-The `dk0` reference implementation will also place:
+An implementation may also place:
 
 1. *lazy* value files in the value store by default to avoid the time and space to download
    every binary artifact from the distribution
@@ -4184,10 +4152,6 @@ Imports a distribution from a GitHub release.
 - `tag`, if unspecified, is the latest release tag.
 
 `github-l2` will validate the release using GitHub's SLSA Level 2 attestations.
-
-The `dk0` reference implementation will download an internal copy of the GitHub CLI
-and use GitHub CLI to perform downloads from GitHub releases and validate
-attestations.
 
 ### Custom Lua Modules
 
@@ -4240,7 +4204,7 @@ return M
 The rule above can be run from the command line:
 
 ```sh
-dk0 run-function MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2
+${dk_build_system} run-function MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2
 ```
 
 or from a subshell in a `values.json` build file:
@@ -4491,7 +4455,7 @@ YourFreeRule(
 UI rules (ie. `uirules`) are rules that:
 
 - only an end-user can run these rules; using UI rules inside a `values.json[c]` file will fail the build
-- the reference implementation has the subcommand `dialog` for UI rules, while `run-function` is reserved for function rules
+- the `dialog` subcommand runs UI rules, while `run-function` is reserved for function rules
 - interact with the end-user through a console or a graphical user interface
 - only one UI rule may run at a time even if the build system implementation parallelizes noninteractive rules
 - have access to the project source code directories through the [request.ui](#lua-requestui-library) library
@@ -4715,7 +4679,7 @@ That means a Lua `nil` is considered equivalent to a missing value.
 The introduction example also submitted a request to a rule through the command line:
 
 ```sh
-dk0 run-function MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2
+${dk_build_system} run-function MyLibrary_Std.A.B.MyModule.MyRule@1.0.0 -s Some.Slot -- a=1 b=2
 ```
 
 Those command line arguments `a=1 b=2` get converted into the same JSON document as before:
@@ -4729,7 +4693,7 @@ The conversion of command line arguments follows the withdrawn but still useful 
 - `... -- name=Jane` creates the request document `{"name":"Jane"}`
 - `... -- pet[species]=Dahut kids[0]=Ashley` creates the request document `{"pets":{"species":"Dahut"},"kids":["Ashley"]}`
 
-While the reference implementation does not do this, other build systems are free to accept the form document directly from a HTML form as defined in [W3C HTML JSON Forms specification] or directly from a JSON document.
+Build systems are free to accept the form document directly from a HTML form as defined in [W3C HTML JSON Forms specification] or directly from a JSON document.
 
 [W3C HTML JSON Forms specification]: https://www.w3.org/TR/html-json-forms
 
@@ -4833,7 +4797,7 @@ The `request` table is available as:
 
 The algorithm is:
 
-1. Add a `values.lua` file to the valuestore (it is an in-memory file in the reference implementation) that is a wrapper around the [recognized embedded Lua](#recognizing-embedded-lua):
+1. Add a `values.lua` file to the valuestore that is a wrapper around the [recognized embedded Lua](#recognizing-embedded-lua):
 
    ```lua
    -- TheUniqueId replaced with a string based on the SHA-256 of the file
@@ -5035,8 +4999,6 @@ if build.is_building then
   -- VALUESCAN will not execute code inside this code block
 end
 ```
-
-**TIP**. The reference implementation has the `dk0 lua --analysis somefile.lua` command to show the rules the build system thinks are defined in the Lua script.
 
 ### Error Handling in Rules
 
@@ -5391,59 +5353,3 @@ The concatenation of:
 | STATESAVE    | Update trace store                                  |
 
 The number in parentheses is the classic phase number; those numbers are being phased out.
-
-## Platforms
-
-### Windows
-
-| File                     | What                                                                   |
-| ------------------------ | ---------------------------------------------------------------------- |
-| `pwsh` in PATH           | `enter-object` interactive shell (optional; searched 1st)              |
-| `powershell` in PATH     | `enter-object` interactive shell (optional; searched 2nd)              |
-| `cmd` in PATH            | `enter-object` interactive shell (fallback; searched last)             |
-| `powershell.exe` in PATH | `dk0.cmd` batch script - for InvokeWebRequest (optional; searched 1st) |
-| `bitsadmin` in PATH      | `dk0.cmd` batch script - for download (fallback; searched last)        |
-| `certutil` in PATH       | `dk0.cmd` batch script - verify sha256sums                             |
-
-### macOS
-
-| File                | What                                                              |
-| ------------------- | ----------------------------------------------------------------- |
-| `/usr/bin/codesign` | Executables are locally signed when `-e GLOB_PATTERN`             |
-| `/bin/sh`           | `enter-object` interactive shell unless `SHELL` envvar set        |
-| `/bin/sh`           | `dk0` shell script                                                |
-| `/usr/bin/shasum`   | `dk0` shell script                                                |
-| `/usr/bin/curl`     | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/curl`         | `dk0` shell script (optional; searched 2st)                       |
-| `/usr/bin/wget`     | `dk0` shell script (optional; searched 3st)                       |
-| `/bin/wget`         | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/mv`       | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/mv`           | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/rm`       | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/rm`           | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/uname`    | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/uname`        | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/awk`      | `dk0` shell script - to parse sha256sums (optional; searched 1st) |
-| `/bin/awk`          | `dk0` shell script (fallback; searched last)                      |
-
-### Linux/BSDs/MSYS2/Cygwin
-
-| File                 | What                                                              |
-| -------------------- | ----------------------------------------------------------------- |
-| `/bin/sh`            | `enter-object` interactive shell unless `SHELL` envvar set        |
-| `/bin/sh`            | `dk0` shell script                                                |
-| `/usr/bin/shasum`    | `dk0` shell script (optional; searched 1st)                       |
-| `/usr/bin/sha256sum` | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/curl`      | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/curl`          | `dk0` shell script (optional; searched 2st)                       |
-| `/usr/bin/wget`      | `dk0` shell script (optional; searched 3st)                       |
-| `/bin/wget`          | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/mv`        | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/mv`            | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/rm`        | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/rm`            | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/uname`     | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/uname`         | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/awk`       | `dk0` shell script - to parse sha256sums (optional; searched 1st) |
-| `/bin/awk`           | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/cygpath`   | `dk0` shell script (optional)                                     |
