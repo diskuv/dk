@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft-07/schema",
-    "id": "https://json.schemastore.org/dk-values.json",
+    "id": "https://diskuv.com/dk/schema/dk-value-1.0.json",
     "title": "JSON schema for values.json, values.json, *.values.json and *.values.jsonc build files",
     "definitions": {
         "producer": {

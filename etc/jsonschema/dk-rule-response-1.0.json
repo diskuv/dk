@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft-07/schema",
-    "id": "https://json.schemastore.org/dk-rule-response.json",
+    "id": "https://diskuv.com/dk/schema/dk-rule-response-1.0.json",
     "title": "Schema for the response of a rule function to build system commands",
     "type": "object",
     "properties": {

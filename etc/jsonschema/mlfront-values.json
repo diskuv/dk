@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft-07/schema",
     "id": "https://json.schemastore.org/mlfront-values.json",
-    "title": "Deprecated; use dk-values.json instead. JSON schema for values.json, values.json, *.values.json and *.values.jsonc build files",
+    "title": "Deprecated; use dk-value-1.0.json instead. JSON schema for values.json, values.json, *.values.json and *.values.jsonc build files",
     "definitions": {
         "producer": {
             "type": "object",
