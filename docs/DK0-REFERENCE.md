@@ -295,8 +295,12 @@ attestation, saves its `values.json` to `<workspace>/etc/dk/i`, then seeds the
 trace store (`t/c`) and lazy value pointers (`t/d`) by forcing the release's
 distributions with `--import lazy`. Only the small `*.valuestore.index` files are
 downloaded eagerly; individual value blobs are range-fetched on demand by the next
-`distribute`. If no matching release exists this is a no-op (exit 0) and the build
-runs cold.
+`distribute`.
+
+If no matching release exists, no-op (exit 0).
+
+If matching release can't be read, erases valuestore and tracestore to
+maintain future incrementality.
 
 ### Query commands
 
