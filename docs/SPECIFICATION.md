@@ -263,7 +263,7 @@ Multiple build configurations can be composed through **precommands** that are l
 ```json
 // filename: producer.values.json
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
+  "$schema": "https://diskuv.com/dk/schema/dk-value-1.0.json",
   "schema_version": { "major": 1, "minor": 0 },
   "bundles": [
     {
@@ -297,7 +297,7 @@ Multiple build configurations can be composed through **precommands** that are l
 ```json
 // filename: consumer.values.json
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
+  "$schema": "https://diskuv.com/dk/schema/dk-value-1.0.json",
   "schema_version": { "major": 1, "minor": 0 },
   "forms": [
     {
@@ -358,7 +358,7 @@ Consider the following snippet from JSON build configuration that fetches PowerS
 
 ```json
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
+  "$schema": "https://diskuv.com/dk/schema/dk-value-1.0.json",
   "schema_version": { "major": 1, "minor": 0 },
   "forms": [
     {
@@ -513,7 +513,7 @@ For example:
 
 ```json
 {
-  "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json",
+  "$schema": "https://diskuv.com/dk/schema/dk-value-1.0.json",
   "schema_version": { "major": 1, "minor": 0 },
   "bundles": [
     {
@@ -4283,7 +4283,7 @@ The output keys can be [object](#objects) keys:
 function rules.YourFreeRule(command, request)
   if command == "declareoutput" then
     return {
-      -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json",
+      -- "$schema" = "https://diskuv.com/dk/schema/dk-rule-response-1.0.json",
       declareoutput = {
         return_objects = {
           -- parse [request.user] to calculate `id` and `slots`
@@ -4303,7 +4303,7 @@ or an [asset](#assets) key:
 function rules.YourFreeRule(command, request)
   if command == "declareoutput" then
     return {
-      -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json",
+      -- "$schema" = "https://diskuv.com/dk/schema/dk-rule-response-1.0.json",
       declareoutput = {
         return_asset = {
           -- parse [request.asst] to calculate `id` and `path`
@@ -4322,7 +4322,7 @@ Static rule inputs are declared in the same `declareoutput` table:
 function rules.YourFreeRule(command, request)
   if command == "declareoutput" then
     return {
-      -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json",
+      -- "$schema" = "https://diskuv.com/dk/schema/dk-rule-response-1.0.json",
       declareoutput = {
         return_asset = {
           id = "UserLibrary_Std.A.B.UserModule.OutputAsset@1.0.0",
@@ -4601,7 +4601,7 @@ if command == "declareoutput" then
   }
 elseif command == "submit" && continue_ == "start" then
   return {
-    -- "$schema" = "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-rule-response.json",
+    -- "$schema" = "https://diskuv.com/dk/schema/dk-rule-response-1.0.json",
     submit = {
       values = {
         forms = {
