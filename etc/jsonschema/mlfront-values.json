@@ -186,6 +186,10 @@
                             }
                         ]
                     },
+                    "min_dk_version": {
+                        "description": "The minimum dk0 version required to consume this release (Android minSdk style). When absent, the release predates this marker and is treated as a legacy release.",
+                        "type": "string"
+                    },
                     "continuations": {
                         "description": "The accepted future continuations of the build keys. A continuation is a new distribution that is a successor to this distribution. Continuations are optional, but if no continuations are specified, the distribution may need to be re-registered with new build keys.",
                         "type": "object",
