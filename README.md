@@ -71,5 +71,5 @@ Those licenses include but are not limited to:
 ## Related Open Source
 
 - DkML compiler: <https://github.com/diskuv/dkml-compiler> and <https://gitlab.com/dkml/distributions/dkml>
-- MlFront: Apache 2.0 core build libraries. <https://gitlab.com/dkml/build-tools/MlFront>. Used for 3rd party, dk-compatible build systems.
-- DkZero: OSL 3.0. <https://gitlab.com/dkml/build-tools/MlFront>. Source code executable (ie. `dk0.exe`) used by `./dk0` and `./dk0.cmd`.
+- MlFront: Apache 2.0 core build libraries. <https://gitlab.com/dkml/build-tools/MlFront>. Used for 3rd party, dk0-compatible build systems.
+- DkZero: OSL 3.0. <https://gitlab.com/dkml/build-tools/MlFront>. Source code of `dk0.exe` executable used by `./dk0` and `./dk0.cmd`.
