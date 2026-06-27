@@ -11,30 +11,6 @@ generated `t/` directory removes every trace of it.
 - In this repository: [SPECIFICATION.md](docs/SPECIFICATION.md) (the formal spec) and
   [DK0-REFERENCE.md](docs/DK0-REFERENCE.md) (the `dk0` reference implementation).
 
-## Quick start
-
-Clone the project and run the sample. Works on Windows (PowerShell), macOS, and
-Linux (Linux needs `curl`):
-
-<!-- $MDX skip -->
-```console
-git clone --branch V2_5 https://github.com/diskuv/dk.git dksrc
-```
-
-<!-- $MDX skip -->
-```console
-dksrc/dk0 --20251217 -nosysinc run dksrc/samples/2025/AsciiArt.cs --delay 1000 "This is line one" "This is the last line"
-```
-
-That builds and runs an ASCII-art C# sample without installing .NET. Step-by-step
-walkthroughs are in the docs: <https://diskuv.com/dk/help/latest/>.
-
-> **macOS:** the standalone `dk0` binary is not yet code-signed, so Gatekeeper may
-> block it. If so, run
-> `xattr -d com.apple.quarantine ~/.local/share/dk0/dk0exe-2.4.*-darwin_arm64/dk0`
-> and retry. One-step native installers (winget, a signed macOS binary, and
-> `curl | sh`) are in progress.
-
 ## Commands
 
 | Command                                                  | What it does                                                   |
