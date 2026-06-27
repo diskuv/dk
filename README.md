@@ -1,4 +1,4 @@
-# dk - a parameterizable, incremental, remote-cacheable build system
+# dk - a parameterizable, incremental, remote cacheable build system
 
 You distribute source code to users. You may be a package maintainer, a contractor giving source to customers, an educator with students, etc. Getting users to *build* it is hard; not every user is a software engineer with Administrator/root access, on Linux, or comfortable with language SDKs, Docker, and nix.
 
@@ -11,16 +11,14 @@ Linux. `dk` fetches, builds, and runs the software locally or remotely.
 
 ## Commands
 
-| Command                                                  | What it does                                                   |
-| -------------------------------------------------------- | -------------------------------------------------------------- |
-| `get-object FORM -s SLOT [-m MEMBER] [-f FILE] [-d DIR]` | Build an object from a form rule into a new file or directory  |
-| `merge-object FORM -s SLOT [-d DIR]`                     | Build an object and merge its files into an existing directory |
-| `get-asset BUNDLE -p PATH [-f FILE] [-d DIR]`            | Retrieve one asset from a bundle                               |
-| `get-bundle BUNDLE [-f FILE] [-d DIR]`                   | Retrieve all assets in a bundle as one archive                 |
-| `run-function RULE ...`                                  | Run a function rule and write its object out                   |
-| `run-object FORM [-s SLOT]`                              | Run an executable built by a form rule                         |
-| `run-asset ASSET ...`                                    | Run an executable fetched from an asset                        |
-| `enter-object OBJECT -s SLOT`                            | Open an incomplete or failed object for debugging              |
+| Command                                                  | What it does                                                  |
+| -------------------------------------------------------- | ------------------------------------------------------------- |
+| `get-object FORM -s SLOT [-m MEMBER] [-f FILE] [-d DIR]` | Build an object from a form rule into a new file or directory |
+| `get-asset BUNDLE -p PATH [-f FILE] [-d DIR]`            | Retrieve one asset from a bundle                              |
+| `run-function RULE ...`                                  | Run a function rule and write its object out                  |
+| `run-object FORM [-s SLOT]`                              | Run an executable built by a form rule                        |
+| `run-asset ASSET ...`                                    | Run an executable fetched from an asset                       |
+| `remote MODULE ... COMMAND ...`                          | Run a command like `run-object` remotely                      |
 
 The full command reference and options live at <https://diskuv.com/dk/help/latest/>.
 
