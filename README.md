@@ -42,10 +42,6 @@ The full command reference and options live at <https://diskuv.com/dk/help/lates
 | Docker    | Huge set of images            | Works well on Windows              |
 | (contd.)  | Works very well in CI         | Works in CI and *during installs*  |
 
-For OCaml users, `dk` complements rather than replaces `opam` (thousands of packages;
-`dk` adds immutable storage and binary artifacts) and `dune` (watch mode and speed;
-`dk` is extensible and not tied to OCaml).
-
 ## Licenses
 
 Copyright 2023 Diskuv, Inc.
