@@ -1,11 +1,9 @@
 # dk - a parameterizable, incremental, remote-cacheable build system
 
-You distribute source code to users. You may be a package maintainer, a contractor who must give source to their customers, an educator with students, etc. Getting users to *build* it is hard; not every user is a software engineer with Administrator/root access, on Linux, or comfortable with language SDKs, Docker, or nix.
+You distribute source code to users. You may be a package maintainer, a contractor giving source to customers, an educator with students, etc. Getting users to *build* it is hard; not every user is a software engineer with Administrator/root access, on Linux, or comfortable with language SDKs, Docker, and nix.
 
 With `dk` your users clone your project and run one command on Windows, macOS or
-Linux. `dk` fetches the toolchain, builds, and runs the software - with SHA-256
-checksums and signify signatures across the supply chain - and deleting the
-generated `t/` directory removes every trace of it.
+Linux. `dk` fetches, builds, and runs the software locally or remotely.
 
 - Full guides + specification: <https://diskuv.com/dk/help/latest/>
 - In this repository: [SPECIFICATION.md](docs/SPECIFICATION.md) (the formal spec) and
