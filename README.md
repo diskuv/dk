@@ -1,4 +1,4 @@
-# dk - a parameterizable, incremental, remote cacheable build system
+# dk - a Windows-friendly, incremental, remote cacheable build system
 
 You distribute source code to users. You may be a package maintainer, a contractor giving source to customers, an educator with students, etc. Getting users to *build* it is hard; not every user is a software engineer with Administrator/root access, on Linux, or comfortable with language SDKs, Docker, and nix.
 
