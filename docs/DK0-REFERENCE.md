@@ -285,7 +285,7 @@ distribution from `VALUES.JSON` to `DIR` and discovers transitive distributions
 from its tracestores and valuestores - for local/offline workflows and tests.
 
 ```text
-restore github-l2 [HOST/]OWNER/REPO[@TAG]
+restore github-l2 [HOST/]OWNER/REPO[@TAG] [--tag-before TAG]
 ```
 
 Reuse a previous GitHub release as a lazy build cache instead of a
@@ -301,6 +301,37 @@ If no matching release exists, no-op (exit 0).
 
 If matching release can't be read, erases valuestore and tracestore to
 maintain future incrementality.
+
+#### Selecting the release with `--tag-before`
+
+`--tag-before TAG` selects the most recent release before TAG with the same `MAJOR.MINOR`. The intended usage is for a GitHub workflow to set TAG
+to the git tag it is currently building, and `restore` gets its cache
+from the release that immediately preceded it.
+
+`--tag-before` and `@TAG` are mutually exclusive.
+
+If the GitHub workflow listing is unavailable from dk0's embedded GitHub
+CLI (ie. no authentication, offline, or a `gh` error), it is
+treated as "no candidate release" and `restore` degrades to a cold build.
+
+A restore tag is `MAJOR.MINOR.TIMESTAMP`, where `TIMESTAMP` is one of
+these UTC stamp formats:
+
+| Digits | Form             | Example          |
+| ------ | ---------------- | ---------------- |
+| 8      | `YYYYMMDD`       | `20260701`       |
+| 10     | `YYYYMMDDHH`     | `2026070100`     |
+| 12     | `YYYYMMDDHHMM`   | `202607010017`   |
+| 14     | `YYYYMMDDHHMMSS` | `20260701001730` |
+
+Resolution algorithm:
+
+1. Split `TAG` into `MAJOR.MINOR` and `TIMESTAMP`.
+2. List the repository's release tags with the embedded `gh`, keeping only tags
+   of the form `MAJOR.MINOR.TIMESTAMP` with the *same* `MAJOR.MINOR` line.
+3. Compare timestamps by zero-padding each to 14 digits.
+4. Keep the candidates whose padded timestamp is strictly less than `TAG`'s, and select the greatest. If none remain, that indicates a
+   cold build (exit 0).
 
 ### Query commands
 
