@@ -2309,7 +2309,8 @@ All Lua functions behave as documented later in this specification.
 
 Care is needed so that the script completes without errors in the sandbox of the first *VALUESCAN* evaluation. The *VALUESCAN* sandbox does the following:
 
-1. `require(dependency).at(version)` will capture the name and version of the dependency, but not load the dependency.
+1. `require('Mod.X_Y_Z')` (preferred) or `require(dependency).at(version)` (deprecated)
+   will capture the name and version of the dependency, but not load the dependency.
 2. `assert(...)` and `error(...)` continue to do Lua conventional error checking
 3. `build.is_building` will return a false-y value (ie. `nil`, or `false` if the Lua implementation version is modern)
 4. All other built-in functions (ex. `print()`, `table.unpack`) are defined to return a sensible Lua value but do nothing.
@@ -2778,6 +2779,17 @@ If the `modname` is a **standard module id** (ex. `MyLibrary_Std.A.B.MyModule` -
 The section [Custom Lua Modules](#custom-lua-modules) describes how to create your own modules.
 
 As of the writing of this specification, only standard modules may be loaded.
+
+Standard modules must be required with a specific version using one of two
+equivalent forms:
+
+- **Version-encoded form** (preferred): `require('Lib_Std.Mod.X_Y_Z')` where
+  `X_Y_Z` is the semver version string with every `.` and `-` replaced by `_`.
+  Example: `require('CommonsBase_Std.Extract.0_2_0')` loads version `0.2.0`.
+  Note: the version suffix starting with a digit is valid as a `require`
+  argument string even though it is not a valid bare Lua identifier.
+- **`.at()` form** (deprecated): `require('Lib_Std.Mod').at('X.Y.Z')`.
+  Example: `require('CommonsBase_Std.Extract').at('0.2.0')`.
 
 Once imported with `require`, standard modules are enriched with constants as per
 [Lua 5.1 module() convention](https://www.lua.org/manual/5.1/manual.html#pdf-module) and
