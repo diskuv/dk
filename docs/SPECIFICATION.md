@@ -165,6 +165,7 @@
       - [request.ui.spawn](#requestuispawn)
       - [request.ui.capture](#requestuicapture)
       - [request.ui.checksum](#requestuichecksum)
+      - [request.ui.writefile](#requestuiwritefile)
       - [request.ui.signify](#requestuisignify)
       - [request.ui.sleep](#requestuisleep)
       - [request.ui.buildpubkey](#requestuibuildpubkey)
@@ -3482,7 +3483,7 @@ metadata = request.ui.checksum {
 Calculates metadata for a project-local file. The `path` field must be a
 [strictly relative](#strictly-relative-path) project path.
 
-Returns:
+On success, returns a single table:
 
 ```lua
 {
@@ -3490,6 +3491,62 @@ Returns:
   size = 123
 }
 ```
+
+If the file does not exist, the two (2) return values are `nil` and an error
+message, so a caller can map absence to
+[`request.ui.writefile`](#requestuiwritefile)'s `expected_sha256 = false`. Using
+the Lua convention `local meta = request.ui.checksum { path = ... }` treats a
+missing file as `meta == nil`.
+
+#### request.ui.writefile
+
+```lua
+request.ui.writefile {
+  path = "relative/project/file",
+  content = "file contents",
+  expected_sha256 = "e3b0c44298fc1c14..."   -- or false to require the file is absent
+}
+```
+
+Conditionally writes `content` to a project-local file. This is a
+compare-and-swap: the write succeeds only if the file's current on-disk content
+matches the caller's stated expectation, guarding against a concurrent writer
+that changed the file since the caller last inspected it.
+
+`path` must be a [strictly relative](#strictly-relative-path) project path,
+resolved against the user's project directory, the same base as
+[`request.ui.checksum`](#requestuichecksum) and
+[`request.ui.signify`](#requestuisignify).
+Missing parent directories are created. Unlike
+[`request.io.write`](#requestiowrite), which stages bytes in the rule's
+discarded working area, `request.ui.writefile` publishes into the
+project tree.
+
+The `expected_sha256` field is **required**; there is no unconditional write:
+
+- A hex SHA-256 string requires the file to currently exist with exactly that
+  SHA-256. Obtain it beforehand from [`request.ui.checksum`](#requestuichecksum).
+- The boolean `false` or the literal string `false` requires the file to not
+  currently exist (a create).
+
+`content` is written verbatim as bytes (encoded UTF-8); no newline translation
+is performed, so the caller controls line endings.
+
+The caller is expected to check the return values. Using the Lua convention
+`assert(request.ui.writefile { ... })` is sufficient. The return values are:
+
+- If the user rejected giving permission to write the file, the three (3)
+  return values are `nil`, an error message, and the string `denied`.
+- If the current file does not satisfy `expected_sha256` (it exists with a
+  different SHA-256, exists when `false` was required, or is absent when a
+  SHA-256 was required), the three (3) return values are `nil`, an error
+  message, and the string `conflict`.
+- On success, the three (3) return values are a truthy value, the
+  [strictly relative](#strictly-relative-path) project path written, and the
+  SHA-256 of the newly written content.
+- On any other failure (a `path` that is not strictly relative or escapes the
+  project, or an I/O error), the three (3) return values are `nil`, an error
+  message, and the string `error`.
 
 #### request.ui.signify
 
