@@ -218,6 +218,9 @@ zipfile.
 
 ### Distribution commands
 
+`dk0` requires that the package (a common prefix for a set of modules) is a `VendorQualifier_Unit` library id. For example, `CommonsBase_GNU.Make.Apparatus`
+is not an acceptable package for distribution but `CommonsBase_GNU` is.
+
 ```text
 prepare-version [--ci github] [--prepare-dir DIR] MAJOR.MINOR
 ```
@@ -283,6 +286,13 @@ attestation embedded is saved to `DIR/LIBRARY.values.json` (`DIR` default
 include path and the distribution libraries are referenced. `import local` saves a
 distribution from `VALUES.JSON` to `DIR` and discovers transitive distributions
 from its tracestores and valuestores - for local/offline workflows and tests.
+
+> [!NOTE]
+> Documentation and catalog rendering want to validate the attestation without the
+> cost of a full import: verify the release, but skip fetching traces and values,
+> and instead fetch the package's exported distribution scripts. The intended flags
+> are `import github-l2 --repo OWNER/REPO --no-traces --no-values --with-dist-scripts`
+> (proposed; not yet implemented).
 
 ```text
 restore github-l2 [HOST/]OWNER/REPO[@TAG] [--tag-before TAG]
