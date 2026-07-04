@@ -84,6 +84,8 @@
     - [JSON Files](#json-files)
     - [JSON Canonicalization](#json-canonicalization)
   - [Distributions](#distributions)
+    - [Distributions are sealed](#distributions-are-sealed)
+      - [Adding to the sealed set](#adding-to-the-sealed-set)
     - [Distributed Value Stores](#distributed-value-stores)
     - [OpenBSD signify keys](#openbsd-signify-keys)
     - [GitHub SLSA Level 2](#github-slsa-level-2)
@@ -2092,9 +2094,45 @@ Unfortunately, GitLab does not yet provide a [minimal level of attestation](http
 
 The build system maintains a *trust store*, with the dk OpenBSD signify key for the `CommonsBase_Std` packages as the only trusted entity by default.
 
----
+### Distributions are sealed
 
-🚧*missing docs*: describe the workflow performed by `prepare-version`, `distribute`, `combine` and `import-github-l2`. Much of the content can come from [posts/2025-10-24-overview-ci-attestations.md](posts/2025-10-24-overview-ci-attestations.md) and the `distribute.t` cram tests.
+A published distribution is **sealed**: the exact set of value versions it
+contains (its bundles, forms and objects, each at a fixed version) is
+determined when the distribution is built and is signed by the distribution's
+attestation.
+
+When a consumer imports a distribution, only the value
+versions that distribution sealed are resolvable. Requesting a module the
+imported distribution did not publish must fail. Requesting different versions
+of a module than the distribution sealed must also fail.
+
+Sealing module versions provides the following security feature:
+
+- The signify signature and
+  SLSA provenance attest the precise values the distribution was built with.
+  The attestation guarantees a consumer receives exactly the version
+  that were attested.
+- Because a consumer
+  can only build and use the value versions the trusted signer explicitly
+  attested, a compromised mirror, a tampered cache, or a later malicious build
+  cannot introduce an unpublished or substituted module into the consumer's build
+  graph.
+
+A package that already has published releases cannot have a
+module added to an existing release: the module must be introduced by
+building and publishing a new distribution version.
+
+#### Adding to the sealed set
+
+A new distribution version whose `MAJOR.MINOR` is strictly higher than the
+latest sealed release may **add** to the sealed set:
+
+- a brand-new module that no sealed release published, or
+- a strictly higher `MAJOR.MINOR` module version of an already-sealed module.
+
+Already-sealed (module, version) pairs are immutable for every version bump.
+Patch-only releases (ie. the same `MAJOR.MINOR`) must not change the
+sealed set.
 
 ### Distributed Value Stores
 
