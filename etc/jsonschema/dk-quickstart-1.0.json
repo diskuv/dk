@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "dk-quickstart-1.0",
+  "description": "Schema for a dk0 quickstart recipe. Recipes are fetched at run time from a registry; adding or updating a group does not require releasing a new dk0 binary.",
+  "type": "object",
+  "required": ["schema_version", "group", "imports", "next_steps"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "URL of this schema."
+    },
+    "schema_version": {
+      "type": "object",
+      "description": "Version of the dk-quickstart schema used by this recipe.",
+      "required": ["major", "minor"],
+      "additionalProperties": false,
+      "properties": {
+        "major": { "type": "integer" },
+        "minor": { "type": "integer" }
+      }
+    },
+    "group": {
+      "type": "string",
+      "description": "The quickstart group name (e.g. 'opam'). Must match the filename stem (<group>.quickstart.jsonc)."
+    },
+    "imports": {
+      "type": "array",
+      "description": "List of workspace imports. Each object's fields are passed verbatim as the attributes of a '%% import { ... }' directive in the generated dk.u.",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "additionalProperties": true,
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Import type. 'github-l2' fetches from a GitHub release with SLSA attestation; 'local' reads a local values.json file.",
+            "enum": ["github-l2", "local"]
+          },
+          "repo": {
+            "type": "string",
+            "description": "For type=github-l2: '[HOST/]OWNER/REPO' (host defaults to github.com)."
+          },
+          "tag": {
+            "type": "string",
+            "description": "For type=github-l2: the release tag to import. If omitted, the latest release is used."
+          },
+          "host": {
+            "type": "string",
+            "description": "For type=github-l2: the GitHub host (defaults to 'github.com')."
+          },
+          "path": {
+            "type": "string",
+            "description": "For type=local: path to the values.json file."
+          }
+        }
+      }
+    },
+    "seed_files": {
+      "type": "array",
+      "description": "Optional list of additional files to create in the workspace directory after writing dk.u.",
+      "items": {
+        "type": "object",
+        "required": ["path", "content"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Strictly relative path within the workspace directory where the file is written."
+          },
+          "content": {
+            "type": "string",
+            "description": "Text content to write to the file."
+          }
+        }
+      }
+    },
+    "next_steps": {
+      "type": "string",
+      "description": "Human-readable message printed after the workspace is initialised, telling the user what to do next."
+    }
+  }
+}

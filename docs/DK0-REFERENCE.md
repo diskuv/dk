@@ -49,6 +49,24 @@ checksums with `dk0 update`, and invalidates values with `dk0 invalidate` or
 `dk0 -x EXPRESSION`.)
 
 ```text
+quickstart GROUP [--dir DIR] [--registry URL] [--force]
+```
+
+Bootstrap a new workspace for a named quickstart group. Fetches a recipe for
+`GROUP` from the registry at runtime, writes a `dk.u` with the appropriate
+imports, then runs `dk0 update` automatically.
+
+- `--dir DIR` writes the workspace in `DIR` instead of the current directory.
+- `--registry URL` overrides the base URL for the recipe registry (default:
+  `https://diskuv.com/dk/quickstart`). The environment variable
+  `DK_QUICKSTART_REGISTRY` is a fallback checked before the built-in default.
+- `--force` overwrites an existing `dk.u` in the target directory.
+
+The registry serves `<URL>/<GROUP>.quickstart.jsonc` files in the
+[dk-quickstart-1.0](../etc/jsonschema/dk-quickstart-1.0.json) JSON schema. The
+schema is also published at `https://diskuv.com/dk/schema/dk-quickstart-1.0.json`.
+
+```text
 add [-f unifiedscript.u] github-l2 [HOST/]OWNER/REPO[@TAG]
 ```
 

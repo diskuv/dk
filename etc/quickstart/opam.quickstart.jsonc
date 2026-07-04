@@ -1,0 +1,13 @@
+{
+  "$schema": "https://diskuv.com/dk/schema/dk-quickstart-1.0.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "group": "opam",
+  "imports": [
+    {
+      "type": "github-l2",
+      "repo": "diskuv/CommonsLang_OCaml",
+      "tag": "1.0.20250101"
+    }
+  ],
+  "next_steps": "To generate a dependency lock for your opam project, run:\n  dk0 get-object CommonsLang_OCaml.Dk.OpamLock.Solve -s Release.Agnostic -f dk.opam-lock.jsonc\n\nSee https://github.com/diskuv/CommonsLang_OCaml for documentation."
+}
