@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "dk-quickstart-1.0",
+  "title": "dk-quickstart-recipe-1.0",
   "description": "Schema for a dk0 quickstart recipe. Recipes are fetched at run time from a registry; adding or updating a group does not require releasing a new dk0 binary.",
   "type": "object",
-  "required": ["schema_version", "group", "imports", "next_steps"],
+  "required": ["schema_version", "name", "imports", "next_steps"],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -20,9 +20,11 @@
         "minor": { "type": "integer" }
       }
     },
-    "group": {
+    "name": {
       "type": "string",
-      "description": "The quickstart group name (e.g. 'opam'). Must match the filename stem (<group>.quickstart.jsonc)."
+      "description": "The recipe name, matching the NAME in 'dk0 quickstart GROUP NAME' and the filename stem (<name>.quickstart.jsonc). The GROUP namespace is not stored in the recipe; it is encoded in the registry URL path.",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "maxLength": 64
     },
     "imports": {
       "type": "array",
@@ -77,7 +79,9 @@
     },
     "next_steps": {
       "type": "string",
-      "description": "Human-readable message printed after the workspace is initialised, telling the user what to do next."
+      "description": "Human-readable message printed after the workspace is initialised, telling the user what to do next. This third-party text is also rendered on diskuv.com, so HTML-significant characters ('<', '>', '&'), BIDI overrides, and invisible/control characters (other than tab, newline, carriage return) are rejected.",
+      "pattern": "^[^<>&\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f\\u007f-\\u009f\\u200b-\\u200f\\u202a-\\u202e\\u2066-\\u2069\\ufeff]*$",
+      "maxLength": 2048
     }
   }
 }

@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "dk-quickstart-group-index-1.0",
+  "description": "Schema for a dk0 quickstart group index. The index lists the recipes available within one group. Whoever owns a group publishes this file at <group-url>/index.jsonc so the diskuv.com website can enumerate the group's recipes.",
+  "type": "object",
+  "required": ["schema_version", "quickstarts"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "URL of this schema."
+    },
+    "schema_version": {
+      "type": "object",
+      "description": "Version of the dk-quickstart-group-index schema used by this index.",
+      "required": ["major", "minor"],
+      "additionalProperties": false,
+      "properties": {
+        "major": { "type": "integer" },
+        "minor": { "type": "integer" }
+      }
+    },
+    "quickstarts": {
+      "type": "array",
+      "description": "List of quickstart recipes available in this group.",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Recipe name (e.g. 'opam'), used as the NAME argument in 'dk0 quickstart GROUP NAME' and matching the stem of the corresponding <name>.quickstart.jsonc file.",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "maxLength": 64
+          },
+          "description": {
+            "type": "string",
+            "description": "Short human-readable description of what the recipe sets up. Third-party text rendered on diskuv.com, so HTML-significant characters ('<', '>', '&'), BIDI overrides, and invisible/control characters are rejected.",
+            "pattern": "^[^<>&\\u0000-\\u001f\\u007f-\\u009f\\u200b-\\u200f\\u202a-\\u202e\\u2066-\\u2069\\ufeff]*$",
+            "maxLength": 256
+          }
+        }
+      }
+    }
+  }
+}

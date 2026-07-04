@@ -3,12 +3,12 @@
   "schema_version": { "major": 1, "minor": 0 },
   "groups": [
     {
-      "name": "opam",
-      "description": "OCaml/opam dependency-lock workflow via CommonsLang_OCaml.Dk.OpamLock"
+      "name": "ocaml",
+      "description": "OCaml community quickstarts, including the opam dependency-lock workflow"
     },
     {
-      "name": "demo",
-      "description": "Trivial demo workspace with no imports (for testing the quickstart mechanism)"
+      "name": "diskuv",
+      "description": "Diskuv quickstarts, including a trivial demo for testing the quickstart mechanism"
     }
   ]
 }

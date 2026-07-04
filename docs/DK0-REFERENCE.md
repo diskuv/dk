@@ -49,22 +49,58 @@ checksums with `dk0 update`, and invalidates values with `dk0 invalidate` or
 `dk0 -x EXPRESSION`.)
 
 ```text
-quickstart GROUP [--dir DIR] [--registry URL] [--force]
+quickstart GROUP NAME [--dir DIR] [--base-registry URL]
+                      [--group-registry GROUP=URL] [--force]
 ```
 
-Bootstrap a new workspace for a named quickstart group. Fetches a recipe for
-`GROUP` from the registry at runtime, writes a `dk.u` with the appropriate
-imports, then runs `dk0 update` automatically.
+Bootstrap a new workspace from the recipe `NAME` in group `GROUP`. `GROUP` is
+the organisation namespace (e.g. `ocaml`) and `NAME` is the recipe within that
+group (e.g. `opam`). Fetches the recipe from the registry at runtime, writes a
+`dk.u` with the appropriate imports, then runs `dk0 update` automatically.
 
 - `--dir DIR` writes the workspace in `DIR` instead of the current directory.
-- `--registry URL` overrides the base URL for the recipe registry (default:
-  `https://diskuv.com/dk/quickstart`). The environment variable
-  `DK_QUICKSTART_REGISTRY` is a fallback checked before the built-in default.
+- `--base-registry URL` overrides the global base URL for the recipe registry
+  (default: `https://diskuv.com/dk/quickstart`). Recipes are fetched from
+  `<URL>/<GROUP>/<NAME>.quickstart.jsonc`. The environment variable
+  `DK_QUICKSTART_BASE_REGISTRY` is a fallback checked before the built-in
+  default. Useful for mirroring all groups without a per-group override.
+- `--group-registry GROUP=URL` points one group at its own registry. Recipes
+  for that group are fetched from `<URL>/<NAME>.quickstart.jsonc` (the group is
+  not part of the path). The environment variable `DK_QUICKSTART_<GROUP>_REGISTRY`
+  (e.g. `DK_QUICKSTART_OCAML_REGISTRY`) is the equivalent fallback. The flag can
+  be repeated for multiple groups. A group override takes priority over
+  `--base-registry` for that group.
 - `--force` overwrites an existing `dk.u` in the target directory.
 
-The registry serves `<URL>/<GROUP>.quickstart.jsonc` files in the
-[dk-quickstart-1.0](../etc/jsonschema/dk-quickstart-1.0.json) JSON schema. The
-schema is also published at `https://diskuv.com/dk/schema/dk-quickstart-1.0.json`.
+The registry serves `<NAME>.quickstart.jsonc` recipe files in the
+[dk-quickstart-recipe-1.0](../etc/jsonschema/dk-quickstart-recipe-1.0.json) JSON
+schema, published at
+`https://diskuv.com/dk/schema/dk-quickstart-recipe-1.0.json`. A registry index
+(`index.jsonc`, [dk-quickstart-index-1.0](../etc/jsonschema/dk-quickstart-index-1.0.json))
+lists the available groups, and each group publishes a group index
+(`<group>/index.jsonc`,
+[dk-quickstart-group-index-1.0](../etc/jsonschema/dk-quickstart-group-index-1.0.json))
+listing its recipes.
+
+#### Hosting a group on your own registry
+
+A group does not have to live on diskuv.com. Any organisation can host a group
+on its own registry:
+
+- Serve each recipe file at `<your-url>/<name>.quickstart.jsonc` (one level; no
+  group prefix is needed since `--group-registry` already selects the group).
+- Publish a group index at `<your-url>/index.jsonc` conforming to
+  `dk-quickstart-group-index-1.0.json` so the diskuv.com listing page can
+  enumerate your recipes.
+- Users reach your group with `--group-registry <group>=<your-url>` or by
+  setting `DK_QUICKSTART_<GROUP>_REGISTRY=<your-url>` once (e.g. in a shell
+  profile); existing commands keep working after a move.
+
+To take over a group that started on diskuv.com, host the recipes and the group
+index at your own URL, then the group's entry in the diskuv.com registry
+`index.jsonc` is updated once to advertise your `registry_url`. After that you
+add new recipes (e.g. `dune`, `rocq`) by updating your own `index.jsonc`;
+diskuv.com refreshes its listing page on its own schedule.
 
 ```text
 add [-f unifiedscript.u] github-l2 [HOST/]OWNER/REPO[@TAG]

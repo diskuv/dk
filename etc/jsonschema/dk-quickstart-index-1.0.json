@@ -30,11 +30,19 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Group name, matching the stem of the corresponding <group>.quickstart.jsonc file."
+            "description": "Group name (e.g. 'ocaml'), used as the GROUP argument in 'dk0 quickstart GROUP NAME' and as the group directory in the registry path.",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "maxLength": 64
           },
           "description": {
             "type": "string",
-            "description": "Short human-readable description of what the group sets up."
+            "description": "Short human-readable description of what the group sets up. Third-party text rendered on diskuv.com, so HTML-significant characters ('<', '>', '&'), BIDI overrides, and invisible/control characters are rejected.",
+            "pattern": "^[^<>&\\u0000-\\u001f\\u007f-\\u009f\\u200b-\\u200f\\u202a-\\u202e\\u2066-\\u2069\\ufeff]*$",
+            "maxLength": 256
+          },
+          "registry_url": {
+            "type": "string",
+            "description": "Optional base URL for a group hosted on its own registry. When present, recipes are fetched from <registry_url>/<NAME>.quickstart.jsonc and the group index from <registry_url>/index.jsonc. When absent, the group lives under the base registry at <base>/<name>/."
           }
         }
       }

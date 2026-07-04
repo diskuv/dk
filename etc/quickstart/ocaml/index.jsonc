@@ -1,0 +1,10 @@
+{
+  "$schema": "https://diskuv.com/dk/schema/dk-quickstart-group-index-1.0.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "quickstarts": [
+    {
+      "name": "opam",
+      "description": "OCaml/opam dependency-lock workflow via CommonsLang_OCaml.Dk.OpamLock"
+    }
+  ]
+}
