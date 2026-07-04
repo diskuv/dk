@@ -165,6 +165,7 @@
       - [request.ui.spawn](#requestuispawn)
       - [request.ui.capture](#requestuicapture)
       - [request.ui.checksum](#requestuichecksum)
+      - [request.ui.readfile](#requestuireadfile)
       - [request.ui.writefile](#requestuiwritefile)
       - [request.ui.signify](#requestuisignify)
       - [request.ui.sleep](#requestuisleep)
@@ -3492,11 +3493,45 @@ On success, returns a single table:
 }
 ```
 
-If the file does not exist, the two (2) return values are `nil` and an error
-message, so a caller can map absence to
+If the file does not exist, the three (3) return values are `nil`, an error
+message, and the string `absent`, so a caller can map absence to
 [`request.ui.writefile`](#requestuiwritefile)'s `expected_sha256 = false`. Using
 the Lua convention `local meta = request.ui.checksum { path = ... }` treats a
-missing file as `meta == nil`.
+missing file as `meta == nil`. On any other failure (a `path` that is not
+strictly relative or an I/O error), the three (3) return values are `nil`, an
+error message, and the string `error`.
+
+#### request.ui.readfile
+
+```lua
+content = request.ui.readfile {
+  path = "relative/project/file"
+}
+```
+
+Reads a project-local file and returns its entire contents as a string. The
+`path` field must be a [strictly relative](#strictly-relative-path) project
+path, resolved against the user's project directory, the same base as
+[`request.ui.checksum`](#requestuichecksum) and
+[`request.ui.writefile`](#requestuiwritefile), and **not** the UI rule's
+sandbox. Unlike [`request.io.read`](#requestioread), which reads the rule's
+discarded working area, `request.ui.readfile` reads the checked-in project
+tree.
+
+The contents are returned verbatim as bytes; no newline translation is
+performed.
+
+The caller is expected to check the return values. Using the Lua convention
+`assert(request.ui.readfile { ... })` is sufficient. The return values are:
+
+- On success, the single return value is the file contents as a string.
+- If the file does not exist or is a directory, the three (3) return values are
+  `nil`, an error message, and the string `absent`.
+- On any other failure (a `path` that is not strictly relative or escapes the
+  project, exceeding the size cap, or an I/O error), the three (3) return
+  values are `nil`, an error message, and the string `error`.
+
+An optional `max_bytes` field caps the number of bytes read (default 16777211).
 
 #### request.ui.writefile
 
