@@ -366,6 +366,29 @@ If no matching release exists, no-op (exit 0).
 If matching release can't be read, erases valuestore and tracestore to
 maintain future incrementality.
 
+#### HOWTO: Change the producer (attestation) repository
+
+Background: The GitHub repository that `prepare-version --ci github` prints in its
+`gh api .../environments/dk-distribution` and `gh secret set --repo ...` commands
+comes from `producer.github_slsa_v1_l2.repository` (or the SLSA L3 caller repository if set)
+in your latest existing `etc/dk/d/*.dist.json`. This same field is the SLSA
+attestation subject a consumer verifies at `import-github-l2`.
+
+To point a new version's keys, secrets, and attestation at a different
+repository, the safe sequence is:
+
+1. Temporarily edit `"repository"` in the **latest existing** version's
+   `etc/dk/d/<prev>.dist.json` to the new repository.
+2. Run `prepare-version --ci github <new MAJOR.MINOR>`. The generated
+   `<new>.dist.json`, workflow, and printed `gh` commands now target the new
+   repository.
+3. Revert the `"repository"` change in the old `<prev>.dist.json` so it
+   still reflects how that already published version was attested.
+
+When the consumer uses dk0 it will verify the SLSA attestation
+against the previous repository, so consumers must be told to update their
+`import` expressions in `dk.u` to the new repository for the new version.
+
 #### Selecting the release with `--tag-before`
 
 `--tag-before TAG` selects the most recent release before TAG with the same `MAJOR.MINOR`. The intended usage is for a GitHub workflow to set TAG
@@ -594,7 +617,7 @@ In the workspace, asset libraries are implicitly trusted, so no
 > The precise behavior depends on which unified script the `unified.asset`
 > declaration is in and how it was reached:
 >
-> | When `unified.asset` runs in… | What happens |
+> | When `unified.asset` runs in... | What happens |
 > | --- | --- |
 > | A unified test or distribution script that is *not* the workspace script | The asset's file or directory contents are always read to calculate its size and checksum. |
 > | The workspace script | If the existing output block under the asset's command already contains size and checksum, those values are reused. Otherwise the asset is always read to recompute them. |
