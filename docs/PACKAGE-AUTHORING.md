@@ -242,14 +242,10 @@ first mirror.
 To see your package documentation in the [dk0 Reference Implementation], run:
 
 ```shell
-dk0 query manifest --manifest --outfile docs.md
+dk0 query manifest --markdown --outfile docs.md
 ```
 
 That reads your `dk.u` and `dist/*.u` scripts and creates a single Markdown document.
-
-> [!NOTE]
-> `query manifest` is a proposed addition to the [dk0 Reference Implementation]
-> (today `dk0 query` only lists the trace store).
 
 ## Publishing
 

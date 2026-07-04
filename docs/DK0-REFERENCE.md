@@ -416,6 +416,29 @@ query
 *(Unstable; options will change.)* List all build traces in the trace store. Exit
 2 when there is an error reading the trace store.
 
+```text
+query manifest [-f WORKSPACE.u] [--markdown] [--outfile FILE] [--version VERSION]
+```
+
+Read a dk package's local working tree (`dk.u` workspace script and `dist/*.u`
+or `dist-*.u/run.u` distribution scripts) and emit a `dk.package-manifest/2`
+JSON document to stdout (or `--outfile FILE`).
+
+| Flag | Meaning |
+| --- | --- |
+| `-f WORKSPACE.u` | Explicit workspace file path. Defaults to nearest ancestor `dk.u` with a `## Workspace` section. |
+| `--markdown` | Emit Markdown (overview + body) instead of JSON. |
+| `--outfile FILE` | Write output to `FILE` instead of stdout. |
+| `--version VERSION` | Set the `package.version` field. Required unless the package provides one. |
+
+The emitted JSON has the `dk.package-manifest/2` schema with fields:
+`schema`, `package`, `licenses`, `platforms`, `assets`, `modules`,
+`dependencies`, `overview`, `body`. Module kinds are inferred from the
+distribution scripts: `apparatus` (workspace assets via `% unified.asset`),
+`bundle` (title contains `.Bundle@`), `scriptmodule` (has `run` or
+`post-object` commands), and `object` (has `\dk.object` metadata or
+`get-object` commands in the expected output).
+
 ## Options
 
 ### Command options
