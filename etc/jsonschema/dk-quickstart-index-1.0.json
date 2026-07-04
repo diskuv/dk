@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "dk-quickstart-index-1.0",
+  "description": "Schema for a dk0 quickstart registry index. The index lists all available quickstart groups with human-readable descriptions.",
+  "type": "object",
+  "required": ["schema_version", "groups"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "URL of this schema."
+    },
+    "schema_version": {
+      "type": "object",
+      "description": "Version of the dk-quickstart-index schema used by this index.",
+      "required": ["major", "minor"],
+      "additionalProperties": false,
+      "properties": {
+        "major": { "type": "integer" },
+        "minor": { "type": "integer" }
+      }
+    },
+    "groups": {
+      "type": "array",
+      "description": "List of quickstart groups available in this registry.",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Group name, matching the stem of the corresponding <group>.quickstart.jsonc file."
+          },
+          "description": {
+            "type": "string",
+            "description": "Short human-readable description of what the group sets up."
+          }
+        }
+      }
+    }
+  }
+}
