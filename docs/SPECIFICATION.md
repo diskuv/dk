@@ -232,6 +232,8 @@
     - [Task Model](#task-model)
     - [Trace Store](#trace-store)
     - [Value Store](#value-store)
+      - [Value Id Formulas](#value-id-formulas)
+      - [Object Ids Hide Build Non-Determinism](#object-ids-hide-build-non-determinism)
       - [v - parsed values.json AST](#v---parsed-valuesjson-ast)
       - [i - index file](#i---index-file)
       - [BLD - Build Metadata](#bld---build-metadata)
@@ -242,6 +244,8 @@
       - [VCI - Values Canonical ID](#vci---values-canonical-id)
       - [VCK - Values Checksum](#vck---values-checksum)
       - [FRM - Form](#frm---form)
+      - [ACI - Asset Canonical Id](#aci---asset-canonical-id)
+      - [BCI - Bundle Canonical Id](#bci---bundle-canonical-id)
   - [Evaluation](#evaluation)
 
 ## Introduction
@@ -5302,7 +5306,7 @@ is stored in the trace, and the potentially large value is stored in the value s
 
 ### Value Store
 
-The value store is a key-value table stored on disk.
+The value store is a key value table stored on disk.
 
 The **value type** is a single letter that categorizes what the value is:
 
@@ -5328,17 +5332,19 @@ Any value types with `(cache)` are stored in the local cache rather than the val
 The build system requests data in the form of a build key, and a [build task](#task-model) is responsible for resolving the build key into a value that will be persisted in the value store.
 The value will be of a type that depends on the build key:
 
-| Build Key                             | Value Type | Id Material                                | Value File                                                               |
-| ------------------------------------- | ---------- | ------------------------------------------ | ------------------------------------------------------------------------ |
-| [asset](#assets)                      | `a`        | [P256](#p256---sha256-of-asset)            | contents of asset                                                        |
-|                                       | `i`        | [Z256](#z256---sha256-of-zip-archive-file) | [index](#i---index-file)                                                 |
-| [bundle](#bundles)                    | `b`        | [Z256](#z256---sha256-of-zip-archive-file) | contents of zip archive file                                             |
-| [object](#objects)                    | `o`        | [FRM](#frm---form)                         | output of form function                                                  |
-|                                       |            | `::<SLOT>`                                 |                                                                          |
-|                                       | `i`        | [Z256](#z256---sha256-of-zip-archive-file) | [index file](#i---index-file)                                            |
-| [V256](#v256---sha256-of-values-file) | `j`        | [V256](#v256---sha256-of-values-file)      | dos2unix json `{schema_version:,forms:,bundles:}`                        |
-| [V256](#v256---sha256-of-values-file) | `l`        | [V256](#v256---sha256-of-values-file)      | dos2unix lua script                                                      |
-| [VCI](#vci---values-canonical-id)     | `v`        | [VCK](#vck---values-checksum)              | [parsed `{schema_version:,forms:,bundles:}`](#v---parsed-valuesjson-ast) |
+| Build Key                             | Value Type | Id Material                           | Value File                                                               |
+| ------------------------------------- | ---------- | ------------------------------------- | ------------------------------------------------------------------------ |
+| [asset](#assets)                      | `a`        | [ACI](#aci---asset-canonical-id)      | contents of asset                                                        |
+|                                       | `i`        | digest of the `a` id (prefix swap)    | [index](#i---index-file)                                                 |
+| [bundle](#bundles)                    | `b`        | [BCI](#bci---bundle-canonical-id)     | contents of zip archive file                                             |
+| [object](#objects)                    | `o`        | [FRM](#frm---form)                    | output of form function                                                  |
+|                                       |            | `::<SLOT>`                            |                                                                          |
+|                                       | `i`        | digest of the `o` id (prefix swap)    | [index file](#i---index-file)                                            |
+| [V256](#v256---sha256-of-values-file) | `j`        | [V256](#v256---sha256-of-values-file) | dos2unix json `{schema_version:,forms:,bundles:}`                        |
+| [V256](#v256---sha256-of-values-file) | `l`        | [V256](#v256---sha256-of-values-file) | dos2unix lua script                                                      |
+| [VCI](#vci---values-canonical-id)     | `v`        | [VCK](#vck---values-checksum)         | [parsed `{schema_version:,forms:,bundles:}`](#v---parsed-valuesjson-ast) |
+
+The exact construction of each value id is given in [Value Id Formulas](#value-id-formulas).
 
 To allow byte range optimized reading of zip files, special rules are in place when fetching assets and objects:
 
@@ -5353,11 +5359,143 @@ However, for the `Optional (zip)` value to provide a benefit, the value URL must
 
 ¹: Currently only value store assets of [distributed value stores](#distributed-value-stores) are known to be zip files. Other asset files are [1-to-1 with their SHA256 identifiers](#asset-identity), and so can't be deterministically known to be zip files.
 
-The *value id* is used to lookup or persist into the value store. It is calculated as follows, where `||` is concatenation:
+The *value id* is used to lookup or persist into the value store.
+
+#### Value Id Formulas
+
+Every value id is an explicit function of its inputs. The helper functions,
+where `||` is byte concatenation:
 
 ```text
-ValueType || Base32( SHA256( IdMaterial ) )
+SHA256_HEX(s)   = lowercase hex encoding of the SHA-256 digest of the bytes s
+BLAKE2B_RAW(s)  = raw (unencoded) BLAKE2b-256 digest of the bytes s
+BASE32L(hex)    = RFC 4648 base32 of the hex-decoded bytes, using the lowercase
+                  alphabet "abcdefghijklmnopqrstuvwxyz234567", without "="
+                  padding. A 32-byte digest encodes to 52 characters.
+BASE32L_RAW(b)  = the same base32 encoding applied directly to raw bytes b
+CANON_JSON(x)   = the canonical compact JSON serialization of x: object fields
+                  in the field order given in the definitions below, no
+                  insignificant whitespace
+STRIP_CR(s)     = s with every carriage return (ASCII 13) byte removed
 ```
+
+Common inputs:
+
+```text
+VCI       = SHA256_HEX( canonical JSON of the parsed values file CST )
+            (see "VCI - Values Canonical ID"; the values file is stripped of
+             carriage returns before parsing)
+MODVER    = MODULE "@" VERSION      -- no build metadata; see "BLD"
+SLOT      = the value shell slot name, e.g. "Release.Windows_x86_64"
+```
+
+The formulas, per value type:
+
+```text
+-- o : object (the output of one form, for one slot)
+FRM  = SHA256_HEX( VCI || "|form|" || MODVER )
+o_id = "o" || BASE32L( SHA256_HEX( FRM || "::" || SLOT ) )
+
+-- a : asset (one file of a bundle)
+ACI_JSON = CANON_JSON( { checksum = { blake2b256?, sha1?, sha256? },
+                         indexes?  = [ per-index records ],
+                         path      = FILE_PATH,
+                         size      = FILE_SIZE } )
+ACI  = SHA256_HEX( ACI_JSON )
+a_id = "a" || BASE32L( SHA256_HEX( ACI ) )
+
+-- b : bundle (the zip of all files of a bundle)
+BCI_JSON = CANON_JSON( { assets = [ ACI_JSON of each file, sorted by path ],
+                         id     = MODVER } )
+BCI  = SHA256_HEX( BCI_JSON )
+b_id = "b" || BASE32L( SHA256_HEX( BCI ) )
+
+-- i : index file over a zip-shaped object or asset payload
+i_id = "i" || suffix          where ("o" || suffix) = o_id
+                              or    ("a" || suffix) = a_id
+
+-- j : values.json file        l : values.lua file
+V256 = SHA256_HEX( STRIP_CR( values file bytes ) )
+j_id = "j" || BASE32L( V256 )
+l_id = "l" || BASE32L( V256 )
+
+-- v : parsed values AST (local cache only)
+VCK  = BLAKE2B_RAW( VCI || EXEC_ABI || TARGET_ABI || AST_SCHEMA_ID || CT )
+v_id = "v" || BASE32L_RAW( VCK )
+       where EXEC_ABI/TARGET_ABI are the ABI names of the current process,
+             AST_SCHEMA_ID is a generated fingerprint of the AST type
+             definitions (changes whenever the AST types change), and
+             CT is the "CT - Compatibility Tag"
+
+-- c : built-in constant        x : execution streams
+c_id = "c" || BASE32L( SHA256_HEX( constant bytes ) )
+x_id = "x" || BASE32L( SHA256_HEX( encoded execution streams ) )
+
+-- k : key with a lazy value    s : source file (debugging)
+k_id = "k" || KEY_ID
+s_id = "s" || BASE32L( SHA256_HEX( source file bytes ) )
+```
+
+Two structural properties follow directly from the formulas:
+
+1. **Asset and bundle ids pin exact bytes.** `ACI_JSON` embeds the content
+   checksum and byte size of the file, so two assets with different bytes can
+   never share an `a` id, and `BCI_JSON` inherits that property for `b` ids.
+2. **Object ids do not hash the produced output.** `o_id` is derived only from
+   the *recipe address*: the values file (via `VCI`), the form's module version and
+   the slot. The bytes that the form's function writes into the output
+   directory appear nowhere in the formula. The consequences are described in
+   the next section.
+
+#### Object Ids Hide Build Non-Determinism
+
+An object id is a *recipe address* (the values file (via `VCI`), the form's
+module version and the slot). Whichever build of the recipe
+completes first has its output bytes persisted into the value store
+under that id; every later build of the same recipe reuses (or republishes)
+bytes under the same id, even if a fresh build would have produced different
+bytes.
+
+So object ids are designed to hide non-determinism present in
+the underlying build. For a distribution script that means the use of
+`$ get-object ...` will output a `\dk.object(...)` that contains a stable,
+build-agnostic `value-id`.
+
+An early version of the `CommonsLang_OCaml.DkML@4.14.3 -s Release.Windows_x86_64`
+OCaml compiler object, for example, had independent builds with the same
+value id. Even so, unique working directories were a primary source of non-determinism;
+751 of the 2032 files inside any two newly built objects differed byte-for-byte:
+
+- 671 OCaml typed-tree files (`.cmt`, `.cmti`) differed by a handful of bytes
+  each: the OCaml compiler embeds the absolute source path, which contains the
+  build system's ephemeral per-invocation working directory (for example
+  `t\p\476\7vpw\...\src-ocaml\` in one build and `t\p\484\2vog\...\src-ocaml\`
+  in the other).
+- Linked binaries (`.exe`, `.dll`, `.lib`, `.obj`), which were generated by the
+  MSVC compiler, differed because paths are recorded in debug information.
+- Bytecode archives (`.cma`, `.cmo`) also differed.
+
+> [!TIP]
+> Nothing prevents the object recipe from setting the compiler options and
+> environment to be bit-for-bit reproducible.
+> For example, the OCaml compiler accepts
+> a BUILD_PATH_PREFIX_MAP environment variable to adjust build paths, and
+> the MSVC compiler accepts `/PDBALTPATH`, `/Brepro`, and other
+> deterministic flags. And that **bit-for-bit reproducibility can be enforced**
+> with distribution scripts that run a checksum object with
+> a subshell that gets the object (`get-object`):
+>
+> ```sh
+> $ run-object
+> >   CommonsBase_Std.Coreutils@0.8.0 -s Release.execution_abi
+> >   -m ./coreutils.exe -f coreutils.exe -e '*'
+> >   --
+> > sha256sum -b
+> > $(get-object OBJECT -s SLOT -m MEMBER -f YOUR_FILENAME)
+> \test(pass)
+> \dk.target(abi: "Windows_x86_64")[SHA256 (YOUR_FILENAME) = 66d5f22136245be5e5c0aa3aba4cdc795d0c7315c23a5ccef3322fd008ac007d
+> ]
+> ```
 
 #### v - parsed values.json AST
 
@@ -5447,6 +5585,11 @@ The hex-encoded SHA-256 of the zip archive generated from either:
 - the output directory of a form
 - the bundle directory for one or more bundle files
 
+Z256 is a checksum of the stored *value file* (the payload).
+In particular, the Z256 of an object
+payload is not stable across rebuilds of the same object id (see
+[Object Ids Hide Build Non-Determinism](#object-ids-hide-build-non-determinism)).
+
 #### CT - Compatibility Tag
 
 A string with the format `oc<OCAMLVERSION>_ws<OCAMLWORDSIZE>`.
@@ -5459,17 +5602,64 @@ The hex-encoded SHA256 of the `values.json` *canonicalized* JSON, stripped of al
 
 #### VCK - Values Checksum
 
-The hex-encoded SHA256 of the marshalled AST of the carriage-return-stripped `values.json`.
+The raw BLAKE2b-256 digest that keys the local cache of the parsed values AST:
+
+```text
+VCK = BLAKE2B_RAW( VCI || EXEC_ABI || TARGET_ABI || AST_SCHEMA_ID || CT )
+```
+
+where `EXEC_ABI` and `TARGET_ABI` are the ABI names of the current process,
+`AST_SCHEMA_ID` is a generated fingerprint of the AST type definitions (it
+changes whenever the AST types change, protecting the marshalled AST from
+schema drift), and `CT` is the [compatibility tag](#ct---compatibility-tag).
 
 The stripping of carriage returns occurs before the CST and AST parsing, so that any serialized AST uses the byte positions of the Unix-encoded JSON.
 
 #### FRM - Form
 
-The concatenation of:
+The hex-encoded SHA-256 of the concatenation of:
 
 - [VCI](#vci---values-canonical-id) for the `values.json` defining the form
 - `|form|`
-- `MODULE@VERSION`
+- `MODULE@VERSION` (without [build metadata](#bld---build-metadata))
+
+That is, using the helpers of [Value Id Formulas](#value-id-formulas):
+
+```text
+FRM = SHA256_HEX( VCI || "|form|" || MODULE "@" VERSION )
+```
+
+#### ACI - Asset Canonical Id
+
+The hex-encoded SHA-256 of the canonical compact JSON of one bundle file's
+identity fields, in the field order:
+
+```text
+ACI_JSON = { "checksum": { "blake2b256"?, "sha1"?, "sha256"? },
+             "indexes"?: [ per-index records ],
+             "path": FILE_PATH,
+             "size": FILE_SIZE }
+ACI      = SHA256_HEX( CANON_JSON( ACI_JSON ) )
+```
+
+The `checksum` object contains whichever of the three checksums the bundle
+declares. The [P256](#p256---sha256-of-asset) content checksum and the byte
+size are both inside `ACI_JSON`, so an asset id pins the exact bytes of the
+asset.
+
+#### BCI - Bundle Canonical Id
+
+The hex-encoded SHA-256 of the canonical compact JSON of the bundle
+definition:
+
+```text
+BCI_JSON = { "assets": [ ACI_JSON of each file, sorted by path ],
+             "id": MODULE "@" VERSION }
+BCI      = SHA256_HEX( CANON_JSON( BCI_JSON ) )
+```
+
+The origins/mirrors listing is deliberately excluded so that re-mirroring a
+bundle does not change its identity.
 
 ## Evaluation
 
