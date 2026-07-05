@@ -190,9 +190,9 @@ important information about the build is placed back into the `.dk.u` file:
 Bundle a small CMake project in the hello-src/ directory
 using the Lua command "unified.asset"
   % unified.asset { name="HelloWorld", dir="hello-src" }
-  \dk.asset\;
+  'asset'
   '790'
-  { 'sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d' }
+  'sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d'
 
 Run the "run-function" shell command to build HelloWorld
 with CMake
@@ -204,10 +204,17 @@ with CMake
   > outexe[]=bin/hello
   \test(pass)
   \dk.object(abi: "Release.Windows_x86", value-id: "oey3zcwqi3bodhkdahazywr4ikitvpthpwsveinsixe3lq7zhcfxq")\;
+
+Fetch a published asset with the "get-asset" shell command
+  $ get-asset CommonsBase_Build.Apparatus.HelloWorld@0.1.0 -p hw -f ${RUNTIME}/hw
+  \test(pass)
+  \dk.asset(path: "hw", value-id: "aey3zcwqi3bodhkdahazywr4ikitvpthpwsveinsixe3lq7zhcfxq", byteSize: "790")\;
 ```
 
-Notice the odd-looking `\dk.asset\;` and `\test(pass)\dk.object(...)\;` text in the output. These
-are response metadata that [renderers] can use to make pretty output.
+Notice the odd-looking `\test(pass)\dk.object(...)\;` and `\test(pass)\dk.asset(...)\;`
+text in the output. These are response metadata that [renderers] can use to make pretty
+output. A `\dk.object` records a built object's `abi` and `value-id`; a `\dk.asset` records
+a fetched asset's `path`, `value-id`, and `byteSize`.
 
 ## Syntax
 
@@ -941,9 +948,9 @@ Unified scripts satisfies the three requirements.
 Bundle a small CMake project in the hello-src/ directory
 using the Lua command "unified.asset"
   % unified.asset { name="HelloWorld", dir="hello-src" }
-  \dk.asset
+  'asset'
   '790'
-  { 'sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d' }
+  'sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d'
 
 Run the "run-function" shell command to build HelloWorld
 with CMake
@@ -953,7 +960,8 @@ with CMake
   > bargs[]=--config bargs[]=Release
   > iargs[]=--config iargs[]=Release
   > outexe[]=bin/hello
-  \pass\;object:oor4kvp5hp7wtwtzfba2ayfhpanwjyhxnsryjssyr5nxt5zslkycq:OurCMake_F_Build.Xhmcju4uhjoh54b35k3iobgdz4q@1.0.0
+  \test(pass)
+  \dk.object(abi: "Release.Windows_x86", value-id: "oey3zcwqi3bodhkdahazywr4ikitvpthpwsveinsixe3lq7zhcfxq")\;
 ```
 
 ## Main Document Kinds
