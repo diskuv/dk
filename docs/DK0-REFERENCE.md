@@ -454,13 +454,26 @@ JSON document to stdout (or `--outfile FILE`).
 | `--outfile FILE` | Write output to `FILE` instead of stdout. |
 | `--version VERSION` | Set the `package.version` field. Required unless the package provides one. |
 
-The emitted JSON has the `dk.package-manifest/2` schema with fields:
-`schema`, `package`, `licenses`, `platforms`, `assets`, `modules`,
-`dependencies`, `overview`, `body`. Module kinds are inferred from the
-distribution scripts: `apparatus` (workspace assets via `% unified.asset`),
-`bundle` (title contains `.Bundle@`), `scriptmodule` (has `run` or
-`post-object` commands), and `object` (has `\dk.object` metadata or
-`get-object` commands in the expected output).
+The `schema` field identifies the manifest format and its version, currently
+`dk.package-manifest/3` (version 3). The version number increases whenever the
+JSON structure changes in a way that could break a reader; a tool can check it
+before reading. The top-level fields are `schema`, `package`, `licenses`,
+`platforms`, `assets`, `modules`, `dependencies`, `overview`, and `body`.
+Module kinds are inferred from the distribution scripts: `apparatus` (workspace
+assets via `% unified.asset`), `bundle` (title contains `.Bundle@`),
+`scriptmodule` (has `run` or `post-object` commands), and `object` (has
+`\dk.object` metadata or `get-object` commands in the expected output).
+
+Each module has a `builds` list (one entry per `\dk.object`, with `platform`,
+`abi` and `valueId`) and, when the module runs `get-asset`, an `assets` list
+(one entry per `\dk.asset`, with `path`, `valueId` and `byteSize`). Object
+builds have no size. Object payload bytes are not deterministic across builds,
+which rules out size as a stable identifier. Asset value blobs are content
+addressed and keep a deterministic `byteSize`.
+
+Version 3 changed the format from version 2 by removing `byteSize` from each
+build and adding the per-module `assets` list. Manifests produced before this
+release use version 2 and still carry build sizes.
 
 ## Options
 
