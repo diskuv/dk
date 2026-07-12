@@ -9,6 +9,27 @@ Linux. `dk` fetches, builds, and runs the software locally or remotely.
 - In this repository: [SPECIFICATION.md](docs/SPECIFICATION.md) (the formal spec) and
   [DK0-REFERENCE.md](docs/DK0-REFERENCE.md) (the `dk0` reference implementation).
 
+## Install
+
+Install the `dk0` reference implementation with one command.
+
+Linux and macOS:
+
+```sh
+curl -fsSL https://diskuv.com/dk/install.sh | sh
+```
+
+Windows:
+
+```powershell
+irm https://diskuv.com/dk/install.ps1 | iex
+```
+
+Each installer downloads the single-file `dk0` executable for your platform,
+verifies its SHA-256, and puts it on your `PATH`. To run `dk` inside a checked-out
+project without a system install, use the project's `dk0` / `dk0.cmd` wrapper
+scripts instead.
+
 ## Commands
 
 | Command                                                  | What it does                                                  |
