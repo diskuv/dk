@@ -3506,10 +3506,19 @@ program will have its environment modified by `envmods` in accordance to
 
 The default `cwd` is the user's working directory.
 
-The default maximum captured size is 16777211 bytes for each stream. On process
-start failure, the three return values are `nil`, an error message, and the
-string `error`. On captured output limit failure, the three return values are
-`nil`, an error message, and the string `output-limit`.
+Like [request.ui.spawn](#requestuispawn), `request.ui.capture` runs a program, so
+build system implementations are required to have the same security controls: an
+interactive trust confirmation that fails closed (no program is run) when the
+rule is not trusted or there is no interactive terminal. A `program` given as a
+bare name (such as `gh`) is resolved through the `PATH` environment variable, and
+the trust prompt warns about this.
+
+The default maximum captured size is 16777211 bytes for each stream. If the user
+rejected giving permission to run the program, the three return values are `nil`,
+an error message, and the string `denied`. On process start failure, the three
+return values are `nil`, an error message, and the string `error`. On captured
+output limit failure, the three return values are `nil`, an error message, and
+the string `output-limit`.
 
 On process completion, one table is returned:
 

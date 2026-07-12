@@ -715,7 +715,8 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 | Key rotation via signed continuations, monotonic per `MAJOR.MINOR` | `prepare-version`, `distribute` (author); every import (consumer) | Yes. `SecPackageRegistry.characterize` runs on both sides. A producer key is imported once and never overwritten (no key may reclaim an established `MAJOR.MINOR`); a new `MAJOR.MINOR` must carry the continuation key a trusted prior release signed; a release below the latest imported release is rejected (`restore` falls back to a cold build). |
 | Vendor-key trust root and deny-by-default acceptance | every import | Yes. Trust anchors, in order: the built-in dk signify key for `CommonsBase_Std`, locally prepared keys in `etc/dk/d`, previously imported releases (the import directory `etc/dk/i` plus the local trust records in `etc/dk/trust`), and the documented `--trust-local-package` escape hatch. Any other producer key gets an interactive accept/deny prompt that defaults to deny and denies at end of input, so CI fails closed. Transitive distributions recovered from a directly imported release are verified (signatures and rotation consistency) before their content-pinned acceptance, and never anchor a directly imported release's rotation. |
 | Value-store integrity of Marshal-ed ASTs | build / `get-object` path | Yes. A SHA-256 prefix guards each Marshal-ed AST and is signify-signed with a per-workspace build key (`SECURITY.md`). |
-| Rule-permission consent for `spawn` / `writefile` | `request.ui.*` (`BuildRequestUi`) | Yes. Deny-by-default interactive prompt; fails closed with no TTY; `--dangerously-trust-all` bypasses. |
+| Rule-permission consent for `spawn` / `capture` / `writefile` | `request.ui.*` (`BuildRequestUi`) | Yes. Deny-by-default interactive prompt before running a program (`request.ui.spawn`, `request.ui.capture`) or writing a file (`request.ui.writefile`); fails closed with no TTY. Answering `[a]ll` trusts only the answering rule for the rest of the process, not every rule; the process-wide `--dangerously-trust-all` is a separate command-line escape hatch. The prompt warns when a program is a bare name resolved through `PATH`. |
+| Windows executable-search hardening | `dk0` process startup (`Shell.ml`) | Yes. On Windows `dk0` sets `NoDefaultCurrentDirectoryInExePath`, removing the current directory from the executable search for every program it spawns — rule spawns, precommands, function commands and subshells — so a program named by a bare name is found only through `PATH`, never from an executable dropped into the working directory. |
 | Build-state exclusion from globs | `request.ui.glob` (`BuildRequestUi`) | Yes. The signify keys directory (holding `build.sec`), the data directory and the cache directory are never enumerated, so a rule cannot route `build.sec` or other build state into a content-addressed bundle. |
 | `signify` primitive (keygen / sign / verify / checksum lists) | `signify -G` / `-S` / `-V` / `-C` | The OpenBSD signify implementation (`MlFront_Signify`), including `-C` verification of a signed SHA256/SHA512 checksum list against its files. |
 
@@ -733,6 +734,11 @@ keys" sections; the value-store protections are in `SECURITY.md`.
   local file); the signify signature, rotation, and acceptance controls above are
   its distribution-integrity control.
 - **Rule permissions are deny-by-default** with an interactive accept prompt.
+  Every rule action that runs a program (`request.ui.spawn`,
+  `request.ui.capture`) or writes a file (`request.ui.writefile`) is prompted;
+  answering `[a]ll` grants further actions for that rule only, and a program
+  given as a bare name is flagged as `PATH`-resolved (with the current directory
+  excluded from the search on Windows).
 
 ### Built-in trust root
 
