@@ -480,10 +480,11 @@ JSON document to stdout (or `--outfile FILE`).
 
 `query manifest` performs no distribution verification by design: it reads the
 local working tree so authors can preview a manifest before any release exists,
-and it logs an UNVERIFIED warning to standard error on every run. A consumer
-that renders its output (for example a package catalog) must obtain integrity
-separately from the verified `import github-l2` path (see the Security
-section).
+and it logs an UNVERIFIED warning to standard error on every run. There is no
+verified manifest command yet (the proposed `import github-l2` flags below
+would provide one); a consumer that renders manifest output (for example a
+package catalog) must verify the release itself through `import github-l2`
+(see the Security section).
 
 | Flag | Meaning |
 | --- | --- |
@@ -732,6 +733,37 @@ keys" sections; the value-store protections are in `SECURITY.md`.
   local file); the signify signature, rotation, and acceptance controls above are
   its distribution-integrity control.
 - **Rule permissions are deny-by-default** with an interactive accept prompt.
+
+### Built-in trust root
+
+`dk0` embeds OpenBSD signify **public** keys for exactly one package:
+`CommonsBase_Std`, in `SecConsumerTrust.builtin_root_keys` (currently the 2.6
+line key, fingerprint `f012f39422d61ed2`, and the 2.5 line key, fingerprint
+`9aea567fb12f73b0`). This implements the [Specification]'s trust store, which
+names the dk signify key for the `CommonsBase_Std` packages as the only
+trusted entity by default.
+
+The keys are embedded because deny-by-default enforcement needs a starting
+anchor. Nearly every dk workspace bootstraps by importing `CommonsBase_Std`
+(coreutils, 7zip, toybox, ...), and a fresh consumer - a first-time user or a
+CI runner - has no previously imported releases, no locally prepared keys, and
+no terminal to answer an accept/deny prompt. Without the embedded root, every
+first import would fail closed or teach users to reach for
+`--trust-local-package`, hollowing out the deny-by-default model. Only this
+one package's keys are embedded - not every `Commons*` key - to keep the
+curated, code-reviewed trust surface minimal: every other producer anchors
+through the signed continuation chains of imported releases, an explicit
+`--trust-local-package`, or an interactive acceptance.
+
+Newer `CommonsBase_Std` lines chain from the embedded keys through the signed
+continuations of imported releases (2.5 signs the 2.6 and 3.0 keys, and so
+on), so rotation within the reachable chain needs no code change. A release
+only carries the chain it links transitively, though, so a fresh import of the
+latest release can outrun an old root (this is how the 2.6 key earned its
+entry). The network-gated `trust-root.t` test imports the latest
+`dkpkg/CommonsBase_Std` release into an anchorless workspace; when it fails,
+`builtin_root_keys` must gain the current line's key, taken from the signed
+continuation of an attested prior release.
 
 ### Gaps
 
