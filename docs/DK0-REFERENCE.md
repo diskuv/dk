@@ -660,6 +660,60 @@ In the workspace, asset libraries are implicitly trusted, so no
   pass the exact argument vector to a subshell/remote engine).
 - `dk0` prompts the user and asks for confirmation before running a program.
 
+## Security
+
+This section documents the controls that protect a *distribution* (a signed,
+released build) and the trust decisions `dk0` makes when it imports or builds one.
+The underlying model is in the [Specification] "Attestations" and "OpenBSD signify
+keys" sections; the value-store protections are in `SECURITY.md`.
+
+### Controls and entry points
+
+| Control | Entry point | Enforced on consumption |
+| --- | --- | --- |
+| GitHub SLSA Level 2 attestation | `import github-l2`, `restore github-l2` | Yes. The release `values.json` is verified with `gh attestation verify` against the Sigstore trusted root, scoped to `-R OWNER/REPO`; a failed verification is fatal. |
+| OpenBSD signify signing of a distribution | `prepare-version` (key generation); `distribute` and `combine` (signing) | No (producer side only). |
+| Key rotation via signed continuations, monotonic per `MAJOR.MINOR` | `prepare-version`, `distribute` | No (enforced only over the local `etc/dk/d` keys while authoring). |
+| Value-store integrity of Marshal-ed ASTs | build / `get-object` path | Yes. A SHA-256 prefix guards each Marshal-ed AST and is signify-signed with a per-workspace build key (`SECURITY.md`). |
+| Rule-permission consent for `spawn` / `writefile` | `request.ui.*` (`BuildRequestUi`) | Yes. Deny-by-default interactive prompt; fails closed with no TTY; `--dangerously-trust-all` bypasses. |
+| `signify` primitive (keygen / sign / verify) | `signify -G` / `-S` / `-V` | The OpenBSD signify implementation (`MlFront_Signify`). |
+
+### Trust model
+
+- **Attestation is required.** `dk0` rejects assets and objects produced without a
+  trusted attestation. Two sources are recognized: a human OpenBSD signify
+  signature, or GitHub Actions SLSA Level 2/3.
+- **The enforced trust anchor is Sigstore plus the named repository.**
+  `import github-l2` trusts any release carrying a valid GitHub/Sigstore attestation
+  for the `OWNER/REPO` on the command line; it is not narrowed to a specific vendor
+  signing key in code.
+- **Rule permissions are deny-by-default** with an interactive accept prompt.
+
+### Gaps
+
+The signify-based *vendor identity* and *rotation* model is specified and
+implemented on the producer side, but is **not enforced on consumption**. Until
+these are closed, the SLSA Level 2 attestation is the only enforced distribution
+control. Tracked for implementation:
+
+1. Consumer-side signify verification is absent: an imported distribution's
+   `producer.openbsd_signify` signature is parsed and stored but never verified
+   (`ShellImportGH2` performs no signify check; `SecDist` discards the field).
+2. The signed continuation chain is not verified on import, and the monotonic
+   rotation rule (no lower-versioned key may claim a `MAJOR.MINOR`; continuations
+   are imported once and never overwritten) runs only in `prepare-version` /
+   `distribute`, not on imported releases.
+3. There is no curated vendor-key trust root. `--trust-local-package` loads
+   distributions even when their signatures cannot be verified, and distributions
+   transitively referenced by a trusted one are auto-accepted.
+4. `verify_checksums` is a TODO stub (`Signify.ml`); GitHub SLSA Level 3 is accepted
+   as a field but not verified.
+5. `query manifest` performs no verification: it reads the local working tree, so a
+   consumer that renders its output (for example a package catalog) must obtain
+   integrity from `import` separately.
+6. There are no negative tests for a forged distribution signature, a lower-key
+   reclaim, or an untrusted producer being rejected on import.
+
 ## Bootstrap scripts
 
 The reference implementation is a single-file executable.
