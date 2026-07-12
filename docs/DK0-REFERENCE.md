@@ -253,13 +253,19 @@ e.g. `GitHub@0.1.0` ⇒ `CommonsBase_Remote.GitHub@0.1.0`, `BuildBuddy.Cloud@0.1
 ### Utility commands
 
 ```text
+signify -C [-q] -p pubkey [-x sigfile] -m checksums [file ...]
 signify -G [-c comment] -p pubkey -s seckey
 signify -S [-x sigfile] -s seckey -m message
 signify -V [-q] [-p pubkey] [-x sigfile] -m message
 ```
 
 Create and verify cryptographic signatures: `-G` generates a key pair, `-S` signs
-a message, `-V` verifies a message against a signature.
+a message, `-V` verifies a message against a signature, and `-C` verifies a signed
+checksum list and then the checksum of each file (all listed files when none are
+given). Unlike OpenBSD signify, `-C` takes the checksum list as a separate `-m`
+file with a detached `-x` signature (no `-e` embedded signatures); the list may be
+in BSD `sha256(1)` format (`SHA256 (FILE) = HEX`) or coreutils `sha256sum(1)`
+format (`HEX  FILE`), with SHA256 and SHA512 checksums supported.
 
 ```text
 zip ZIPFILE[.zip] [SRCFILE...]
@@ -340,6 +346,19 @@ attestation embedded is saved to `DIR/LIBRARY.values.json` (`DIR` default
 include path and the distribution libraries are referenced. `import local` saves a
 distribution from `VALUES.JSON` to `DIR` and discovers transitive distributions
 from its tracestores and valuestores - for local/offline workflows and tests.
+
+Both commands (and `restore github-l2` and `remote-result import`) also enforce
+the consumer-side signify trust model (see the Security section): embedded
+signify signatures must verify against the release's `producer.openbsd_signify`
+public key, the monotonic key-rotation rules hold against the releases already
+imported in `DIR` and the local trust records in `<workspace>/etc/dk/trust`,
+and a producer key with no trust anchor (the built-in dk vendor root, a locally
+prepared key in `etc/dk/d`, a signed continuation chain, or
+`--trust-local-package`) is denied unless interactively accepted. The prompt
+denies at end of input, so unattended CI fails closed; pass
+`--trust-local-package LIBRARY` to accept a known producer without a prompt.
+`import local` records each accepted release in `etc/dk/trust` so later imports
+can anchor on it.
 
 > [!NOTE]
 > Documentation and catalog rendering want to validate the attestation without the
@@ -447,6 +466,11 @@ Read a dk package's local working tree (`dk.u` workspace script and `dist/*.u`
 or `dist-*.u/run.u` distribution scripts) and emit a `dk.package-manifest/2`
 JSON document to stdout (or `--outfile FILE`).
 
+`query manifest` performs no distribution verification by design: it reads the
+local working tree so authors can preview a manifest before any release exists.
+A consumer that renders its output (for example a package catalog) must obtain
+integrity separately from the verified `import` path (see the Security section).
+
 | Flag | Meaning |
 | --- | --- |
 | `-f WORKSPACE.u` | Explicit workspace file path. Defaults to nearest ancestor `dk.u` with a `## Workspace` section. |
@@ -532,7 +556,7 @@ run: dk0 -t "${{ github.event.head_commit.timestamp }}" ...
 
 - `--integrity none|existence|checksum` - verify the local value store against the trace store. `none` is fastest but can't tell if values are evicted; `existence` checks for the existence of values (fetching from a remote value store if present); `checksum` is slowest, skips any value read without a constructive-trace entry, and removes it if permitted [default: existence].
 - `--random-seed SEED` - seed the RNG for operations needing randomness (e.g. signing build files). Highly insecure but allows reproducible trace/value stores; if unset, a seed is generated from system entropy.
-- `--trust-local-package PACKAGE_ID` - allow loading distributions from `PACKAGE_ID` even if their signatures cannot be verified. Repeatable.
+- `--trust-local-package PACKAGE_ID` - allow loading local distributions from `PACKAGE_ID`, and accept `PACKAGE_ID`'s producer key on import without the interactive accept/deny prompt. Repeatable. This is the documented escape hatch for unattended imports; it never overrides signature verification or the key-rotation rules.
 - `--dangerously-trust-all` - skip all trust prompts and allow every privileged operation. Don't do it.
 - `--keys-env ENV_PREFIX` - use `<ENV_PREFIX>_PUBKEY` and `<ENV_PREFIX>_SECKEY` as the build public/secret key (lines may be separated with pipes or newlines).
 - `--keys-dir DIR` - directory for the `build.pub`/`build.sec` keys [default: `<workspace>/t/k`, or `<xdg config>/dk` with `--global`].
@@ -672,47 +696,44 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 | Control | Entry point | Enforced on consumption |
 | --- | --- | --- |
 | GitHub SLSA Level 2 attestation | `import github-l2`, `restore github-l2` | Yes. The release `values.json` is verified with `gh attestation verify` against the Sigstore trusted root, scoped to `-R OWNER/REPO`; a failed verification is fatal. |
-| OpenBSD signify signing of a distribution | `prepare-version` (key generation); `distribute` and `combine` (signing) | No (producer side only). |
-| Key rotation via signed continuations, monotonic per `MAJOR.MINOR` | `prepare-version`, `distribute` | No (enforced only over the local `etc/dk/d` keys while authoring). |
+| OpenBSD signify signing of a distribution | `prepare-version` (key generation); `distribute` and `combine` (signing); every import (verification) | Yes. On `import github-l2`, `import local`, `restore github-l2` and `remote-result import`, the signed continuations must verify against the `producer.openbsd_signify` public key, and a `build.attestation.openbsd_signify` signature (when present) must verify over the canonical build payload (`ThunkDist.canonical_build_payload_id`). A present-but-invalid signature is fatal (`SecConsumerTrust`). |
+| Key rotation via signed continuations, monotonic per `MAJOR.MINOR` | `prepare-version`, `distribute` (author); every import (consumer) | Yes. `SecPackageRegistry.characterize` runs on both sides. A producer key is imported once and never overwritten (no key may reclaim an established `MAJOR.MINOR`); a new `MAJOR.MINOR` must carry the continuation key a trusted prior release signed; a release below the latest imported release is rejected (`restore` falls back to a cold build). |
+| Vendor-key trust root and deny-by-default acceptance | every import | Yes. Trust anchors, in order: the built-in dk signify key for `CommonsBase_Std`, locally prepared keys in `etc/dk/d`, previously imported releases (the import directory `etc/dk/i` plus the local trust records in `etc/dk/trust`), and the documented `--trust-local-package` escape hatch. Any other producer key gets an interactive accept/deny prompt that defaults to deny and denies at end of input, so CI fails closed. Transitive distributions recovered from a directly imported release are verified (signatures and rotation consistency) before their content-pinned acceptance, and never anchor a directly imported release's rotation. |
 | Value-store integrity of Marshal-ed ASTs | build / `get-object` path | Yes. A SHA-256 prefix guards each Marshal-ed AST and is signify-signed with a per-workspace build key (`SECURITY.md`). |
 | Rule-permission consent for `spawn` / `writefile` | `request.ui.*` (`BuildRequestUi`) | Yes. Deny-by-default interactive prompt; fails closed with no TTY; `--dangerously-trust-all` bypasses. |
-| `signify` primitive (keygen / sign / verify) | `signify -G` / `-S` / `-V` | The OpenBSD signify implementation (`MlFront_Signify`). |
+| `signify` primitive (keygen / sign / verify / checksum lists) | `signify -G` / `-S` / `-V` / `-C` | The OpenBSD signify implementation (`MlFront_Signify`), including `-C` verification of a signed SHA256/SHA512 checksum list against its files. |
 
 ### Trust model
 
 - **Attestation is required.** `dk0` rejects assets and objects produced without a
   trusted attestation. Two sources are recognized: a human OpenBSD signify
   signature, or GitHub Actions SLSA Level 2/3.
-- **The enforced trust anchor is Sigstore plus the named repository.**
-  `import github-l2` trusts any release carrying a valid GitHub/Sigstore attestation
-  for the `OWNER/REPO` on the command line; it is not narrowed to a specific vendor
-  signing key in code.
+- **`import github-l2` verifies two anchors.** The release must carry a valid
+  GitHub/Sigstore attestation for the `OWNER/REPO` on the command line, and its
+  producer signify key must anchor to the built-in dk vendor root, a locally
+  prepared key, a trusted continuation chain, `--trust-local-package`, or an
+  interactive acceptance (deny by default).
+- **`import local` has no transport attestation by design** (the user names a
+  local file); the signify signature, rotation, and acceptance controls above are
+  its distribution-integrity control.
 - **Rule permissions are deny-by-default** with an interactive accept prompt.
 
 ### Gaps
 
-The signify-based *vendor identity* and *rotation* model is specified and
-implemented on the producer side, but is **not enforced on consumption**. Until
-these are closed, the SLSA Level 2 attestation is the only enforced distribution
-control. Tracked for implementation:
+The consumer-side gaps that the controls above close were found by Opus 4.8 with
+Claude Code on 2026-07-11, and were closed the same day. Still tracked for
+implementation:
 
-1. Consumer-side signify verification is absent: an imported distribution's
-   `producer.openbsd_signify` signature is parsed and stored but never verified
-   (`ShellImportGH2` performs no signify check; `SecDist` discards the field).
-2. The signed continuation chain is not verified on import, and the monotonic
-   rotation rule (no lower-versioned key may claim a `MAJOR.MINOR`; continuations
-   are imported once and never overwritten) runs only in `prepare-version` /
-   `distribute`, not on imported releases.
-3. There is no curated vendor-key trust root. `--trust-local-package` loads
-   distributions even when their signatures cannot be verified, and distributions
-   transitively referenced by a trusted one are auto-accepted.
-4. `verify_checksums` is a TODO stub (`Signify.ml`); GitHub SLSA Level 3 is accepted
-   as a field but not verified.
-5. `query manifest` performs no verification: it reads the local working tree, so a
-   consumer that renders its output (for example a package catalog) must obtain
-   integrity from `import` separately.
-6. There are no negative tests for a forged distribution signature, a lower-key
-   reclaim, or an untrusted producer being rejected on import.
+1. `distribute` does not yet produce the producer's
+   `build.attestation.openbsd_signify` signature over the canonical build payload
+   (`ThunkDist.canonical_build_payload_id`); releases publish an empty anchor.
+   Consumers already verify that signature whenever it is present.
+2. GitHub SLSA Level 3 is not verified. A release carrying a non-empty
+   `github_slsa_v1_l3` attestation document is explicitly rejected on import
+   instead of being accepted unverified.
+3. `query manifest` performs no verification by design: it reads the local working
+   tree for authoring and preview. A consumer that renders its output (for example
+   a package catalog) must obtain integrity from `import` separately.
 
 ## Bootstrap scripts
 
