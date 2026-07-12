@@ -736,12 +736,9 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 
 ### Built-in trust root
 
-`dk0` embeds OpenBSD signify **public** keys for exactly one package:
-`CommonsBase_Std`, in `SecConsumerTrust.builtin_root_keys`. The current line is
-the 2.6 key (fingerprint `f012f39422d61ed2`). The 2.5 key (fingerprint
-`9aea567fb12f73b0`) is a transitional entry, kept only while the `import-gh-l2.t`
-network test still pins a 2.5 release; it is removed once the cram tests and the
-dkpkg packages move to 2.6 references. This implements the [Specification]'s
+`dk0` embeds the OpenBSD signify **public** key for exactly one package:
+`CommonsBase_Std`, in `SecConsumerTrust.builtin_root_keys` (the current 2.6 line
+key, fingerprint `f012f39422d61ed2`). This implements the [Specification]'s
 trust store, which names the dk signify key for the `CommonsBase_Std` packages
 as the only trusted entity by default.
 
