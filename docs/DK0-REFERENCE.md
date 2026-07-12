@@ -323,6 +323,13 @@ Objects and rules are public interfaces, so only their transitive values are
 included; bundle files and assets are included only if an object or rule
 transitively has `get-asset`/`get-bundle` precommands.
 
+When the build key is the distribution producer key (for example the
+distribution key that the dk-distribute CI action passes with `--keys-env`),
+`distribute` also signs the distribution's canonical build payload and records
+the signature as `build.attestation.openbsd_signify`. A local build's
+auto-generated workspace key is not the producer key, so the attestation anchor
+stays empty there.
+
 ```text
 combine [--origin-name <origin-name>] [--mirror <origin-url>]*
 ```
@@ -332,6 +339,11 @@ Combine `dk-dist/*.values.json` from many `distribute PART` runs into a single
 `origin-url` become the bundle mirrors for the origin named `local`, which is then
 renamed to `origin-name`. (`dk0 combine` can also adjust the mirrors permanently
 during distribution.)
+
+The combined build differs from every part, so combining clears the per-part
+build signatures. With the global `--keys-env` option, `combine` re-signs each
+combined distribution's canonical build payload with the distribution key; the
+key must be the distribution's `producer.openbsd_signify` key.
 
 ```text
 import github-l2 -R,--repo [HOST/]OWNER/REPO [--tag TAG] [--outdir DIR]
@@ -696,7 +708,7 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 | Control | Entry point | Enforced on consumption |
 | --- | --- | --- |
 | GitHub SLSA Level 2 attestation | `import github-l2`, `restore github-l2` | Yes. The release `values.json` is verified with `gh attestation verify` against the Sigstore trusted root, scoped to `-R OWNER/REPO`; a failed verification is fatal. |
-| OpenBSD signify signing of a distribution | `prepare-version` (key generation); `distribute` and `combine` (signing); every import (verification) | Yes. On `import github-l2`, `import local`, `restore github-l2` and `remote-result import`, the signed continuations must verify against the `producer.openbsd_signify` public key, and a `build.attestation.openbsd_signify` signature (when present) must verify over the canonical build payload (`ThunkDist.canonical_build_payload_id`). A present-but-invalid signature is fatal (`SecConsumerTrust`). |
+| OpenBSD signify signing of a distribution | `prepare-version` (key generation); `distribute` and `combine` (signing); every import (verification) | Yes. `distribute` signs the canonical build payload (`ThunkDist.canonical_build_payload_id`) when the build key is the distribution producer key (the dk-distribute CI action passes it with `--keys-env`), and `combine` re-signs the combined distribution the same way. On `import github-l2`, `import local`, `restore github-l2` and `remote-result import`, the signed continuations must verify against the `producer.openbsd_signify` public key, and the `build.attestation.openbsd_signify` signature (when present) must verify over the canonical build payload. A present-but-invalid signature is fatal (`SecConsumerTrust`). |
 | Key rotation via signed continuations, monotonic per `MAJOR.MINOR` | `prepare-version`, `distribute` (author); every import (consumer) | Yes. `SecPackageRegistry.characterize` runs on both sides. A producer key is imported once and never overwritten (no key may reclaim an established `MAJOR.MINOR`); a new `MAJOR.MINOR` must carry the continuation key a trusted prior release signed; a release below the latest imported release is rejected (`restore` falls back to a cold build). |
 | Vendor-key trust root and deny-by-default acceptance | every import | Yes. Trust anchors, in order: the built-in dk signify key for `CommonsBase_Std`, locally prepared keys in `etc/dk/d`, previously imported releases (the import directory `etc/dk/i` plus the local trust records in `etc/dk/trust`), and the documented `--trust-local-package` escape hatch. Any other producer key gets an interactive accept/deny prompt that defaults to deny and denies at end of input, so CI fails closed. Transitive distributions recovered from a directly imported release are verified (signatures and rotation consistency) before their content-pinned acceptance, and never anchor a directly imported release's rotation. |
 | Value-store integrity of Marshal-ed ASTs | build / `get-object` path | Yes. A SHA-256 prefix guards each Marshal-ed AST and is signify-signed with a per-workspace build key (`SECURITY.md`). |
@@ -721,19 +733,19 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 ### Gaps
 
 The consumer-side gaps that the controls above close were found by Opus 4.8 with
-Claude Code on 2026-07-11, and were closed the same day. Still tracked for
-implementation:
+Claude Code on 2026-07-11, and were closed the same day. Still tracked:
 
-1. `distribute` does not yet produce the producer's
-   `build.attestation.openbsd_signify` signature over the canonical build payload
-   (`ThunkDist.canonical_build_payload_id`); releases publish an empty anchor.
-   Consumers already verify that signature whenever it is present.
-2. GitHub SLSA Level 3 is not verified. A release carrying a non-empty
+1. GitHub SLSA Level 3 is not verified. A release carrying a non-empty
    `github_slsa_v1_l3` attestation document is explicitly rejected on import
    instead of being accepted unverified.
-3. `query manifest` performs no verification by design: it reads the local working
+2. `query manifest` performs no verification by design: it reads the local working
    tree for authoring and preview. A consumer that renders its output (for example
    a package catalog) must obtain integrity from `import` separately.
+3. A release produced without the distribution key in the build environment (for
+   example a local `distribute` with the auto-generated workspace key) publishes
+   an empty `build.attestation.openbsd_signify` anchor; consumers accept the
+   absence and rely on the other controls. Requiring the signature is a possible
+   future hardening once every producer signs.
 
 ## Bootstrap scripts
 
