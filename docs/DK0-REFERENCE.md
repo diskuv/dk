@@ -479,9 +479,11 @@ or `dist-*.u/run.u` distribution scripts) and emit a `dk.package-manifest/2`
 JSON document to stdout (or `--outfile FILE`).
 
 `query manifest` performs no distribution verification by design: it reads the
-local working tree so authors can preview a manifest before any release exists.
-A consumer that renders its output (for example a package catalog) must obtain
-integrity separately from the verified `import` path (see the Security section).
+local working tree so authors can preview a manifest before any release exists,
+and it logs an UNVERIFIED warning to standard error on every run. A consumer
+that renders its output (for example a package catalog) must obtain integrity
+separately from the verified `import github-l2` path (see the Security
+section).
 
 | Flag | Meaning |
 | --- | --- |
