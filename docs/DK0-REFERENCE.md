@@ -372,12 +372,22 @@ denies at end of input, so unattended CI fails closed; pass
 `import local` records each accepted release in `etc/dk/trust` so later imports
 can anchor on it.
 
-> [!NOTE]
-> Documentation and catalog rendering want to validate the attestation without the
-> cost of a full import: verify the release, but skip fetching traces and values,
-> and instead fetch the package's exported distribution scripts. The intended flags
-> are `import github-l2 --repo OWNER/REPO --no-traces --no-values --with-dist-scripts`
-> (proposed; not yet implemented).
+```text
+inspect github-l2 -R,--repo [HOST/]OWNER/REPO [--tag TAG] [--outdir DIR]
+inspect local --path VALUES.JSON [--outdir DIR]
+```
+
+`inspect` is for documentation and catalog rendering that wants to validate the
+release without the cost of a full import. It verifies a release exactly like the
+matching `import` command - GitHub SLSA Level 2 attestation for `github-l2`, then
+the consumer-side signify trust model above - but instead of importing the package
+payload it fetches **only** the small distmeta valuestore and extracts the
+exported distribution scripts (the `*.values.lua` script modules) to
+`DIR/LIBRARY.VERSION.dist-scripts/`. No package values or traces are imported and
+there is no transitive discovery. `inspect local` is the offline counterpart:
+same trust checks, same extraction, against a local `VALUES.JSON`. (`query
+manifest` renders a manifest from the *unverified* local working tree; `inspect`
+is the verified-release path to the same distribution-script data.)
 
 ```text
 restore github-l2 [HOST/]OWNER/REPO[@TAG] [--tag-before TAG]
@@ -480,11 +490,11 @@ JSON document to stdout (or `--outfile FILE`).
 
 `query manifest` performs no distribution verification by design: it reads the
 local working tree so authors can preview a manifest before any release exists,
-and it logs an UNVERIFIED warning to standard error on every run. There is no
-verified manifest command yet (the proposed `import github-l2` flags below
-would provide one); a consumer that renders manifest output (for example a
-package catalog) must verify the release itself through `import github-l2`
-(see the Security section).
+and it logs an UNVERIFIED warning to standard error on every run. A consumer that
+renders manifest output (for example a package catalog) should instead use
+`inspect github-l2` (above), which verifies the release and extracts the exported
+distribution scripts without downloading the package payload, or verify the
+release itself through `import github-l2` (see the Security section).
 
 | Flag | Meaning |
 | --- | --- |
@@ -710,7 +720,7 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 
 | Control | Entry point | Enforced on consumption |
 | --- | --- | --- |
-| GitHub SLSA Level 2 attestation | `import github-l2`, `restore github-l2` | Yes. The release `values.json` is verified with `gh attestation verify` against the Sigstore trusted root, scoped to `-R OWNER/REPO`; a failed verification is fatal. |
+| GitHub SLSA Level 2 attestation | `import github-l2`, `inspect github-l2`, `restore github-l2` | Yes. The release `values.json` is verified with `gh attestation verify` against the Sigstore trusted root, scoped to `-R OWNER/REPO`; a failed verification is fatal. |
 | OpenBSD signify signing of a distribution | `prepare-version` (key generation); `distribute` and `combine` (signing); every import (verification) | Yes. `distribute` signs the canonical build payload (`ThunkDist.canonical_build_payload_id`) when the build key is the distribution producer key (the dk-distribute CI action passes it with `--keys-env`), and `combine` re-signs the combined distribution the same way. On `import github-l2`, `import local`, `restore github-l2` and `remote-result import`, the signed continuations must verify against the `producer.openbsd_signify` public key, and the `build.attestation.openbsd_signify` signature (when present) must verify over the canonical build payload. A present-but-invalid signature is fatal (`SecConsumerTrust`). |
 | Key rotation via signed continuations, monotonic per `MAJOR.MINOR` | `prepare-version`, `distribute` (author); every import (consumer) | Yes. `SecPackageRegistry.characterize` runs on both sides. A producer key is imported once and never overwritten (no key may reclaim an established `MAJOR.MINOR`); a new `MAJOR.MINOR` must carry the continuation key a trusted prior release signed; a release below the latest imported release is rejected (`restore` falls back to a cold build). |
 | Vendor-key trust root and deny-by-default acceptance | every import | Yes. Trust anchors, in order: the built-in dk signify key for `CommonsBase_Std`, locally prepared keys in `etc/dk/d`, previously imported releases (the import directory `etc/dk/i` plus the local trust records in `etc/dk/trust`), and the documented `--trust-local-package` escape hatch. Any other producer key gets an interactive accept/deny prompt that defaults to deny and denies at end of input, so CI fails closed. Transitive distributions recovered from a directly imported release are verified (signatures and rotation consistency) before their content-pinned acceptance, and never anchor a directly imported release's rotation. |
@@ -733,6 +743,11 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 - **`import local` has no transport attestation by design** (the user names a
   local file); the signify signature, rotation, and acceptance controls above are
   its distribution-integrity control.
+- **`inspect` runs the same verification as `import`** (SLSA Level 2 for
+  `github-l2`, then the signify / rotation / deny-by-default acceptance controls)
+  but extracts only the exported distribution scripts from the distmeta valuestore
+  and never imports the package payload. It is the verified-release source for
+  catalog and manifest rendering.
 - **Rule permissions are deny-by-default** with an interactive accept prompt.
   Every rule action that runs a program (`request.ui.spawn`,
   `request.ui.capture`) or writes a file (`request.ui.writefile`) is prompted;
@@ -780,7 +795,9 @@ Claude Code on 2026-07-11, and were closed the same day. Still tracked:
    instead of being accepted unverified.
 2. `query manifest` performs no verification by design: it reads the local working
    tree for authoring and preview. A consumer that renders its output (for example
-   a package catalog) must obtain integrity from `import` separately.
+   a package catalog) should obtain the same distribution-script data from a
+   verified release with `inspect github-l2`, or obtain integrity from `import`
+   separately.
 3. A release produced without the distribution key in the build environment (for
    example a local `distribute` with the auto-generated workspace key) publishes
    an empty `build.attestation.openbsd_signify` anchor; consumers accept the
