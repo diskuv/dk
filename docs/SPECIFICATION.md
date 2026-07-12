@@ -3337,6 +3337,13 @@ The `patterns` and `excludes` are glob expressions on project files that conform
 
 `excludes` exclude *files* after they have been found by `patterns`.
 
+Regardless of `patterns`, `request.ui.glob` never enumerates `dk0`'s build-state
+directories: the signify keys directory (which holds the secret `build.sec`), the
+data directory and the cache directory (`t/k`, `t/d` and `t/c` at their default
+locations, or their configured locations). This ensures a rule can never route
+`build.sec` or other build state into a content-addressed bundle. A user-supplied
+`patterns`/`excludes` cannot override this exclusion.
+
 The same project file may belong to different assets.
 
 The specification does not mandate how change detection is implemented. An implementation may scan all the globs at startup, or cache the globbed files and only update them when an invalidation is given to the build system.
