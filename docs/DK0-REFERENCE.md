@@ -823,6 +823,22 @@ Claude Code on 2026-07-11, and were closed the same day. Still tracked:
    absence and rely on the other controls. Requiring the signature is a possible
    future hardening once every producer signs.
 
+## Operational guide
+
+Day-to-day guidance for people who publish dk packages. Each entry is written
+for package publishers, not build-system developers.
+
+### Keep the releases that newer releases build on
+
+Each new release of a package is usually built on top of the release before
+it, and it reuses pieces of that earlier release. People who add or update
+your package can therefore still need the earlier release to be published.
+
++ Publish a new release before deleting any earlier release. A fresh release
+  stands on its own and ends the need for the releases before it.
++ dk0 warns and continues when it meets a deleted earlier release. The
+  warning goes away after the next release.
+
 ## Bootstrap scripts
 
 The reference implementation is a single-file executable.
