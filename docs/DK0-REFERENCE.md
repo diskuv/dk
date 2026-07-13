@@ -310,7 +310,10 @@ increasing patch of `MAJOR.MINOR` without build or prerelease components. The
 to `dk-dist/` with `./PART.distmeta.valuestore.zip` + `./PART.package.valuestore.zip`
 (metadata and package payload valuestores) and `./PART.distmeta.TAG.tracestore` +
 `./PART.package.TAG.tracestore` (tracestores; `TAG` is the compatibility tag, e.g.
-`oc414_wd64` - see `--print-platform-ids`). Overwrites
+`oc414_wd64` - see `--print-platform-ids`). A `./PART.distmeta.manifest.zip`
+seals the manifest inputs (the workspace `dk.u`, this part's distribution
+script, and any `etc/dk/v/*.values.jsonc`) as a bundle asset for the
+`inspect` command; importers never fetch it. Overwrites
 `distributions[].producer.application` with the current `dk0` version or
 `--with-producer-version`.
 
@@ -377,17 +380,29 @@ inspect github-l2 -R,--repo [HOST/]OWNER/REPO [--tag TAG] [--outdir DIR]
 inspect local --path VALUES.JSON [--outdir DIR]
 ```
 
-`inspect` is for documentation and catalog rendering that wants to validate the
-release without the cost of a full import. It verifies a release exactly like the
-matching `import` command - GitHub SLSA Level 2 attestation for `github-l2`, then
-the consumer-side signify trust model above - but instead of importing the package
-payload it fetches **only** the small distmeta valuestore and extracts the
-exported distribution scripts (the `*.values.lua` script modules) to
-`DIR/LIBRARY.VERSION.dist-scripts/`. No package values or traces are imported and
-there is no transitive discovery. `inspect local` is the offline counterpart:
-same trust checks, same extraction, against a local `VALUES.JSON`. (`query
-manifest` renders a manifest from the *unverified* local working tree; `inspect`
-is the verified-release path to the same distribution-script data.)
+`inspect` is for documentation, catalog rendering, and audit that wants to
+validate a release without the cost of a full import. It verifies a release
+exactly like the matching `import` command - GitHub SLSA Level 2 attestation for
+`github-l2`, then the consumer-side signify trust model above - but instead of
+importing the package payload it fetches **only** the small distmeta and
+extracts two artifact classes into separate directories:
+
+- `DIR/LIBRARY.VERSION.script-modules/` - the exported `*.values.lua` script
+  modules: the executable rules the release will run on a consumer machine,
+  extracted so a reviewer can audit them before trusting the release.
+- `DIR/LIBRARY.VERSION.dist-scripts/` - the distribution scripts the producer
+  sealed at `distribute` time (the workspace `dk.u`, the `dist/*.u`
+  distribution scripts, and any `etc/dk/v/*.values.jsonc`), laid out like the
+  package working tree. Render a **verified manifest** from them with
+  `dk0 query manifest -f DIR/LIBRARY.VERSION.dist-scripts/dk.u`.
+
+No package values or traces are imported and there is no transitive discovery.
+`inspect local` is the offline counterpart: same trust checks, same extraction,
+against a local `VALUES.JSON`. A release produced by a dk0 that predates
+manifest sealing extracts zero distribution scripts (the script modules still
+extract). The sealed files are listed in the release bundle with checksums, so
+they are covered by the signed build payload and the release attestation;
+importers never fetch the manifest zip.
 
 ```text
 restore github-l2 [HOST/]OWNER/REPO[@TAG] [--tag-before TAG]
@@ -491,10 +506,11 @@ JSON document to stdout (or `--outfile FILE`).
 `query manifest` performs no distribution verification by design: it reads the
 local working tree so authors can preview a manifest before any release exists,
 and it logs an UNVERIFIED warning to standard error on every run. A consumer that
-renders manifest output (for example a package catalog) should instead use
-`inspect github-l2` (above), which verifies the release and extracts the exported
-distribution scripts without downloading the package payload, or verify the
-release itself through `import github-l2` (see the Security section).
+renders manifest output (for example a package catalog) should render from
+verified release data instead: `dk0 inspect github-l2 -R OWNER/REPO` verifies the
+release and extracts its sealed distribution scripts, then
+`dk0 query manifest -f <outdir>/LIBRARY.VERSION.dist-scripts/dk.u` renders the
+manifest from that extracted tree (see the `inspect` command above).
 
 | Flag | Meaning |
 | --- | --- |
@@ -745,8 +761,9 @@ keys" sections; the value-store protections are in `SECURITY.md`.
   its distribution-integrity control.
 - **`inspect` runs the same verification as `import`** (SLSA Level 2 for
   `github-l2`, then the signify / rotation / deny-by-default acceptance controls)
-  but extracts only the exported distribution scripts from the distmeta valuestore
-  and never imports the package payload. It is the verified-release source for
+  but never imports the package payload: it extracts the exported script modules
+  (for audit) and the sealed distribution scripts (for verified manifest
+  rendering) from the small distmeta only. It is the verified-release source for
   catalog and manifest rendering.
 - **Rule permissions are deny-by-default** with an interactive accept prompt.
   Every rule action that runs a program (`request.ui.spawn`,
@@ -795,9 +812,11 @@ Claude Code on 2026-07-11, and were closed the same day. Still tracked:
    instead of being accepted unverified.
 2. `query manifest` performs no verification by design: it reads the local working
    tree for authoring and preview. A consumer that renders its output (for example
-   a package catalog) should obtain the same distribution-script data from a
-   verified release with `inspect github-l2`, or obtain integrity from `import`
-   separately.
+   a package catalog) should render from verified release data instead:
+   `inspect github-l2` extracts the sealed distribution scripts, and
+   `query manifest -f <outdir>/LIBRARY.VERSION.dist-scripts/dk.u` renders them.
+   Releases produced before dk0 sealed manifest inputs cannot be rendered this
+   way until re-released.
 3. A release produced without the distribution key in the build environment (for
    example a local `distribute` with the auto-generated workspace key) publishes
    an empty `build.attestation.openbsd_signify` anchor; consumers accept the
