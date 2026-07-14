@@ -540,6 +540,58 @@ Version 3 changed the format from version 2 by removing `byteSize` from each
 build and adding the per-module `assets` list. Manifests produced before this
 release use version 2 and still carry build sizes.
 
+### Maintenance commands
+
+```text
+gc [info] [--prune-older-than DAYS] [--dry-run] [--empty-roots-ok]
+```
+
+Garbage collect the workspace stores with mark and sweep. Every top-level
+dk0 command records the key it demands as a root in the root store
+(`t/d/rts.1`, the same framed segment format as the constructive trace
+store; machine local, never distributed or imported). `gc` marks the
+dependency closure of recent roots through the trace store, then in
+crash-safe order compacts the trace store to the live closure, compacts the
+root store, deletes unreachable value store files, and removes per-process
+scratch directories (`t/p/<pid>`, `t/x0/<pid>`). It runs under the same
+exclusive trace store lock as builds, so it cannot race a build.
+
+Everything swept is re-buildable or re-downloadable; the signify keys
+(`t/k`), user outputs (`t/o`, `t/s`), parsed-values caches, unrecognized
+value ids and unrecognized `t/` entries are reported and never deleted.
+
+| Flag | Meaning |
+| --- | --- |
+| `info` or `--dry-run` | Report what would be swept without deleting anything. |
+| `--prune-older-than DAYS` | Roots recorded more than `DAYS` days ago stop pinning their dependency closure (default 30). Pinned roots never expire. |
+| `--empty-roots-ok` | Proceed even when no live roots exist, which sweeps every value and trace. Without it `gc` refuses, because a workspace that predates the root store has no roots yet and would lose its whole cache. |
+
+`gc` also refuses when the root store contains entries recorded by a newer
+dk0 that this dk0 cannot understand.
+
+```text
+gc --pin COMMAND...
+gc --unpin COMMAND...
+```
+
+Record (`--pin`) or remove (`--unpin`) a never-expiring root for the key
+that the value shell `COMMAND` demands, without running the command. Use a
+pin for something built too rarely to stay inside the retention window, for
+example a release target or a large toolchain asset:
+
+```text
+dk0 gc --pin get-object MyLib_Std.Tool@1.2.0 -s Release.Agnostic -f tool.exe
+dk0 gc --unpin get-object MyLib_Std.Tool@1.2.0 -s Release.Agnostic -f tool.exe
+```
+
+The command is parsed and resolved exactly like a real run (aliases and
+subshells included) but is not executed. It must therefore be a complete
+command - `get-object` still needs its `-f` or `-d` - but the output path
+does not change the pinned key, so pin with the same command line you
+normally run. A pin is exact: it covers the resolved `MODULE@VERSION` (and
+slot or asset path), not other versions, so re-pin after a version bump.
+`gc info` reports the number of pinned roots.
+
 ## Options
 
 ### Command options
