@@ -687,6 +687,19 @@ run: dk0 -t "${{ github.event.head_commit.timestamp }}" ...
 
 Behavior that is specific to `dk0` and may differ in other implementations.
 
+### Workspace directories
+
+`dk0` keeps its durable workspace configuration under `etc/dk/` (transient
+build state lives under `t/`; see the Configuration and Security options for
+the `t/d`, `t/c` and `t/k` defaults). The `etc/dk/` directories are:
+
+| Directory | Contents | Written by | Read for |
+| --- | --- | --- | --- |
+| `etc/dk/d` | Prepared distribution keys: `<MAJOR.MINOR>.<PATCH>.dist.json` files carrying the producer public key and signed continuations for the version lines this workspace releases. Author-owned; commit them. | `prepare-version` | `distribute` and `combine` (signing); every import (the keys are locally prepared trust anchors). |
+| `etc/dk/i` | The import directory: verified release `<LIBRARY>.<VERSION>.values.json` files, plus the `values.unattested.json` download scratch file. On the workspace include path, so the imported distributions resolve values and traces. The files double as prior-import trust anchors. Machine-managed: `update` garbage-collects entries its resolution no longer uses, and an `import` prunes the strictly older releases it supersedes on the same `MAJOR.MINOR` line. | `add`, `import`, `restore`, and workspace `import` declarations | distribution resolution; prior-import trust anchoring. |
+| `etc/dk/t` | Consumer trust records: byte-identical copies of directly imported release values files, recorded only after the consumer trust checks pass. Deliberately **not** an include directory, so no values or traces are ever resolved from a record; a record only anchors the producer key and rotation of later imports. | `import local` (acceptance) | prior-import trust anchoring. |
+| `etc/dk/v` | Authored values files (`*.values.jsonc`, `*.values.lua`) belonging to the workspace. On the workspace include path. `distribute` seals them into the distribution manifest together with the workspace script and `dist/*.u`. | the workspace author | distribution resolution; manifest sealing. |
+
 ### Lua interpreter
 
 `dk0` uses a pure-OCaml version of Lua (`lua-ml`), which is fully type-safe,
