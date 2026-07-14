@@ -1,6 +1,6 @@
 @ECHO OFF
 REM ##########################################################################
-REM # File: dk\dk0.cmd                                             #
+REM # File: dk\dk0.cmd                                                       #
 REM #                                                                        #
 REM # Copyright 2025 Diskuv, Inc.                                            #
 REM #                                                                        #
@@ -13,200 +13,148 @@ REM #                                                                        #
 REM ##########################################################################
 
 REM Recommendation: Place this file in source control.
-
-REM The canonical way to run this script is: ./dk0
-REM That works in Powershell on Windows, and in Unix. Copy-and-paste works!
 REM
-REM Purpose: Install dk0 if not present. Then invoke dk0.
+REM Manifest-driven, self-updating dk0 launcher for Windows. Pure batch on the
+REM hot path -- PowerShell is used only as a last-resort download fallback (after
+REM curl and BITSADMIN), never for logic -- so it runs on locked-down machines.
+REM   1. download the pinned mlfront-signify verifier, check it against the
+REM      SHA-256 baked below (the anchor -- not the manifest, so no circularity);
+REM   2. verify the signify signature over the manifest with the baked pubkey;
+REM   3. read the manifest's dk0 SHA-256 (plain key=value, no JSON), download and
+REM      cache dk0.exe, then exec it.
+REM This file never rewrites itself.
 
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-REM Coding guidelines
-REM 1. Microsoft way of getting around PowerShell permissions:
-REM    https://github.com/microsoft/vcpkg/blob/71422c627264daedcbcd46f01f1ed0dcd8460f1b/bootstrap-vcpkg.bat
-REM 2. Hygiene: Capitalize keywords, variables, commands, operators and options
-REM 3. Detect errors with `%ERRORLEVEL% EQU` (etc). https://ss64.com/nt/errorlevel.html
-REM 3. In nested blocks like `IF EXIST xxx ( ... )` use delayed !ERRORLEVEL!. https://stackoverflow.com/a/4368104/21513816
-REM 4. Use functions ("subroutines"):
-REM    https://learn.openwaterfoundation.org/owf-learn-windows-shell/best-practices/best-practices/#use-functions-to-create-reusable-blocks-of-code
-REM 5. Use XCOPY for copying files since it has sane exit codes for scripting (unlike COPY).
-REM    Create an intermediate subdirectory if needed since XCOPY only copies directories well.
+SET "DK_PROJECT_DIR=%~dp0"
+SET "DKCODER_PWD=%CD%"
 
-REM Invoke-WebRequest guidelines
-REM 1. Use $ProgressPreference = 'SilentlyContinue' always. Terrible slowdown w/o it.
-REM    https://stackoverflow.com/questions/28682642
+REM ===== BAKED TRUST ROOT (rotates rarely; updated only on key/verifier rotation) =====
+SET "SIGNIFY_PUBKEY_B64=RWTMq/GqeeJ06ACy7By/H05vvtpc3ZPEKlbnDm9fIQxpkgTV92is6YHD"
+SET "DK_CKSUM_SIGNIFY=ebe1aa87a3eb87ed6769782a31916fab72bbdf0ced22d6ddd9a7a455e23e2c68"
+REM The verifier is pinned by version+checksum and fetched from its GitLab package
+REM (a direct download, not the throttled listing API); the site serves only the
+REM signed manifest and the wrappers.
+SET "SIGNIFY_PKG_VER=2.4.2.271"
+IF "%DK0_BASE_URL%"=="" (SET "DK_BASE_URL=https://diskuv.com/dk") ELSE (SET "DK_BASE_URL=%DK0_BASE_URL%")
+REM ====================================================================================
 
-SET DK_PROJECT_DIR=%~dp0
-SET DKCODER_PWD=%CD%
+IF "%DKCODER_DATA_HOME%"=="" (SET "DK_DATA_HOME=%LOCALAPPDATA%\Programs\dk0") ELSE (SET "DK_DATA_HOME=%DKCODER_DATA_HOME%")
+SET "DK_VDIR=%DK_DATA_HOME%\verifier"
+IF NOT EXIST "%DK_VDIR%" MKDIR "%DK_VDIR%" >NUL 2>&1
 
-REM Update within dksdk-coder:
-REM   f_dk0() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/dk0-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/$ver/dk0-$i$extexe"; done }
-REM   f_dk0 2.4.2.79
-REM   shasum -a 256 build/dk0-* | awk 'BEGIN{FS="[ /-]"} {printf "SET DK_CKSUM_%s=%s\n", toupper($5), $1}' | sort | grep -v 9491d4737000e80bcbdd7a39e9dc13c2178ff865beff7d800d6159bfc395e8fa
-REM
-REM   Empty value if the architecture is not supported.
-REM   In particular, use empty instead of 9491d4737000e80bcbdd7a39e9dc13c2178ff865beff7d800d6159bfc395e8fa which is checksum for HTTP 404 error.
-REM -------------------------------------
-SET DK_VER=2.4.2.270
-SET DK_CKSUM_WINDOWS_X86_64=71c687c0ed142e69172bfcf7a32586bd324a750a666fce77957606d64ff00497
-SET DK_CKSUM_WINDOWS_X86=
-
-REM --------- Quiet Detection ---------
-SET DK_QUIET=0
-SET _XCOPY_SWITCHES=
-SET _DKEXE_OPTIONS=
-
-REM --------- Data Home ---------
-
-IF "%DKCODER_DATA_HOME%" == "" (
-    SET DK_DATA_HOME=%LOCALAPPDATA%\Programs\dk0
-) ELSE (
-    SET DK_DATA_HOME=%DKCODER_DATA_HOME%
+REM 1. Pinned verifier from GitLab, checked against the baked SHA-256 (the anchor).
+SET "DK_SIGNIFY=%DK_VDIR%\mlfront-signify-%DK_CKSUM_SIGNIFY%.exe"
+IF NOT EXIST "%DK_SIGNIFY%" (
+    CALL :fetch "https://gitlab.com/api/v4/projects/60486861/packages/generic/mlfront-signify/%SIGNIFY_PKG_VER%/mlfront-signify-windows_x86_64.exe" "%DK_SIGNIFY%"
+    IF !ERRORLEVEL! NEQ 0 EXIT /B 1
+)
+CALL :sha256 "%DK_SIGNIFY%" DK_SIG_ACTUAL
+IF /I NOT "!DK_SIG_ACTUAL!"=="%DK_CKSUM_SIGNIFY%" (
+    ECHO dk0: mlfront-signify checksum mismatch ^(verifier not trusted^) 1>&2
+    EXIT /B 1
 )
 
-REM -------------- single binary executable --------------
+REM 2. Write the baked public key (pure batch; signify accepts the CRLF form).
+> "%DK_VDIR%\dk0.pub" ECHO untrusted comment: dk0 signify public key
+>> "%DK_VDIR%\dk0.pub" ECHO %SIGNIFY_PUBKEY_B64%
 
-REM Download dk0.exe
-REM     Use subdir of %TEMP% since XCOPY does not work changing basenames during copy.
-IF "%PROGRAMFILES(x86)%" == "" (
-    REM 32-bit Windows
-    IF "%DK_CKSUM_WINDOWS_X86%" == "" (
-        ECHO.Windows 32-bit PCs are not supported as host machines.
-        ECHO.Instead develop on a 64-bit PC and cross-compile with StdStd_Std.Exe to 32-bit Windows target PCs.
-        EXIT /B 1
-    )
-    SET "DK_EXEDIR=%DK_DATA_HOME%\dk0exe-%DK_VER%-windows_x86"
-    IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!"
-    SET "DK_EXE=!DK_EXEDIR!\dk0.exe"
-    IF NOT EXIST "!DK_EXE!" (
-        IF %DK_QUIET% EQU 0 ECHO.dk0 executable:
-        IF NOT EXIST "%TEMP%\%DK_CKSUM_WINDOWS_X86%" MKDIR "%TEMP%\%DK_CKSUM_WINDOWS_X86%"
-        CALL :downloadFile ^
-            dk0 ^
-            "dk %DK_VER% 32-bit" ^
-            "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/%DK_VER%/dk0-windows_x86.exe" ^
-            %DK_CKSUM_WINDOWS_X86%\dk0.exe ^
-            %DK_CKSUM_WINDOWS_X86%
-        REM On error the error message was already displayed.
-        IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
-        XCOPY "%TEMP%\%DK_CKSUM_WINDOWS_X86%\dk0.exe" "!DK_EXEDIR!" %_XCOPY_SWITCHES% /v /g /i /r /n /y /j >NUL
-        IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
-        REM It is okay if the temp dir is not cleaned up. No error checking.
-        IF NOT "%DK_CKSUM_WINDOWS_X86%" == "" RD "%TEMP%\%DK_CKSUM_WINDOWS_X86%" /s /q
-    )
+REM 3. Read the dk.u pin: the version between quotes on the actual_version line.
+SET "DK_PIN="
+IF EXIST "%DK_PROJECT_DIR%dk.u" CALL :readpin
+
+REM --self-update handled by dk0.exe (it edits dk.u safely); see below after resolve.
+SET "DK_SELFUPDATE=0"
+IF "%~1"=="--self-update" SET "DK_SELFUPDATE=1"
+
+REM 4. Verify the manifest and resolve the version + dk0 checksum. Self-update and
+REM    an unpinned project both use the latest manifest.
+IF "%DK_SELFUPDATE%"=="1" (SET "DK_WANT=") ELSE (SET "DK_WANT=%DK_PIN%")
+CALL :getmanifest "%DK_WANT%"
+IF !ERRORLEVEL! NEQ 0 EXIT /B 1
+IF "%DK_WANT%"=="" (
+    CALL :mval version DK_VER
+    IF "%DK_SELFUPDATE%"=="0" IF "%DK_PIN%"=="" ECHO dk0: no actual_version pin in dk.u; using latest !DK_VER! ^(run "dk0 --self-update" to pin^) 1>&2
 ) ELSE (
-    SET "DK_EXEDIR=%DK_DATA_HOME%\dk0exe-%DK_VER%-windows_x86_64"
-    IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!"
-    SET "DK_EXE=!DK_EXEDIR!\dk0.exe"
-    IF NOT EXIST "!DK_EXE!" (
-        IF %DK_QUIET% EQU 0 ECHO.dk0 executable:
-        IF NOT EXIST "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%" MKDIR "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%"
-        CALL :downloadFile ^
-            dk0 ^
-            "dk0 %DK_VER% 64-bit" ^
-            "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/%DK_VER%/dk0-windows_x86_64.exe" ^
-            %DK_CKSUM_WINDOWS_X86_64%\dk0.exe ^
-            %DK_CKSUM_WINDOWS_X86_64%
-        REM On error the error message was already displayed.
-        IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
-        XCOPY "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%\dk0.exe" "!DK_EXEDIR!" %_XCOPY_SWITCHES% /v /g /i /r /n /y /j >NUL
-        IF !ERRORLEVEL! NEQ 0 EXIT /B !ERRORLEVEL!
-        REM It is okay if the temp dir is not cleaned up. No error checking.
-        IF NOT "%DK_CKSUM_WINDOWS_X86_64%" == "" RD "%TEMP%\%DK_CKSUM_WINDOWS_X86_64%" /s /q
-    )
+    SET "DK_VER=%DK_PIN%"
 )
-SET DK_EXEDIR=
+IF "!DK_VER!"=="" (ECHO dk0: could not resolve a dk0 version 1>&2 & EXIT /B 1)
+CALL :mval dk0_windows_x86_64 DK_CKSUM
+IF "!DK_CKSUM!"=="" (ECHO dk0: manifest has no dk0 build for windows_x86_64 ^(version !DK_VER!^) 1>&2 & EXIT /B 3)
 
-REM -------------- DkML PATH ---------
-REM We get "git-sh-setup: file not found" in Git for Windows because
-REM Command Prompt has the "Path" environment variable, while PowerShell
-REM and `with-dkml` use the PATH environment variable. Sadly both
-REM can be present in Command Prompt at the same time. Git for Windows
-REM (called by FetchContent in CMake) does not comport with what Command
-REM Prompt is using. So we let Command Prompt be the source of truth by
-REM removing any duplicated PATH twice and resetting to what Command Prompt
-REM thinks the PATH is.
+REM 5. Cache + download dk0.exe (version-keyed dir; never overwrite a running exe).
+SET "DK_EXEDIR=%DK_DATA_HOME%\dk0exe-!DK_VER!-windows_x86_64"
+IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!" >NUL 2>&1
+SET "DK_EXE=!DK_EXEDIR!\dk0.exe"
+SET "DK_NEED_EXE=1"
+IF EXIST "!DK_EXE!" (
+    CALL :sha256 "!DK_EXE!" DK_EXE_ACTUAL
+    IF /I "!DK_EXE_ACTUAL!"=="!DK_CKSUM!" SET "DK_NEED_EXE=0"
+)
+IF !DK_NEED_EXE! EQU 1 (
+    CALL :fetch "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/!DK_VER!/dk0-windows_x86_64.exe" "!DK_EXE!"
+    IF !ERRORLEVEL! NEQ 0 EXIT /B 1
+    CALL :sha256 "!DK_EXE!" DK_EXE_ACTUAL
+    IF /I NOT "!DK_EXE_ACTUAL!"=="!DK_CKSUM!" (ECHO dk0: dk0.exe checksum mismatch 1>&2 & EXIT /B 1)
+)
 
-SET _DK_PATH=%PATH%
-SET PATH=
-SET PATH=
-SET PATH=%_DK_PATH%
-SET "_DK_PATH="
-
-REM -------------- Clear environment -------
-
-SET "DK_QUIET="
-
-REM -------------- Run executable --------------
-
-SET DKCODER_ARG0=%0
-
-REM     Unset local variables
-SET "DK_DATA_HOME="
-SET "DK_QUIET="
-SET "_DK_PATH="
-SET "_XCOPY_SWITCHES="
-REM     Then run it
-"%DK_EXE%" %_DKEXE_OPTIONS% -isystem "%DK_PROJECT_DIR%\etc\dk\i" %*
+REM 6. Run it (same contract as the POSIX wrapper). dk0 --self-update rewrites the
+REM    dk.u actual_version line itself (dk0.exe edits dk.u safely; this launcher
+REM    never does file surgery on dk.u).
+SET "DKCODER_ARG0=dk0"
+IF "%DK_SELFUPDATE%"=="1" (
+    REM dk0.exe repins the dk.u actual_version line to the resolved (latest) version.
+    "!DK_EXE!" -isystem "%DK_PROJECT_DIR%etc\dk\i" self-update !DK_VER!
+) ELSE (
+    "!DK_EXE!" -isystem "%DK_PROJECT_DIR%etc\dk\i" %*
+)
 EXIT /B %ERRORLEVEL%
 
-REM ------ SUBROUTINE [downloadFile]
-REM Usage: downloadFile ID "FILE DESCRIPTION" "URL" FILENAME SHA256
-REM
-REM Procedure:
-REM   1. Download from <quoted> URL ARG3 (example: "https://github.com/ninja-build/ninja/releases/download/v%DK_VER%/dk.exe")
-REM      to the temp directory with filename ARG4 (example: something-x64.zip)
-REM   2. SHA-256 integrity check from ARG5 (example: 524b344a1a9a55005eaf868d991e090ab8ce07fa109f1820d40e74642e289abc)
-REM
-REM Error codes:
-REM   1 - Can't download from the URL.
-REM   2 - SHA-256 verification failed.
+REM ================= subroutines =================
 
-:downloadFile
-
-REM Replace "DESTINATION" double quotes with single quotes
-SET DK_DOWNLOAD_URL=%3
-SET DK_DOWNLOAD_URL=%DK_DOWNLOAD_URL:"='%
-
-REM 1. Download from <quoted> URL ARG3 (example: "https://github.com/ninja-build/ninja/releases/download/v%DK_VER%/dk.exe")
-REM    to the temp directory with filename ARG4 (example: something-x64.zip)
-IF %DK_QUIET% EQU 0 ECHO.  Downloading %3
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
-    "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest %DK_DOWNLOAD_URL% -OutFile '%TEMP%\%4'" >NUL
-IF %ERRORLEVEL% NEQ 0 (
-    REM Fallback to BITSADMIN because sometimes corporate policy does not allow executing PowerShell.
-    REM BITSADMIN overwhelms the console so user-friendly to do PowerShell then BITSADMIN.
-    IF %DK_QUIET% EQU 0 (
-        BITSADMIN /TRANSFER dk0-%1 /DOWNLOAD /PRIORITY FOREGROUND ^
-            %3 "%TEMP%\%4"
-    ) ELSE (
-        BITSADMIN /TRANSFER dk0-%1 /DOWNLOAD /PRIORITY FOREGROUND ^
-            %3 "%TEMP%\%4" >NUL
-    )
-    REM Short-circuit return with error code from function if can't download.
-    IF !ERRORLEVEL! NEQ 0 (
-        ECHO.
-        ECHO.Could not download %2.
-        ECHO.
-        EXIT /B 1
-    )
+REM :fetch URL DEST  -- download without a checksum (the manifest is verified by
+REM signature). curl first, then BITSADMIN, then PowerShell -- so no PowerShell
+REM dependency on machines that ship curl (Windows 10 1803+).
+:fetch
+IF EXIST "%SystemRoot%\System32\curl.exe" (
+    "%SystemRoot%\System32\curl.exe" -fsSL "%~1" -o "%~2" && EXIT /B 0
 )
+BITSADMIN /TRANSFER dk0fetch /DOWNLOAD /PRIORITY FOREGROUND "%~1" "%~2" >NUL 2>&1 && EXIT /B 0
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -Uri '%~1' -OutFile '%~2'" >NUL 2>&1 && EXIT /B 0
+ECHO dk0: could not download %~1 1>&2
+EXIT /B 1
 
-REM 2. SHA-256 integrity check from ARG5 (example: 524b344a1a9a55005eaf868d991e090ab8ce07fa109f1820d40e74642e289abc)
-IF %DK_QUIET% EQU 0 ECHO.  Performing SHA-256 validation of %4
-FOR /F "tokens=* usebackq" %%F IN (`certutil -hashfile "%TEMP%\%4" sha256 ^| findstr /v hash`) DO (
-    SET "DK_CKSUM_WINDOWS_X86_64_ACTUAL=%%F"
+REM :sha256 FILE OUTVAR  -- set OUTVAR to the lowercased SHA-256 of FILE.
+:sha256
+SET "%~2="
+FOR /F "usebackq tokens=* delims=" %%H IN (`certutil -hashfile "%~1" SHA256 ^| findstr /R "^[0-9a-fA-F][0-9a-fA-F]*$"`) DO (
+    IF NOT DEFINED %~2 SET "%~2=%%H"
 )
-IF /I NOT "%DK_CKSUM_WINDOWS_X86_64_ACTUAL%" == "%5" (
-    ECHO.
-    ECHO.Could not verify the integrity of %2.
-    ECHO.Expected SHA-256 %5
-    ECHO.but received %DK_CKSUM_WINDOWS_X86_64_ACTUAL%.
-    ECHO.Make sure that you can access the Internet, and there is nothing
-    ECHO.intercepting network traffic.
-    ECHO.
-    EXIT /B 2
-)
+IF DEFINED %~2 SET "%~2=!%~2: =!"
+EXIT /B 0
 
-REM Return from [downloadFile]
+REM :getmanifest VER  -- fetch manifest[-VER].txt + .sig into %DK_VDIR%, signify-verify.
+:getmanifest
+IF "%~1"=="" (SET "DK_MURL=%DK_BASE_URL%/manifest.txt") ELSE (SET "DK_MURL=%DK_BASE_URL%/manifest-%~1.txt")
+CALL :fetch "!DK_MURL!" "%DK_VDIR%\manifest"
+IF !ERRORLEVEL! NEQ 0 EXIT /B 1
+CALL :fetch "!DK_MURL!.sig" "%DK_VDIR%\manifest.sig"
+IF !ERRORLEVEL! NEQ 0 EXIT /B 1
+"%DK_SIGNIFY%" -V -q -p "%DK_VDIR%\dk0.pub" -m "%DK_VDIR%\manifest" -x "%DK_VDIR%\manifest.sig"
+IF !ERRORLEVEL! NEQ 0 (ECHO dk0: manifest signature INVALID for !DK_MURL! -- refusing to continue 1>&2 & EXIT /B 1)
+EXIT /B 0
+
+REM :mval KEY OUTVAR  -- read key=value from the verified %DK_VDIR%\manifest.
+:mval
+SET "%~2="
+FOR /F "usebackq tokens=1,* delims==" %%A IN ("%DK_VDIR%\manifest") DO (
+    IF /I "%%A"=="%~1" SET "%~2=%%B"
+)
+EXIT /B 0
+
+REM :readpin  -- set DK_PIN to the version between the quotes on the dk.u
+REM actual_version line. The caret-escaped FOR options are how batch uses a
+REM double-quote as a delimiter (a quoted "delims=^"" options string does not work).
+:readpin
+FOR /F usebackq^ tokens^=2^ delims^=^" %%V IN (`findstr /L /C:"actual_version" "%DK_PROJECT_DIR%dk.u"`) DO SET "DK_PIN=%%V"
 EXIT /B 0

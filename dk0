@@ -21,19 +21,31 @@
 
 set -euf
 
-# Update within dksdk-coder:
-#   f_dk0() { ver=$1; install -d build; for i in darwin_arm64 darwin_x86_64 linux_x86 linux_x86_64 windows_x86_64 windows_x86; do extexe=; case $i in windows_*) extexe=.exe ;; esac; curl -Lo "build/dk0-$i" "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/$ver/dk0-$i$extexe"; done }
-#   f_dk0 2.4.2.79
-#   shasum -a 256 build/dk0-* | awk 'BEGIN{FS="[ /-]"} {printf "cksum256_%s=%s\n", $5, $1}' | sort | grep -v 9491d4737000e80bcbdd7a39e9dc13c2178ff865beff7d800d6159bfc395e8fa
-#
-# Empty value if the architecture is not supported.
-# In particular, use empty instead of 9491d4737000e80bcbdd7a39e9dc13c2178ff865beff7d800d6159bfc395e8fa which is checksum for HTTP 404 error.
-# -------------------------------------
-majminpat_ver=2.4.2.270
-cksum256_darwin_arm64=a36d23017e1ac4ad366c2a160e7264f6b4b194d43d31ac0261abbc80c606649e
-cksum256_darwin_x86_64=c4b02b1d4b20801e885080642285e3590b833f416bae55e0ce70b8ffe3f9004f
-cksum256_linux_x86_64=d95b3a468f481d81cfac7cafe597be12287915089aace96c66445ccfede72cb9
-cksum256_linux_x86=0368d8b1427f6cd6131afb5add4b81c95c46375a78a6417ef16c666153460ae3
+# ===== BAKED TRUST ROOT (rotates rarely; updated only on key/verifier rotation) =====
+# The dk0 version is NOT baked here. It is pinned per project by a
+#   %% actual_version("X.Y.Z.W")
+# line in dk.u's `## workspace` section (or the latest signed manifest if absent).
+# dk0 and its checksum come from a signify-signed manifest verified at runtime:
+#   1. download the pinned mlfront-signify verifier from its GitLab package (by
+#      the baked version below), check it against the SHA-256 baked below (the
+#      anchor -- not the manifest, so no circularity);
+#   2. verify the signify signature over the manifest (manifest.txt) with the
+#      baked public key;
+#   3. only then read the manifest's per-arch dk0 SHA-256.
+# This file never rewrites itself (Windows batch/exe safety); `dk0 --self-update`
+# edits only the dk.u actual_version line, and key rotation is followed at
+# verify-time via the manifest's continuation chain.
+SIGNIFY_PUBKEY_B64="RWTMq/GqeeJ06ACy7By/H05vvtpc3ZPEKlbnDm9fIQxpkgTV92is6YHD"
+# The verifier is pinned by version+checksum and fetched from GitLab (a direct
+# package download, not the throttled listing API); the site serves only the
+# signed manifest and the wrappers.
+signify_pkg_ver="2.4.2.271"
+cksum_signify_linux_x86_64="9701ed5821ea57114890f2d54381ee29742b45292ea0c8a259b0d4187c728a4d"
+cksum_signify_linux_x86="533ec71ef0c6081c57850c840d29df5ca8efd3c2722b54dc77c14224dda0c418"
+cksum_signify_darwin_arm64="89513c94add01ef5e15fa4c3a171755cd3eb783f552b9d4a3dedd009fa89a062"
+cksum_signify_darwin_x86_64="875ba2f6840bb705ed2346c9c3a165ee5fdfde559df4b9adfa0c6f915043eade"
+DK_BASE_URL="${DK0_BASE_URL:-https://diskuv.com/dk}"
+# ====================================================================================
 
 dk_pwd=$PWD
 
@@ -604,6 +616,73 @@ case "$BUILDHOST_ARCH" in
 esac
 
 # -----
+# resolve version + verify the signed manifest
+# -----
+
+# A checksum-less fetch (the manifest is trusted by SIGNATURE, not a pre-known
+# checksum). curl or wget, matching downloadfile's tool detection.
+dk_fetch() {
+  if [ -n "$DKMLSYS_CURL" ]; then "$DKMLSYS_CURL" -fsSL "$1" -o "$2"
+  elif [ -n "$DKMLSYS_WGET" ]; then "$DKMLSYS_WGET" -q -O "$2" "$1"
+  else echo "FATAL: no curl or wget on the system paths" >&2; exit 107; fi
+}
+
+# Read `%% actual_version("X.Y.Z.W")` from dk.u's workspace section (the pin).
+# The `[(]?` tolerates the parenthesized call form dk0 writes (the workspace Lua
+# grammar rejects the bare `actual_version "X"` string-call sugar); the version
+# is the first double-quoted field either way.
+dk_read_actual_version() {
+  [ -f "$DK_PROJECT_DIR/dk.u" ] || return 0
+  "$DKMLSYS_GREP" -oE '%%[[:space:]]*actual_version[[:space:]]*[(]?[[:space:]]*"[^"]+"' "$DK_PROJECT_DIR/dk.u" 2>/dev/null \
+    | head -1 | "$DKMLSYS_SED" 's/.*"\([^"]*\)".*/\1/'
+}
+
+# Read a plain key=value field from a verified manifest.
+dk_manifest_str() {
+  "$DKMLSYS_GREP" "^$2=" "$1" | head -1 | cut -d= -f2
+}
+
+# Fetch + signify-verify the manifest into $1. $2 is the pinned version ("" =
+# latest). Aborts on any verification failure. Trust anchor = the baked
+# mlfront-signify SHA-256, then the baked public key over the manifest.
+dk_verify_manifest() {
+  dvm_out=$1; dvm_ver=$2
+  eval "dvm_pin=\${cksum_signify_${BUILDHOST_ARCH}:-}"
+  [ -n "$dvm_pin" ] || { echo "FATAL: no pinned mlfront-signify checksum for $BUILDHOST_ARCH" >&2; exit 3; }
+  install -d "$tools_dir/verifier"
+  dvm_signify="$tools_dir/verifier/mlfront-signify-$dvm_pin"
+  downloadfile "https://gitlab.com/api/v4/projects/60486861/packages/generic/mlfront-signify/$signify_pkg_ver/mlfront-signify-$BUILDHOST_ARCH" "$dvm_signify" "$dvm_pin"
+  chmod +x "$dvm_signify"
+  if [ -n "$dvm_ver" ]; then dvm_url="$DK_BASE_URL/manifest-$dvm_ver.txt"; else dvm_url="$DK_BASE_URL/manifest.txt"; fi
+  dk_fetch "$dvm_url" "$dvm_out"
+  dk_fetch "$dvm_url.sig" "$dvm_out.sig"
+  printf 'untrusted comment: dk0 signify public key\n%s\n' "$SIGNIFY_PUBKEY_B64" > "$tools_dir/verifier/dk0.pub"
+  "$dvm_signify" -V -q -p "$tools_dir/verifier/dk0.pub" -m "$dvm_out" -x "$dvm_out.sig" \
+    || { echo "FATAL: manifest signature INVALID for $dvm_url -- refusing to continue" >&2; exit 1; }
+}
+
+# Resolve the version. `--self-update` ignores the pin and uses the LATEST dk0,
+# which rewrites the dk.u actual_version to its own version -- dk0.exe edits dk.u
+# safely, so this launcher never does file surgery (and stays batch-safe on the
+# Windows side too). Otherwise use the dk.u pin, else the latest.
+dk_selfupdate=0
+[ "${1:-}" = "--self-update" ] && dk_selfupdate=1
+if [ "$dk_selfupdate" = 1 ]; then
+  majminpat_ver=
+else
+  majminpat_ver=$(dk_read_actual_version)
+fi
+dk_manifest="$tools_dir/verifier/manifest"
+dk_verify_manifest "$dk_manifest" "$majminpat_ver"
+if [ -z "$majminpat_ver" ]; then
+  majminpat_ver=$(dk_manifest_str "$dk_manifest" version)
+  [ "$dk_selfupdate" = 0 ] && echo "dk0: no '%% actual_version' pin in dk.u; using latest $majminpat_ver (run './dk0 --self-update' to pin)" >&2
+fi
+[ -n "$majminpat_ver" ] || { echo "FATAL: could not resolve a dk0 version" >&2; exit 1; }
+dk0_cksum=$(dk_manifest_str "$dk_manifest" "dk0_${BUILDHOST_ARCH}")
+[ -n "$dk0_cksum" ] || { echo "FATAL: manifest has no dk0 build for $BUILDHOST_ARCH (version $majminpat_ver)" >&2; exit 3; }
+
+# -----
 # single binary executable
 # -----
 
@@ -619,30 +698,14 @@ download_helper() {
     "$download_helper_CKSUM"
 }
 download_dk() {
-  case "$BUILDHOST_ARCH" in
-    darwin_arm64) download_helper $cksum256_darwin_arm64 ;;
-    darwin_x86_64) download_helper $cksum256_darwin_x86_64 ;;
-    linux_x86_64) download_helper $cksum256_linux_x86_64 ;;
-    linux_x86)
-      if [ -z "$cksum256_linux_x86" ]; then
-        echo "FATAL: There is no dk0 build for $BUILDHOST_ARCH" >&2; exit 3
-      fi
-      download_helper $cksum256_linux_x86 ;;
-    *) echo "FATAL: There is no support for $BUILDHOST_ARCH" >&2; exit 3 ;;
-  esac
+  # dk0 checksum comes from the signify-verified manifest, not a baked value.
+  download_helper "$dk0_cksum"
 }
-have_correct_dk=0
-if [ -x "$destdir/dk0" ]; then
-  # shellcheck disable=SC2016
-  have_correct_VER=$("$destdir/dk0" --version)
-  if [ "$have_correct_VER" = "$majminpat_ver" ]; then
-    have_correct_dk=1
-  fi
-fi
-if [ $have_correct_dk -eq 0 ]; then
-  download_dk
-  chmod +x "$destdir/dk0"
-fi
+# downloadfile skips the download when the cached dk0 already matches the manifest
+# checksum, so this is a no-op on the common (already-cached) path. (A `--version`
+# comparison would not work: dk0 prints "X.Y.Z+rev-W" but the pin is "X.Y.Z.W".)
+download_dk
+chmod +x "$destdir/dk0"
 
 # Set DK_EXE
 DK_EXE="$destdir/dk0"
@@ -656,4 +719,9 @@ export DKCODER_ARG0="$0"
 export DKCODER_PWD="$dk_pwd"
 export DK_PROJECT_DIR
 #   shellcheck disable=SC2086
-exec "$DK_EXE" -isystem "$DK_PROJECT_DIR/etc/dk/i" $_DKEXE_OPTIONS "$@"
+if [ "$dk_selfupdate" = 1 ]; then
+  # dk0.exe repins the dk.u actual_version line to the resolved (latest) version.
+  exec "$DK_EXE" -isystem "$DK_PROJECT_DIR/etc/dk/i" $_DKEXE_OPTIONS self-update "$majminpat_ver"
+else
+  exec "$DK_EXE" -isystem "$DK_PROJECT_DIR/etc/dk/i" $_DKEXE_OPTIONS "$@"
+fi
