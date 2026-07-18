@@ -553,8 +553,14 @@ store; machine local, never distributed or imported). `gc` marks the
 dependency closure of recent roots through the trace store, then in
 crash-safe order compacts the trace store to the live closure, compacts the
 root store, deletes unreachable value store files, and removes per-process
-scratch directories (`t/p/<pid>`, `t/x0/<pid>`). It runs under the same
-exclusive trace store lock as builds, so it cannot race a build.
+scratch directories (`t/p/<pid>`, `t/x0/<pid>`). It also sweeps aged
+`${RUNTIME}` script caches: each unified script gets a runtime directory
+`t/xr/<uid>` whose uid hashes the script's content and location, so an
+edited, renamed or removed script strands its old directory; the current
+workspace script's directory stays live regardless of age, and any other
+uid-shaped directory is swept once its age passes the retention window.
+`gc` runs under the same exclusive trace store lock as builds, so it
+cannot race a build.
 
 Everything swept is re-buildable or re-downloadable; the signify keys
 (`t/k`), user outputs (`t/o`, `t/s`), parsed-values caches, unrecognized
