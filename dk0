@@ -719,12 +719,15 @@ DK_EXE="$destdir/dk0"
 # remove version directories (and superseded verifier binaries) that no
 # launcher has used in 30 days. Everything here re-downloads on demand from
 # its signed manifest, so deletion is always safe; pruning must never break
-# the launch, hence the blanket error suppression.
+# the launch, hence the blanket error suppression and the [find] guard
+# (skip pruning entirely on systems without [find]).
 touch "$destdir" "$dvm_signify" 2>/dev/null || true
-find "$tools_dir" -maxdepth 1 -type d -name 'dk0exe-*' -mtime +30 \
-  -exec "$DKMLSYS_RM" -rf {} + 2>/dev/null || true
-find "$tools_dir/verifier" -maxdepth 1 -type f -name 'mlfront-signify-*' \
-  -mtime +30 -exec "$DKMLSYS_RM" -f {} + 2>/dev/null || true
+if command -v find >/dev/null 2>&1; then
+  find "$tools_dir" -maxdepth 1 -type d -name 'dk0exe-*' -mtime +30 \
+    -exec "$DKMLSYS_RM" -rf {} + 2>/dev/null || true
+  find "$tools_dir/verifier" -maxdepth 1 -type f -name 'mlfront-signify-*' \
+    -mtime +30 -exec "$DKMLSYS_RM" -f {} + 2>/dev/null || true
+fi
 
 # --- Run executable ---
 
