@@ -710,6 +710,22 @@ chmod +x "$destdir/dk0"
 # Set DK_EXE
 DK_EXE="$destdir/dk0"
 
+# -----
+# launcher store GC
+# -----
+
+# Every dk0 version installs into its own $tools_dir/dk0exe-* directory and
+# old versions accumulate forever. Mark the pinned version as used, then
+# remove version directories (and superseded verifier binaries) that no
+# launcher has used in 30 days. Everything here re-downloads on demand from
+# its signed manifest, so deletion is always safe; pruning must never break
+# the launch, hence the blanket error suppression.
+touch "$destdir" "$dvm_signify" 2>/dev/null || true
+find "$tools_dir" -maxdepth 1 -type d -name 'dk0exe-*' -mtime +30 \
+  -exec "$DKMLSYS_RM" -rf {} + 2>/dev/null || true
+find "$tools_dir/verifier" -maxdepth 1 -type f -name 'mlfront-signify-*' \
+  -mtime +30 -exec "$DKMLSYS_RM" -f {} + 2>/dev/null || true
+
 # --- Run executable ---
 
 #   We already changed to DK_PROJECT_DIR earlier. Change back.

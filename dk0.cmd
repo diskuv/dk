@@ -98,7 +98,22 @@ IF !DK_NEED_EXE! EQU 1 (
     IF /I NOT "!DK_EXE_ACTUAL!"=="!DK_CKSUM!" (ECHO dk0: dk0.exe checksum mismatch 1>&2 & EXIT /B 1)
 )
 
-REM 6. Run it (same contract as the POSIX wrapper). dk0 --self-update rewrites the
+REM 6. Launcher store GC. Every dk0 version installs into its own dk0exe-*
+REM    directory and old versions accumulate forever. Mark the pinned version
+REM    (and the current verifier) as used, then remove version directories and
+REM    superseded verifier binaries no launcher has used in 30 days. Everything
+REM    here re-downloads on demand from its signed manifest, so deletion is
+REM    always safe; pruning must never break the launch, so every step
+REM    suppresses errors. Pure batch: the mtime bump is a create+delete of a
+REM    marker file (updates the directory timestamp), the verifier bump is the
+REM    batch copy-touch idiom, and the age test is FORFILES /D.
+>"!DK_EXEDIR!\.dk0-touch" ECHO OK
+DEL /Q "!DK_EXEDIR!\.dk0-touch" >NUL 2>&1
+COPY /B "%DK_SIGNIFY%"+,, "%DK_SIGNIFY%" >NUL 2>&1
+FORFILES /P "%DK_DATA_HOME%" /M dk0exe-* /D -30 /C "cmd /c if @isdir==TRUE rd /s /q @path" >NUL 2>&1
+FORFILES /P "%DK_VDIR%" /M mlfront-signify-*.exe /D -30 /C "cmd /c del /q @path" >NUL 2>&1
+
+REM 7. Run it (same contract as the POSIX wrapper). dk0 --self-update rewrites the
 REM    dk.u actual_version line itself (dk0.exe edits dk.u safely; this launcher
 REM    never does file surgery on dk.u).
 SET "DKCODER_ARG0=dk0"

@@ -918,6 +918,15 @@ A `dk0` shell script (Unix) and a
 They rely on a small set of external tools per platform; a different implementation may
 use different tools or none at all.
 
+Each dk0 version installs into its own `dk0exe-<version>-<abi>` directory
+under the launcher data home (`%LOCALAPPDATA%\Programs\dk0` on Windows,
+`$XDG_DATA_HOME/dk0` or `~/.local/share/dk0` on Unix, `DKCODER_DATA_HOME`
+override). The launchers garbage collect that store on every run: the
+version being launched is marked used, then version directories and
+superseded `verifier/mlfront-signify-*` binaries that no launcher has used
+in 30 days are removed. Everything in the store re-downloads on demand from
+its signed manifest, so pruning is always safe and never blocks a launch.
+
 ### Windows
 
 | File                     | What                                                                   |
@@ -928,6 +937,7 @@ use different tools or none at all.
 | `powershell.exe` in PATH | `dk0.cmd` batch script - for InvokeWebRequest (optional; searched 1st) |
 | `bitsadmin` in PATH      | `dk0.cmd` batch script - for download (fallback; searched last)        |
 | `certutil` in PATH       | `dk0.cmd` batch script - verify sha256sums                             |
+| `forfiles` in PATH       | `dk0.cmd` batch script - prune old dk0 versions (optional)             |
 
 ### macOS
 

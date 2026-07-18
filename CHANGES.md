@@ -1,5 +1,14 @@
 # Changes
 
+## Unreleased
+
+- The `dk0` and `dk0.cmd` launchers garbage collect the launcher store on
+  every run: `dk0exe-<version>-<abi>` directories and superseded
+  `verifier/mlfront-signify-*` binaries that no launcher has used in 30 days
+  are removed. The launched version is marked used first, and everything in
+  the store re-downloads on demand from its signed manifest, so pruning is
+  always safe and never blocks a launch.
+
 ## 2.3.202505282324
 
 - Moved to dkcoder based `dk` executable which is downloaded by `./dk` and `./dk.cmd`. No CMake is required, so `__dk.cmake` is no longer necessary.
