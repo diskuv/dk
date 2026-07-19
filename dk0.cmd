@@ -31,13 +31,32 @@ SET "DKCODER_PWD=%CD%"
 
 REM ===== BAKED TRUST ROOT (rotates rarely; updated only on key/verifier rotation) =====
 SET "SIGNIFY_PUBKEY_B64=RWTMq/GqeeJ06ACy7By/H05vvtpc3ZPEKlbnDm9fIQxpkgTV92is6YHD"
-SET "DK_CKSUM_SIGNIFY=ebe1aa87a3eb87ed6769782a31916fab72bbdf0ced22d6ddd9a7a455e23e2c68"
+SET "DK_CKSUM_SIGNIFY_WINDOWS_X86_64=ebe1aa87a3eb87ed6769782a31916fab72bbdf0ced22d6ddd9a7a455e23e2c68"
+REM windows_x86 (32-bit) mlfront-signify is not published at SIGNIFY_PKG_VER yet;
+REM the __ placeholder trips the not-provisioned guard below until a real checksum
+REM is baked here (matching the ci/dist/dk0 shell slot) so .\dk0.cmd and ./dk0
+REM light up together.
+SET "DK_CKSUM_SIGNIFY_WINDOWS_X86=__CKSUM_SIGNIFY_WINDOWS_X86__"
 REM The verifier is pinned by version+checksum and fetched from its GitLab package
 REM (a direct download, not the throttled listing API); the site serves only the
 REM signed manifest and the wrappers.
 SET "SIGNIFY_PKG_VER=2.4.2.271"
 IF "%DK0_BASE_URL%"=="" (SET "DK_BASE_URL=https://diskuv.com/dk") ELSE (SET "DK_BASE_URL=%DK0_BASE_URL%")
 REM ====================================================================================
+
+REM Detect the Windows architecture (WOW64-aware) and select its pinned verifier.
+REM A 32-bit process on 64-bit Windows reports PROCESSOR_ARCHITECTURE=x86 but has
+REM PROCESSOR_ARCHITEW6432 defined; genuine 32-bit Windows does not.
+SET "DK_ARCH=windows_x86_64"
+SET "DK_CKSUM_SIGNIFY=%DK_CKSUM_SIGNIFY_WINDOWS_X86_64%"
+IF /I "%PROCESSOR_ARCHITECTURE%"=="x86" IF NOT DEFINED PROCESSOR_ARCHITEW6432 (
+    SET "DK_ARCH=windows_x86"
+    SET "DK_CKSUM_SIGNIFY=%DK_CKSUM_SIGNIFY_WINDOWS_X86%"
+)
+IF "!DK_CKSUM_SIGNIFY:~0,2!"=="__" (
+    ECHO dk0: no pinned mlfront-signify checksum for !DK_ARCH! ^(launcher not provisioned^) 1>&2
+    EXIT /B 3
+)
 
 IF "%DKCODER_DATA_HOME%"=="" (SET "DK_DATA_HOME=%LOCALAPPDATA%\Programs\dk0") ELSE (SET "DK_DATA_HOME=%DKCODER_DATA_HOME%")
 SET "DK_VDIR=%DK_DATA_HOME%\verifier"
@@ -46,7 +65,7 @@ IF NOT EXIST "%DK_VDIR%" MKDIR "%DK_VDIR%" >NUL 2>&1
 REM 1. Pinned verifier from GitLab, checked against the baked SHA-256 (the anchor).
 SET "DK_SIGNIFY=%DK_VDIR%\mlfront-signify-%DK_CKSUM_SIGNIFY%.exe"
 IF NOT EXIST "%DK_SIGNIFY%" (
-    CALL :fetch "https://gitlab.com/api/v4/projects/60486861/packages/generic/mlfront-signify/%SIGNIFY_PKG_VER%/mlfront-signify-windows_x86_64.exe" "%DK_SIGNIFY%"
+    CALL :fetch "https://gitlab.com/api/v4/projects/60486861/packages/generic/mlfront-signify/%SIGNIFY_PKG_VER%/mlfront-signify-!DK_ARCH!.exe" "%DK_SIGNIFY%"
     IF !ERRORLEVEL! NEQ 0 EXIT /B 1
 )
 CALL :sha256 "%DK_SIGNIFY%" DK_SIG_ACTUAL
@@ -79,11 +98,11 @@ IF "%DK_WANT%"=="" (
     SET "DK_VER=%DK_PIN%"
 )
 IF "!DK_VER!"=="" (ECHO dk0: could not resolve a dk0 version 1>&2 & EXIT /B 1)
-CALL :mval dk0_windows_x86_64 DK_CKSUM
-IF "!DK_CKSUM!"=="" (ECHO dk0: manifest has no dk0 build for windows_x86_64 ^(version !DK_VER!^) 1>&2 & EXIT /B 3)
+CALL :mval dk0_!DK_ARCH! DK_CKSUM
+IF "!DK_CKSUM!"=="" (ECHO dk0: manifest has no dk0 build for !DK_ARCH! ^(version !DK_VER!^) 1>&2 & EXIT /B 3)
 
 REM 5. Cache + download dk0.exe (version-keyed dir; never overwrite a running exe).
-SET "DK_EXEDIR=%DK_DATA_HOME%\dk0exe-!DK_VER!-windows_x86_64"
+SET "DK_EXEDIR=%DK_DATA_HOME%\dk0exe-!DK_VER!-!DK_ARCH!"
 IF NOT EXIST "!DK_EXEDIR!" MKDIR "!DK_EXEDIR!" >NUL 2>&1
 SET "DK_EXE=!DK_EXEDIR!\dk0.exe"
 SET "DK_NEED_EXE=1"
@@ -92,7 +111,7 @@ IF EXIST "!DK_EXE!" (
     IF /I "!DK_EXE_ACTUAL!"=="!DK_CKSUM!" SET "DK_NEED_EXE=0"
 )
 IF !DK_NEED_EXE! EQU 1 (
-    CALL :fetch "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/!DK_VER!/dk0-windows_x86_64.exe" "!DK_EXE!"
+    CALL :fetch "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/!DK_VER!/dk0-!DK_ARCH!.exe" "!DK_EXE!"
     IF !ERRORLEVEL! NEQ 0 EXIT /B 1
     CALL :sha256 "!DK_EXE!" DK_EXE_ACTUAL
     IF /I NOT "!DK_EXE_ACTUAL!"=="!DK_CKSUM!" (ECHO dk0: dk0.exe checksum mismatch 1>&2 & EXIT /B 1)

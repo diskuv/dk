@@ -44,6 +44,12 @@ cksum_signify_linux_x86_64="9701ed5821ea57114890f2d54381ee29742b45292ea0c8a259b0
 cksum_signify_linux_x86="533ec71ef0c6081c57850c840d29df5ca8efd3c2722b54dc77c14224dda0c418"
 cksum_signify_darwin_arm64="89513c94add01ef5e15fa4c3a171755cd3eb783f552b9d4a3dedd009fa89a062"
 cksum_signify_darwin_x86_64="875ba2f6840bb705ed2346c9c3a165ee5fdfde559df4b9adfa0c6f915043eade"
+cksum_signify_windows_x86_64="ebe1aa87a3eb87ed6769782a31916fab72bbdf0ced22d6ddd9a7a455e23e2c68"
+# windows_x86 (32-bit) mlfront-signify is not published at signify_pkg_ver yet.
+# Keep the slot maintained: the __ placeholder trips the not-provisioned guard
+# in dk_verify_manifest until a real checksum is baked here (and dk0.cmd carries
+# the matching x86 slot), so ./dk0 and .\dk0.cmd light up together.
+cksum_signify_windows_x86="__CKSUM_SIGNIFY_WINDOWS_X86__"
 DK_BASE_URL="${DK0_BASE_URL:-https://diskuv.com/dk}"
 # ====================================================================================
 
@@ -642,16 +648,27 @@ dk_manifest_str() {
   "$DKMLSYS_GREP" "^$2=" "$1" | head -1 | cut -d= -f2
 }
 
+# On Windows the published dk0 + mlfront-signify binaries carry a `.exe`
+# extension; other platforms have none. Mirrors gen-manifest.sh's extexe.
+dk_extexe() { case "$BUILDHOST_ARCH" in windows_*) printf '.exe' ;; esac; }
+
 # Fetch + signify-verify the manifest into $1. $2 is the pinned version ("" =
 # latest). Aborts on any verification failure. Trust anchor = the baked
 # mlfront-signify SHA-256, then the baked public key over the manifest.
 dk_verify_manifest() {
   dvm_out=$1; dvm_ver=$2
   eval "dvm_pin=\${cksum_signify_${BUILDHOST_ARCH}:-}"
-  [ -n "$dvm_pin" ] || { echo "FATAL: no pinned mlfront-signify checksum for $BUILDHOST_ARCH" >&2; exit 3; }
+  # Empty = the arch was never provisioned; a value still starting with `__` is
+  # a maintained-but-unbaked placeholder (e.g. windows_x86 until its signify job
+  # ships). Both are "not provisioned" -- refuse rather than fetch and trust an
+  # unverifiable verifier.
+  case "$dvm_pin" in
+    '' | __*) echo "FATAL: no pinned mlfront-signify checksum for $BUILDHOST_ARCH (launcher not provisioned)" >&2; exit 3 ;;
+  esac
   install -d "$tools_dir/verifier"
-  dvm_signify="$tools_dir/verifier/mlfront-signify-$dvm_pin"
-  downloadfile "https://gitlab.com/api/v4/projects/60486861/packages/generic/mlfront-signify/$signify_pkg_ver/mlfront-signify-$BUILDHOST_ARCH" "$dvm_signify" "$dvm_pin"
+  dvm_exe=$(dk_extexe)
+  dvm_signify="$tools_dir/verifier/mlfront-signify-$dvm_pin$dvm_exe"
+  downloadfile "https://gitlab.com/api/v4/projects/60486861/packages/generic/mlfront-signify/$signify_pkg_ver/mlfront-signify-$BUILDHOST_ARCH$dvm_exe" "$dvm_signify" "$dvm_pin"
   chmod +x "$dvm_signify"
   if [ -n "$dvm_ver" ]; then dvm_url="$DK_BASE_URL/manifest-$dvm_ver.txt"; else dvm_url="$DK_BASE_URL/manifest.txt"; fi
   dk_fetch "$dvm_url" "$dvm_out"
@@ -690,11 +707,12 @@ DK_EXE=
 
 destdir=$tools_dir/dk0exe-$majminpat_ver-$BUILDHOST_ARCH
 install -d "$destdir"
+dk0_exe="$destdir/dk0$(dk_extexe)"
 download_helper() {
   download_helper_CKSUM=$1; shift
   downloadfile \
-    "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/$majminpat_ver/dk0-$BUILDHOST_ARCH" \
-    "$destdir/dk0" \
+    "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/$majminpat_ver/dk0-$BUILDHOST_ARCH$(dk_extexe)" \
+    "$dk0_exe" \
     "$download_helper_CKSUM"
 }
 download_dk() {
@@ -705,10 +723,10 @@ download_dk() {
 # checksum, so this is a no-op on the common (already-cached) path. (A `--version`
 # comparison would not work: dk0 prints "X.Y.Z+rev-W" but the pin is "X.Y.Z.W".)
 download_dk
-chmod +x "$destdir/dk0"
+chmod +x "$dk0_exe"
 
 # Set DK_EXE
-DK_EXE="$destdir/dk0"
+DK_EXE="$dk0_exe"
 
 # -----
 # launcher store GC
