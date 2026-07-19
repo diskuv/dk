@@ -656,7 +656,7 @@ run: dk0 -t "${{ github.event.head_commit.timestamp }}" ...
 - `--integrity none|existence|checksum` - verify the local value store against the trace store. `none` is fastest but can't tell if values are evicted; `existence` checks for the existence of values (fetching from a remote value store if present); `checksum` is slowest, skips any value read without a constructive-trace entry, and removes it if permitted [default: existence].
 - `--random-seed SEED` - seed the RNG for operations needing randomness (e.g. signing build files). Highly insecure but allows reproducible trace/value stores; if unset, a seed is generated from system entropy.
 - `--trust-local-package PACKAGE_ID` - allow loading local distributions from `PACKAGE_ID`, and accept `PACKAGE_ID`'s producer key on import without the interactive accept/deny prompt. Repeatable. This is the documented escape hatch for unattended imports; it never overrides signature verification or the key-rotation rules.
-- `--dangerously-trust-all` - skip all trust prompts and allow every privileged operation. Don't do it.
+- `--dangerously-trust-all` - skip the `request.ui` capability prompts and allow every privileged rule action for the process. Don't do it: record explicit grants with `dk0 trust grant` (or an interactive `[a]lways` answer) instead. It never affects the import-time signify verification.
 - `--keys-env ENV_PREFIX` - use `<ENV_PREFIX>_PUBKEY` and `<ENV_PREFIX>_SECKEY` as the build public/secret key (lines may be separated with pipes or newlines).
 - `--keys-dir DIR` - directory for the `build.pub`/`build.sec` keys [default: `<workspace>/t/k`, or `<xdg config>/dk` with `--global`].
 
@@ -703,7 +703,7 @@ the `t/d`, `t/c` and `t/k` defaults). The `etc/dk/` directories are:
 | --- | --- | --- | --- |
 | `etc/dk/d` | Prepared distribution keys: `<MAJOR.MINOR>.<PATCH>.dist.json` files carrying the producer public key and signed continuations for the version lines this workspace releases. Author-owned; commit them. | `prepare-version` | `distribute` and `combine` (signing); every import (the keys are locally prepared trust anchors). |
 | `etc/dk/i` | The import directory: verified release `<LIBRARY>.<VERSION>.values.json` files, plus the `values.unattested.json` download scratch file. On the workspace include path, so the imported distributions resolve values and traces. The files double as prior-import trust anchors. Machine-managed: `update` garbage-collects entries its resolution no longer uses, and an `import` prunes the strictly older releases it supersedes on the same `MAJOR.MINOR` line. | `add`, `import`, `restore`, and workspace `import` declarations | distribution resolution; prior-import trust anchoring. |
-| `etc/dk/t` | Consumer trust records: byte-identical copies of directly imported release values files, recorded only after the consumer trust checks pass. Deliberately **not** an include directory, so no values or traces are ever resolved from a record; a record only anchors the producer key and rotation of later imports. | `import local` (acceptance) | prior-import trust anchoring. |
+| `etc/dk/t` | Consumer trust records. Three kinds: **(1)** byte-identical copies of directly imported release values files (`<LIBRARY>.<VERSION>.values.json`), recorded only after the consumer trust checks pass; **(2)** `imports.json`, the machine-written import ledger. Each entry records a `values_sha256` (SHA-256 of the dos2unix-ed content) that an import/restore verification accepted, its `kind` (`record` for the imported `values.json` file, or `scriptmodule` for an exported `values.lua` whose hash the producer signed into `build_to_sign.build_script_module_sha256s`), and the distribution's producer `pubkey_base64`. A rule whose run-time content SHA matches a keyed entry is attributed to that producer; **(3)** `capabilities.json`, the human-authorized `request.ui` capability grants (`run`, `write`) keyed by producer public key (`pubkey_base64`) or by local values content (`values_sha256`). A `.gitignore` written by `dk0` keeps the machine-written records (1) and (2) out of git while leaving `capabilities.json` committable so a repository can carry its grants into CI. Deliberately **not** an include directory, so no values or traces are ever resolved from a record; a record only anchors the producer key and rotation of later imports, gates producer-key grants (ledger), or carries grants. | `import local` (record copies); every `import`/`restore` (ledger); `trust grant` and the capability prompt's `[a]lways` answer (grants) | prior-import trust anchoring; producer-key grant activation (ledger); `request.ui` capability decisions (grants). |
 | `etc/dk/v` | Authored values files (`*.values.jsonc`, `*.values.lua`) belonging to the workspace. On the workspace include path. `distribute` seals them into the distribution manifest together with the workspace script and `dist/*.u`. | the workspace author | distribution resolution; manifest sealing. |
 
 ### Lua interpreter
@@ -794,7 +794,9 @@ In the workspace, asset libraries are implicitly trusted, so no
 
 - Before submitting work, `dk0` prints the resolved inner argument vector (it can
   pass the exact argument vector to a subshell/remote engine).
-- `dk0` prompts the user and asks for confirmation before running a program.
+- `dk0` asks for confirmation before a rule runs a program or writes a file,
+  unless a matching capability grant is recorded (`dk0 trust grant` or a prior
+  `[a]lways` answer; see Security).
 
 ## Security
 
@@ -812,7 +814,7 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 | Key rotation via signed continuations, monotonic per `MAJOR.MINOR` | `prepare-version`, `distribute` (author); every import (consumer) | Yes. `SecPackageRegistry.characterize` runs on both sides. A producer key is imported once and never overwritten (no key may reclaim an established `MAJOR.MINOR`); a new `MAJOR.MINOR` must carry the continuation key a trusted prior release signed; a release below the latest imported release is rejected (`restore` falls back to a cold build). |
 | Vendor-key trust root and deny-by-default acceptance | every import | Yes. Trust anchors, in order: the built-in dk signify key for `CommonsBase_Std`, locally prepared keys in `etc/dk/d`, previously imported releases (the import directory `etc/dk/i` plus the local trust records in `etc/dk/t`), and the documented `--trust-local-package` escape hatch. Any other producer key gets an interactive accept/deny prompt that defaults to deny and denies at end of input, so CI fails closed. Transitive distributions recovered from a directly imported release are verified (signatures and rotation consistency) before their content-pinned acceptance, and never anchor a directly imported release's rotation. |
 | Value-store integrity of Marshal-ed ASTs | build / `get-object` path | Yes. A SHA-256 prefix guards each Marshal-ed AST and is signify-signed with a per-workspace build key (`SECURITY.md`). |
-| Rule-permission consent for `spawn` / `capture` / `writefile` | `request.ui.*` (`BuildRequestUi`) | Yes. Deny-by-default interactive prompt before running a program (`request.ui.spawn`, `request.ui.capture`) or writing a file (`request.ui.writefile`); fails closed with no TTY. Answering `[a]ll` trusts only the answering rule for the rest of the process, not every rule; the process-wide `--dangerously-trust-all` is a separate command-line escape hatch. The prompt warns when a program is a bare name resolved through `PATH`. |
+| Rule-capability consent for `spawn` / `capture` / `writefile`, keyed by signify provenance | `request.ui.*` (`BuildRequestUi`, `SecUiCapability`); `trust list/grant/revoke` | Yes. Deny-by-default prompt before a rule first exercises a capability — `run` (running a program: `request.ui.spawn` and `request.ui.capture`, gated identically so capture cannot bypass a spawn denial) or `write` (`request.ui.writefile`); fails closed with no TTY, naming `dk0 trust grant`. The prompt identifies the rule by its signify provenance: the producer key fingerprint and `package@version` for a rule from an imported, signature-verified distribution, or the values-file SHA-256 for a host script or local rule. Answering `[a]lways` (or `dk0 trust grant`) persists the grant in `etc/dk/t/capabilities.json`, keyed by the full producer public key (never the fingerprint, which is the attacker-choosable keynum) or by content hash; `[y]es` allows once. A producer-key grant is honored only for values content whose SHA-256 is recorded in the `etc/dk/t/imports.json` ledger against that producer — the producer signs each exported script module's content hash into `build_to_sign.build_script_module_sha256s`, and import records it after verifying the signature — so content tampered after import (or a local squatter) falls back to the content-hash prompt. Key acceptance at import never confers a capability. The process-wide `--dangerously-trust-all` is a separate command-line escape hatch; the isolated `dk0 remote` path additionally allows the single, producer-trusted orchestration rule it runs without a prompt. The prompt warns when a program is a bare name resolved through `PATH`. |
 | Windows executable-search hardening | `dk0` process startup (`Shell.ml`) | Yes. On Windows `dk0` sets `NoDefaultCurrentDirectoryInExePath`, removing the current directory from the executable search for every program it spawns — rule spawns, precommands, function commands and subshells — so a program named by a bare name is found only through `PATH`, never from an executable dropped into the working directory. |
 | Build-state exclusion from globs | `request.ui.glob` (`BuildRequestUi`) | Yes. The signify keys directory (holding `build.sec`), the data directory and the cache directory are never enumerated, so a rule cannot route `build.sec` or other build state into a content-addressed bundle. |
 | `signify` primitive (keygen / sign / verify / checksum lists) | `signify -G` / `-S` / `-V` / `-C` | The OpenBSD signify implementation (`MlFront_Signify`), including `-C` verification of a signed SHA256/SHA512 checksum list against its files. |
@@ -836,12 +838,33 @@ keys" sections; the value-store protections are in `SECURITY.md`.
   (for audit) and the sealed distribution scripts (for verified manifest
   rendering) from the small distmeta only. It is the verified-release source for
   catalog and manifest rendering.
-- **Rule permissions are deny-by-default** with an interactive accept prompt.
-  Every rule action that runs a program (`request.ui.spawn`,
-  `request.ui.capture`) or writes a file (`request.ui.writefile`) is prompted;
-  answering `[a]ll` grants further actions for that rule only, and a program
-  given as a bare name is flagged as `PATH`-resolved (with the current directory
-  excluded from the search on Windows).
+- **Rule capabilities are deny-by-default and keyed by signify provenance.**
+  A rule action that runs a program (`request.ui.spawn`, `request.ui.capture` —
+  one `run` capability, so capture cannot bypass a spawn denial) or writes a
+  file (`request.ui.writefile`, the `write` capability) is prompted the first
+  time; answering `[a]lways` persists a workspace grant
+  (`etc/dk/t/capabilities.json`) for the rule's producer signify key — bound to
+  the full public key — or, for unsigned local content, for the values-file
+  SHA-256 (editing the content asks again). A rule from an imported distribution
+  is attributed to the producer key when its `values.lua` content SHA-256 is in
+  the import ledger (`etc/dk/t/imports.json`) against that key: the producer
+  signs each exported script module's content SHA into the distribution
+  (`build_to_sign.build_script_module_sha256s`), import records it after
+  verifying the signature, and the run-time content is bound by matching that
+  hash. Content tampered after import (or a local file squatting on the module
+  id) is not in the ledger and safely falls back to the content-hash prompt.
+  `dk0 trust grant|revoke|list` manages the grants non-interactively (CI).
+  Accepting a producer key at import time never grants a capability: authenticity
+  and authorization are separate decisions. A program given as a bare name is
+  flagged as `PATH`-resolved (with the current directory excluded from the
+  search on Windows).
+- **`dk0 remote` composes producer trust into capability.** The isolated remote
+  orchestration path imports and verifies the explicitly named producer, then
+  (only for the single orchestration rule it runs, in the ephemeral isolated
+  workspace) allows that producer key's rule to run its own
+  capture/spawn/writefile without a per-action prompt — so `dk0 remote GitHub@X`
+  no longer needs `--dangerously-trust-all`. The allowance is scoped to the
+  named producer's key and the isolated run; it is empty in every other process.
 
 ### Built-in trust root
 
