@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/diskuv/dk.git
+	branch = V2_5
+	commit = 700ca0a6cb71847bc7a74ed84dc8caef34a330ee
+	parent = 5df49099f8935d51396db7cf89d576f93d9cb781
+	method = merge
+	cmdver = 0.4.9
