@@ -81,9 +81,6 @@ To view a copy of this license, visit <http://creativecommons.org/licenses/by-nd
 
 "dk" acts as a package manager: you tell it what packages you want to download and run.
 Those packages have independent licenses and you may be prompted to accept licenses.
-Those licenses include but are not limited to:
-
-- The [DkSDK SOFTWARE DEVELOPMENT KIT LICENSE AGREEMENT](./LICENSE-DKSDK)
 
 ## Related Open Source
 

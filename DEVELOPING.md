@@ -55,7 +55,7 @@ komac new Diskuv.dk `
     --release-notes-url "https://github.com/diskuv/dk/releases/tag/2.3.202505282324" `
     --urls "https://diskuv.com/a/dk-distribution/2.3.202505282324/dist/dk-windows_x86_64.exe" `
     --moniker dk `
-    --license "DkSDK SOFTWARE DEVELOPMENT KIT LICENSE AGREEMENT" `
+    --license "Open Software License 3.0" `
     --license-url "https://diskuv.com/legal/" `
     --publisher "Diskuv, Inc." `
     --publisher-url "https://diskuv.com" `
