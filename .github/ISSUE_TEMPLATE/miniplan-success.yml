@@ -1,0 +1,37 @@
+name: Mini-plan worked
+description: A dk Prompt Studio mini-plan helped you build and ship working software.
+title: "[miniplan-success] "
+labels: ["miniplan-success", "from-prompt-studio"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Great to hear it worked. Sharing what you built helps Diskuv make the
+        mini-plans better for the next person.
+  - type: textarea
+    id: built
+    attributes:
+      label: What did you build?
+    validations:
+      required: true
+  - type: textarea
+    id: miniplan
+    attributes:
+      label: The mini-plan you pasted into your agent
+      render: text
+    validations:
+      required: false
+  - type: input
+    id: prompt-id
+    attributes:
+      label: Prompt id (if you have it)
+      description: Optional. Shown by the studio with the generated mini-plan when available.
+    validations:
+      required: false
+  - type: input
+    id: project
+    attributes:
+      label: Link to your project (if public)
+      placeholder: https://github.com/you/your-project
+    validations:
+      required: false

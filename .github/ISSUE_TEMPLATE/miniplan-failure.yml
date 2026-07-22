@@ -1,0 +1,49 @@
+name: Mini-plan did not work
+description: A dk Prompt Studio mini-plan stalled or failed while your agent was building the software.
+title: "[miniplan-failure] "
+labels: ["miniplan-failure", "from-prompt-studio"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Sorry it stalled. This report helps Diskuv improve the mini-plans other
+        people get. Do not paste secrets, tokens, or private code.
+  - type: textarea
+    id: miniplan
+    attributes:
+      label: The mini-plan you pasted into your agent
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: prompt-id
+    attributes:
+      label: Prompt id (if you have it)
+      description: Optional. Shown by the studio with the generated mini-plan when available.
+    validations:
+      required: false
+  - type: textarea
+    id: stall
+    attributes:
+      label: Where did it stall?
+      description: The step or command where your agent got stuck.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or error output
+      render: shell
+    validations:
+      required: false
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other
+    validations:
+      required: false

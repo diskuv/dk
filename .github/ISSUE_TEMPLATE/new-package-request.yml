@@ -1,0 +1,55 @@
+name: New dk package request
+description: Ask Diskuv to adopt a tool or library your mini-plan built from source as an official dk package.
+title: "[new-package] "
+labels: ["new-package", "from-prompt-studio"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for building a package. If your mini-plan brought a tool into
+        the build from source, share how so Diskuv can adopt it under
+        github.com/dkpkg and other users get it prebuilt.
+  - type: input
+    id: package
+    attributes:
+      label: Tool or library name
+      placeholder: ffmpeg
+    validations:
+      required: true
+  - type: input
+    id: upstream
+    attributes:
+      label: Upstream project URL
+      placeholder: https://github.com/owner/project
+    validations:
+      required: true
+  - type: dropdown
+    id: method
+    attributes:
+      label: How did your agent bring it into the build?
+      options:
+        - Bundle of released binaries
+        - From source with the make-dk-package-from-autoconf skill
+        - From source following the project README or INSTALL notes
+    validations:
+      required: true
+  - type: input
+    id: abis
+    attributes:
+      label: Which ABIs did you validate?
+      placeholder: Windows_x86_64, Linux_x86_64
+    validations:
+      required: false
+  - type: input
+    id: repo
+    attributes:
+      label: Link to your GitHub repo that hosts the dk package
+      placeholder: https://github.com/you/your-dk-package
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else that would help package it
+    validations:
+      required: false
