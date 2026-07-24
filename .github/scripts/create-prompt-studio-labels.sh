@@ -21,5 +21,6 @@ create "from-prompt-studio" "5319e7" "Filed from a dk Prompt Studio mini-plan"
 create "new-package"        "0e8a16" "Request to adopt a tool or library as a dk package"
 create "miniplan-failure"   "d73a4a" "A mini-plan stalled or failed while building"
 create "miniplan-success"   "0e8a16" "A mini-plan produced working software"
+create "implemented"        "1d76db" "The requested dk package is created, tested, and available"
 
 echo "Labels created or updated on $REPO."
