@@ -759,11 +759,12 @@ A local directory path is always zipped into a zip archive file, where the [Zip 
 
 - have the zip last modification time to the earliest datetime (Jan 1, 1980 00:00:00)
 - have each zip entry with its modification time to the earliest datetime (Jan 1, 1980 00:00:00)
-- have each zip file entry set its extended attribute to be a "regular file" with `rw-r--r--` permissions
-- use zip compression level 5, even for tiny file entries. That is: "compression method: (2 bytes) ... 5 - The file is Reduced with compression factor 4" at [IANA application/zip]
+- have each zip file entry set its external file attribute to a Unix "regular file" with `rwxr-x---` permissions (octal `0100750`). Every entry is marked executable because, when a zip is created on a Windows host for a Unix target, the creator cannot reliably tell which files are executable; the correct executable bit is restored on extraction from external information, so marking every entry executable does not affect what is unzipped.
+- compress every entry with the DEFLATE method (zip [compression method](https://www.iana.org/assignments/media-types/application/zip) `8`) at compression level 5, even for tiny file entries (nothing is stored uncompressed)
 - always accompany a zip directory entry with a zip64 directory entry
+- produce the DEFLATE bit stream with the reference encoder: the vendored `miniz` at the commit pinned in `MlFront_ZipFile`'s notes. RFC 1951 admits many valid DEFLATE encodings of the same data, so byte-for-byte reproducibility across implementations depends on using that same encoder. dk0 and dk1 use the native `miniz`; a JavaScript implementation (dkjs) uses the same `miniz` compiled to WebAssembly. The archive bytes, and therefore the [Z256](#z256---sha256-of-zip-archive-file) of the archive, are then identical across implementations.
 
-[IANA application/zip]: https://www.iana.org/assignments/media-types/application/zip
+The multi-disk-volume "index" archive format, which lets a single entry be fetched from a large remote archive without downloading the whole archive, is specified in `MlFront_ZipFile`'s notes, and the same reference `miniz` produces it on every implementation.
 
 ### Loading Assets
 
