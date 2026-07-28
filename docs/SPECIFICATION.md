@@ -934,6 +934,7 @@ At the time of writing, the list is:
 - `Linux_arm64`
 - `Linux_x86`
 - `Linux_x86_64`
+- `Linux_x86_64_musl`
 - `NetBSD_x86_64`
 - `OpenBSD_x86_64`
 - `Windows_arm32`
