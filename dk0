@@ -648,6 +648,17 @@ dk_manifest_str() {
   "$DKMLSYS_GREP" "^$2=" "$1" | head -1 | cut -d= -f2
 }
 
+# Defense-in-depth: the dk0 download URL comes from the signify-verified manifest,
+# but still restrict it to known hosts so a signed-but-malicious manifest cannot
+# redirect the fetch off github.com/dkpkg or the legacy GitLab package host.
+dk_allow_host() {
+  case "$1" in
+    https://github.com/dkpkg/*) return 0 ;;
+    https://gitlab.com/api/v4/projects/60486861/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 # On Windows the published dk0 + mlfront-signify binaries carry a `.exe`
 # extension; other platforms have none. Mirrors gen-manifest.sh's extexe.
 dk_extexe() { case "$BUILDHOST_ARCH" in windows_*) printf '.exe' ;; esac; }
@@ -698,6 +709,8 @@ fi
 [ -n "$majminpat_ver" ] || { echo "FATAL: could not resolve a dk0 version" >&2; exit 1; }
 dk0_cksum=$(dk_manifest_str "$dk_manifest" "dk0_${BUILDHOST_ARCH}")
 [ -n "$dk0_cksum" ] || { echo "FATAL: manifest has no dk0 build for $BUILDHOST_ARCH (version $majminpat_ver)" >&2; exit 3; }
+dk0_url_template=$(dk_manifest_str "$dk_manifest" "dk0_url_template")
+[ -n "$dk0_url_template" ] || { echo "FATAL: manifest has no dk0_url_template (version $majminpat_ver)" >&2; exit 1; }
 
 # -----
 # single binary executable
@@ -710,10 +723,13 @@ install -d "$destdir"
 dk0_exe="$destdir/dk0$(dk_extexe)"
 download_helper() {
   download_helper_CKSUM=$1; shift
-  downloadfile \
-    "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk0/$majminpat_ver/dk0-$BUILDHOST_ARCH$(dk_extexe)" \
-    "$dk0_exe" \
-    "$download_helper_CKSUM"
+  # Resolve {version}/{arch}/{exe} in the verified manifest's dk0_url_template,
+  # then allowlist the host before fetching.
+  download_helper_URL=$(printf '%s' "$dk0_url_template" | "$DKMLSYS_SED" \
+    -e "s|{version}|$majminpat_ver|g" -e "s|{arch}|$BUILDHOST_ARCH|g" -e "s|{exe}|$(dk_extexe)|g")
+  dk_allow_host "$download_helper_URL" \
+    || { echo "FATAL: dk0 download host not allowlisted: $download_helper_URL" >&2; exit 1; }
+  downloadfile "$download_helper_URL" "$dk0_exe" "$download_helper_CKSUM"
 }
 download_dk() {
   # dk0 checksum comes from the signify-verified manifest, not a baked value.
