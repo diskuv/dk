@@ -100,6 +100,8 @@ IF "%DK_WANT%"=="" (
 IF "!DK_VER!"=="" (ECHO dk1: could not resolve a dk1 version 1>&2 & EXIT /B 1)
 CALL :mval dk1_!DK_ARCH! DK_CKSUM
 IF "!DK_CKSUM!"=="" (ECHO dk1: manifest has no dk1 build for !DK_ARCH! ^(version !DK_VER!^) 1>&2 & EXIT /B 3)
+CALL :mval dk1_url_template DK_TMPL
+IF "!DK_TMPL!"=="" (ECHO dk1: manifest has no dk1_url_template ^(version !DK_VER!^) 1>&2 & EXIT /B 1)
 
 REM 5. Cache + download dk1.exe (version-keyed dir; never overwrite a running exe).
 SET "DK_EXEDIR=%DK_DATA_HOME%\dk1exe-!DK_VER!-!DK_ARCH!"
@@ -111,7 +113,15 @@ IF EXIST "!DK_EXE!" (
     IF /I "!DK_EXE_ACTUAL!"=="!DK_CKSUM!" SET "DK_NEED_EXE=0"
 )
 IF !DK_NEED_EXE! EQU 1 (
-    CALL :fetch "https://gitlab.com/api/v4/projects/60486861/packages/generic/dk1/!DK_VER!/dk1-!DK_ARCH!.exe" "!DK_EXE!"
+    REM Resolve {version}/{arch}/{exe} in the verified dk1_url_template, then
+    REM allowlist the host before downloading.
+    SET "DK_URL=!DK_TMPL!"
+    SET "DK_URL=!DK_URL:{version}=%DK_VER%!"
+    SET "DK_URL=!DK_URL:{arch}=%DK_ARCH%!"
+    SET "DK_URL=!DK_URL:{exe}=.exe!"
+    CALL :allowhost "!DK_URL!"
+    IF !ERRORLEVEL! NEQ 0 (ECHO dk1: download host not allowlisted: !DK_URL! 1>&2 & EXIT /B 1)
+    CALL :fetch "!DK_URL!" "!DK_EXE!"
     IF !ERRORLEVEL! NEQ 0 EXIT /B 1
     CALL :sha256 "!DK_EXE!" DK_EXE_ACTUAL
     IF /I NOT "!DK_EXE_ACTUAL!"=="!DK_CKSUM!" (ECHO dk1: dk1.exe checksum mismatch 1>&2 & EXIT /B 1)
@@ -185,6 +195,13 @@ FOR /F "usebackq tokens=1,* delims==" %%A IN ("%DK_VDIR%\manifest") DO (
     IF /I "%%A"=="%~1" SET "%~2=%%B"
 )
 EXIT /B 0
+
+REM :allowhost URL  -- EXIT /B 0 if URL starts with an allowlisted host prefix,
+REM else 1. Defense-in-depth over the signify-verified template (a signed-but-
+REM malicious manifest still cannot redirect the download off a known host).
+:allowhost
+ECHO %~1| findstr /B /L /C:"https://github.com/dkpkg/" /C:"https://gitlab.com/api/v4/projects/60486861/" >NUL 2>&1
+EXIT /B !ERRORLEVEL!
 
 REM :readpin  -- set DK_PIN to the version between the quotes on the dk.u
 REM actual_version line. The caret-escaped FOR options are how batch uses a
