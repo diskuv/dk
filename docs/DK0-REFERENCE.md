@@ -761,7 +761,7 @@ In the workspace, asset libraries are implicitly trusted, so no
 > In the [workspace script], if the
 > [existing output block] has a size and checksum then the
 > asset's size and checksum won't be recomputed. The block is the
-> `\dk.asset(byteSize: "...", checksum: "sha256:...")` metadata markup;
+> `\dk.asset(byteSize: "...", checksum: (sha256: "..."))` metadata markup;
 > the legacy three Lua value lines (`'asset'`, size, checksum) that predate
 > the markup are still read so already-published packages keep working, and
 > `update` rewrites them to the markup. The workspace script is

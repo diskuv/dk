@@ -192,10 +192,10 @@ either a `file=` or a `dir=` path:
 
 Here 
   % unified.asset { name="NuGetConfig", file="assets/nuget/NuGet.Config" }
-  \dk.asset(byteSize: "321", checksum: "sha256:b7b2fedda9c847bdee1e5d4035460c895cda1db56c28629940bfb4d200b6bb90")\;
+  \dk.asset(byteSize: "321", checksum: (sha256: "b7b2fedda9c847bdee1e5d4035460c895cda1db56c28629940bfb4d200b6bb90"))\;
 
   % unified.asset { name="NuGetPackages", dir="assets/nuget/packages" }
-  \dk.asset(byteSize: "226", checksum: "sha256:e21a238ce8fede4c01faa609588c44207a330515ce78a973e79c3443b1695ace")\;
+  \dk.asset(byteSize: "226", checksum: (sha256: "e21a238ce8fede4c01faa609588c44207a330515ce78a973e79c3443b1695ace"))\;
 ```
 
 As shown above, the `unified.asset` must be in a section with a module identifier

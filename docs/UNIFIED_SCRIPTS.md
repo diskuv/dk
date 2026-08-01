@@ -190,7 +190,7 @@ important information about the build is placed back into the `.dk.u` file:
 Bundle a small CMake project in the hello-src/ directory
 using the Lua command "unified.asset"
   % unified.asset { name="HelloWorld", dir="hello-src" }
-  \dk.asset(byteSize: "790", checksum: "sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d")\;
+  \dk.asset(byteSize: "790", checksum: (sha256: "847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d"))\;
 
 Run the "run-function" shell command to build HelloWorld
 with CMake
@@ -214,7 +214,8 @@ Notice the odd-looking `\dk.asset(...)\;`, `\test(pass)\dk.object(...)\;` and
 [renderers] can use to make pretty output. A `\dk.object` records a built object's `abi`
 and `value-id`. A `\dk.asset` from `get-asset` records a fetched asset's `path`,
 `value-id`, and `byteSize`, while a `\dk.asset` from `unified.asset` records the declared
-asset's `byteSize` and algorithm-prefixed `checksum`.
+asset's `byteSize` and its `checksum` as a nested attribute list with one attribute per
+algorithm (ex. `sha256`).
 
 ## Syntax
 
@@ -948,7 +949,7 @@ Unified scripts satisfies the three requirements.
 Bundle a small CMake project in the hello-src/ directory
 using the Lua command "unified.asset"
   % unified.asset { name="HelloWorld", dir="hello-src" }
-  \dk.asset(byteSize: "790", checksum: "sha256:847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d")\;
+  \dk.asset(byteSize: "790", checksum: (sha256: "847c39531962e987ba69983babf15f244735f3d566d4fdcaa9a94c038484415d"))\;
 
 Run the "run-function" shell command to build HelloWorld
 with CMake
