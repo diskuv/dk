@@ -1008,3 +1008,21 @@ its signed manifest, so pruning is always safe and never blocks a launch.
 | `/usr/bin/awk`       | `dk0` shell script - to parse sha256sums (optional; searched 1st) |
 | `/bin/awk`           | `dk0` shell script (fallback; searched last)                      |
 | `/usr/bin/cygpath`   | `dk0` shell script (optional)                                     |
+
+### Dynamic linker (per ABI, not per OS)
+
+The tables above list files that vary by operating system. The dynamic linker
+is the exception: it varies by **ABI**. A dynamically linked executable names
+its loader by absolute path in its ELF `PT_INTERP` header, so that exact path
+must exist to run objects of that ABI. Statically linked objects carry no
+`PT_INTERP` and need no loader; the `Linux_x86_64_musl` `dk0`/`dk1` launchers
+are static for this reason. The loader is normally supplied by the host's own
+libc, and must be provided explicitly only when objects of one ABI run on a
+host of another - for example `Linux_x86_64_musl` objects on a glibc host.
+
+| ABI                 | File                          | What                                                |
+| ------------------- | ----------------------------- | --------------------------------------------------- |
+| `Linux_arm64`       | `/lib/ld-linux-aarch64.so.1`  | glibc dynamic linker for dynamically linked objects |
+| `Linux_x86`         | `/lib/ld-linux.so.2`          | glibc dynamic linker for dynamically linked objects |
+| `Linux_x86_64`      | `/lib64/ld-linux-x86-64.so.2` | glibc dynamic linker for dynamically linked objects |
+| `Linux_x86_64_musl` | `/lib/ld-musl-x86_64.so.1`    | musl dynamic linker for dynamically linked objects  |
