@@ -215,7 +215,8 @@ Notice the odd-looking `\dk.asset(...)\;`, `\test(pass)\dk.object(...)\;` and
 and `value-id`. A `\dk.asset` from `get-asset` records a fetched asset's `path`,
 `value-id`, and `byteSize`, while a `\dk.asset` from `unified.asset` records the declared
 asset's `byteSize` and its `checksum` as a nested attribute list with one attribute per
-algorithm (ex. `sha256`).
+algorithm (ex. `sha256`). A `\dk.import` records one imported library of a workspace
+`import` command with its `type`, `library`, `version`, and per-algorithm `checksum`.
 
 ## Syntax
 

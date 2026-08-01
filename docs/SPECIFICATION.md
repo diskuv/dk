@@ -4269,13 +4269,11 @@ Imports a distribution.
   %% import {
   ..   type="TYPE",
   ..   ... depends on TYPE ... }
-  'import'
-  'TYPE'
-  { { 'CommonsBase_Std', '2.5.202603190707', {
-      'blake2b-256:9d956430ebb347d46e0037e8094bb92b1fcbfa52603394b643685c40b489f7f0',
-      'sha256:8e37f1d16259b643fbd3ce447d53e97ef321d96555bf9c3ba23a328108848ec6',
-      'sha1:b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49'
-    } } }
+  \dk.import(type: "TYPE", library: "CommonsBase_Std",
+    version: "2.5.202603190707",
+    checksum: (blake2b-256: "9d956430ebb347d46e0037e8094bb92b1fcbfa52603394b643685c40b489f7f0",
+      sha256: "8e37f1d16259b643fbd3ce447d53e97ef321d96555bf9c3ba23a328108848ec6",
+      sha1: "b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49"))\;
 ```
 
 The `import` will:
@@ -4285,14 +4283,24 @@ The `import` will:
 - place distribution metadata in the trace store (deprecated; <https://github.com/diskuv/dk/issues/101>)
 - place distribution metadata in the source tree
 
-The return values are either `nil` and an error message, or three values:
+On error, the output block is `nil` and an error message echoed as two Lua
+value lines.
 
-1. the type constant 'import'
-2. the value 'TYPE' from `import { type="TYPE", ... }`
-3. a table value whose:
+On success, the output block is one `\dk.import` metadata markup (see
+[Metadata syntax](UNIFIED_SCRIPTS.md#metadata-syntax)) per imported library,
+with the attributes:
 
-   - keys are a versioned library that was distributed in the GitHub release
-   - values are a numbered table of the checksums of the distribution metadata (`.../<LIBRARY>-<VERSION>.values.json`)
+1. `type`: the value 'TYPE' from `import { type="TYPE", ... }`.
+2. `library`: the library that was distributed in the GitHub release.
+3. `version`: the distributed version of the library.
+4. `checksum`: a nested attribute list with one attribute per checksum
+   algorithm of the distribution metadata
+   (`.../<LIBRARY>-<VERSION>.values.json`).
+
+The legacy output block form that predates the markup (the three Lua value
+lines `'import'`, the type, and a table of records) is still accepted when
+reading existing output blocks, so already-published packages keep working;
+`dk0 update` rewrites it to the markup form.
 
 However, *if* there is existing output (ie. `CommonsBase_Std@2.5.202603190707`)
 and *all* of the `LIBRARY@VERSION` are present in the trace store or source tree,
@@ -4317,13 +4325,11 @@ Imports a distribution from a GitHub release.
   ..   repo="OWNER/REPO",
   ..   host="",
   ..   tag="" }
-  'import'
-  'github-l2'
-  { { 'CommonsBase_Std', '2.5.202603190707', {
-      'blake2b-256:9d956430ebb347d46e0037e8094bb92b1fcbfa52603394b643685c40b489f7f0',
-      'sha256:8e37f1d16259b643fbd3ce447d53e97ef321d96555bf9c3ba23a328108848ec6',
-      'sha1:b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49'
-    } } }
+  \dk.import(type: "github-l2", library: "CommonsBase_Std",
+    version: "2.5.202603190707",
+    checksum: (blake2b-256: "9d956430ebb347d46e0037e8094bb92b1fcbfa52603394b643685c40b489f7f0",
+      sha256: "8e37f1d16259b643fbd3ce447d53e97ef321d96555bf9c3ba23a328108848ec6",
+      sha1: "b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49"))\;
 ```
 
 - `host` defaults to `github.com`.

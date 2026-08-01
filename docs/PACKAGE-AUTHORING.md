@@ -55,13 +55,11 @@ section behaves like a miniature lock file:
   %% import {
   ..   type="github-l2",
   ..   repo="dkpkg/CommonsBase_Std" }
-  'import'
-  'github-l2'
-  { { 'CommonsBase_Std', '2.5.202606240625', {
-      'blake2b-256:6450d810180892d71647fe63c2313d17df5ce23eef80e1050a13cf7ad4417b31',
-      'sha256:9eac4142bc0a80e5b51d3b89e83069672873ec628256afe849408ab64f954100',
-      'sha1:8c02d3bf95fe54717dd1798f292c6d6688a63faa'
-    } } }
+  \dk.import(type: "github-l2", library: "CommonsBase_Std",
+    version: "2.5.202606240625",
+    checksum: (blake2b-256: "6450d810180892d71647fe63c2313d17df5ce23eef80e1050a13cf7ad4417b31",
+      sha256: "9eac4142bc0a80e5b51d3b89e83069672873ec628256afe849408ab64f954100",
+      sha1: "8c02d3bf95fe54717dd1798f292c6d6688a63faa"))\;
 ```
 
 The two spaces and the `%%` start a [Lua workspace command], and the
