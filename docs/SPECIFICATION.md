@@ -3940,6 +3940,19 @@ In the example above, there are four (4) return values. The first is
 a Lua string, the second is a Lua number, the third is a Lua string,
 and the fourth is a Lua table.
 
+When the output is a metadata markup block (see
+[Metadata syntax](UNIFIED_SCRIPTS.md#metadata-syntax)) rather than Lua value
+lines, such as the `\dk.asset(...)` block recorded by
+[unified.asset](#unifiedasset):
+
+- each markup converts to a Lua table with the reserved key `tag` bound to
+  the markup name, each `name: "text"` attribute bound as a string field, each
+  bare attribute bound to the number `1`, each nested attribute list bound to
+  a nested table, and each `[argument]` added as a numbered entry holding the
+  argument's plaintext
+- the output block itself is echoed verbatim, not as the Lua table view, so
+  the block is a fixed point under re-runs and `update` stays stable
+
 Any Lua function can use `unified.existingoutput {}` to have a persistent memory of what
 happened the last time the Lua function was called.
 
@@ -4026,7 +4039,8 @@ On error, returns `nil` and an error message which are echoed as two Lua
 value lines.
 
 On success, the output block is a single `\dk.asset` metadata markup line
-(see [Metadata syntax](#metadata-syntax)) with the attributes:
+(see [Metadata syntax](UNIFIED_SCRIPTS.md#metadata-syntax)) with the
+attributes:
 
 1. `byteSize`: the size of the asset in bytes.
 2. `checksum`: the algorithm-prefixed checksum of the asset (ex.
