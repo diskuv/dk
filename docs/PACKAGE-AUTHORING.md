@@ -192,23 +192,19 @@ either a `file=` or a `dir=` path:
 
 Here 
   % unified.asset { name="NuGetConfig", file="assets/nuget/NuGet.Config" }
-  'asset'
-  '321'
-  'sha256:b7b2fedda9c847bdee1e5d4035460c895cda1db56c28629940bfb4d200b6bb90'
+  \dk.asset(byteSize: "321", checksum: "sha256:b7b2fedda9c847bdee1e5d4035460c895cda1db56c28629940bfb4d200b6bb90")\;
 
   % unified.asset { name="NuGetPackages", dir="assets/nuget/packages" }
-  'asset'
-  '226'
-  { 'sha256:e21a238ce8fede4c01faa609588c44207a330515ce78a973e79c3443b1695ace' }
+  \dk.asset(byteSize: "226", checksum: "sha256:e21a238ce8fede4c01faa609588c44207a330515ce78a973e79c3443b1695ace")\;
 ```
 
 As shown above, the `unified.asset` must be in a section with a module identifier
 (ex. `CommonsLang_DotNet.Apparatus@1.0.0`).
 
-The output blocks (the lines that start with `'asset'` and end with sha256
-checksums) are not meant to be hand-maintained. There will be a command like
-`dk0 update --no-imports` for the [dk0 Reference Implementation] that will
-recalculate the checksums on your behalf.
+The output blocks (the `\dk.asset(...)` metadata lines recording the byte size
+and sha256 checksum) are not meant to be hand-maintained. There will be a
+command like `dk0 update --no-imports` for the [dk0 Reference Implementation]
+that will recalculate the checksums on your behalf.
 
 ### Downloaded assets
 

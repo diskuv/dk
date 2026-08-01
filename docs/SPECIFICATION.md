@@ -680,9 +680,7 @@ So:
 ### CommonsBase_GNU.Make.Apparatus@4.4.1
 
   % unified.asset { name="BuildW32Bat", file="assets/p/patched-make-build_w32.bat" }
-  'asset'
-  '11131'
-  'sha256:3f9825744b486bc5413806cccbae36a4d354e944765fba68c26d37884369a06d'
+  \dk.asset(byteSize: "11131", checksum: "sha256:3f9825744b486bc5413806cccbae36a4d354e944765fba68c26d37884369a06d")\;
 ```
 
 creates an asset `CommonsBase_GNU.Make.Apparatus.BuildW32Bat@4.4.1` with path `-p assets/p/patched-make-build_w32.bat`.
@@ -4008,18 +4006,12 @@ If there is no valid `MODULE@VERSION` then `scriptmodver` will be the values `ni
 Assumes that the script is .../*.u/run.u and that
 .../*.u/data/gawk-5.3.1.tar.gz exists.
   % unified.asset { name="GawkTarball", file="data/gawk-5.3.1.tar.gz" }
-  'asset'
-  '6264553'
-  { 'sha256:fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e',
-    'sha1:b82ae461dcc46e4aaa3381d9ada2a093e9aa1b49' }
+  \dk.asset(byteSize: "6264553", checksum: "sha256:fa41b3a85413af87fb5e3a7d9c8fa8d4a20728c67651185bb49c38a7f9382b1e")\;
 
 Assumes that the script is .../*.u/run.u and that
 .../*.u/user/share/gawk directory exists.
   % unified.asset { name="GawkShare", dir="usr/share/gawk" }
-  'asset'
-  '123456'
-  { 'sha256:0000003812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904',
-    'sha1:99baee504a1fe91a07bc66b6900bd39874191889' }
+  \dk.asset(byteSize: "123456", checksum: "sha256:0000003812089120bc2a5d84f9e65cd0c25e4a4d724c80075c357239c74ae904")\;
 ```
 
 `unified.asset` loads the local file or directory, and makes a singleton bundle from the asset. The local file or directory must be a [strictly relative path](#strictly-relative-path).
@@ -4030,11 +4022,21 @@ Assumes that the script is .../*.u/run.u and that
 - the bundle id is `<scriptid>.<name>@<scriptver>` where `scriptid` and `scriptver` are from [unified.scriptmodver](#unifiedscriptmodver)
 - the origin is named the library id of `scriptid` (ex. `OurLibrary_Std` if `scriptid = OurLibrary_Std.A.B.C`) and has mirrors set to the library cell (ex. `cell://OurLibrary_Std`).
 
-Returns `nil` and an error message, or three values:
+On error, returns `nil` and an error message which are echoed as two Lua
+value lines.
 
-1. The type constant `asset`.
-2. The size of the asset.
-3. A numbered table of the checksums.
+On success, the output block is a single `\dk.asset` metadata markup line
+(see [Metadata syntax](#metadata-syntax)) with the attributes:
+
+1. `byteSize`: the size of the asset in bytes.
+2. `checksum`: the algorithm-prefixed checksum of the asset (ex.
+   `sha256:<hex>`). A future revision may record additional checksum
+   algorithms as repeated `checksum` attributes.
+
+The legacy output block form that predates the markup (the three Lua value
+lines `'asset'`, the size, and the checksum or a numbered table of checksums)
+is still accepted when reading existing output blocks, so already-published
+packages keep working; `dk0 update` rewrites it to the markup form.
 
 The singleton bundle in the above example would be:
 
