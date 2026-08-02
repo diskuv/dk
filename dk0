@@ -300,7 +300,15 @@ autodetect_buildhost_arch() {
             Linux-i386 | Linux-i686)
                 BUILDHOST_ARCH=linux_x86;;
             Linux-x86_64)
-                BUILDHOST_ARCH=linux_x86_64;;
+                BUILDHOST_ARCH=linux_x86_64
+                # musl hosts (ex. alpine) get the fully-static musl build. The
+                # musl dynamic loader path is the reliable marker; musl's ldd
+                # identifying itself is the fallback.
+                if [ -e /lib/ld-musl-x86_64.so.1 ] \
+                  || { ldd --version 2>&1 | grep -qi musl; } 2>/dev/null; then
+                    BUILDHOST_ARCH=linux_x86_64_musl
+                fi
+                ;;
             Darwin-arm64)
                 BUILDHOST_ARCH=darwin_arm64;;
             Darwin-x86_64)
@@ -668,7 +676,12 @@ dk_extexe() { case "$BUILDHOST_ARCH" in windows_*) printf '.exe' ;; esac; }
 # mlfront-signify SHA-256, then the baked public key over the manifest.
 dk_verify_manifest() {
   dvm_out=$1; dvm_ver=$2
-  eval "dvm_pin=\${cksum_signify_${BUILDHOST_ARCH}:-}"
+  # The linux_x86_64 mlfront-signify is musl-static (built on alpine), so musl
+  # hosts pin and fetch that same verifier; no musl-named verifier asset is
+  # published.
+  dvm_sigarch=$BUILDHOST_ARCH
+  [ "$BUILDHOST_ARCH" = linux_x86_64_musl ] && dvm_sigarch=linux_x86_64
+  eval "dvm_pin=\${cksum_signify_${dvm_sigarch}:-}"
   # Empty = the arch was never provisioned; a value still starting with `__` is
   # a maintained-but-unbaked placeholder (e.g. windows_x86 until its signify job
   # ships). Both are "not provisioned" -- refuse rather than fetch and trust an
@@ -679,7 +692,7 @@ dk_verify_manifest() {
   install -d "$tools_dir/verifier"
   dvm_exe=$(dk_extexe)
   dvm_signify="$tools_dir/verifier/mlfront-signify-$dvm_pin$dvm_exe"
-  downloadfile "https://gitlab.com/api/v4/projects/60486861/packages/generic/mlfront-signify/$signify_pkg_ver/mlfront-signify-$BUILDHOST_ARCH$dvm_exe" "$dvm_signify" "$dvm_pin"
+  downloadfile "https://gitlab.com/api/v4/projects/60486861/packages/generic/mlfront-signify/$signify_pkg_ver/mlfront-signify-$dvm_sigarch$dvm_exe" "$dvm_signify" "$dvm_pin"
   chmod +x "$dvm_signify"
   if [ -n "$dvm_ver" ]; then dvm_url="$DK_BASE_URL/manifest-$dvm_ver.txt"; else dvm_url="$DK_BASE_URL/manifest.txt"; fi
   dk_fetch "$dvm_url" "$dvm_out"
