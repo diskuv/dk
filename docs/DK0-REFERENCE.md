@@ -833,12 +833,11 @@ keys" sections; the value-store protections are in `SECURITY.md`.
   producer signify key must anchor to the built-in dk vendor root, a locally
   prepared key, a trusted continuation chain, `--trust-local-package`, or an
   interactive acceptance (deny by default).
-- **The Sigstore trusted root is derived, not embedded.** The Fulcio CAs and
+- **The Sigstore trusted root is derived at import time.** The Fulcio CAs and
   Rekor keys that anchor the SLSA Level 2 check are refreshed through Sigstore's
-  threshold-signed TUF metadata rather than baked into `dk0`. "Sigstore trusted
-  root" below describes the three guarantees this gives an importer - root
-  substitution resistance, bounded staleness, and channel independence - and how
-  the root is cached.
+  threshold-signed TUF metadata. "Sigstore trusted root" below describes the
+  three guarantees this gives an importer - root substitution resistance,
+  bounded staleness, and channel independence - and how the root is cached.
 - **`import local` has no transport attestation by design** (the user names a
   local file); the signify signature, rotation, and acceptance controls above are
   its distribution-integrity control.
@@ -909,10 +908,9 @@ continuation of an attested prior release.
 ### Sigstore trusted root
 
 The SLSA Level 2 control verifies a release against the Sigstore **trusted root**
-(the Fulcio certificate authorities and Rekor log keys). That root is not
-embedded in `dk0`: it is derived at import time by `gh attestation trusted-root`,
-which refreshes it through Sigstore's threshold-signed TUF metadata. The chain
-that produces it is:
+(the Fulcio certificate authorities and Rekor log keys). `dk0` derives that root
+at import time by running `gh attestation trusted-root`, which refreshes it
+through Sigstore's threshold-signed TUF metadata. The chain that produces it is:
 
 ```text
 launcher (baked signify root, diskuv.com/dk manifest)
@@ -935,17 +933,18 @@ That chain gives an importer three guarantees.
    a frozen or replayed old root is rejected.
 3. **Channel independence.** SLSA/sigstore (GitHub plus Sigstore infrastructure)
    is an independent second channel from the signify producer-key channel
-   (Diskuv). Compromising one signing infrastructure does not defeat both: the
-   trusted root is never redistributed from `diskuv.com`, and a signify signature
-   is never accepted as a substitute for attestation.
+   (Diskuv). Compromising one signing infrastructure leaves the other standing:
+   the trusted root is never redistributed from `diskuv.com`, and on the
+   `import github-l2` path a signify signature is never accepted in place of the
+   attestation check.
 
 `dk0` caches the derived root so a second workspace on the same machine does not
 repeat the TUF refresh. The cache is keyed by the GitHub CLI's module version and
 the `--build-period` build number, so a new build period is a new key and derives
 the root again; `--build-period 1h` is the recommended production setting. A
-cached root is re-verified whenever it is read, and one that fails its check or has
-outlived `--trusted-root-max-age` is discarded and re-derived rather than used. The
-`gh` binary that derives it is pinned by SHA-256 in the built-in
+cached root is re-verified whenever it is read, and one that fails its check or
+has outlived `--trusted-root-max-age` is discarded and derived again. The `gh`
+binary that derives it is pinned by SHA-256 in the built-in
 `MlFront_Attestation` catalog and re-checked against that pin on every read.
 
 ### Gaps
