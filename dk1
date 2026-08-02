@@ -301,10 +301,24 @@ autodetect_buildhost_arch() {
                 BUILDHOST_ARCH=linux_x86;;
             Linux-x86_64)
                 BUILDHOST_ARCH=linux_x86_64
+                # uname -m reports the KERNEL machine, so a 32-bit userland on
+                # a 64-bit kernel (ex. an i386 container on an amd64 host)
+                # still says x86_64 -- but a 64-bit dk1 cannot run there. The
+                # userland's own ELF class is the truth: byte 5 of /bin/sh is
+                # 1 for ELFCLASS32. od(1) is POSIX but not guaranteed present;
+                # without it, or on a 64-bit userland, the kernel's answer
+                # stands. test's numeric -eq tolerates od's leading
+                # whitespace; the redirected test guards non-numeric output.
+                autodetect_buildhost_arch_ELFCLASS=
+                if command -v od >/dev/null 2>&1; then
+                    autodetect_buildhost_arch_ELFCLASS=$(od -An -td1 -j4 -N1 /bin/sh 2>/dev/null)
+                fi
+                if [ "${autodetect_buildhost_arch_ELFCLASS:-2}" -eq 1 ] 2>/dev/null; then
+                    BUILDHOST_ARCH=linux_x86
                 # musl hosts (ex. alpine) get the fully-static musl build. The
                 # musl dynamic loader path is the reliable marker; musl's ldd
                 # identifying itself is the fallback.
-                if [ -e /lib/ld-musl-x86_64.so.1 ] \
+                elif [ -e /lib/ld-musl-x86_64.so.1 ] \
                   || { ldd --version 2>&1 | grep -qi musl; } 2>/dev/null; then
                     BUILDHOST_ARCH=linux_x86_64_musl
                 fi
