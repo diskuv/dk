@@ -942,6 +942,8 @@ At the time of writing, the list is:
 - `Windows_x86`
 - `Windows_x86_64`
 
+A musl (Alpine) host self-identifies its execution ABI as `Linux_x86_64_musl`. When a build resolves an object at a slot containing the execution ABI (for example `-s Release.execution_abi`) and the object does not publish a `Linux_x86_64_musl` slot, the resolver retries at the bare `Release.Linux_x86_64` slot and notes the substitution on stderr: the bare Linux execution tools are statically linked, so a musl host runs them natively. The fallback applies only to the execution ABI (a `target_abi` request never degrades), and a miss at both slots reports the original `Linux_x86_64_musl` slot. Import and `get-bundle` host-slot requests use the bare `Release.Linux_x86_64` slot directly.
+
 #### ${/} directory separator
 
 The directory separator. Except for one edge case (below), it is always `/` even on Windows. That is, form commands can assume the `/` separator, which can simplify function code when the function interacts with MSYS2.
