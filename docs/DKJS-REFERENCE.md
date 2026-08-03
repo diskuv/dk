@@ -76,30 +76,27 @@ threads are used.
 ## Determinism
 
 `dkjs` is deterministic: for the same inputs it produces the same output, and `-j`
-changes only wall-clock time, never the produced values or the trace store. It
-runs the same engine, hashing, signing, and archive code as `dk0` and `dk1`, so a
-build that resolves the same values is byte-identical across all three (a
-`get-object` under `dkjs` produces the same bytes as under `dk0`). Values that
-depend on the execution ABI differ, because `dkjs` runs as `js_nodejs` rather than
-a native ABI.
+changes only wall-clock time. It runs the same engine, hashing, signing, and
+archive code as `dk0` and `dk1`, so a build that resolves the same values is
+byte-identical across all three (a `get-object` under `dkjs` produces the same
+bytes as under `dk0`). Values that depend on the execution ABI differ, since
+`dkjs`'s execution ABI is `js_nodejs`.
 
 ## Known limitations
 
-`dkjs` runs with no native code, which bounds what it can build and how it
-coordinates:
+`dkjs` runs with no native code, which is where its two user-visible limits come
+from:
 
 - **Native compilation is not available yet.** `dkjs` builds JavaScript and web
   targets. Generating native (for example C) code depends on a fuller set of C
   toolchains packaged as dk objects; that packaging is under way but incomplete
-  (see [Scope](#scope)).
-- **No coordination with a concurrently running native dk.** Node.js has no
-  advisory file locks (`fcntl` / `flock`), so `dkjs` coordinates the cache and
-  trace-store locks between `dkjs` processes with lock files, yet cannot
-  coordinate with a `dk0` / `dk1` running at the same time against the same cache
-  or workspace. Run `dkjs` alone against a given cache and workspace.
-- **Archives.** The streaming archive writer does not support append mode or
-  prefixed self-extracting archives.
-- **Downloads.** HTTP downloads have no separate connection timeout.
+  (see [Scope](#scope)). Use `dk1` for native builds.
+- **Run `dkjs` alone against a given cache and workspace.** Node.js has no OS
+  advisory file locks (`fcntl` / `flock`), so `dkjs` serializes its own processes
+  with lock files but cannot coordinate with a `dk0` / `dk1` running at the same
+  time against the same cache or workspace.
+
+Otherwise `dkjs` runs the same commands as [dk0](DK0-REFERENCE.md#commands).
 
 ## Everything else
 

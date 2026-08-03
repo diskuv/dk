@@ -201,8 +201,8 @@ As shown above, the `unified.asset` must be in a section with a module identifie
 
 The output blocks (the `\dk.asset(...)` metadata lines recording the byte size
 and sha256 checksum) are not meant to be hand-maintained. There will be a
-command like `dk0 update --no-imports` for the [dk0 Reference Implementation]
-that will recalculate the checksums on your behalf.
+command like `dk1 update --no-imports` that recalculates the checksums on your
+behalf.
 
 ### Downloaded assets
 
@@ -233,10 +233,10 @@ first mirror.
 
 ## Previewing your package documentation
 
-To see your package documentation in the [dk0 Reference Implementation], run:
+To see your package documentation, run:
 
 ```shell
-dk0 query manifest --markdown --outfile docs.md
+dk1 query manifest --markdown --outfile docs.md
 ```
 
 That reads your `dk.u` and `dist/*.u` scripts and creates a single Markdown document.
@@ -252,15 +252,15 @@ Creating signing keys, producing the release, and how consumers verify and
 ## A minimal checklist
 
 - [ ] `dk.u` has `## workspace` with each dependency pinned via `%% import`
-      (use `dk0 add` / `dk0 update`).
+      (use `dk1 add` / `dk1 update`).
 - [ ] `dk.u` has `## Overview` and `## License` with a
       `### LicenseRef-*` subsection for every custom license.
 - [ ] One `dist/<ABI>.u` per supported ABI (or a single `dist/any.u`)
       containing `$` value shell build commands.
 - [ ] Workspace assets declared with `% unified.asset { file=... | dir=... }`
 - [ ] Downloaded assets declared in `*.values.jsonc` with multiple `mirrors`.
-- [ ] `dk0 test` passes on every distribution script.
-- [ ] `dk0 query manifest` shows the package the way users will see it.
+- [ ] `dk1 test` passes on every distribution script.
+- [ ] `dk1 query manifest` shows the package the way users will see it.
 - [ ] Ready to share? Publish a release (see [Publishing](#publishing)).
 
 [dk0 Reference Implementation]: DK0-REFERENCE.md
