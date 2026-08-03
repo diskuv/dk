@@ -1,40 +1,33 @@
 # dkjs Reference Implementation
 
-`dkjs` is the JavaScript implementation of the dk build system. It runs on
-Node.js with no native binary: the whole build engine is compiled to a single
-JavaScript bundle that Node executes directly. `dkjs` is a **fallback** path -
-the signed, fast native `dk1` is always tried first, and `dkjs` exists for hosts
-where installing or running that native binary is blocked or unavailable but
-Node.js is present.
+`dkjs` is the JavaScript build system in the dk family. It runs on Node.js and
+builds JavaScript and web projects: its execution ABI is `js_nodejs`, and a build
+targets `js_nodejs` or, through a web bundler, `js_web`. The whole dk build engine
+is compiled to a single JavaScript bundle that Node executes directly, with no
+native binary.
 
 `dkjs` shares the exact command-line dispatch, commands, options, and build
-engine of the single-threaded reference implementation `dk0` and the
-multi-threaded `dk1`. **This document only describes what is different in
-`dkjs`.** For the invocation form, every command, and every option, see the
-[dk0 Reference]. For the `-j` / `--jobs` option it shares with `dk1`, see the
-[dk1 Reference]. For the implementation-agnostic build model (projects, assets,
-bundles, forms, objects, values, subshells, distributions and scripts) see the
-[Specification].
+engine of the reference implementation `dk0` and the multi-threaded `dk1`. **This
+document only describes what is different in `dkjs`.** For the invocation form,
+every command, and every option, see the [dk0 Reference]. For the `-j` / `--jobs`
+option it shares with `dk1`, see the [dk1 Reference]. For the
+implementation-agnostic build model (projects, assets, bundles, forms, objects,
+values, subshells, distributions and scripts) see the [Specification].
 
 [dk0 Reference]: DK0-REFERENCE.md
 [dk1 Reference]: DK1-REFERENCE.md
 [Specification]: SPECIFICATION.md
 
-## When to use dkjs
+## Scope
 
-`dkjs` is a **conditional fallback, not the default surface**. Prefer the native
-`dk1` binary: it is signed, fast, and complete. Reach for `dkjs` only when both
-of these hold:
-
-- installing or running the native `dk0` / `dk1` binary is blocked or
-  unavailable (for example a download or tool classifier that refuses
-  executables), and
-- the host already has Node.js.
-
-Node.js and npm are common on developer machines, but AI agent harnesses do not
-bundle them, so `dkjs` is a conditional fallback rather than a universal path.
-Because it shares the build engine, a build `dkjs` produces is byte-identical to
-the same build under `dk0` / `dk1` (see [Determinism](#determinism)).
+`dkjs` builds projects whose execution ABI is `js_nodejs` (a build running on
+Node.js) and whose targets are JavaScript or web (`js_web`). It does not yet
+generate native code. The native `dk0` / `dk1` binaries compile native (for
+example C) code for the platform they run on; for `dkjs` to do the same, dk needs
+C toolchains packaged as dk objects. That packaging is under way -
+`CommonsBase_GNU.Toolchain.W64dev` is one such package - but the set is not yet
+complete. Today, use `dkjs` for JavaScript and web builds and `dk1` for native
+builds.
 
 ## Invocation
 
@@ -48,18 +41,18 @@ host. The invocation form, the workspace and project-directory rules, and every
 command are identical to `dk0` - see [Invocation](DK0-REFERENCE.md#invocation)
 and [Commands](DK0-REFERENCE.md#commands).
 
-## Execution ABI
+## Execution ABI and targets
 
-Every dk build runs under an **execution ABI** that names the host it runs on.
-Because `dkjs` always runs on Node.js, its execution ABI is always `js_nodejs`,
-with an operating-system value of `JS` and an OS family of `js`. `dkjs` does not
-probe the machine underneath Node: it never resolves native per-ABI artifacts, so
-the host CPU and operating system do not change how it runs.
+Every dk build runs under an **execution ABI** that names the host it runs on, and
+resolves objects for a **target ABI**. Because `dkjs` always runs on Node.js, its
+execution ABI is always `js_nodejs`, with an operating-system value of `JS` and an
+OS family of `js`. `dkjs` does not probe the machine underneath Node: it never
+resolves native per-ABI artifacts, so the host CPU and operating system do not
+change how it runs.
 
-A build may still **cross-compile** to another target by setting a target ABI
-(`--target-abi`); `js_web` names a web-bundler target for producing browser
-output. The execution ABI (where `dkjs` runs, always `js_nodejs`) and the target
-ABI (what the build produces) are independent.
+A build targets `js_nodejs` by default, or `js_web` (set with `--target-abi`) to
+produce web-bundler output. Native target ABIs are not available yet (see
+[Scope](#scope)).
 
 ## Parallel builds
 
@@ -82,29 +75,28 @@ threads are used.
 
 ## Determinism
 
-`dkjs` matches the native implementations byte-for-byte: for the same inputs, a
-supported build under `dkjs` produces **byte-identical output** to `dk0` and
-`dk1`, and identical output for any `-j`. This is the point of the shared engine:
-the build model, hashing, signing, archive layout, and trace store are the same
-code paths, differing only in the host runtime. Changing `-j` changes only
-wall-clock time, never the produced values or the trace store. See
-[Determinism](DK1-REFERENCE.md#determinism) for the same guarantee stated for
-`dk1`.
+`dkjs` is deterministic: for the same inputs it produces the same output, and `-j`
+changes only wall-clock time, never the produced values or the trace store. It
+runs the same engine, hashing, signing, and archive code as `dk0` and `dk1`, so a
+build that resolves the same values is byte-identical across all three (a
+`get-object` under `dkjs` produces the same bytes as under `dk0`). Values that
+depend on the execution ABI differ, because `dkjs` runs as `js_nodejs` rather than
+a native ABI.
 
 ## Known limitations
 
-`dkjs` trades some of the native binary's completeness for running with no native
-code. The differences a user can observe:
+`dkjs` runs with no native code, which bounds what it can build and how it
+coordinates:
 
+- **Native compilation is not available yet.** `dkjs` builds JavaScript and web
+  targets. Generating native (for example C) code depends on a fuller set of C
+  toolchains packaged as dk objects; that packaging is under way but incomplete
+  (see [Scope](#scope)).
 - **No coordination with a concurrently running native dk.** Node.js has no
   advisory file locks (`fcntl` / `flock`), so `dkjs` coordinates the cache and
   trace-store locks between `dkjs` processes with lock files, yet cannot
   coordinate with a `dk0` / `dk1` running at the same time against the same cache
   or workspace. Run `dkjs` alone against a given cache and workspace.
-- **Command coverage is still being completed.** `dkjs` is a fallback still
-  reaching full parity with the native command surface; where a command is
-  supported it is byte-identical, and the native `dk1` remains the complete
-  surface.
 - **Archives.** The streaming archive writer does not support append mode or
   prefixed self-extracting archives.
 - **Downloads.** HTTP downloads have no separate connection timeout.
@@ -116,4 +108,4 @@ security behavior, and the operational guide are identical to `dk0`. See the
 [dk0 Reference], the [dk1 Reference], and the [Specification]. `dkjs` is the same
 reference dispatch and build engine compiled to JavaScript and bound to a Node.js
 execution context; only the runtime, the `js_nodejs` execution ABI, and the
-fallback role are new.
+JavaScript and web target scope are new.
