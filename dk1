@@ -798,6 +798,13 @@ cd "$dk_pwd"
 export DKCODER_ARG0="$0"
 export DKCODER_PWD="$dk_pwd"
 export DK_PROJECT_DIR
+#   Tell the dk1 binary the real execution host. dkml-c-probe bakes the ABI of
+#   the C compiler that built the binary, so a musl dk1 cross-built on glibc
+#   would otherwise self-identify as linux_x86_64 and resolve the glibc
+#   toolchain on a musl host. BUILDHOST_ARCH is the launcher's own host
+#   detection (honors a pre-set DKML_HOST_ABI, else uname + the musl loader
+#   probe above), so propagate it as DKML_HOST_ABI which the binary honors.
+export DKML_HOST_ABI="$BUILDHOST_ARCH"
 #   shellcheck disable=SC2086
 if [ "$dk_selfupdate" = 1 ]; then
   # dk1.exe repins the dk.u actual_version line to the resolved (latest) version.
