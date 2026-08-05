@@ -1073,3 +1073,16 @@ host of another - for example `Linux_x86_64_musl` objects on a glibc host.
 | `Linux_x86`         | `/lib/ld-linux.so.2`          | glibc dynamic linker for dynamically linked objects |
 | `Linux_x86_64`      | `/lib64/ld-linux-x86-64.so.2` | glibc dynamic linker for dynamically linked objects |
 | `Linux_x86_64_musl` | `/lib/ld-musl-x86_64.so.1`    | musl dynamic linker for dynamically linked objects  |
+
+### Minimum glibc (per ABI)
+
+The published Linux binaries are built on `manylinux_2_28` container images,
+so the glibc ABIs run on any distribution carrying glibc 2.28 or newer. The
+`Linux_x86_64_musl` binaries are statically linked and carry no libc floor.
+
+| ABI                 | Minimum libc               |
+| ------------------- | -------------------------- |
+| `Linux_arm64`       | glibc 2.28                 |
+| `Linux_x86`         | glibc 2.28                 |
+| `Linux_x86_64`      | glibc 2.28                 |
+| `Linux_x86_64_musl` | none (statically linked)   |
