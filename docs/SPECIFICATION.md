@@ -6,11 +6,17 @@
     - [Composition by Subshells](#composition-by-subshells)
     - [Composition by Rules](#composition-by-rules)
     - [Composition by Distribution](#composition-by-distribution)
-    - [(pending re-organization) Concepts](#pending-re-organization-concepts)
   - [Terminology](#terminology)
+    - [keys, values and tasks](#keys-values-and-tasks)
     - [strictly relative path](#strictly-relative-path)
   - [Project Structure](#project-structure)
     - [Workspace script](#workspace-script)
+  - [Versioning](#versioning)
+    - [Immutability of Versions](#immutability-of-versions)
+    - [Increased Patch Numbers](#increased-patch-numbers)
+    - [Increased Minor Numbers](#increased-minor-numbers)
+    - [Increased Major Numbers](#increased-major-numbers)
+    - [Nonstandard Semantic Versions](#nonstandard-semantic-versions)
   - [Assets](#assets)
     - [Asset Identity](#asset-identity)
     - [Web assets](#web-assets)
@@ -29,6 +35,7 @@
       - [${SLOT.SlotName}](#slotslotname)
       - [${SLOTABS.SlotName}](#slotabsslotname)
       - [${SLOTNAME.SlotName}](#slotnameslotname)
+      - [Object Slot ABI](#object-slot-abi)
       - [${/} directory separator](#-directory-separator)
       - [${.exe.execution}](#exeexecution)
       - [${.exe.target}](#exetarget)
@@ -88,6 +95,7 @@
       - [Adding to the sealed set](#adding-to-the-sealed-set)
     - [Distributed Value Stores](#distributed-value-stores)
     - [OpenBSD signify keys](#openbsd-signify-keys)
+      - [Distribution versioning](#distribution-versioning)
     - [GitHub SLSA Level 2](#github-slsa-level-2)
     - [GitHub SLSA Level 3](#github-slsa-level-3)
     - [Distribution Scripts](#distribution-scripts)
@@ -559,7 +567,7 @@ For example:
 }
 ```
 
-A full-example is <https://github.com/diskuv/dk/blob/V2_5/etc/dk/i/CommonsBase_Std.values.json>.
+A full-example is <https://github.com/dkpkg/CommonsBase_LLVM/blob/5b2e2cdd080eefca919cdcb436e88bd67d5b6b57/etc/dk/i/CommonsBase_Std.2.6.20260718222208.values.json>.
 
 The relevant sections of the specification are:
 
@@ -570,15 +578,25 @@ The relevant sections of the specification are:
 - [Scripts](#scripts)
 - [Distributions](#distributions)
 
-### (pending re-organization) Concepts
-
-We use the generic term **value** to mean an bundle, a form or an object.
-
-All values have names like `YourLibrary_Std.YourPackage.YourThing`. Think of the name as if it were a serial number, as the name uniquely identifies each bundle, form and object.
-
-All values also have versions like `1.0.0`. Making a change to a value means creating a new value with the same name but with an increased version. For example, if the text of your 2025-09-04 privacy policy is in the bundle `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904`, an end-of-year update to the privacy policy could be `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20251231`. These *semantic* versions offer a lot of flexibility and are industry-standard: [external link: semver 2.0](https://semver.org/). The important point is that values do not change; versions do.
-
 ## Terminology
+
+### keys, values and tasks
+
+A value is a bundle, an asset, a form, an object or an script. A value is immutable (it should not change).
+The [Values](#values) section has more detail.
+
+A key is an identifier in the format `MODULE@VERSION` used to:
+
+- locate an up-to-date value from a [Value Store](#value-store)
+- if there is no up-to-date value, locate a recipe (called a "task") from a [Task Model](#task-model) that can produce that value
+
+The simple `make` build system has the following:
+
+- key: a filename
+- value: the contents of a file
+- task: a Makefile recipe
+
+The build system in this specification is a generalization of those keys.
 
 ### strictly relative path
 
@@ -620,6 +638,68 @@ Having a workspace makes available:
 
 - [importing third party distributions](#import)
 - [workspace-scoped assets](#unifiedasset). The workspace script's [unified.asset](#unifiedasset) declarations in non-workspace sections are available to the user `<script>`.
+
+## Versioning
+
+The build systems use semantic versioning defined by [semver 2.0](https://semver.org/).
+
+### Immutability of Versions
+
+Once a value is distributed with a version, the value should not change. Violations mean that
+consumers will have incorrect and outdated values in their caches.
+
+Comment or formatting edits to a values.json or a values.lua that leave behavior
+identical may safely be edited on the same distributed version.
+
+### Increased Patch Numbers
+
+Example: 0.3.0 to 0.3.1
+
+A behavior-preserving repair should increase the patch number.
+Existing consumers can keep their existing versions and opt-in to the repair
+by importing a release that carries the new version.
+
+Even though [distributions are sealed](#distributions-are-sealed), an increased patch
+number does not require a new [signify key](#openbsd-signify-keys).
+
+### Increased Minor Numbers
+
+Example: 0.3.0 to 0.4.0
+
+A new capability or feature should increase the minor number.
+
+Minor numbers require a new [signify key](#openbsd-signify-keys) when the new minor number has
+not already been [sealed by the previous distribution](#distributions-are-sealed).
+In other words, a small number of minor number increases will eventually
+lead to the producer having to create a new set of sealed signify keys;
+that requires the producer to establish that they have possession of the
+secret key.
+
+That is a security property: new capabilities and new features
+increase the security surface, and versioning requires the producer
+to eventually authenticate their ownership of the changes.
+
+Consumers opt in by referencing the new version; existing references
+keep their existing behavior.
+
+### Increased Major Numbers
+
+Example: 0.3.0 to 1.0.0
+
+A backwards-incompatible change should increase the major number.
+
+Major numbers, like minor numbers, require a new [signify key](#openbsd-signify-keys) when the new major number has
+not already been [sealed by the previous distribution](#distributions-are-sealed).
+
+Consumers opt in by referencing the new version; existing references
+keep their existing behavior.
+
+### Nonstandard Semantic Versions
+
+Often values do not have a natural semantic version.
+
+An example would be a privacy policy contained in a bundle module `YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy`.
+`YourOrg_Std.StringsForWebSiteAndPrograms.PrivacyPolicy@1.0.20250904` could be used for the 2025-09-04 privacy policy.
 
 ## Assets
 
@@ -2291,6 +2371,25 @@ Most important, the `OpenBSD_Std@5.7.0` public key **cannot** sign for an earlie
 The net effect is a tendency of the trust store to increase versions over time, so that these OpenBSD signify keys have an implicit rotation policy as these versions increase. You choose how many keys you want to keep alive at any time (the current key plus the number of keys in your `continuations`), and do a rotation by doing a new build using a key from one of your continuations.
 
 So, let's say you keep 2 continuations alive (plus the current key) like OpenBSD does. When you start using a key from one of your continuations (ex. `OpenBSD_Std@5.7.0`), you should will keep `N-1 = 1` keys in rotation (ex. "continuations" should contain `OpenBSD_Std@5.8.0` still) **and** create one new key (ex. "continuations" should have a new `OpenBSD_Std@5.9.0` key).
+
+#### Distribution versioning
+
+The first trusted release that claims a `MAJOR.MINOR` establishes its key, and that
+association is imported once and never overwritten.
+
+The implication is that distribution keys must be rotated for a new `MAJOR.MINOR`
+distribution package version.
+
+- A release within the current line (a new `MAJOR.MINOR.PATCH`, ex. the
+  `MAJOR.MINOR.<UTC timestamp>` tags of a dk package) is signed by the line's
+  existing secret key.
+- A release on a line listed in the current line's `continuations` is signed
+  by that pre-signed key. The consumer accepts it through the continuation
+  chain with no new trust decision. The producer must possess the continuation's
+  secret key to perform the release.
+- A release on a line absent from every trusted release's `continuations` has
+  no chain to it. Every consumer is prompted to accept its key as if the
+  producer were new.
 
 ### GitHub SLSA Level 2
 
