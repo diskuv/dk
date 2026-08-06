@@ -610,7 +610,7 @@ However, since cells must be given on the command line or some other user-specif
 
 ### Workspace script
 
-When a build system command that takes a [unified script](UNIFIED_SCRIPTS.md) (for example `dk0 test <script>` or `dk0 distribute <script>`) runs, the *workspace script* is the first unified script — searched in the order below — that contains a `## workspace` section:
+When a build system command that takes a [unified script](UNIFIED_SCRIPTS.md) (for example `dk0 test <script>` or `dk0 distribute <script>`) runs, the *workspace script* is the first unified script, searched in the order below, that contains a `## workspace` section:
 
 1. The user `<script>` itself.
 2. A file named `dk.u` in the directory containing `<script>`, if it exists.
@@ -946,6 +946,15 @@ At the time of writing, the list is:
 
 A musl (Alpine) host self-identifies its execution ABI as `Linux_x86_64_musl`. When a build resolves an object at a slot containing the execution ABI (for example `-s Release.execution_abi`) and the object does not publish a `Linux_x86_64_musl` slot, the resolver retries at the bare `Release.Linux_x86_64` slot and notes the substitution on stderr: the bare Linux execution tools are statically linked, so a musl host runs them natively. The fallback applies only to the execution ABI (a `target_abi` request never degrades), and a miss at both slots reports the original `Linux_x86_64_musl` slot. Import and `get-bundle` host-slot requests use the bare `Release.Linux_x86_64` slot directly.
 
+#### Object Slot ABI
+
+An object slot's ABI conventionally falls into one of two categories:
+
+- A build-time tool whose output does not depend on the target uses the execution ABI slot (`Release.execution_abi`), the ABI of the [execution platform](https://bazel.build/extending/platforms) it runs on.
+- A target artifact, like a compiled executable, a shared library, or a whole runtime tree that ships to the target, uses the target ABI slot (`Release.target_abi`).
+
+An interpreted runtime that performs native compilation during the build is both a build-time tool and a source of target artifacts. Conventionally, that interpreted runtime would use a target ABI slot like `Release.target_abi` and run with an emulator like Rosetta on macOS, QEMU on Linux, or WOW64 on Windows. The interpreter runs on the execution host and its native compilation produces artifacts for the target. For example, a cross-build of a Python distribution on a `Darwin_arm64` host for a `Darwin_x86_64` target fetches the `Darwin_x86_64` CPython runtime and runs its `python3` under Rosetta to install wheels. A wheel with a C extension, like one built through setuptools, compiles the extension for the target ABI `Darwin_x86_64`.
+
 #### ${/} directory separator
 
 The directory separator. Except for one edge case (below), it is always `/` even on Windows. That is, form commands can assume the `/` separator, which can simplify function code when the function interacts with MSYS2.
@@ -1178,14 +1187,14 @@ Each precommand and each function command is a [build task](#task-model). A task
 > Avoid `precommands` that place values in intermediate directories rather than `${SLOT.*}` directories. Instead use subshells. If you use intermediate directories the intermediate files won't be updated or invalidated.
 >
 > ```json
-> // WRONG — precommand + cp = cached:
+> // WRONG: precommand + cp = cached
 > "precommands": { "private": ["get-asset MOD@VER -p path/to/script.py -f script.py"] },
 > "commands": [
 >   ["coreutils", "cp", "script.py", "${SLOT.request}/script.py"],
 >   ["python3", "script.py"]
 > ]
 > 
-> // CORRECT — subshell creates dependency, re-runs when asset is updated or invalidated:
+> // CORRECT: subshell creates dependency, re-runs when asset is updated or invalidated
 > "commands": [
 >   ["python3", "$(get-asset MOD@VER -p path/to/script.py -f script.py)"]
 > ]
