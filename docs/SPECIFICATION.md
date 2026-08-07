@@ -666,7 +666,10 @@ number does not require a new [signify key](#openbsd-signify-keys).
 
 Example: 0.3.0 to 0.4.0
 
-A new capability or feature should increase the minor number.
+A new capability should increase the minor number:
+
+- Adding a new rule to a scriptmodule (values.lua), or a new scriptmodule, is a new capability.
+- Adding a new module to a values.jsonc, or a new values.jsonc, is a new capability.
 
 Minor numbers require a new [signify key](#openbsd-signify-keys) when the new minor number has
 not already been [sealed by the previous distribution](#distributions-are-sealed).
@@ -675,7 +678,7 @@ lead to the producer having to create a new set of sealed signify keys;
 that requires the producer to establish that they have possession of the
 secret key.
 
-That is a security property: new capabilities and new features
+That is a security property: new capabilities
 increase the security surface, and versioning requires the producer
 to eventually authenticate their ownership of the changes.
 
