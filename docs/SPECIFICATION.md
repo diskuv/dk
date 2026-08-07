@@ -651,6 +651,9 @@ consumers will have incorrect and outdated values in their caches.
 Comment or formatting edits to a values.json or a values.lua that leave behavior
 identical may safely be edited on the same distributed version.
 
+Sealing is append-only and gated at the distribution level; see
+[Increased Minor Numbers](#increased-minor-numbers).
+
 ### Increased Patch Numbers
 
 Example: 0.3.0 to 0.3.1
@@ -670,6 +673,12 @@ A new capability should increase the minor number:
 
 - Adding a new rule to a scriptmodule (values.lua), or a new scriptmodule, is a new capability.
 - Adding a new module to a values.jsonc, or a new values.jsonc, is a new capability.
+
+A distribution may add to its sealed set, either a brand-new module or a
+strictly higher `MAJOR.MINOR` version of an already-sealed module, only when
+the distribution's own `MAJOR.MINOR` is strictly higher than the latest
+sealed release. A release within an already-sealed `MAJOR.MINOR` line can
+neither add modules nor add module `MAJOR.MINOR` versions.
 
 Minor numbers require a new [signify key](#openbsd-signify-keys) when the new minor number has
 not already been [sealed by the previous distribution](#distributions-are-sealed).
