@@ -651,6 +651,13 @@ consumers will have incorrect and outdated values in their caches.
 Comment or formatting edits to a values.json or a values.lua that leave behavior
 identical may safely be edited on the same distributed version.
 
+Immutability binds once a consumer of the distributed package imports the
+package. Before then a release is a candidate that only the producer
+imports, and testing the candidate from its release is the only way to
+exercise the consumer-side import path. The producer may repair a defect
+found in a candidate, delete the candidate tag and its release, and
+re-release the same versions.
+
 Sealing is append-only and gated at the distribution level; see
 [Increased Minor Numbers](#increased-minor-numbers).
 
