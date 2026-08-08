@@ -4473,6 +4473,14 @@ An implementation may also place:
 1. *lazy* value files in the value store by default to avoid the time and space to download
    every binary artifact from the distribution
 
+An implementation that places lazy value files re-verifies a lazy value's
+recorded dependencies against their current content before the value is
+served. A change that is reachable only through a dependency rebuilds the
+dependent instead of serving the imported value. The recorded dependencies are
+kept as [lazy-dependency evidence traces](#trace-store) in the trace store, so
+the re-verification works in a later build process than the one that imported
+the distribution.
+
 ##### import type=github-l2
 
 Imports a distribution from a GitHub release.
@@ -5502,6 +5510,17 @@ The *key* is one of two types:
 
 The *value* is not directly stored in the trace. Instead, an identifier (the **value id**)
 is stored in the trace, and the potentially large value is stored in the value store (more on that next section).
+
+A **lazy-dependency evidence trace** is a trace recorded during a lazy import
+or restore rather than by a task execution. When a distribution import leaves
+a module key as a lazy value pointer (the value blob stays in the
+distribution and is fetched on demand), the import records the imported
+trace's dependencies under a distinct evidence key derived from the module
+key. The build system consults the evidence before it trusts the lazy value
+pointer: a dependency whose current content differs from the recorded digest
+invalidates the pointer and the key rebuilds. An evidence trace is never an
+up-to-date source for the module key and is never part of a distributed trace
+store.
 
 ### Value Store
 
