@@ -697,7 +697,11 @@ the package is imported at all. This matters when a producer builds a new
 release on top of a restored previous release. An internal module the previous
 release did not seal, one reached only through a run command so its trace is a
 dependency rather than a sealed output, still builds from the producer's
-declaration.
+declaration. The same holds when the producer bumps a module the previous
+release DID seal to a new `MAJOR.MINOR` line: the local package builds the new
+line from its own declaration even though the imported distribution seals only
+the lower line, whereas a consumer of that imported distribution still may not
+reference the unsealed line.
 
 Minor numbers require a new [signify key](#openbsd-signify-keys) when the new minor number has
 not already been [sealed by the previous distribution](#distributions-are-sealed).
