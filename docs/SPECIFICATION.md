@@ -687,6 +687,18 @@ the distribution's own `MAJOR.MINOR` is strictly higher than the latest
 sealed release. A release within an already-sealed `MAJOR.MINOR` line can
 neither add modules nor add module `MAJOR.MINOR` versions.
 
+Sealing constrains what a consumer of an imported distribution may reference.
+It does not constrain the producer's own local package. Resolution for a local
+package, the package a `distribute` builds or a package a producer trusts
+locally, is independent of whether a distribution of that package is imported:
+a module the imported distribution did not seal resolves through the producer's
+own declaration, the same behavior the producer sees when no distribution of
+the package is imported at all. This matters when a producer builds a new
+release on top of a restored previous release. An internal module the previous
+release did not seal, one reached only through a run command so its trace is a
+dependency rather than a sealed output, still builds from the producer's
+declaration.
+
 Minor numbers require a new [signify key](#openbsd-signify-keys) when the new minor number has
 not already been [sealed by the previous distribution](#distributions-are-sealed).
 In other words, a small number of minor number increases will eventually
