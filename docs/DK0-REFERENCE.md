@@ -550,7 +550,7 @@ sbom local --path VALUES.JSON [--slot SLOT] [--verify-content]
     [--timestamp now|RFC3339] [--pretty] [--outfile FILE]
 ```
 
-Emit a CycloneDX 1.2 software bill of materials as JSON (minified unless
+Emit a CycloneDX 1.6 software bill of materials as JSON (minified unless
 `--pretty`; stdout unless `--outfile FILE`).
 
 dk value ids are declaration-addressed: an object id hashes the module's
@@ -566,12 +566,26 @@ when their value ids are identical.
 
 Subjects:
 
-- `sbom self` prints the SBOM embedded in the running `dk0`/`dk1` executable
-  at its own build time, fully offline (like `--version`). Release builds
+- `sbom self` prints the running `dk0`/`dk1` executable's own bill of
+  materials, fully offline (like `--version`), from the opam lock
+  (`dk.opam-lock.jsonc`) and `dk.u` compiled in at build time. It emits: one
+  `library` component for the MlFront source (the `DK_SBOM_SOURCE_SHA256`
+  digest as a `hashes[]` entry, and the `dk.u` `## License` expression as a
+  `licenses[]` entry); one `framework` component for the OCaml toolchain from
+  the lock's `ocaml` field; and one component per opam package in the binary's
+  own slot, each with a `pkg:opam/NAME@VERSION` `purl`, the source archive
+  checksums as `hashes[]`, and the archive URL as an `externalReferences[]`
+  entry of type `distribution`. A top-level `dependencies` graph links each
+  package to its resolved lock dependencies, and the opam-repository pins
+  appear as `externalReferences[]` on the metadata component. The slot is the
+  one the binary was built for (`DK_SBOM_SLOT` injected at release, recorded as
+  `diskuv:dk:sbom:slot`; the host-detected slot in a dev build). Release builds
   inject the real values through the `DK_SBOM_SERIALNUMBER`,
-  `DK_SBOM_TIMESTAMP`, `DK_SBOM_GITREF`, `DK_SBOM_SOURCE_SHA256` and
-  `DK_SBOM_TOOLCHAIN_OCAMLCOMMON_SHA256` build environment variables; a dev
-  build shows placeholders (a zero-uuid serial, gitref `dev`).
+  `DK_SBOM_TIMESTAMP`, `DK_SBOM_GITREF`, `DK_SBOM_SOURCE_SHA256`,
+  `DK_SBOM_TOOLCHAIN_OCAMLCOMMON_SHA256` and `DK_SBOM_SLOT` build environment
+  variables; a dev build shows placeholders (a zero-uuid serial, gitref `dev`)
+  and the host slot. The opam lock records no per-package license fields, so
+  third-party packages carry no `licenses[]` yet.
 - `sbom workspace` reads only local data: the `\dk.import` pins recorded in
   `dk.u` (library, version, pin-file checksums), the transitive distributions
   from `etc/dk/i/dk-closure-manifest.tsv`, and every object/bundle/asset
@@ -604,11 +618,23 @@ default (`--timestamp now` or `--timestamp RFC3339` adds one) and
 the SHA-256 of the serialized components), so identical inventories produce
 identical bytes and `diff` shows only real changes.
 
+Alongside the vendor properties below, components use the standard CycloneDX
+elements where the data exists: `hashes` (content and pin digests, with the
+CycloneDX algorithm names `SHA-256`, `SHA-512`, `MD5`, `SHA-1`,
+`BLAKE2b-256`), `externalReferences` (archive and repository URLs), `licenses`
+(SPDX expressions), and the top-level `dependencies` graph keyed by each
+component's `bom-ref`. The `diskuv:dk:*` properties are retained for the
+content and provenance details the standard elements do not carry.
+
 Component properties (all in the `diskuv:dk:` namespace, all string valued):
 
 | Property | Meaning |
 | --- | --- |
 | `diskuv:dk:subject` | `self`, `workspace`, `github-l2` or `local` (on the metadata component). |
+| `diskuv:dk:gitref` | The source git ref the running binary was built from (`self` metadata component; `dev` in a dev build). |
+| `diskuv:dk:source:sha256` | SHA-256 of the MlFront source zip the binary was built from (`self` metadata component). |
+| `diskuv:dk:sbom:slot` | The slot the `self` inventory is taken for, e.g. `Release.Linux_x86_64` (`self` metadata component). |
+| `diskuv:dk:origin` / `diskuv:dk:local` | `workspace` / `true` on the MlFront source and workspace-local opam components (`self`). |
 | `diskuv:dk:import:type` | The import type of a `library` component (`github-l2`, `local`, `workspace`). |
 | `diskuv:dk:import:pin:sha256` (also `:blake2b-256`, `:sha1`) | Checksums of the import's distribution pin file (`etc/dk/i/LIBRARY.VERSION.values.json`). |
 | `diskuv:dk:import:transitive` | `true` on a distribution known only through the closure manifest. |
