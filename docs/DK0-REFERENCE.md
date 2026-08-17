@@ -540,6 +540,106 @@ Version 3 changed the format from version 2 by removing `byteSize` from each
 build and adding the per-module `assets` list. Manifests produced before this
 release use version 2 and still carry build sizes.
 
+```text
+sbom self [--pretty] [--outfile FILE]
+sbom workspace [-f WORKSPACE.u] [--slot SLOT] [--timestamp now|RFC3339]
+    [--pretty] [--outfile FILE]
+sbom github-l2 [HOST/]OWNER/REPO[@TAG] [--outdir DIR] [--slot SLOT]
+    [--verify-content] [--timestamp now|RFC3339] [--pretty] [--outfile FILE]
+sbom local --path VALUES.JSON [--slot SLOT] [--verify-content]
+    [--timestamp now|RFC3339] [--pretty] [--outfile FILE]
+```
+
+Emit a CycloneDX 1.2 software bill of materials as JSON (minified unless
+`--pretty`; stdout unless `--outfile FILE`).
+
+dk value ids are declaration-addressed: an object id hashes the module's
+declaration text and slot, deliberately excluding the content of its build
+inputs. Two releases can therefore
+carry *different bytes under the same value id* (for example when a
+non-bit-reproducible compiler is rebuilt), and a contaminated store can serve
+one slot's bytes under another slot's id. Every component this command emits
+records the value id *and* a `diskuv:dk:content:*` content digest of the
+bytes actually present or consumed, so two releases (or a release and a
+local store) can be compared with a plain `diff` of two `sbom` runs even
+when their value ids are identical.
+
+Subjects:
+
+- `sbom self` prints the SBOM embedded in the running `dk0`/`dk1` executable
+  at its own build time, fully offline (like `--version`). Release builds
+  inject the real values through the `DK_SBOM_SERIALNUMBER`,
+  `DK_SBOM_TIMESTAMP`, `DK_SBOM_GITREF`, `DK_SBOM_SOURCE_SHA256` and
+  `DK_SBOM_TOOLCHAIN_OCAMLCOMMON_SHA256` build environment variables; a dev
+  build shows placeholders (a zero-uuid serial, gitref `dev`).
+- `sbom workspace` reads only local data: the `\dk.import` pins recorded in
+  `dk.u` (library, version, pin-file checksums), the transitive distributions
+  from `etc/dk/i/dk-closure-manifest.tsv`, and every object/bundle/asset
+  value recorded in the trace store. Each value carries the digest recorded
+  at build/import time (`diskuv:dk:content:sha256:recorded`, from the trace)
+  and the digest of the bytes now in the value store
+  (`diskuv:dk:content:sha256`). A divergence is flagged
+  `diskuv:dk:content:mismatch`. Values seeded by a lazy import whose bytes
+  are not yet materialized are `diskuv:dk:content:state=lazy`.
+- `sbom github-l2` verifies a GitHub release exactly like
+  `inspect github-l2` (SLSA Level 2 attestation, then the consumer-side
+  signify trust model; the attested `values.json` pins are saved to
+  `--outdir`, default `<workspace>/etc/dk/i`), then inventories every
+  per-slot value of the release from its tracestores, using the digests the
+  producer recorded at distribute time. Only the small `values.json`, the
+  tracestores and the valuestore indexes are downloaded, so diffing two
+  releases is cheap.
+- `sbom local` is the offline analog for a local `VALUES.JSON` distribution
+  (a `dk-dist/` directory), with the same consumer trust checks as
+  `inspect local`.
+
+`--verify-content` (release subjects) additionally fetches every enumerated
+value blob - a ranged download per value for `github-l2`, served from the
+release's zip index - and re-hashes it locally, so the producer-recorded
+digest is cross-checked against the bytes the release actually serves.
+
+Output is byte-reproducible by design: `metadata.timestamp` is omitted by
+default (`--timestamp now` or `--timestamp RFC3339` adds one) and
+`serialNumber` is derived from the content (an RFC 4122 v5-style urn over
+the SHA-256 of the serialized components), so identical inventories produce
+identical bytes and `diff` shows only real changes.
+
+Component properties (all in the `diskuv:dk:` namespace, all string valued):
+
+| Property | Meaning |
+| --- | --- |
+| `diskuv:dk:subject` | `self`, `workspace`, `github-l2` or `local` (on the metadata component). |
+| `diskuv:dk:import:type` | The import type of a `library` component (`github-l2`, `local`, `workspace`). |
+| `diskuv:dk:import:pin:sha256` (also `:blake2b-256`, `:sha1`) | Checksums of the import's distribution pin file (`etc/dk/i/LIBRARY.VERSION.values.json`). |
+| `diskuv:dk:import:transitive` | `true` on a distribution known only through the closure manifest. |
+| `diskuv:dk:import:source` | For a transitive distribution, the direct pin file that carries it. |
+| `diskuv:dk:origin:repo` / `diskuv:dk:origin:tag` / `diskuv:dk:origin:url` / `diskuv:dk:origin:path` | Where the release resolved from. |
+| `diskuv:dk:value:id` | The declaration value id (`o...`, `b...`, `a...`, `i...`). |
+| `diskuv:dk:value:kind` | `object`, `bundle`, `asset`, `assetindex` or `release-asset`. |
+| `diskuv:dk:value:slot` | The object slot (objects only), e.g. `Release.Linux_x86_64`. |
+| `diskuv:dk:value:asset-path` | The asset path (assets only). |
+| `diskuv:dk:content:state` | `materialized`, `lazy` or `missing` (workspace subject only). |
+| `diskuv:dk:content:sha256` / `diskuv:dk:content:size` | SHA-256 and byte size of the bytes actually present or fetched. |
+| `diskuv:dk:content:sha256:recorded` | The digest recorded at build/distribute time (the producer claim). `blake2b-256`/`sha1` variants appear for declared release-asset checksums. |
+| `diskuv:dk:content:mismatch` | Present when the recorded and computed digests both exist and differ. |
+| `diskuv:dk:value:untracked` | `true` on a value present in the store without any covering trace (for example seeded by an import's payload replay); grouped under a `store-only` component (workspace subject only). |
+| `diskuv:dk:toolchain:KEY` | A toolchain fingerprint entry read from the object (below). |
+
+Toolchain fingerprint contract: a built object MAY carry a
+`.dk/toolchain.properties` member at the root of its slot tree (the `.dk/`
+directory inside an object is reserved for dk metadata). The file is plain
+UTF-8 `key=value` lines; `#` starts a comment line. `sbom` surfaces every
+pair verbatim as a `diskuv:dk:toolchain:KEY` property (sorted by key), so a
+package's build-time toolchain (for example
+`ocamlcommon-cmxa:sha256=...` recorded by an opam build wrapper) can be
+compared against a live toolchain. Producers do not emit this file yet; this
+paragraph defines the contract they should target.
+
+A digest mismatch is *reported*, never fatal: `sbom` is descriptive and
+exits 0 on success. Old releases whose tracestores predate recorded value
+digests simply omit `diskuv:dk:content:sha256:recorded`; use
+`--verify-content` to compute digests for those.
+
 ### Maintenance commands
 
 ```text
