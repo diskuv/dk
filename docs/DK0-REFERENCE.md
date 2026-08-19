@@ -1212,3 +1212,45 @@ so the glibc ABIs run on any distribution carrying glibc 2.28 or newer. The
 | `Linux_x86`         | glibc 2.28                 |
 | `Linux_x86_64`      | glibc 2.28                 |
 | `Linux_x86_64_musl` | none (statically linked)   |
+
+### System toolchains (per-ABI contract)
+
+Slot artifacts that contain native code are built with one system toolchain
+per ABI family. This section is the contract for where that toolchain comes
+from and what compatibility floor the built artifacts inherit.
+
+| ABI family        | System toolchain                      | How it is located                                    |
+| ----------------- | ------------------------------------- | ---------------------------------------------------- |
+| `Linux_*` (glibc) | `gcc`, `as`, binutils                 | resolved from `PATH` at build time                   |
+| `Linux_*_musl`    | `x86_64-linux-musl-*` cross toolchain | bundled inside the slot                              |
+| `Windows_*`       | MSVC                                  | at consume time: `vswhere`, then `vcvarsall` capture |
+| `Darwin_*`        | `/usr/bin/clang`                      | fixed path (Xcode Command Line Tools)                |
+
++ `Linux_*` (glibc): distribution builds must run in a glibc 2.28 build
+  environment, canonically the `quay.io/pypa/manylinux_2_28_*` containers,
+  so slot artifacts run on any distribution carrying glibc 2.28 or newer.
++ `Linux_*` (glibc): glibc links are backward-compatible only, so a build
+  on a newer-glibc host inherits that host's glibc floor. Such builds work
+  for local use (the DkML compiler is relocatable as of CommonsLang_OCaml
+  release `<RELOCATABLE-GLIBC-TAG>`), and a newer-glibc host can never
+  produce distribution-grade artifacts natively.
++ `Linux_*` (glibc): runtime objects are compiled as position-independent
+  code, so native links succeed under PIE-default toolchains.
++ `Linux_*_musl`: the slot bundles its cross toolchain (bare
+  `x86_64-linux-musl-*` tool names plus dispatch shims) and its output is
+  statically linked.
++ `Windows_*`: MSVC is the sole official Windows slot toolchain. `vswhere`
+  finds the Visual Studio installation, a `vcvarsall` environment capture
+  supplies `INCLUDE`, `LIB`, `LIBPATH` and `PATH`, and the slot to
+  `vcvarsall` architecture mapping is the CommonsLang_OCaml table
+  `assets/table/msvc-arch/Release.<slot>`.
+  `CommonsBase_LLVM.Toolchain.MinGW` is a cross toolchain for building C
+  userland packages.
++ `Darwin_*`: `/usr/bin/clang` is the `xcode-select` trampoline installed
+  with the Xcode Command Line Tools.
++ Per-ABI build-environment conformance checks run once, in the shared
+  `diskuv/dk-distribute` action that every dk package's distribute
+  workflow invokes, before the distscript executes. A published
+  attestation therefore implies the build environment conformed; the
+  combine job's `file`-based architecture check on the produced binaries
+  is the post-build complement.
