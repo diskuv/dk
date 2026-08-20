@@ -1232,7 +1232,7 @@ from and what compatibility floor the built artifacts inherit.
 + `Linux_*` (glibc): glibc links are backward-compatible only, so a build
   on a newer-glibc host inherits that host's glibc floor. Such builds work
   for local use (the DkML compiler is relocatable as of CommonsLang_OCaml
-  release `<RELOCATABLE-GLIBC-TAG>`), and a newer-glibc host can never
+  release `0.1.20260820083108`), and a newer-glibc host can never
   produce distribution-grade artifacts natively.
 + `Linux_*` (glibc): runtime objects are compiled as position-independent
   code, so native links succeed under PIE-default toolchains.
