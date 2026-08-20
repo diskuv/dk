@@ -39,6 +39,7 @@
       - [${/} directory separator](#-directory-separator)
       - [${.exe.execution}](#exeexecution)
       - [${.exe.target}](#exetarget)
+      - [${.script.execution}](#scriptexecution)
       - [${HOME}](#home)
       - [${CACHE}](#cache)
       - [${DATA}](#data)
@@ -1098,6 +1099,12 @@ When the build system is running normally, the executable suffix will be `.exe` 
 
 - reduces the need for seperate `.precommands` for Windows and Unix, and separate `.function.args`
 - is a performance and space optimization since a common executable suffix increases the chances that non-ABI specific artifacts share the same hash across Windows and Unix.
+
+#### ${.script.execution}
+
+The shell script extension for the [execution platform](https://bazel.build/extending/platforms).
+
+On a Windows execution platform it is `bat`; otherwise it is `sh`. Unlike `${.exe.execution}`, this variable carries no leading dot, so a form writes the dot itself, as in `discover.${.script.execution}`, which resolves to `discover.bat` on a Windows execution host and `discover.sh` on a Unix one.
 
 #### ${HOME}
 
