@@ -315,12 +315,16 @@ autodetect_buildhost_arch() {
                 fi
                 if [ "${autodetect_buildhost_arch_ELFCLASS:-2}" -eq 1 ] 2>/dev/null; then
                     BUILDHOST_ARCH=linux_x86
-                # musl hosts (ex. alpine) get the fully-static musl build. The
-                # musl dynamic loader path is the reliable marker; musl's ldd
+                # musl-based Linux (ex. alpine) is not a supported dk1 ABI yet;
+                # there is no musl dk1 build. Fail fast with a clear message
+                # instead of reaching a confusing "not provisioned" error later.
+                # A user who knows better can still force DKML_HOST_ABI. The musl
+                # dynamic loader path is the reliable marker; musl's ldd
                 # identifying itself is the fallback.
                 elif [ -e /lib/ld-musl-x86_64.so.1 ] \
                   || { ldd --version 2>&1 | grep -qi musl; } 2>/dev/null; then
-                    BUILDHOST_ARCH=linux_x86_64_musl
+                    printf "%s\n" "FATAL: musl-based Linux (e.g. Alpine) is not supported yet; dk1 needs a glibc-based distro" >&2
+                    exit 1
                 fi
                 ;;
             Darwin-arm64)
@@ -473,9 +477,17 @@ sha256check() {
     fi
 }
 
+# Echo --https-only if this wget supports it (BusyBox wget does not), so a
+# redirect cannot downgrade the transfer off HTTPS wherever the option exists.
+dk_wget_https_only() {
+  if "$DKMLSYS_WGET" --help 2>&1 | grep -q -- --https-only; then printf '%s' '--https-only'; fi
+}
+
 # [downloadfile URL FILE SUM] downloads from URL into FILE and verifies the SHA256 checksum of SUM.
 # If the FILE already exists with the correct checksum it is not redownloaded.
 # The function will exit with failure if the checksum does not match.
+# curl pins HTTPS end to end (--proto '=https' + --proto-redir '=https') with a
+# TLS 1.2 floor, and -f fails on an HTTP error page instead of saving it.
 downloadfile() {
     downloadfile_URL="$1"
     shift
@@ -502,18 +514,18 @@ downloadfile() {
     printf_maybe_quiet "... %s %s\n" "Downloading" "$downloadfile_URL"
     if [ "${CI:-}" = true ] || [ "${DKCODER_QUIET:-}" -eq 1 ]; then
         if [ -n "$DKMLSYS_CURL" ]; then
-            log_trace "$DKMLSYS_CURL" -L -s "$downloadfile_URL" -o "$downloadfile_FILE".tmp
+            log_trace "$DKMLSYS_CURL" --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL "$downloadfile_URL" -o "$downloadfile_FILE".tmp
         elif [ -n "$DKMLSYS_WGET" ]; then
-            log_trace "$DKMLSYS_WGET" -q -O "$downloadfile_FILE".tmp "$downloadfile_URL"
+            log_trace "$DKMLSYS_WGET" $(dk_wget_https_only) -q -O "$downloadfile_FILE".tmp "$downloadfile_URL"
         else
             echo "No curl or wget available on the system paths" >&2
             exit 107
         fi
     else
         if [ -n "$DKMLSYS_CURL" ]; then
-            log_trace "$DKMLSYS_CURL" -L "$downloadfile_URL" -o "$downloadfile_FILE".tmp
+            log_trace "$DKMLSYS_CURL" --proto '=https' --proto-redir '=https' --tlsv1.2 -fL "$downloadfile_URL" -o "$downloadfile_FILE".tmp
         elif [ -n "$DKMLSYS_WGET" ]; then
-            log_trace "$DKMLSYS_WGET" -O "$downloadfile_FILE".tmp "$downloadfile_URL"
+            log_trace "$DKMLSYS_WGET" $(dk_wget_https_only) -O "$downloadfile_FILE".tmp "$downloadfile_URL"
         else
             echo "No curl or wget available on the system paths" >&2
             exit 107
@@ -650,8 +662,8 @@ esac
 # A checksum-less fetch (the manifest is trusted by SIGNATURE, not a pre-known
 # checksum). curl or wget, matching downloadfile's tool detection.
 dk_fetch() {
-  if [ -n "$DKMLSYS_CURL" ]; then "$DKMLSYS_CURL" -fsSL "$1" -o "$2"
-  elif [ -n "$DKMLSYS_WGET" ]; then "$DKMLSYS_WGET" -q -O "$2" "$1"
+  if [ -n "$DKMLSYS_CURL" ]; then "$DKMLSYS_CURL" --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL "$1" -o "$2"
+  elif [ -n "$DKMLSYS_WGET" ]; then "$DKMLSYS_WGET" $(dk_wget_https_only) -q -O "$2" "$1"
   else echo "FATAL: no curl or wget on the system paths" >&2; exit 107; fi
 }
 
@@ -690,11 +702,7 @@ dk_extexe() { case "$BUILDHOST_ARCH" in windows_*) printf '.exe' ;; esac; }
 # mlfront-signify SHA-256, then the baked public key over the manifest.
 dk_verify_manifest() {
   dvm_out=$1; dvm_ver=$2
-  # The linux_x86_64 mlfront-signify is musl-static (built on alpine), so musl
-  # hosts pin and fetch that same verifier; no musl-named verifier asset is
-  # published.
   dvm_sigarch=$BUILDHOST_ARCH
-  [ "$BUILDHOST_ARCH" = linux_x86_64_musl ] && dvm_sigarch=linux_x86_64
   eval "dvm_pin=\${cksum_signify_${dvm_sigarch}:-}"
   # Empty = the arch was never provisioned; a value still starting with `__` is
   # a maintained-but-unbaked placeholder (e.g. windows_x86 until its signify job
