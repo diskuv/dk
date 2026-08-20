@@ -5630,7 +5630,11 @@ The formulas, per value type:
 ```text
 -- o : object (the output of one form, for one slot)
 FRM  = SHA256_HEX( VCI || "|form|" || MODVER )
-o_id = "o" || BASE32L( SHA256_HEX( FRM || "::" || SLOT ) )
+XT   = ""                             when EXEC_ABI = TARGET_ABI  (native build)
+     = "::target_abi=" || TARGET_ABI  when EXEC_ABI <> TARGET_ABI (cross build)
+       where EXEC_ABI and TARGET_ABI are the resolved v3 ABI names of the
+       build; a native build contributes nothing and keeps its id
+o_id = "o" || BASE32L( SHA256_HEX( FRM || "::" || SLOT || XT ) )
 
 -- a : asset (one file of a bundle)
 ACI_JSON = CANON_JSON( { checksum = { blake2b256?, sha1?, sha256? },
@@ -5678,15 +5682,16 @@ Two structural properties follow directly from the formulas:
    checksum and byte size of the file, so two assets with different bytes can
    never share an `a` id, and `BCI_JSON` inherits that property for `b` ids.
 2. **Object ids do not hash the produced output.** `o_id` is derived only from
-   the *recipe address*: the values file (via `VCI`), the form's module version and
-   the slot. The bytes that the form's function writes into the output
-   directory appear nowhere in the formula. The consequences are described in
-   the next section.
+   the *recipe address*: the values file (via `VCI`), the form's module version,
+   the slot, and, on a cross build, the resolved target ABI. The bytes that the
+   form's function writes into the output directory appear nowhere in the
+   formula. The consequences are described in the next section.
 
 #### Object Ids Hide Build Non-Determinism
 
 An object id is a *recipe address* (the values file (via `VCI`), the form's
-module version and the slot). Whichever build of the recipe
+module version, the slot, and the resolved target ABI on a cross build).
+Whichever build of the recipe
 completes first has its output bytes persisted into the value store
 under that id; every later build of the same recipe reuses (or republishes)
 bytes under the same id, even if a fresh build would have produced different
