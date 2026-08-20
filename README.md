@@ -16,13 +16,13 @@ Install the `dk0` reference implementation with one command.
 Linux and macOS:
 
 ```sh
-curl -fsSL https://diskuv.com/dk/install.sh | sh
+curl --proto '=https' --tlsv1.2 -sSf https://diskuv.com/dk/install.sh | sh
 ```
 
 Windows:
 
 ```powershell
-irm https://diskuv.com/dk/install.ps1 | iex
+powershell -ExecutionPolicy ByPass -c "[Net.ServicePointManager]::SecurityProtocol = 3072; irm https://diskuv.com/dk/install.ps1 | iex"
 ```
 
 Each installer downloads the single-file `dk0` executable for your platform,
