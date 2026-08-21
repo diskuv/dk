@@ -1071,7 +1071,7 @@ An object slot's ABI conventionally falls into one of two categories:
 
 An interpreted runtime that performs native compilation during the build is both a build-time tool and a source of target artifacts. Conventionally, that interpreted runtime would use a target ABI slot like `Release.target_abi` and run with an emulator like Rosetta on macOS, QEMU on Linux, or WOW64 on Windows. The interpreter runs on the execution host and its native compilation produces artifacts for the target. For example, a cross-build of a Python distribution on a `Darwin_arm64` host for a `Darwin_x86_64` target fetches the `Darwin_x86_64` CPython runtime and runs its `python3` under Rosetta to install wheels. A wheel with a C extension, like one built through setuptools, compiles the extension for the target ABI `Darwin_x86_64`.
 
-The system toolchain that each ABI family assumes, and how it is located, is specified in [System toolchains (per-ABI contract)](DK0-REFERENCE.md#system-toolchains-per-abi-contract).
+The system toolchain that each ABI family assumes, and how it is located, is specified in the "System toolchains (per-ABI contract)" section of the dk0 reference.
 
 #### ${/} directory separator
 
