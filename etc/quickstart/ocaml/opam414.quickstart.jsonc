@@ -1,0 +1,22 @@
+{
+  "$schema": "https://diskuv.com/dk/schema/dk-quickstart-recipe-1.0.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "name": "opam414",
+  "imports": [
+    {
+      "type": "github-l2",
+      "repo": "dkpkg/CommonsLang_OCaml"
+    }
+  ],
+  "seed_files": [
+    {
+      "path": ".gitattributes",
+      "content": "# dk hashes assets by raw bytes, so check out LF everywhere. Without this a\n# Windows checkout with core.autocrlf=true rewrites the content-addressed\n# assets to CRLF and dk1 run-object fails asset verification.\n* text=auto eol=lf\n*.cmd text eol=crlf\n*.bat text eol=crlf\n*.ps1 text eol=crlf\n"
+    },
+    {
+      "path": "dk-opam-pins.txt",
+      "content": "# Pin table for CommonsLang_OCaml.Dk.OpamLock.Solve.\n# Line forms:\n#   repo NAME URL          opam repository (append #COMMIT to pin a commit)\n#   pin NAME VERSION       hard version lock for one opam package\n#   float NAME             remove a pin inherited from an existing switch\n#   archexclude NAME ARCH  exclude a package on one architecture\n#\n# opam-repository. Append #COMMIT to pin a commit for a reproducible closure.\nrepo default git+https://github.com/ocaml/opam-repository.git\n#\n# Lock the compiler to the 4.14.3 toolchain (CommonsLang_OCaml.DkML@4.14.3) so\n# the solved closure compiles under 4.14, not 5.x:\npin ocaml 4.14.3\npin ocaml-base-compiler 4.14.3\n#\n# Pin dune to the toolchain-provided version (CommonsLang_OCaml.Dune@3.23.1):\npin dune 3.23.1\n"
+    }
+  ],
+  "next_steps": "This workspace targets the CommonsLang_OCaml.DkML@4.14.3 (OCaml 4.14) toolchain. Edit dk-opam-pins.txt if needed, then generate the lock and per-package build driver for your opam project. See https://diskuv.com/dk/pkg/CommonsLang_OCaml for the adoption steps."
+}

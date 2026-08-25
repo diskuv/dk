@@ -1,0 +1,22 @@
+{
+  "$schema": "https://diskuv.com/dk/schema/dk-quickstart-recipe-1.0.json",
+  "schema_version": { "major": 1, "minor": 0 },
+  "name": "opam550",
+  "imports": [
+    {
+      "type": "github-l2",
+      "repo": "dkpkg/CommonsLang_OCaml"
+    }
+  ],
+  "seed_files": [
+    {
+      "path": ".gitattributes",
+      "content": "# dk hashes assets by raw bytes, so check out LF everywhere. Without this a\n# Windows checkout with core.autocrlf=true rewrites the content-addressed\n# assets to CRLF and dk1 run-object fails asset verification.\n* text=auto eol=lf\n*.cmd text eol=crlf\n*.bat text eol=crlf\n*.ps1 text eol=crlf\n"
+    },
+    {
+      "path": "dk-opam-pins.txt",
+      "content": "# Pin table for CommonsLang_OCaml.Dk.OpamLock.Solve.\n# Line forms:\n#   repo NAME URL          opam repository (append #COMMIT to pin a commit)\n#   pin NAME VERSION       hard version lock for one opam package\n#   float NAME             remove a pin inherited from an existing switch\n#   archexclude NAME ARCH  exclude a package on one architecture\n#\n# opam-repository. Append #COMMIT to pin a commit for a reproducible closure.\nrepo default git+https://github.com/ocaml/opam-repository.git\n#\n# Lock the compiler to the OCaml Base 5.5 toolchain (CommonsLang_OCaml.Base@5.5.x).\n# Set these to the exact compiler and dune versions your dk toolchain ships:\npin ocaml 5.5.0\npin ocaml-base-compiler 5.5.0\npin dune 3.23.1\n"
+    }
+  ],
+  "next_steps": "This workspace targets the CommonsLang_OCaml.Base 5.5 (OCaml 5.5) toolchain. Set the compiler and dune versions in dk-opam-pins.txt to match your dk toolchain, then generate the lock and per-package build driver for your opam project. See https://diskuv.com/dk/pkg/CommonsLang_OCaml for the adoption steps."
+}
