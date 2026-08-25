@@ -178,6 +178,7 @@
       - [request.ui.checksum](#requestuichecksum)
       - [request.ui.readfile](#requestuireadfile)
       - [request.ui.writefile](#requestuiwritefile)
+      - [request.ui.selfignore](#requestuiselfignore)
       - [request.ui.signify](#requestuisignify)
       - [request.ui.sleep](#requestuisleep)
       - [request.ui.buildpubkey](#requestuibuildpubkey)
@@ -3822,6 +3823,44 @@ The caller is expected to check the return values. Using the Lua convention
   [strictly relative](#strictly-relative-path) project path written, and the
   SHA-256 of the newly written content.
 - On any other failure (a `path` that is not strictly relative or escapes the
+  project, or an I/O error), the three (3) return values are `nil`, an error
+  message, and the string `error`.
+
+#### request.ui.selfignore
+
+```lua
+request.ui.selfignore { dir = "relative/project/dir" }
+```
+
+Drops the same self-ignore markers `dk0` writes into its own `t/` sandboxes
+into a rule-created transient project directory:
+
+- `dir/.gitignore` whose sole line is `*`, git-ignoring everything beneath the
+  directory (including the marker files), so the transient tree never appears
+  in the host project's git status.
+- `dir/dune` whose sole line is `(dirs)`, so a host project's `dune build`
+  never descends into the directory and collides on the `dune-project` files a
+  rule may stage there.
+
+`dir` must be a [strictly relative](#strictly-relative-path) project path,
+resolved against the user's project directory. The directory is created if
+missing. Each marker is written only if it does not already exist, so a
+maintainer edit to either marker is preserved and a repeated call is
+idempotent. Use it instead of two
+[`request.ui.writefile`](#requestuiwritefile) calls so a rule that
+materializes a transient tree (for example a local opam venv) never makes the
+maintainer hand-edit the top-level `.gitignore`.
+
+Writing into the project tree, `request.ui.selfignore` needs the same `write`
+capability as [`request.ui.writefile`](#requestuiwritefile). The caller is
+expected to check the return values (`assert(request.ui.selfignore { ... })`
+is sufficient):
+
+- If the user rejected giving permission, the three (3) return values are
+  `nil`, an error message, and the string `denied`.
+- On success, the single return value is the
+  [strictly relative](#strictly-relative-path) project path of the directory.
+- On any other failure (a `dir` that is not strictly relative or escapes the
   project, or an I/O error), the three (3) return values are `nil`, an error
   message, and the string `error`.
 
