@@ -493,6 +493,13 @@ and let UI rules perform privileged `request.ui` actions without an interactive
 prompt. The records live in `<workspace>/etc/dk/t` and are committable, so a
 repository carries its trust decisions into CI.
 
+The trust commands anchor `etc/dk/t` at the nearest workspace within the
+current repository. In a directory with no `dk.u`, and in a repository whose
+only enclosing workspace belongs to another checkout, the records anchor at
+the current directory: a `trust accept` issued in a project before its
+`quickstart` lands in that project, where the quickstart-created workspace's
+import reads it.
+
 `trust list` is the audit surface for the whole signify trust model. It prints
 one line per entry, each producer key shown in full so it can be compared
 against a known-good key: the built-in vendor root, the locally prepared author
