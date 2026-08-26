@@ -2334,6 +2334,8 @@ Signify builds keys are automatically created specific to the user (you) on a ma
 Any OpenBSD signify key and any GitHub repository encountered by the build system is automatically denied.
 However, you are prompted if you want to accept or deny the key or repository, with the default as deny.
 
+A consumer can record a durable acceptance for a package name before any import, so the next import of that package accepts the producer key it presents without a prompt. The acceptance optionally pins the expected public key obtained out-of-band; an import whose producer key differs from the pin is denied, so a first import over a compromised channel is denied rather than accepted on first use. An acceptance is an authenticity decision and never grants a package's rules a capability.
+
 When accepting an OpenBSD signify public key embedded in a values.json build file, the
 
 - accompanying continuations that were signed with the private key are accepted. These continuations are public keys for the next version, and imported once and never overwritten.

@@ -368,12 +368,15 @@ signify signatures must verify against the release's `producer.openbsd_signify`
 public key, the monotonic key-rotation rules hold against the releases already
 imported in `DIR` and the local trust records in `<workspace>/etc/dk/t`,
 and a producer key with no trust anchor (the built-in dk vendor root, a locally
-prepared key in `etc/dk/d`, a signed continuation chain, or
-`--trust-local-package`) is denied unless interactively accepted. The prompt
-denies at end of input, so unattended CI fails closed; pass
-`--trust-local-package LIBRARY` to accept a known producer without a prompt.
-`import local` records each accepted release in `etc/dk/t` so later imports
-can anchor on it.
+prepared key in `etc/dk/d`, a signed continuation chain, a durable
+`dk0 trust accept` record, or `--trust-local-package`) is denied unless
+interactively accepted. The prompt denies at end of input, so unattended CI
+fails closed. Record a durable acceptance ahead of the import with
+`dk0 trust accept PACKAGE_ID` (add `--key PUBKEY` to pin a key obtained
+out-of-band, so a first import over a compromised channel is denied), or pass
+`--trust-local-package LIBRARY` to accept a known producer for the current
+invocation only. `import local` records each accepted release in `etc/dk/t` so
+later imports can anchor on it.
 
 ```text
 inspect github-l2 -R,--repo [HOST/]OWNER/REPO [--tag TAG] [--outdir DIR]
@@ -475,6 +478,61 @@ Resolution algorithm:
 3. Compare timestamps by zero-padding each to 14 digits.
 4. Keep the candidates whose padded timestamp is strictly less than `TAG`'s, and select the greatest. If none remain, that indicates a
    cold build (exit 0).
+
+### Trust commands
+
+```text
+trust list
+trust accept PACKAGE_ID [--key PUBKEY] [--run] [--write]
+trust grant (PACKAGE_ID | --values-sha256 HEX) [--run] [--write]
+trust revoke (PACKAGE_ID | --values-sha256 HEX) [--run] [--write]
+```
+
+`trust` manages the workspace trust records that let signed imports be accepted
+and let UI rules perform privileged `request.ui` actions without an interactive
+prompt. The records live in `<workspace>/etc/dk/t` and are committable, so a
+repository carries its trust decisions into CI.
+
+`trust list` is the audit surface for the whole signify trust model. It prints
+one line per entry, each producer key shown in full so it can be compared
+against a known-good key: the built-in vendor root, the locally prepared author
+keys, the producer keys anchored by prior imports, the explicit capability
+grants, the durable acceptances, the grantable local identities, and the import
+ledger that activates producer-key grants.
+
+`trust accept PACKAGE_ID` records a durable acceptance of the package's
+producer key in `etc/dk/t/acceptances.json`. The next import of the package
+accepts the key it presents and pins it, exactly as an interactive acceptance
+would, and the record is visible to `trust list` and removable with
+`trust revoke`. The record carries no local-resolution meaning, so it is the
+consumer-side lever that `--trust-local-package` is not.
+
+`trust accept PACKAGE_ID --key PUBKEY` pins the expected producer key, the full
+OpenBSD signify public key obtained out-of-band (for example from the package's
+page on diskuv.com). An import whose producer key differs from the pin is
+denied, so a first import over a compromised channel is denied rather than
+accepted on first use.
+
+`trust accept PACKAGE_ID --run` / `--write` record pending capabilities that
+resolve into ordinary producer-key grants at the first successful import. Until
+that import the acceptance shows as `state=pending` in `trust list`; after it
+the acceptance shows as `state=resolved` and the grant is indistinguishable
+from one written by `trust grant`.
+
+`trust grant PACKAGE_ID` grants a capability to a package that is already
+imported. It resolves the package's current producer signify key from the
+imported releases in `etc/dk/i` and the trust records in `etc/dk/t`, and grants
+to that key: the full public key material, never the displayed fingerprint.
+When no imported release carries a producer key, the grant falls back to the
+package's keyless local distribution records and binds their values-file
+content hashes. `trust grant --values-sha256 HEX` grants to unsigned local
+content addressed by its dos2unix-ed values-file SHA-256.
+
+The capabilities are `--run` (run programs: `request.ui.spawn` and
+`request.ui.capture`) and `--write` (write files: `request.ui.writefile`).
+`grant` requires at least one; `accept` treats them as optional. `revoke`
+without a capability removes the whole grant, and `revoke PACKAGE_ID` also
+removes the matching acceptance.
 
 ### Query commands
 
@@ -781,7 +839,7 @@ run: dk0 -t "${{ github.event.head_commit.timestamp }}" ...
 
 - `--integrity none|existence|checksum` - verify the local value store against the trace store. `none` is fastest but can't tell if values are evicted; `existence` checks for the existence of values (fetching from a remote value store if present); `checksum` is slowest, skips any value read without a constructive-trace entry, and removes it if permitted [default: existence].
 - `--random-seed SEED` - seed the RNG for operations needing randomness (e.g. signing build files). Highly insecure but allows reproducible trace/value stores; if unset, a seed is generated from system entropy.
-- `--trust-local-package PACKAGE_ID` - allow loading local distributions from `PACKAGE_ID`, and accept `PACKAGE_ID`'s producer key on import without the interactive accept/deny prompt. Repeatable. This is the documented escape hatch for unattended imports; it never overrides signature verification or the key-rotation rules.
+- `--trust-local-package PACKAGE_ID` - allow loading local distributions from `PACKAGE_ID`, and accept `PACKAGE_ID`'s producer key on import without the interactive accept/deny prompt. Repeatable. This is the producer/development lever for a local source tree, and its acceptance is per-invocation. For a consumer accepting a signed import, `dk0 trust accept PACKAGE_ID` records a durable acceptance without the local-resolution meaning. `--trust-local-package` never overrides signature verification or the key-rotation rules.
 - `--dangerously-trust-all` - skip the `request.ui` capability prompts and allow every privileged rule action for the process. Don't do it: record explicit grants with `dk0 trust grant` (or an interactive `[a]lways` answer) instead. It never affects the import-time signify verification.
 - `--keys-env ENV_PREFIX` - use `<ENV_PREFIX>_PUBKEY` and `<ENV_PREFIX>_SECKEY` as the build public/secret key (lines may be separated with pipes or newlines).
 - `--keys-dir DIR` - directory for the `build.pub`/`build.sec` keys [default: `<workspace>/t/k`, or `<xdg config>/dk` with `--global`].
@@ -829,7 +887,7 @@ the `t/d`, `t/c` and `t/k` defaults). The `etc/dk/` directories are:
 | --- | --- | --- | --- |
 | `etc/dk/d` | Prepared distribution keys: `<MAJOR.MINOR>.<PATCH>.dist.json` files carrying the producer public key and signed continuations for the version lines this workspace releases. Author-owned; commit them. | `prepare-version` | `distribute` and `combine` (signing); every import (the keys are locally prepared trust anchors). |
 | `etc/dk/i` | The import directory: verified release `<LIBRARY>.<VERSION>.values.json` files, plus the `values.unattested.json` download scratch file. On the workspace include path, so the imported distributions resolve values and traces. The files double as prior-import trust anchors. Machine-managed: `update` garbage-collects entries its resolution no longer uses, and an `import` prunes the strictly older releases it supersedes on the same `MAJOR.MINOR` line. | `add`, `import`, `restore`, and workspace `import` declarations | distribution resolution; prior-import trust anchoring. |
-| `etc/dk/t` | Consumer trust records. Three kinds: **(1)** byte-identical copies of directly imported release values files (`<LIBRARY>.<VERSION>.values.json`), recorded only after the consumer trust checks pass; **(2)** `imports.json`, the machine-written import ledger. Each entry records a `values_sha256` (SHA-256 of the dos2unix-ed content) that an import/restore verification accepted, its `kind` (`record` for the imported `values.json` file, or `scriptmodule` for an exported `values.lua` whose hash the producer signed into `build_to_sign.build_script_module_sha256s`), and the distribution's producer `pubkey_base64`. A rule whose run-time content SHA matches a keyed entry is attributed to that producer; **(3)** `capabilities.json`, the human-authorized `request.ui` capability grants (`run`, `write`) keyed by producer public key (`pubkey_base64`) or by local values content (`values_sha256`). A `.gitignore` written by `dk0` keeps the machine-written records (1) and (2) out of git while leaving `capabilities.json` committable so a repository can carry its grants into CI. Deliberately **not** an include directory, so no values or traces are ever resolved from a record; a record only anchors the producer key and rotation of later imports, gates producer-key grants (ledger), or carries grants. | `import local` (record copies); every `import`/`restore` (ledger); `trust grant` and the capability prompt's `[a]lways` answer (grants) | prior-import trust anchoring; producer-key grant activation (ledger); `request.ui` capability decisions (grants). |
+| `etc/dk/t` | Consumer trust records. Four kinds: **(1)** byte-identical copies of directly imported release values files (`<LIBRARY>.<VERSION>.values.json`), recorded only after the consumer trust checks pass; **(2)** `imports.json`, the machine-written import ledger. Each entry records a `values_sha256` (SHA-256 of the dos2unix-ed content) that an import/restore verification accepted, its `kind` (`record` for the imported `values.json` file, or `scriptmodule` for an exported `values.lua` whose hash the producer signed into `build_to_sign.build_script_module_sha256s`), and the distribution's producer `pubkey_base64`. A rule whose run-time content SHA matches a keyed entry is attributed to that producer; **(3)** `capabilities.json`, the human-authorized `request.ui` capability grants (`run`, `write`) keyed by producer public key (`pubkey_base64`) or by local values content (`values_sha256`); **(4)** `acceptances.json`, the durable `dk0 trust accept` records keyed by package name, each carrying an optional pinned producer key and optional pending capabilities that become grants at the first successful import. A `.gitignore` written by `dk0` keeps the machine-written records (1) and (2) out of git while leaving `capabilities.json` and `acceptances.json` committable so a repository can carry its trust decisions into CI. Deliberately **not** an include directory, so no values or traces are ever resolved from a record; a record only anchors the producer key and rotation of later imports, gates producer-key grants (ledger), carries grants, or carries acceptances. | `import local` (record copies); every `import`/`restore` (ledger, and acceptance resolution); `trust grant` and the capability prompt's `[a]lways` answer (grants); `trust accept` (acceptances) | prior-import trust anchoring; producer-key grant activation (ledger); `request.ui` capability decisions (grants); import-time key acceptance (acceptances). |
 | `etc/dk/v` | Authored values files (`*.values.jsonc`, `*.values.lua`) belonging to the workspace. On the workspace include path. `distribute` seals them into the distribution manifest together with the workspace script and `dist/*.u`. | the workspace author | distribution resolution; manifest sealing. |
 
 ### Lua interpreter
@@ -942,9 +1000,9 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 | GitHub SLSA Level 2 attestation | `import github-l2`, `inspect github-l2`, `restore github-l2` | Yes. The release `values.json` is verified with `gh attestation verify` against the Sigstore trusted root, scoped to `-R OWNER/REPO`; a failed verification is fatal. |
 | OpenBSD signify signing of a distribution | `prepare-version` (key generation); `distribute` and `combine` (signing); every import (verification) | Yes. `distribute` signs the canonical build payload (`ThunkDist.canonical_build_payload_id`) when the build key is the distribution producer key (the dk-distribute CI action passes it with `--keys-env`), and `combine` re-signs the combined distribution the same way. On `import github-l2`, `import local`, `restore github-l2` and `remote-result import`, the signed continuations must verify against the `producer.openbsd_signify` public key, and the `build.attestation.openbsd_signify` signature (when present) must verify over the canonical build payload. A present-but-invalid signature is fatal (`SecConsumerTrust`). |
 | Key rotation via signed continuations, monotonic per `MAJOR.MINOR` | `prepare-version`, `distribute` (author); every import (consumer) | Yes. `SecPackageRegistry.characterize` runs on both sides. A producer key is imported once and never overwritten (no key may reclaim an established `MAJOR.MINOR`); a new `MAJOR.MINOR` must carry the continuation key a trusted prior release signed; a release below the latest imported release is rejected (`restore` falls back to a cold build). |
-| Vendor-key trust root and deny-by-default acceptance | every import | Yes. Trust anchors, in order: the built-in dk signify key for `CommonsBase_Std`, locally prepared keys in `etc/dk/d`, previously imported releases (the import directory `etc/dk/i` plus the local trust records in `etc/dk/t`), and the documented `--trust-local-package` escape hatch. Any other producer key gets an interactive accept/deny prompt that defaults to deny and denies at end of input, so CI fails closed. Transitive distributions recovered from a directly imported release are verified (signatures and rotation consistency) before their content-pinned acceptance, and never anchor a directly imported release's rotation. |
+| Vendor-key trust root and deny-by-default acceptance | every import | Yes. Trust anchors, in order: the built-in dk signify key for `CommonsBase_Std`, locally prepared keys in `etc/dk/d`, previously imported releases (the import directory `etc/dk/i` plus the local trust records in `etc/dk/t`), a durable `dk0 trust accept` record (optionally pinned to a key; a pin mismatch is fatal), and the documented `--trust-local-package` escape hatch. Any other producer key gets an interactive accept/deny prompt that defaults to deny and denies at end of input, so CI fails closed. Transitive distributions recovered from a directly imported release are verified (signatures and rotation consistency) before their content-pinned acceptance, and never anchor a directly imported release's rotation. |
 | Value-store integrity of Marshal-ed ASTs | build / `get-object` path | Yes. A SHA-256 prefix guards each Marshal-ed AST and is signify-signed with a per-workspace build key (`SECURITY.md`). |
-| Rule-capability consent for `spawn` / `capture` / `writefile` / `selfignore`, keyed by signify provenance | `request.ui.*` (`BuildRequestUi`, `SecUiCapability`); `trust list/grant/revoke` | Yes. Deny-by-default prompt before a rule first exercises a capability — `run` (running a program: `request.ui.spawn` and `request.ui.capture`, gated identically so capture cannot bypass a spawn denial) or `write` (`request.ui.writefile` and `request.ui.selfignore`); fails closed with no TTY, naming `dk0 trust grant`. The prompt identifies the rule by its signify provenance: the producer key fingerprint and `package@version` for a rule from an imported, signature-verified distribution, or the values-file SHA-256 for a host script or local rule. Answering `[a]lways` (or `dk0 trust grant`) persists the grant in `etc/dk/t/capabilities.json`, keyed by the full producer public key (never the fingerprint, which is the attacker-choosable keynum) or by content hash; `[y]es` allows once. A producer-key grant is honored only for values content whose SHA-256 is recorded in the `etc/dk/t/imports.json` ledger against that producer — the producer signs each exported script module's content hash into `build_to_sign.build_script_module_sha256s`, and import records it after verifying the signature — so content tampered after import (or a local squatter) falls back to the content-hash prompt. Key acceptance at import never confers a capability. The process-wide `--dangerously-trust-all` is a separate command-line escape hatch; the isolated `dk0 remote` path additionally allows the single, producer-trusted orchestration rule it runs without a prompt. The prompt warns when a program is a bare name resolved through `PATH`. |
+| Rule-capability consent for `spawn` / `capture` / `writefile` / `selfignore`, keyed by signify provenance | `request.ui.*` (`BuildRequestUi`, `SecUiCapability`); `trust list/accept/grant/revoke` | Yes. Deny-by-default prompt before a rule first exercises a capability — `run` (running a program: `request.ui.spawn` and `request.ui.capture`, gated identically so capture cannot bypass a spawn denial) or `write` (`request.ui.writefile` and `request.ui.selfignore`); fails closed with no TTY, naming `dk0 trust grant`. The prompt identifies the rule by its signify provenance: the producer key fingerprint and `package@version` for a rule from an imported, signature-verified distribution, or the values-file SHA-256 for a host script or local rule. Answering `[a]lways` (or `dk0 trust grant`) persists the grant in `etc/dk/t/capabilities.json`, keyed by the full producer public key (never the fingerprint, which is the attacker-choosable keynum) or by content hash; `[y]es` allows once. A producer-key grant is honored only for values content whose SHA-256 is recorded in the `etc/dk/t/imports.json` ledger against that producer — the producer signs each exported script module's content hash into `build_to_sign.build_script_module_sha256s`, and import records it after verifying the signature — so content tampered after import (or a local squatter) falls back to the content-hash prompt. Key acceptance at import never confers a capability, though `dk0 trust accept PACKAGE_ID --run`/`--write` records pending capabilities that become the same producer-key grants at the first successful import. The process-wide `--dangerously-trust-all` is a separate command-line escape hatch; the isolated `dk0 remote` path additionally allows the single, producer-trusted orchestration rule it runs without a prompt. The prompt warns when a program is a bare name resolved through `PATH`. |
 | Windows executable-search hardening | `dk0` process startup (`Shell.ml`) | Yes. On Windows `dk0` sets `NoDefaultCurrentDirectoryInExePath`, removing the current directory from the executable search for every program it spawns — rule spawns, precommands, function commands and subshells — so a program named by a bare name is found only through `PATH`, never from an executable dropped into the working directory. |
 | Build-state exclusion from globs | `request.ui.glob` (`BuildRequestUi`) | Yes. The signify keys directory (holding `build.sec`), the data directory and the cache directory are never enumerated, so a rule cannot route `build.sec` or other build state into a content-addressed bundle. |
 | `signify` primitive (keygen / sign / verify / checksum lists) | `signify -G` / `-S` / `-V` / `-C` | The OpenBSD signify implementation (`MlFront_Signify`), including `-C` verification of a signed SHA256/SHA512 checksum list against its files. |
@@ -957,8 +1015,9 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 - **`import github-l2` verifies two anchors.** The release must carry a valid
   GitHub/Sigstore attestation for the `OWNER/REPO` on the command line, and its
   producer signify key must anchor to the built-in dk vendor root, a locally
-  prepared key, a trusted continuation chain, `--trust-local-package`, or an
-  interactive acceptance (deny by default).
+  prepared key, a trusted continuation chain, a durable `dk0 trust accept`
+  record (optionally pinned to a key, so a pin mismatch is denied),
+  `--trust-local-package`, or an interactive acceptance (deny by default).
 - **The Sigstore trusted root is derived at import time.** The Fulcio CAs and
   Rekor keys that anchor the SLSA Level 2 check are refreshed through Sigstore's
   threshold-signed TUF metadata. "Sigstore trusted root" below describes the
@@ -989,7 +1048,9 @@ keys" sections; the value-store protections are in `SECURITY.md`.
   verifying the signature, and the run-time content is bound by matching that
   hash. Content tampered after import (or a local file squatting on the module
   id) is not in the ledger and safely falls back to the content-hash prompt.
-  `dk0 trust grant|revoke|list` manages the grants non-interactively (CI).
+  `dk0 trust grant|revoke|list` manages the grants non-interactively (CI), and
+  `dk0 trust accept PACKAGE_ID --run`/`--write` records pending capabilities
+  that become the same producer-key grants at the first successful import.
   Accepting a producer key at import time never grants a capability: authenticity
   and authorization are separate decisions. A program given as a bare name is
   flagged as `PATH`-resolved (with the current directory excluded from the
@@ -1019,8 +1080,9 @@ first import would fail closed or teach users to reach for
 `--trust-local-package`, hollowing out the deny-by-default model. Only this
 one package's keys are embedded - not every `Commons*` key - to keep the
 curated, code-reviewed trust surface minimal: every other producer anchors
-through the signed continuation chains of imported releases, an explicit
-`--trust-local-package`, or an interactive acceptance.
+through the signed continuation chains of imported releases, a durable
+`dk0 trust accept` record, an explicit `--trust-local-package`, or an
+interactive acceptance.
 
 Newer `CommonsBase_Std` lines chain from the embedded keys through the signed
 continuations of imported releases (2.5 signs the 2.6 and 3.0 keys, and so
