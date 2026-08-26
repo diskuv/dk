@@ -113,7 +113,7 @@ like they do from any opam switch.
 
 ## Adopting an opam project
 
-Adoption is, with `VERSION` being your project's version:
+Adoption is (replace `VERSION` with your project version):
 
 {% tabs %}
 {% tabitem label="Unix" %}
@@ -159,13 +159,13 @@ powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol = 30
 `quickstart ocaml opam414` selects the DkML 4.14 toolchain and
 `quickstart ocaml opam550` selects OCaml 5.5.
 
-Command by command, that adoption will:
+Adoption will:
 
 - copy dk launcher scripts into your project so you can type `./dk1` in PowerShell or POSIX (or `.\dk1` in Command Prompt) to run the dk executable
 - construct a `dk.u` workspace file, populate the pin table for the chosen toolchain, and import [CommonsLang_OCaml] (the `--trust-local-package` flag accepts its publisher key without an interactive prompt)
 - verify the imported release against its GitHub attestation
-- let the adoption dialog run programs (the opam solver) and write files (the generated build forms) without interactive prompts
-- launch the adoption dialog, which solves the opam lock, generates the build forms, and registers the project source code
+- let the adoption dialog run programs (the opam solver) and write files (the generated build scripts) without interactive prompts
+- launch the adoption dialog, which solves the opam lock, generates the build scripts, and registers the project source code
 
 When the dialog finishes it prints the two remaining commands: a final
 `./dk1 update` that records the checksums of the registered files, and the
