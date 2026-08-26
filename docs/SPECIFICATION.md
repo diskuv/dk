@@ -1162,7 +1162,8 @@ Form functions may have execution constraints like the following that restricts 
 
 These names and values follow the *Platform Lexicon* defined by the Bazel build tool: <https://github.com/bazelbuild/remote-apis/blob/main/build/bazel/remote/execution/v2/platform.md/>.
 
-> Tip: be careful! If you specify the `ISA` property pair, it may be ignored today but recognized in a future version.
+> [!TIP]
+> Be careful! If you specify the `ISA` property pair, it may be ignored today but recognized in a future version.
 
 **If** there is a need to constrain the execution, it is conventional to use a lookup table to map slots to execution values.
 The use of `get-asset` and the `$(...)` subshell will be explained in later sections. But for now, here is the convention

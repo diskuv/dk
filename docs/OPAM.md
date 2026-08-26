@@ -1,108 +1,175 @@
 # dk for opam users
 
-dk runs the opam you already know: the real solver, real opam repositories,
-your pins. It adds a committed, per-platform lockfile and a cache of built
-packages that releases publish as signed, attested assets. Each locked
-package builds in its own sandbox, and the result is stored under the hash of
-everything that went into it: the package source, its locked dependencies,
-and the compiler. A build that needs a locked package downloads and verifies
-a published object when one exists and builds it from source when one does
-not. When you want the standard inner loop, an opam prefix can be
-materialized from the built packages, so `dune build -w` runs against the
-working tree.
+At a high level, dk is a build system with a distributed key value store.
+The key value stores are either local in a private `t/` folder in your project
+or are remotely stored in GitHub releases. dk provides tools so you can
+maintain your own GitHub projects (called "packages") with your own build
+artifacts and reusable build rules stored in GitHub releases. GitLab and other
+CI providers may be used at a later date.
+
+The [CommonsLang_OCaml] package has reusable build rules that create
+multi-platform lockfiles and maintain a global federation of built packages
+backed by dk's remote key value stores.
+Each locked package builds in its own directory hashed by the
+package source, its locked dependencies, and the OCaml compiler. A build
+that needs a locked package downloads it from GitHub releases
+if it exists; otherwise it builds from source. When you want true incremental
+development, an opam prefix can be materialized from the built packages,
+so `dune build -w` and similar commands run against your source tree.
 
 The authoritative reference for the rules this page describes is the
-[CommonsLang_OCaml package page](https://diskuv.com/dk/pkg/CommonsLang_OCaml).
+[CommonsLang_OCaml] package page.
+
+[CommonsLang_OCaml]: https://diskuv.com/dk/pkg/CommonsLang_OCaml
+
+> [!NOTE]
+> I use Windows as my primary dev environment so I don't have any experience
+> with `dune pkg`. I expect there is some overlap, even if the overall goals
+> are quite different. (Jonah)
 
 ## The pin table
 
-`dk-opam-pins.txt` is the project's input to the solver, in one small file.
-It plays the role of `opam repository add` and `opam pin` for the solve, and
-it is committed, so the whole team solves against the same inputs.
+In conventional opam use, an `opam install` command would run a "solve"
+(find the exact package versions that match the constraints in the .opam files)
+and then install the packages.
+
+`dk-opam-pins.txt` is how you declare your inputs to the solve.
+It plays the role of `opam repository add` and `opam pin`.
 
 ```text
-repo NAME URL          opam repository (append #COMMIT to pin a commit)
+repo NAME URL          opam repository
 pin NAME VERSION       hard version lock for one opam package
 float NAME             remove a pin inherited from an existing switch
 archexclude NAME ARCH  exclude a package on one architecture
 ```
 
-Pinning the compiler is how a project selects its toolchain: `pin ocaml
-4.14.3` solves against the DkML 4.14 toolchain, and `pin ocaml 5.5.0` solves
-against OCaml 5.5. Appending `#COMMIT` to the opam-repository line makes the
-solve reproducible down to the repository state.
+You need to select an OCaml toolchain with a pin:
 
-## Solving the lock
+- `pin ocaml 4.14.3` solves against the DkML 4.14 toolchain. This toolchain is OCaml 4.14 with patches; the most important patches are the relocatable patches.
+- `pin ocaml 5.5.0` solves against unpatched OCaml 5.5.
+
+> [!TIP]
+> Use a `#COMMIT` gitref in a `repo NAME URL#COMMIT` line to make the
+> solve reproducible.
+
+## Technical Details
+
+### Solving the pin table
 
 The solve runs `opam list --resolve` to compute the dependency closure and
 `opam show` to read each package's version, source, dependencies, and build
-commands. It never runs `opam install`. opam has no switch-less solve (the
-solver needs a switch's repositories, pins, and os/arch variables), so the
-solve creates an empty opam switch purely as a throwaway resolution context:
-it adds the pinned repositories, applies the version pins from the pin
-table, path-pins the local packages, and resolves. The switch is an
-ephemeral local switch in the rule's sandbox, unique per run, and removed
-once the solve finishes; nothing is ever installed into it.
+commands. Since the opam solver needs a switch's repositories, pins, and
+os/arch variables, the solve creates a throwaway opam switch from the
+[pin table](#the-pin-table). Nothing is ever installed into the throwaway
+switch.
 
-## The lock
+### The lock file
 
-The solve writes `dk.opam-lock.jsonc`, a committed lockfile with one section
-per platform ("slot" in dk terms: `Release.Linux_x86_64`,
+The solve creates `dk.opam-lock.jsonc`, a committed lockfile with one section
+per platform (ie. a "slot" in dk: `Release.Linux_x86_64`,
 `Release.Windows_x86_64`, and so on). It records every package's version,
-source URL, checksum, and build commands, so a pull request that changes the
-closure shows the change as an ordinary reviewable diff. The lock also
-carries a `generated` block recording the solve's own inputs (roots, the
-pin-table identity), which is what lets the tooling re-run or verify the
-solve later without anyone remembering the original command.
+source URL, checksum, and build commands. The lock also
+carries a `generated` block with the solve's own inputs (the package roots
+and the [pin table](#the-pin-table) identifier).
 
-## Building the closure
+### Building the package dependencies
 
-Each locked package builds from its opam-repository recipe in its own
-sandbox, and becomes its own cached object. The second build, and every
-incremental build after an edit, reuses every object whose inputs are
-unchanged; editing your source rebuilds your package and leaves the
-dependency closure cached.
+Each locked package builds in its own directory and becomes a cached object. That gives a coarse-grained
+incrementality to builds: if the binary artifacts of an opam package are cached
+and its inputs have not changed, those binary artifacts are loaded from the cache.
 
-Object identities are recipe addresses: a hash of the build rule's content,
-the `module@version`, and the slot, and the recipe embeds the project's own
-namespace. Caches therefore serve a project line, and the mechanism that
-pays off across machines is restoring against the project's own published
-releases: CI builds the closure once, releases it, and every later build
-(CI or a contributor's first checkout) seeds itself from that release.
+### Prebuilt packages
 
-## Prebuilt packages
+[CommonsLang_OCaml] includes the following prebuilt objects:
 
-The toolchain arrives prebuilt: the compiler, Dune, opam, and the build
-utilities are fetched lazily as attested objects from published releases,
-on every platform, including the Windows toolchain (an MSVC-based compiler,
-MSYS2, and Git delivered the same way as any other cached package). For the
-project's own dependency closure, any release that already built a locked
-package can serve it: every release ships the exact lock it was built from,
-and a consumer's locked `name.version` is served from a release whose lock
-pins the same version and the same compiler.
+- the OCaml compiler
+- Dune
+- opam
+- MSYS2 (building opam packages on Windows unfortunately needs substantial Unix emulation today)
 
-## The inner loop
+[CommonsBase_Build] includes:
 
-`dk1` rebuilds only what an edit invalidates. For the dune-native workflow,
-the OpamVenv dialog materializes a real opam prefix from the already-built
-closure into the project's `opam-venv/` directory, with activation scripts
-for each shell. Inside it, `dune build -w` and the editor's merlin work
-against the working tree exactly as they do in any opam switch.
+- Git (opam needs this)
 
-## Adopting an opam+dune project
+[CommonsBase_Build]: https://diskuv.com/dk/pkg/CommonsBase_Build/
 
-Adoption is scripted end to end. The launchers are vendored into the
-repository with one command, a quickstart recipe scaffolds the workspace and
-seeds the pin table for the chosen toolchain, and an adoption dialog solves
-the lock, generates the build forms, and registers the workspace assets:
+When you "adopt" dk into an existing opam project, you import the [CommonsLang_OCaml]
+dk package *and* you can import other dk-adopting packages. The net effect
+is you can import binary opam artifacts from other people, and you can
+distribute your binary opam artifacts to other people.
+
+## Underlying build system
+
+Today [CommonsLang_OCaml] only provides package level builds. It knows how to
+build packages that use `dune` or `ocamlbuild`, the two widely deployed OCaml
+build systems.
+
+Both `dune` and `ocamlbuild` have incremental compilation. You can use the
+OpamVenv dialog to create a real opam prefix from the already-built
+closure into the project's `opam-venv/` directory. Activation scripts for
+a POSIX shell, Windows Command Prompt and Windows PowerShell are available.
+Once activated, `dune build -w`, LSPs, merlin, etc., should work
+like they do from any opam switch.
+
+## Adopting an opam project
+
+Adoption is, with `VERSION` being your project's version:
+
+{% tabs %}
+{% tabitem label="Unix" %}
 
 ```sh
 curl -fsSL https://diskuv.com/dk/vendor.sh | sh
 ./dk1 --trust-local-package CommonsLang_OCaml quickstart ocaml opam414
+./dk1 update
+./dk1 trust grant CommonsLang_OCaml --run --write
+./dk1 dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.11 version=VERSION
 ```
 
+{% /tabitem %}
+{% tabitem label="PowerShell" %}
+
+```powershell
+# 3072 is Tls12. That is, don't use legacy TLS 1.0 or SSL 3.0
+[Net.ServicePointManager]::SecurityProtocol = 3072
+irm https://diskuv.com/dk/vendor.ps1 | iex
+./dk1 --trust-local-package CommonsLang_OCaml quickstart ocaml opam414
+./dk1 update
+./dk1 trust grant CommonsLang_OCaml --run --write
+./dk1 dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.11 version=VERSION
+```
+
+{% /tabitem %}
+{% tabitem label="Command Prompt" %}
+
+```bat
+REM 3072 is Tls12. That is, don't use legacy TLS 1.0 or SSL 3.0
+powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol = 3072; irm https://diskuv.com/dk/vendor.ps1 | iex"
+.\dk1.cmd --trust-local-package CommonsLang_OCaml quickstart ocaml opam414
+.\dk1.cmd update
+.\dk1.cmd trust grant CommonsLang_OCaml --run --write
+.\dk1.cmd dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.11 version=VERSION
+```
+
+{% /tabitem %}
+{% /tabs %}
+
 `quickstart ocaml opam414` selects the DkML 4.14 toolchain and
-`quickstart ocaml opam550` selects OCaml 5.5; each seeds a matching pin
-table. The [CommonsLang_OCaml package page](https://diskuv.com/dk/pkg/CommonsLang_OCaml)
+`quickstart ocaml opam550` selects OCaml 5.5.
+
+Command by command, that adoption will:
+
+- copy dk launcher scripts into your project so you can type `./dk1` in PowerShell or POSIX (or `.\dk1` in Command Prompt) to run the dk executable
+- construct a `dk.u` workspace file, populate the pin table for the chosen toolchain, and import [CommonsLang_OCaml] (the `--trust-local-package` flag accepts its publisher key without an interactive prompt)
+- verify the imported release against its GitHub attestation
+- let the adoption dialog run programs (the opam solver) and write files (the generated build forms) without interactive prompts
+- launch the adoption dialog, which solves the opam lock, generates the build forms, and registers the project source code
+
+When the dialog finishes it prints the two remaining commands: a final
+`./dk1 update` that records the checksums of the registered files, and the
+`./dk1 run-object` that builds your project's dependency closure and runs
+your executable.
+
+The [CommonsLang_OCaml] package page
 documents the adoption dialog and the individual rules (solve, driver
 generation, venv) with their current versions and parameters.
