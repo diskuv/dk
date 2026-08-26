@@ -129,8 +129,9 @@ curl -fsSL https://diskuv.com/dk/vendor.sh | sh
 {% /tabitem %}
 {% tabitem label="PowerShell" %}
 
+> `3072` is the code for `Tls12`. That is, don't use legacy TLS 1.0 or SSL 3.0.
+
 ```powershell
-# 3072 is Tls12. That is, don't use legacy TLS 1.0 or SSL 3.0
 [Net.ServicePointManager]::SecurityProtocol = 3072
 irm https://diskuv.com/dk/vendor.ps1 | iex
 ./dk1 --trust-local-package CommonsLang_OCaml quickstart ocaml opam414
@@ -142,8 +143,9 @@ irm https://diskuv.com/dk/vendor.ps1 | iex
 {% /tabitem %}
 {% tabitem label="Command Prompt" %}
 
+> `3072` is the code for `Tls12`. That is, don't use legacy TLS 1.0 or SSL 3.0.
+
 ```bat
-REM 3072 is Tls12. That is, don't use legacy TLS 1.0 or SSL 3.0
 powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol = 3072; irm https://diskuv.com/dk/vendor.ps1 | iex"
 .\dk1.cmd --trust-local-package CommonsLang_OCaml quickstart ocaml opam414
 .\dk1.cmd update
