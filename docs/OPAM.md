@@ -121,6 +121,7 @@ Adoption is (replace `VERSION` with your project version):
 ```sh
 curl -fsSL https://diskuv.com/dk/vendor.sh | sh
 ./dk1 trust accept CommonsLang_OCaml --run --write
+./dk1 trust accept CommonsBase_Build
 ./dk1 quickstart ocaml opam414
 ./dk1 update
 ./dk1 dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.12 version=VERSION
@@ -135,6 +136,7 @@ curl -fsSL https://diskuv.com/dk/vendor.sh | sh
 [Net.ServicePointManager]::SecurityProtocol = 3072
 irm https://diskuv.com/dk/vendor.ps1 | iex
 ./dk1 trust accept CommonsLang_OCaml --run --write
+./dk1 trust accept CommonsBase_Build
 ./dk1 quickstart ocaml opam414
 ./dk1 update
 ./dk1 dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.12 version=VERSION
@@ -148,6 +150,7 @@ irm https://diskuv.com/dk/vendor.ps1 | iex
 ```bat
 powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol = 3072; irm https://diskuv.com/dk/vendor.ps1 | iex"
 .\dk1.cmd trust accept CommonsLang_OCaml --run --write
+.\dk1.cmd trust accept CommonsBase_Build
 .\dk1.cmd quickstart ocaml opam414
 .\dk1.cmd update
 .\dk1.cmd dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.12 version=VERSION
@@ -162,7 +165,7 @@ powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol = 30
 Adoption will:
 
 - copy dk launcher scripts into your project so you can type `./dk1` in PowerShell or POSIX (or `.\dk1` in Command Prompt) to run the dk executable
-- record a durable acceptance of [CommonsLang_OCaml]'s publisher key with `trust accept`, so the quickstart-time import accepts the key without an interactive prompt, and grant its adoption dialog run and write at the same time
+- record a durable acceptance of the publisher keys the quickstart imports (`CommonsLang_OCaml`, and its support package `CommonsBase_Build`) with `trust accept`, so the quickstart-time import accepts the keys without an interactive prompt, and grant `CommonsLang_OCaml`'s adoption dialog run and write at the same time (the support package needs no capabilities, so it is accepted without `--run`/`--write`)
 - construct a `dk.u` workspace file, populate the pin table for the chosen toolchain, and import [CommonsLang_OCaml]
 - verify the imported release against its GitHub attestation
 - let the adoption dialog run programs (the opam solver) and write files (the generated build scripts) without interactive prompts, resolved from the pending grant the acceptance recorded

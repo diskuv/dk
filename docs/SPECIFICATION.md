@@ -2761,6 +2761,36 @@ The `fnrules` and `uirules` fields will both be empty tables, and those empty ta
 
 See [Custom Lua Rules](#introduction-to-custom-lua-rules) for a detailed explanation of the difference between `fnrules` and `uirules`.
 
+A `uirule` may declare the `request.ui` capabilities it needs in an optional
+`uirule_capabilities` field of the module table, keyed by rule name:
+
+```lua
+local M = {
+  id = '...',
+  uirule_capabilities = { Refresh = { 'run', 'write' } },
+}
+fnrules, uirules = build.newrules(M)
+function uirules.Refresh(command, request, continue_)
+  -- may call request.ui.spawn/capture (run) and request.ui.writefile (write)
+end
+return M
+```
+
+The two capability names are `run` (needed by `request.ui.spawn` and
+`request.ui.capture`) and `write` (needed by `request.ui.writefile` and
+`request.ui.selfignore`). A rule declares the union of the capabilities all of
+its `request.ui` calls make.
+
+The declaration is an *upper bound* that is enforced when present: a
+`request.ui` call for a capability the rule did not declare is denied without a
+prompt, and no trust flag can widen a rule beyond its own declaration. When a
+rule is denied a declared capability, the printed `trust grant` command lists
+every declared capability, so a single grant covers the rule. The field is
+optional: a rule with no `uirule_capabilities` is prompted for each capability
+as it first requests it, exactly as before. Because the declaration lives in the
+same values file as the rule body, it shares the rule's content identity and the
+producer's signature, so it cannot be changed independently of the rule.
+
 ### Lua jsondk library
 
 The `jsondk` library is embedded into the build system (nothing needs to be downloaded) but it must be accessed through `jsondk = require('jsondk')`.

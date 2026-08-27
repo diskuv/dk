@@ -483,7 +483,7 @@ Resolution algorithm:
 
 ```text
 trust list
-trust accept PACKAGE_ID [--key PUBKEY] [--run] [--write]
+trust accept PACKAGE_ID... [--key PUBKEY] [--run] [--write]
 trust grant (PACKAGE_ID | --values-sha256 HEX) [--run] [--write]
 trust revoke (PACKAGE_ID | --values-sha256 HEX) [--run] [--write]
 ```
@@ -507,12 +507,24 @@ keys, the producer keys anchored by prior imports, the explicit capability
 grants, the durable acceptances, the grantable local identities, and the import
 ledger that activates producer-key grants.
 
+A producer key anchored by a prior import prints as `anchor imported` only when
+this workspace has *verified* the import, which happens when its content is in
+the `etc/dk/t/imports.json` ledger. A committed `etc/dk/i` record that a fresh
+clone carries but has not verified yet (no `update` has run) prints as
+`anchor unverified-import` instead, and `trust list` names `update` as the
+remedy. This keeps `trust list` from showing a producer anchor that the
+execution-time trust check would still treat as unsigned local content.
+
 `trust accept PACKAGE_ID` records a durable acceptance of the package's
 producer key in `etc/dk/t/acceptances.json`. The next import of the package
 accepts the key it presents and pins it, exactly as an interactive acceptance
 would, and the record is visible to `trust list` and removable with
 `trust revoke`. The record carries no local-resolution meaning, so it is the
-consumer-side lever that `--trust-local-package` is not.
+consumer-side lever that `--trust-local-package` is not. Several PACKAGE_IDs may
+be accepted in one command (for example to cover every producer key a
+`quickstart` template imports); `--key` then applies to a single PACKAGE_ID
+only, while `--run`/`--write` apply to every named package, so pass them only
+for packages that need those capabilities.
 
 `trust accept PACKAGE_ID --key PUBKEY` pins the expected producer key, the full
 OpenBSD signify public key obtained out-of-band (for example from the package's
@@ -540,6 +552,42 @@ The capabilities are `--run` (run programs: `request.ui.spawn` and
 `grant` requires at least one; `accept` treats them as optional. `revoke`
 without a capability removes the whole grant, and `revoke PACKAGE_ID` also
 removes the matching acceptance.
+
+A UI rule may declare the capabilities it needs in a `uirule_capabilities` field
+of its module table (see the Specification). When a rule declares its
+capabilities, a `request.ui` call for a capability it did not declare is denied
+without a prompt (the declaration is an enforced upper bound, not widened by any
+trust flag), and a `trust grant` command suggested for the rule lists every
+declared capability so one grant covers it. A rule with no declaration is
+prompted for each capability as it first requests it.
+
+#### Committing imports for clone-and-build repositories
+
+A repository can carry its trust decisions so a fresh clone builds without
+re-deciding them. Commit the import records (`etc/dk/i/*.values.json`), the
+capability grants (`etc/dk/t/capabilities.json`), and the acceptances
+(`etc/dk/t/acceptances.json`). Do **not** commit `etc/dk/t/imports.json` or the
+`etc/dk/t/*.values.json` copies: those are the machine-written, per-workspace
+record that this workspace *verified* an import, and the `.gitignore` `dk0`
+writes keeps them out of git.
+
+Because the verification ledger is per-workspace, a fresh clone holds import
+records it has not verified yet. One `dk0 update` verifies them against their
+GitHub attestation and producer signatures and writes the ledger, after which
+the committed package grants and resolved acceptances apply. A privileged
+`dk0 dialog` also verifies the committed imports on its own first (offline,
+using the producer signatures and the committed acceptances), so cloning a
+repository that commits its `acceptances.json` and running a dialog works with
+no extra step; when a producer key is not anchored, the dialog reports the
+import as unverified and names `dk0 update`. Until an import is verified, a rule
+from it is treated as unsigned local content and a package (producer-key) grant
+does not apply to it.
+
+`trust accept` covers authenticity: it anchors each named package's producer
+key (optionally pinned with `--key`), and its `--run`/`--write` become grants at
+the first verification. `trust grant --values-sha256` grants are for local
+unsigned development only: they pin one release's file content and go stale on
+every release, so a committed repository grants by package instead.
 
 ### Query commands
 
@@ -893,7 +941,7 @@ the `t/d`, `t/c` and `t/k` defaults). The `etc/dk/` directories are:
 | Directory | Contents | Written by | Read for |
 | --- | --- | --- | --- |
 | `etc/dk/d` | Prepared distribution keys: `<MAJOR.MINOR>.<PATCH>.dist.json` files carrying the producer public key and signed continuations for the version lines this workspace releases. Author-owned; commit them. | `prepare-version` | `distribute` and `combine` (signing); every import (the keys are locally prepared trust anchors). |
-| `etc/dk/i` | The import directory: verified release `<LIBRARY>.<VERSION>.values.json` files, plus the `values.unattested.json` download scratch file. On the workspace include path, so the imported distributions resolve values and traces. The files double as prior-import trust anchors. Machine-managed: `update` garbage-collects entries its resolution no longer uses, and an `import` prunes the strictly older releases it supersedes on the same `MAJOR.MINOR` line. | `add`, `import`, `restore`, and workspace `import` declarations | distribution resolution; prior-import trust anchoring. |
+| `etc/dk/i` | The import directory: verified release `<LIBRARY>.<VERSION>.values.json` files, plus the `values.unattested.json` download scratch file. On the workspace include path, so the imported distributions resolve values and traces. The files double as prior-import trust anchors. Machine-written but committable, so a clone can carry them for clone-and-build (see "Committing imports for clone-and-build repositories"); `update` garbage-collects entries its resolution no longer uses, and an `import` prunes the strictly older releases it supersedes on the same `MAJOR.MINOR` line. | `add`, `import`, `restore`, and workspace `import` declarations | distribution resolution; prior-import trust anchoring. |
 | `etc/dk/t` | Consumer trust records. Four kinds: **(1)** byte-identical copies of directly imported release values files (`<LIBRARY>.<VERSION>.values.json`), recorded only after the consumer trust checks pass; **(2)** `imports.json`, the machine-written import ledger. Each entry records a `values_sha256` (SHA-256 of the dos2unix-ed content) that an import/restore verification accepted, its `kind` (`record` for the imported `values.json` file, or `scriptmodule` for an exported `values.lua` whose hash the producer signed into `build_to_sign.build_script_module_sha256s`), and the distribution's producer `pubkey_base64`. A rule whose run-time content SHA matches a keyed entry is attributed to that producer; **(3)** `capabilities.json`, the human-authorized `request.ui` capability grants (`run`, `write`) keyed by producer public key (`pubkey_base64`) or by local values content (`values_sha256`); **(4)** `acceptances.json`, the durable `dk0 trust accept` records keyed by package name, each carrying an optional pinned producer key and optional pending capabilities that become grants at the first successful import. A `.gitignore` written by `dk0` keeps the machine-written records (1) and (2) out of git while leaving `capabilities.json` and `acceptances.json` committable so a repository can carry its trust decisions into CI. Deliberately **not** an include directory, so no values or traces are ever resolved from a record; a record only anchors the producer key and rotation of later imports, gates producer-key grants (ledger), carries grants, or carries acceptances. | `import local` (record copies); every `import`/`restore` (ledger, and acceptance resolution); `trust grant` and the capability prompt's `[a]lways` answer (grants); `trust accept` (acceptances) | prior-import trust anchoring; producer-key grant activation (ledger); `request.ui` capability decisions (grants); import-time key acceptance (acceptances). |
 | `etc/dk/v` | Authored values files (`*.values.jsonc`, `*.values.lua`) belonging to the workspace. On the workspace include path. `distribute` seals them into the distribution manifest together with the workspace script and `dist/*.u`. | the workspace author | distribution resolution; manifest sealing. |
 
