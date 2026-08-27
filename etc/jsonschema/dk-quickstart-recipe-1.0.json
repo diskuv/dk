@@ -58,6 +58,30 @@
         }
       }
     },
+    "trust": {
+      "type": "array",
+      "description": "Optional list of trust statements the quickstart records before scaffolding, each mirroring 'dk0 trust accept PACKAGE [--key PUBKEY] [--run] [--write]'. The engine prints every statement (interactive sessions confirm once before anything is recorded), records each as a durable acceptance in the new workspace's etc/dk/t/acceptances.json, and the same statements are rendered on the quickstart's page on diskuv.com. Engines that predate this field ignore it.",
+      "items": {
+        "type": "object",
+        "required": ["accept"],
+        "additionalProperties": false,
+        "properties": {
+          "accept": {
+            "type": "string",
+            "description": "The package whose producer key is accepted (PACKAGE_ID full name)."
+          },
+          "key": {
+            "type": "string",
+            "description": "The pinned producer public key: the base64 line of the OpenBSD signify public key. Strongly recommended; an import whose key differs from the pin is denied, so a compromised package repository fails loudly instead of being accepted on first use."
+          },
+          "capabilities": {
+            "type": "array",
+            "description": "Pending request.ui capabilities ('run', 'write') that resolve into producer-key grants at the first verified import. List only the capabilities the package's rules need; key acceptance alone confers none.",
+            "items": { "type": "string", "enum": ["run", "write"] }
+          }
+        }
+      }
+    },
     "seed_files": {
       "type": "array",
       "description": "Optional list of additional files to create in the workspace directory after writing dk.u.",

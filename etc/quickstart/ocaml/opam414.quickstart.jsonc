@@ -12,6 +12,17 @@
       "repo": "dkpkg/CommonsBase_Build"
     }
   ],
+  "trust": [
+    {
+      "accept": "CommonsLang_OCaml",
+      "key": "RWQrGWGcOA3WV93QbuXdm8aAWjDkYvCM5jgFAanfDRiW9n3PzSvLESmR",
+      "capabilities": ["run", "write"]
+    },
+    {
+      "accept": "CommonsBase_Build",
+      "key": "RWSeaqgBCnFTKnH5DQPSFvVC/a7F8kL3fujjoHXf0dX3CKHfArEfmu/H"
+    }
+  ],
   "seed_files": [
     {
       "path": ".gitattributes",

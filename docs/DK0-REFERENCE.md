@@ -58,6 +58,19 @@ the organisation namespace (e.g. `ocaml`) and `NAME` is the recipe within that
 group (e.g. `opam`). Fetches the recipe from the registry at runtime, writes a
 `dk.u` with the appropriate imports, then runs `dk0 update` automatically.
 
+A recipe may declare trust statements (its `trust` array), each mirroring
+`dk0 trust accept PACKAGE [--key PUBKEY] [--run] [--write]`. The statements
+are rendered on the quickstart's page, and before anything is scaffolded the
+engine prints them and records them as durable acceptances in the new
+workspace's `etc/dk/t/acceptances.json`, so the imports that follow accept
+the declared producer keys without a prompt. An interactive session confirms
+the printed statements once (`y/N`, deny at end of input) before they are
+recorded; declining aborts with nothing recorded or written. A pinned `key`
+means an import presenting a different key is denied. When the recipe imports
+a package its trust statements do not cover, a non-interactive session fails
+before scaffolding with a copy-pasteable `trust accept` command naming every
+uncovered package.
+
 - `--dir DIR` writes the workspace in `DIR` instead of the current directory.
 - `--base-registry URL` overrides the global base URL for the recipe registry
   (default: `https://diskuv.com/dk/quickstart`). Recipes are fetched from
