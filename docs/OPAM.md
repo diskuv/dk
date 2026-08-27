@@ -123,7 +123,7 @@ curl -fsSL https://diskuv.com/dk/vendor.sh | sh
 ./dk1 trust accept CommonsLang_OCaml --run --write
 ./dk1 quickstart ocaml opam414
 ./dk1 update
-./dk1 dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.11 version=VERSION
+./dk1 dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.12 version=VERSION
 ```
 
 {% /tabitem %}
@@ -137,7 +137,7 @@ irm https://diskuv.com/dk/vendor.ps1 | iex
 ./dk1 trust accept CommonsLang_OCaml --run --write
 ./dk1 quickstart ocaml opam414
 ./dk1 update
-./dk1 dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.11 version=VERSION
+./dk1 dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.12 version=VERSION
 ```
 
 {% /tabitem %}
@@ -150,7 +150,7 @@ powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol = 30
 .\dk1.cmd trust accept CommonsLang_OCaml --run --write
 .\dk1.cmd quickstart ocaml opam414
 .\dk1.cmd update
-.\dk1.cmd dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.11 version=VERSION
+.\dk1.cmd dialog CommonsLang_OCaml.Dk.OpamLock.Adopt@1.1.12 version=VERSION
 ```
 
 {% /tabitem %}

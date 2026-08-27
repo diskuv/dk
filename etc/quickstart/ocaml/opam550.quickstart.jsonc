@@ -6,6 +6,10 @@
     {
       "type": "github-l2",
       "repo": "dkpkg/CommonsLang_OCaml"
+    },
+    {
+      "type": "github-l2",
+      "repo": "dkpkg/CommonsBase_Build"
     }
   ],
   "seed_files": [
