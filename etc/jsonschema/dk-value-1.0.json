@@ -632,7 +632,7 @@
                         "additionalProperties": false,
                         "properties": {
                             "commands": {
-                                "description": "One or more command lines. A flat list is the command line arguments for a single command line; a two-level list is a list of command lines. All form rule variables (ex. ${SLOT.Release.Agnostic}) may be used.",
+                                "description": "One or more command lines. A flat list is the command line arguments for a single command line; a two-level list is a list of command lines. All form rule variables (ex. ${SLOT.Release.Agnostic}) may be used. A command line whose first word is \"--cmd.exe\" runs cmd.exe /c on Windows; a command line whose first word is \"--zip\" runs the zip command in-process.",
                                 "type": "array",
                                 "items": {
                                     "oneOf": [

@@ -289,6 +289,10 @@ directory are added. `-srcdir DIR` sets the source directory; `-d` deletes
 entries; `-x PATTERN` excludes a glob; `--deterministic` creates a reproducible
 zipfile.
 
+The same command is available inside a values file's `function.commands` as
+the `["--zip", ...]` special form, which runs in-process and always produces a
+deterministic zipfile. See the SPECIFICATION for details.
+
 ### Distribution commands
 
 `dk0` requires that the package (a common prefix for a set of modules) is a `VendorQualifier_Unit` library id. For example, `CommonsBase_GNU.Make.Apparatus`

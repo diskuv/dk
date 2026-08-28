@@ -543,7 +543,7 @@
                         "additionalProperties": false,
                         "properties": {
                             "commands": {
-                                "description": "The command line arguments to the executable. All form variables (ex. ${SLOT.Release.Agnostic}) may be used.",
+                                "description": "The command line arguments to the executable. All form variables (ex. ${SLOT.Release.Agnostic}) may be used. A command line whose first word is \"--cmd.exe\" runs cmd.exe /c on Windows; a command line whose first word is \"--zip\" runs the zip command in-process.",
                                 "type": "array",
                                 "items": {
                                     "type": "string"

@@ -59,6 +59,7 @@
       - [Execution Step Cacheing](#execution-step-cacheing)
       - [Windows command-line quoting](#windows-command-line-quoting)
       - [Windows `--cmd.exe` special form](#windows---cmdexe-special-form)
+      - [In-process `--zip` special form](#in-process---zip-special-form)
   - [Objects](#objects)
     - [Saving and Loading Objects](#saving-and-loading-objects)
     - [Object Slots](#object-slots)
@@ -1365,6 +1366,41 @@ That expands to being the `lpCommandLine` parameter to the Windows API function 
 ```text
 cmd.exe /c "   echo hi > "...\somewhere\Release.Agnostic\some-file.txt"   "
 ```
+
+#### In-process `--zip` special form
+
+A `function.commands` command line whose first word is `--zip` creates or
+updates a zipfile inside the build engine process. The special form takes the
+same arguments as the [`zip` utility command](#utility-commands):
+`ZIPFILE[.zip] [SRCFILE...]`, `-srcdir DIR`, `-x PATTERN`, `-d`, and `-v`.
+Each argument is its own command word, and [VSL](#vsl-lexical-rules) variables
+and subshells expand in each word before the special form runs.
+
+```json
+{
+  "function": {
+    "commands": [
+      ["some-generator.exe", "out-dir"],
+      ["--zip", "${SLOT.request}/output.zip", "-srcdir", "out-dir"]
+    ]
+  }
+}
+```
+
+A relative `ZIPFILE` or `-srcdir DIR` resolves against the function working
+directory, which is also the default source directory. Source files stay
+relative to the source directory.
+
+The archive is always deterministic, following the [Zip Archive
+Reproducibility](#zip-archive-reproducibility) standards, so the same inputs
+produce the same bytes on every platform and in every build system
+implementation. The `--deterministic` option is accepted for parity with the
+utility command and has no additional effect.
+
+The special form runs in-process and starts no external program, so a form
+packages a directory into a zipfile without importing a third-party archiver.
+It ignores `function.envmods`. The `-v` logging appears in the build engine
+diagnostics rather than in the command's log files.
 
 ## Objects
 
@@ -5509,9 +5545,11 @@ directory before spawning on all platforms.
 
 On Windows, that command line is rendered using `cmd.exe` command-word quoting
 and spacing rules because `CreateProcessW` takes one command-line string rather
-than a native argv array. The `["--cmd.exe", "/c", "<string>"]` special form
-described above is the exception: it builds one explicit `cmd.exe /c "..."`
-payload from the supplied string with its own inner quoting rules.
+than a native argv array. Two special forms are exceptions. The
+`["--cmd.exe", "/c", "<string>"]` form described above builds one explicit
+`cmd.exe /c "..."` payload from the supplied string with its own inner quoting
+rules. The `["--zip", ...]` form described above runs the zip command
+in-process and spawns no program at all.
 
 #### Option Groups
 
