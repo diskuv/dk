@@ -3,8 +3,12 @@
   "schema_version": { "major": 1, "minor": 0 },
   "quickstarts": [
     {
-      "name": "opam",
-      "description": "OCaml/opam dependency-lock workflow via CommonsLang_OCaml.Dk.OpamLock"
+      "name": "opam414",
+      "description": "OCaml 4.14 opam dependency-lock workflow via CommonsLang_OCaml.Dk.OpamLock"
+    },
+    {
+      "name": "opam550",
+      "description": "OCaml 5.5 opam dependency-lock workflow via CommonsLang_OCaml.Dk.OpamLock"
     }
   ]
 }
