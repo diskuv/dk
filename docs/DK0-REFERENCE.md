@@ -953,7 +953,10 @@ Behavior that is specific to `dk0` and may differ in other implementations.
 
 `dk0` keeps its durable workspace configuration under `etc/dk/` (transient
 build state lives under `t/`; see the Configuration and Security options for
-the `t/d`, `t/c` and `t/k` defaults). The `etc/dk/` directories are:
+the `t/d`, `t/c` and `t/k` defaults). `dk0` drops a self-ignoring `.gitignore`
+(`*`) into `t/` and each of its build directories, so a project keeps its `t/`
+tree out of git without a hand-written `/t/` line. The `etc/dk/` directories
+are:
 
 | Directory | Contents | Written by | Read for |
 | --- | --- | --- | --- |
