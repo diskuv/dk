@@ -122,6 +122,11 @@
       - [jsondk.encode](#jsondkencode)
       - [jsondk.decode](#jsondkdecode)
       - [jsondk.null](#jsondknull)
+    - [Lua envmod library](#lua-envmod-library)
+      - [envmod.parse](#envmodparse)
+      - [envmod.plan](#envmodplan)
+    - [Lua modver library](#lua-modver-library)
+      - [modver.parse](#modverparse)
     - [Lua math library](#lua-math-library)
       - [math.abs](#mathabs)
       - [math.acos](#mathacos)
@@ -2902,6 +2907,115 @@ str = jsondk.encode (tbl)
 ```
 
 The `jsondk.null` Lua value represents JSON null.
+
+### Lua envmod library
+
+The `envmod` library is embedded into the build system (nothing needs to be downloaded) but it must be accessed through `envmod = require('envmod')`.
+That keeps with the [design goal to maintain Lua conventions](#lua-specification).
+
+It parses and orders [environment modifications](#environment-modifications) (`+NAME=VALUE`, `<NAME=VALUE`, `-NAME`) with the same grammar and the same ordering rules the build system applies internally, so a script does not reimplement them in Lua.
+Values are treated literally: form variables like `${PREFIX}` and subshells are not expanded (a script substitutes its own tokens before calling the library).
+
+#### envmod.parse
+
+```lua
+envmod = require('envmod')
+m = envmod.parse('+FLEXLINKFLAGS=-link /DEBUG:FULL')
+
+-- m = { kind = "add", name = "FLEXLINKFLAGS", value = "-link /DEBUG:FULL" }
+
+-- or
+envmod = require('envmod')
+m, errmsg = envmod.parse('nosigil')
+```
+
+Parses one environment modification string into a table:
+
+- `+NAME=VALUE` gives `{ kind = "add", name = NAME, value = VALUE }`
+- `<NAME=VALUE` gives `{ kind = "prepend_path", name = NAME, value = VALUE }`
+- `-NAME` gives `{ kind = "remove", name = NAME }`
+
+If the string could be parsed, the table is the first return value.
+
+Otherwise:
+
+- `m` is `nil`
+- `errmsg` is an error message
+
+#### envmod.plan
+
+```lua
+envmod = require('envmod')
+p = envmod.plan({ '+A=1', '+A=2', '<PATH=/x', '<PATH=/y', '-B' })
+
+-- p = {
+--   additions = { { name = "A", value = "1" } },
+--   prepends  = { { name = "PATH", value = "/x" }, { name = "PATH", value = "/y" } },
+--   removals  = { "B" }
+-- }
+
+-- or
+envmod = require('envmod')
+p, errmsg = envmod.plan({ '+A=1', 'nosigil' })
+```
+
+Parses a list of environment modification strings and groups them into a plan that reflects the build system's ordering rules:
+
+- `additions` are the `+NAME=VALUE` entries. The first value seen for a name wins.
+- `prepends` are the `<NAME=VALUE` entries, kept in the order they were given.
+- `removals` are the `-NAME` names.
+
+Applying a plan processes `additions` first, then `prepends`, then `removals`, so a removal takes precedence over an addition or a prepend of the same name.
+
+If every entry could be parsed, the plan is the first return value.
+
+Otherwise:
+
+- `p` is `nil`
+- `errmsg` is an error message
+
+### Lua modver library
+
+The `modver` library is embedded into the build system (nothing needs to be downloaded) but it must be accessed through `modver = require('modver')`.
+That keeps with the [design goal to maintain Lua conventions](#lua-specification).
+
+It parses a `MODULE@VERSION` string with the build system's own parser and exposes the module id and semantic version parts.
+
+#### modver.parse
+
+```lua
+modver = require('modver')
+m = modver.parse('MlFront_Std.Tested@2.4.2')
+
+-- m = {
+--   module = "MlFront_Std.Tested",
+--   module_namespace = "Tested",
+--   namespace_tail = "Tested",
+--   library = "MlFront_Std",
+--   library_vendor = "Ml",
+--   library_qualifier = "Front",
+--   library_unit = "Std",
+--   version = "2.4.2",
+--   version_major = "2",
+--   version_minor = "4",
+--   version_patch = "2",
+--   prerelease = {},
+--   build = {}
+-- }
+
+-- or
+modver = require('modver')
+m, errmsg = modver.parse('not a valid id')
+```
+
+Parses one `MODULE@VERSION` string into a table. The `library_*` fields are the parts of the library id, and the `version_*` fields are the semantic version components. Version components are strings because they are 64-bit and Lua integers are not. `prerelease` and `build` are lists of the dot-separated semantic-version identifiers.
+
+If the string could be parsed, the table is the first return value.
+
+Otherwise:
+
+- `m` is `nil`
+- `errmsg` is an error message
 
 ### Lua math library
 
