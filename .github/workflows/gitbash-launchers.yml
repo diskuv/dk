@@ -1,0 +1,61 @@
+name: Git Bash launchers   # the POSIX dk0/dk1 must work under Git Bash on Windows
+on:
+  push:
+    paths: [dk0, dk1, dk0.cmd, dk1.cmd, .github/workflows/gitbash-launchers.yml]
+  pull_request:
+    paths: [dk0, dk1, dk0.cmd, dk1.cmd]
+  workflow_dispatch: # allow manual triggering from the GitHub page
+
+# This check lives here rather than in MlFront's GitLab CI because GitLab's
+# saas-windows image ships MinGit: a recursive search of that image found no
+# bash.exe anywhere, so the only way to run one there was to install Git for
+# Windows per job, which cost two minutes and crashed the runner with an access
+# violation. A GitHub windows runner ships Git for Windows already, and
+# `shell: bash` on it IS Git Bash. This repository is also the better subject:
+# it holds the launchers that the CI driver and users actually run.
+#
+# The regression under test: the launchers used to probe only /usr/bin/curl and
+# /bin/curl for a downloader. Git for Windows keeps curl in /mingw64/bin, so
+# every fetch died with "no curl or wget on the system paths" (exit 107).
+
+jobs:
+  gitbash:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Show the shell and downloader
+        run: |
+          uname -s
+          echo "curl: $(command -v curl || echo '(none)')"
+          echo "wget: $(command -v wget || echo '(none)')"
+
+      - name: Launchers resolve a downloader
+        # Assert the fixed lookup directly, so a regression is named rather than
+        # showing up as a confusing download failure below.
+        run: |
+          set -eu
+          for w in dk0 dk1; do
+            sed -n '/^dk_prog_path() {/,/^}/p' "./$w" > helper.sh
+            [ -s helper.sh ] || { echo "FAIL: $w has no dk_prog_path helper"; exit 1; }
+            got=$(. ./helper.sh; dk_prog_path curl)
+            [ -n "$got" ] || { echo "FAIL: $w resolved no curl on this Windows shell"; exit 1; }
+            echo "ok - $w resolves a downloader at $got"
+          done
+
+      - name: dk0 and dk1 run end to end
+        # No DKMLSYS_CURL override on purpose: that override was the documented
+        # workaround for this bug, and its absence is what proves the fix.
+        env:
+          DKML_HOST_ABI: windows_x86_64
+        run: |
+          set -eu
+          for w in dk0 dk1; do
+            got=$(sh "./$w" --version | tail -1)
+            [ -n "$got" ] || { echo "FAIL: $w printed no version"; exit 1; }
+            echo "ok - $w -> $got"
+          done
