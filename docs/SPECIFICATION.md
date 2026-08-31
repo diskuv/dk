@@ -772,6 +772,19 @@ Each asset is uniquely identified by its SHA256 checksums.
 That unique identification means that mirrors for assets can be added
 at any time (including in the future) without triggering rebuilds.
 
+A mirror in an origin's `mirrors` list is either a base-URL string or an
+object `{ "url": ..., "filename": ... }`. For a base-URL string the download
+URL is the base joined with the asset's `path`. For the object form the
+`filename` replaces the asset's `path` at that mirror, so one asset can be
+fetched from mirrors that disagree on the filename. An opam source, for
+example, lists the opam content-addressed cache first (where the file is named
+by its hash) and the upstream release second (where the file is named
+`src.tar.gz`): the cache is preferred, and a cache miss falls back to the
+upstream release. Every mirror is verified against the asset's SHA256, so the
+fallback never weakens integrity, and the filename is part of the mirror
+listing, which is excluded from the bundle identity, so adding it triggers no
+rebuild.
+
 ### Web assets
 
 Examples:

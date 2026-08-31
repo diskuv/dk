@@ -748,9 +748,30 @@
                                         },
                                         "mirrors": {
                                             "type": "array",
-                                            "description": "The base URL of each source site. The base URL combined with the path in the [files] section become the full URL used to download the asset when the file is not cached.",
+                                            "description": "Each source site for the origin's assets, tried in order. A mirror is either a base-URL string (the base combined with an asset's [path] forms the download URL) or an object { url, filename } whose filename replaces that asset's [path] at this mirror. The object form lets one asset be fetched from mirrors that disagree on the filename, for example the opam content-addressed cache (the file is named by its hash) and the upstream release (the file is named src.tar.gz). The asset's SHA256 remains its identity, so every mirror is checksum-verified and adding a mirror never triggers a rebuild.",
                                             "items": {
-                                                "type": "string"
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": "string",
+                                                                "description": "The base URL of this mirror."
+                                                            },
+                                                            "filename": {
+                                                                "type": "string",
+                                                                "description": "The filename to fetch at this mirror, replacing the asset's [path]."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url"
+                                                        ],
+                                                        "additionalProperties": false
+                                                    }
+                                                ]
                                             },
                                             "minItems": 1
                                         }
