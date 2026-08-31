@@ -59,11 +59,15 @@ dk_pwd=$PWD
 DK_PROJECT_DIR=$(dirname "$0")
 DK_PROJECT_DIR=$(cd "$DK_PROJECT_DIR" && pwd)
 
-# --- Windows shunting ---
-if [ -n "${COMSPEC:-}" ] && [ -x /usr/bin/cmd ] && [ -x /usr/bin/cygpath ] && [ -e "$DK_PROJECT_DIR/dk1.cmd" ]; then
-    DK_PROJECT_DIR_WIN=$(/usr/bin/cygpath -aw "$DK_PROJECT_DIR")
-    exec /usr/bin/cmd /c "$DK_PROJECT_DIR_WIN\\dk1.cmd" "$@"
-fi
+# --- Windows ---
+# There is no shunt to dk1.cmd here. The block that used to live here required
+# [ -x /usr/bin/cmd ], and no MSYS2, Cygwin, or Git Bash layout ships a `cmd` in
+# /usr/bin, so it never fired on any host. This script handles Windows directly
+# instead: autodetect_buildhost_arch resolves windows_x86_64 / windows_x86 via
+# is_unixy_windows_build_machine, dk_extexe adds the .exe suffix, the data home
+# below shares dk1.cmd's store, and MSYS converts POSIX paths in argv when
+# exec'ing the native dk1.exe. A shunt could not be the whole answer anyway: a
+# global install.sh install ships no dk1.cmd to shunt to.
 
 # --- Quiet mode detection ---
 DKCODER_QUIET=0
@@ -76,11 +80,43 @@ printf_maybe_quiet() {
   printf "$@" >&2
 }
 
+# --- Launcher helpers (not from crossplatform-functions.sh) ---
+
+# [dk_prog_path NAME] prints the path to NAME, or nothing when it is not
+# installed. Absolute locations first, so the hardened Linux/macOS behavior is
+# unchanged, then PATH. Git Bash (Git for Windows) ships curl at
+# /mingw64/bin/curl and has no /usr/bin/curl or /bin/curl, so without the PATH
+# fallback the launcher finds no downloader at all and every fetch fails.
+# ci/dist/install.sh already resolves curl/wget through PATH for the same reason.
+# This does not weaken the trust model: the mlfront-signify verifier is pinned by
+# the SHA-256 baked above, the manifest is signify-verified, and every binary is
+# checked against a signed checksum, so a hostile PATH curl can deny service but
+# cannot substitute an artifact.
+# The `|| true` matters under `set -e`: `command -v` exits nonzero for a missing
+# program, and a bare assignment would propagate that status and abort the script.
+dk_prog_path() {
+  if [ -x "/usr/bin/$1" ]; then printf '%s' "/usr/bin/$1"
+  elif [ -x "/bin/$1" ]; then printf '%s' "/bin/$1"
+  else command -v "$1" 2>/dev/null || true
+  fi
+}
+
+# Every download path funnels here when neither curl nor wget resolved. Name what
+# was searched and the escape hatch; a bare "not available" leaves the reader with
+# nothing to act on.
+dk_no_downloader() {
+  echo "FATAL: no curl or wget found (searched /usr/bin, /bin, then PATH)" >&2
+  echo "  ...: install curl or wget, or set DKMLSYS_CURL=/full/path/to/curl" >&2
+  exit 107
+}
+
 # --- Imports of dkml-runtime-common's crossplatform-functions.sh ---
 # Changes:
 # 1. In download_file() use [ "${DKCODER_QUIET:-}" -eq 1 ]
 # 2. In log_trace() replace non-FATAL `printf ... >&2` with `printf_maybe_quiet ...`
 # 3. In sha256check() all shasum/* use --quiet option (this should be upstreamed)
+# 4. In autodetect_system_binaries() curl and wget resolve through dk_prog_path
+#    (above), which falls back to PATH when the absolute locations miss
 
 # Get standard locations of Unix system binaries like `/usr/bin/mv` (or `/bin/mv`).
 #
@@ -201,24 +237,8 @@ autodetect_system_binaries() {
             DKMLSYS_GREP=/bin/grep
         fi
     fi
-    if [ -z "${DKMLSYS_CURL:-}" ]; then
-        if [ -x /usr/bin/curl ]; then
-            DKMLSYS_CURL=/usr/bin/curl
-        elif [ -x /bin/curl ]; then
-            DKMLSYS_CURL=/bin/curl
-        else
-            DKMLSYS_CURL=
-        fi
-    fi
-    if [ -z "${DKMLSYS_WGET:-}" ]; then
-        if [ -x /usr/bin/wget ]; then
-            DKMLSYS_WGET=/usr/bin/wget
-        elif [ -x /bin/wget ]; then
-            DKMLSYS_WGET=/bin/wget
-        else
-            DKMLSYS_WGET=
-        fi
-    fi
+    if [ -z "${DKMLSYS_CURL:-}" ]; then DKMLSYS_CURL=$(dk_prog_path curl); fi
+    if [ -z "${DKMLSYS_WGET:-}" ]; then DKMLSYS_WGET=$(dk_prog_path wget); fi
     if [ -z "${DKMLSYS_TR:-}" ]; then
         if [ -x /usr/bin/tr ]; then
             DKMLSYS_TR=/usr/bin/tr
@@ -518,8 +538,7 @@ downloadfile() {
         elif [ -n "$DKMLSYS_WGET" ]; then
             log_trace "$DKMLSYS_WGET" $(dk_wget_https_only) -q -O "$downloadfile_FILE".tmp "$downloadfile_URL"
         else
-            echo "No curl or wget available on the system paths" >&2
-            exit 107
+            dk_no_downloader
         fi
     else
         if [ -n "$DKMLSYS_CURL" ]; then
@@ -527,8 +546,7 @@ downloadfile() {
         elif [ -n "$DKMLSYS_WGET" ]; then
             log_trace "$DKMLSYS_WGET" $(dk_wget_https_only) -O "$downloadfile_FILE".tmp "$downloadfile_URL"
         else
-            echo "No curl or wget available on the system paths" >&2
-            exit 107
+            dk_no_downloader
         fi
     fi
     printf_maybe_quiet "\n... %s %s\n" "Verifying" "$downloadfile_URL"
@@ -565,6 +583,21 @@ fi
 if [ -z "$tools_dir" ] && [ "${CI:-}" = true ]; then
   install -d "$DK_PROJECT_DIR/.z-dk/tools"
   tools_dir="$DK_PROJECT_DIR/.z-dk/tools"
+fi
+#   2b. On Windows (Git Bash / MSYS2 / Cygwin) use the SAME store as dk1.cmd,
+#      %LOCALAPPDATA%\Programs\dk1, so a project driven from both PowerShell and
+#      a POSIX shell shares one cache instead of downloading every build twice.
+#      This sits after the CI check on purpose: dk1.cmd has no CI branch, but a
+#      Windows CI job driving ./dk1 from bash still wants the in-project cache.
+#      LOCALAPPDATA holds a native Windows path (MSYS does not convert
+#      environment variables), so cygpath it; needing cygpath also scopes this
+#      to MSYS/Cygwin.
+if [ -z "$tools_dir" ] && [ -n "${COMSPEC:-}" ] && [ -n "${LOCALAPPDATA:-}" ] && [ -x /usr/bin/cygpath ]; then
+  tools_dir_LOCALAPPDATA=$(/usr/bin/cygpath -au "$LOCALAPPDATA")
+  if [ -w "$tools_dir_LOCALAPPDATA" ]; then
+    install -d "$tools_dir_LOCALAPPDATA/Programs/$tools_name"
+    tools_dir="$tools_dir_LOCALAPPDATA/Programs/$tools_name"
+  fi
 fi
 #   3. Check in locations rooted under /opt/diskuv
 #      We look under a /opt/diskuv early because
@@ -664,7 +697,7 @@ esac
 dk_fetch() {
   if [ -n "$DKMLSYS_CURL" ]; then "$DKMLSYS_CURL" --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL "$1" -o "$2"
   elif [ -n "$DKMLSYS_WGET" ]; then "$DKMLSYS_WGET" $(dk_wget_https_only) -q -O "$2" "$1"
-  else echo "FATAL: no curl or wget on the system paths" >&2; exit 107; fi
+  else dk_no_downloader; fi
 }
 
 # Read `%% actual_version("X.Y.Z.W")` from dk.u's workspace section (the pin).
