@@ -1265,6 +1265,17 @@ superseded `verifier/mlfront-signify-*` binaries that no launcher has used
 in 30 days are removed. Everything in the store re-downloads on demand from
 its signed manifest, so pruning is always safe and never blocks a launch.
 
+### Windows POSIX shells
+
+On Windows the `dk0` shell script runs under Git Bash, MSYS2, and Cygwin, and
+`dk0.cmd` runs under `cmd.exe` and PowerShell. Both select the `windows_x86_64` or
+`windows_x86` binaries and share one launcher data home,
+`%LOCALAPPDATA%\Programs\dk0`, so a project driven from both shells downloads
+each version once.
+
+The shell script looks for `curl` and `wget` in `/usr/bin` and `/bin` first, and then
+on `PATH`. The `PATH` step is what finds `/mingw64/bin/curl` under Git for Windows.
+
 ### Windows
 
 | File                     | What                                                                   |
@@ -1288,7 +1299,8 @@ its signed manifest, so pruning is always safe and never blocks a launch.
 | `/usr/bin/curl`     | `dk0` shell script (optional; searched 1st)                       |
 | `/bin/curl`         | `dk0` shell script (optional; searched 2nd)                       |
 | `/usr/bin/wget`     | `dk0` shell script (optional; searched 3rd)                       |
-| `/bin/wget`         | `dk0` shell script (fallback; searched last)                      |
+| `/bin/wget`         | `dk0` shell script (optional; searched 4th)                       |
+| `curl`/`wget` in PATH | `dk0` shell script (fallback; searched last)                    |
 | `/usr/bin/mv`       | `dk0` shell script (optional; searched 1st)                       |
 | `/bin/mv`           | `dk0` shell script (fallback; searched last)                      |
 | `/usr/bin/rm`       | `dk0` shell script (optional; searched 1st)                       |
@@ -1298,7 +1310,7 @@ its signed manifest, so pruning is always safe and never blocks a launch.
 | `/usr/bin/awk`      | `dk0` shell script - to parse sha256sums (optional; searched 1st) |
 | `/bin/awk`          | `dk0` shell script (fallback; searched last)                      |
 
-### Linux / BSDs / MSYS2 / Cygwin
+### Linux / BSDs / MSYS2 / Cygwin / Git Bash
 
 | File                 | What                                                              |
 | -------------------- | ----------------------------------------------------------------- |
@@ -1309,7 +1321,8 @@ its signed manifest, so pruning is always safe and never blocks a launch.
 | `/usr/bin/curl`      | `dk0` shell script (optional; searched 1st)                       |
 | `/bin/curl`          | `dk0` shell script (optional; searched 2nd)                       |
 | `/usr/bin/wget`      | `dk0` shell script (optional; searched 3rd)                       |
-| `/bin/wget`          | `dk0` shell script (fallback; searched last)                      |
+| `/bin/wget`          | `dk0` shell script (optional; searched 4th)                       |
+| `curl`/`wget` in PATH  | `dk0` shell script (fallback; searched last)                    |
 | `/usr/bin/mv`        | `dk0` shell script (optional; searched 1st)                       |
 | `/bin/mv`            | `dk0` shell script (fallback; searched last)                      |
 | `/usr/bin/rm`        | `dk0` shell script (optional; searched 1st)                       |
