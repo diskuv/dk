@@ -38,17 +38,17 @@
 
 dk0's own configuration and publishing files *are* unified scripts:
 
-- `dk.u` — the **workspace script** at the root of a project.
-- `dist-*/run.u` — **distribution scripts** (these may be located elsewhere)
+- `dk.u`: the **workspace script** at the root of a project.
+- `dist-*/run.u`: **distribution scripts** (these may be located elsewhere)
 
 You work with these unified scripts when you:
 
-- **publish your values for others to use** — you write the distribution
+- **publish your values for others to use**: you write the distribution
   scripts (`dist-*/run.u`) that package and demonstrate them;
-- **define workspace assets** — you hand-edit `dk.u` so that your distribution
+- **define workspace assets**: you hand-edit `dk.u` so that your distribution
   scripts know which source and test files in your project are available to be
   built
-- **read and understand a project** — `dk.u` and the distribution scripts show
+- **read and understand a project**: `dk.u` and the distribution scripts show
   what a project imports, builds, and ships.
 
 The rest of this guide explains the unified script format these files use.
