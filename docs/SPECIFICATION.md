@@ -2392,6 +2392,16 @@ A unoptimal implementation can simply zip up the value store directory, but done
 
 An optimal implementation only includes the necessary values.
 
+A distribution may be assembled from more than one producing run. A producer must not publish
+one key id from more than one run: within a distribution a key id binds to exactly one value id.
+
+An importer offered a key id bound to more than one value id must report the divergence, naming
+the key, its slot, every value id offered and the one it bound. It binds the key to the first
+candidate the value index walk offers, so the result does not depend on how the walk was
+scheduled. Reporting is required because the importer cannot tell the producing runs apart:
+nothing a distribution carries names the run that published a value, so an importer can detect
+the conflict and cannot resolve it.
+
 ### OpenBSD signify keys
 
 [Securing OpenBSD From Us To You]: https://www.openbsd.org/papers/bsdcan-signify.html
