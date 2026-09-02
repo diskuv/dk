@@ -1474,6 +1474,11 @@ Each object has one or more slots. Each slot is a container for the object's fil
 
 There are no built-in slots. However, `Release.Agnostic` is the conventional slot for files that are ABI-agnostic.
 
+A slot naming an ABI is owned, for publishing purposes, by the run that TARGETS that ABI. A run
+that merely executes on an ABI may compute values that land in its slot, and it does not publish
+them. This is what makes the value store rule under [Distributed Value Stores](#distributed-value-stores)
+a consequence of slot ownership rather than a special case.
+
 The names of the slots are period-separated "MlFront standard namespace terms". Each of these terms:
 
 - are drawn from the character set `'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_'`
@@ -2368,7 +2373,16 @@ The following values must be present:
 
 - the "j" values file for any values.json with a form or bundle having a library identical to the distribution library `id`
 - the "w" parsed values ast for any values.json with a form or bundle having a library identical to the distribution library `id`
-- the "o" object file for any object having a library identical to the distribution library `id`
+- the "o" object file for any object having a library identical to the distribution library `id`, except an object whose slot names the execution ABI and does not name the target ABI, when the distribution ran with a target ABI different from its execution ABI
+
+That exception is a host slot. The value was computed while cross targeting, so the slot it
+landed under is the one the host's own native run publishes its artifacts under. A release
+assembled from several runs would otherwise bind one key to two different values, and a
+consumer resolving that key would receive whichever run was assembled last, with nothing
+reporting that a choice had been made.
+
+The exclusion is about publishing only. The value is still computed and its value id is
+unchanged, because the object id already folds in the target ABI.
 
 The following values will be ignored if present:
 
