@@ -343,6 +343,12 @@ Objects and rules are public interfaces, so only their transitive values are
 included; bundle files and assets are included only if an object or rule
 transitively has `get-asset`/`get-bundle` precommands.
 
+When `--target-abi` names an ABI other than `--execution-abi`, objects whose slot
+came from the `execution_abi` wildcard are computed but not published: they are
+the host's slots, and the run that targets that ABI publishes them. Objects whose
+rule named a literal `execution_slot` are published whatever their terms spell.
+See "Object Slots" in the specification.
+
 When the build key is the distribution producer key (for example the
 distribution key that the dk-distribute CI action passes with `--keys-env`),
 `distribute` also signs the distribution's canonical build payload and records

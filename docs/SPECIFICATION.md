@@ -1474,9 +1474,18 @@ Each object has one or more slots. Each slot is a container for the object's fil
 
 There are no built-in slots. However, `Release.Agnostic` is the conventional slot for files that are ABI-agnostic.
 
-A slot naming an ABI is owned, for publishing purposes, by the run that TARGETS that ABI. A run
-that merely executes on an ABI may compute values that land in its slot, and it does not publish
-them. This is what makes the value store rule under [Distributed Value Stores](#distributed-value-stores)
+A slot is owned, for publishing purposes, according to how its ABI terms were written. A rule
+declares the slot its object lands under with an
+[`execution_slot`](#function-rule-command---declareoutput), and that slot is either literal or a
+wildcard. A slot the build system produced by expanding the `execution_abi` wildcard is a HOST
+slot, and it is owned by the run that TARGETS that ABI: a run that merely executes on the ABI
+computes the value and leaves it unpublished. A slot a literal `execution_slot` named is owned by
+the run that computed it, so a cross run publishes such an object whatever terms the slot spells.
+
+A package therefore chooses which of its objects a cross run publishes through the
+`execution_slot` it declares, and the spelling of a slot never carries that choice.
+
+This is what makes the value store rule under [Distributed Value Stores](#distributed-value-stores)
 a consequence of slot ownership rather than a special case.
 
 The names of the slots are period-separated "MlFront standard namespace terms". Each of these terms:
@@ -2373,13 +2382,22 @@ The following values must be present:
 
 - the "j" values file for any values.json with a form or bundle having a library identical to the distribution library `id`
 - the "w" parsed values ast for any values.json with a form or bundle having a library identical to the distribution library `id`
-- the "o" object file for any object having a library identical to the distribution library `id`, except an object whose slot names the execution ABI and does not name the target ABI, when the distribution ran with a target ABI different from its execution ABI
+- the "o" object file for any object having a library identical to the distribution library `id`, except an object whose slot the build system produced by expanding the `execution_abi` wildcard, when the distribution ran with a target ABI different from its execution ABI
 
-That exception is a host slot. The value was computed while cross targeting, so the slot it
-landed under is the one the host's own native run publishes its artifacts under. A release
-assembled from several runs would otherwise bind one key to two different values, and a
-consumer resolving that key would receive whichever run was assembled last, with nothing
-reporting that a choice had been made.
+That exception is a host slot, in the sense given under [Object Slots](#object-slots). The value
+was computed while cross targeting, so the slot it landed under is the one the host's own native
+run publishes its artifacts under. A release assembled from several runs would otherwise bind one
+key to two different values, and a consumer resolving that key would receive whichever run was
+assembled last, with nothing reporting that a choice had been made.
+
+A run whose target ABI differs from its execution ABI publishes every object whose slot came from
+a literal `execution_slot`, including one whose terms spell the execution ABI. That run is the
+only producer of such a value, so the key it binds stays bound to one value.
+
+An object that carries no record of how its slot was written is excluded when its slot names the
+execution ABI and does not name the target ABI. A value store carries that record for every
+object a run computes, so a slot's terms decide the question only for a value a distribution
+reuses from a store that lacks the record.
 
 The exclusion is about publishing only. The value is still computed and its value id is
 unchanged, because the object id already folds in the target ABI.
