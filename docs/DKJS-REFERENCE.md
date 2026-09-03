@@ -54,6 +54,14 @@ A build targets `js_nodejs` by default, or `js_web` (set with `--target-abi`) to
 produce web-bundler output. Native target ABIs are not available yet (see
 [Scope](#scope)).
 
+A build targeting `js_web` runs with a target ABI other than its `js_nodejs`
+execution ABI, which makes it a cross run for publishing purposes. A
+`dkjs distribute` from such a build publishes the objects whose slot a literal
+`execution_slot` named, and withholds the objects whose slot came from the
+`execution_abi` wildcard, since those are `js_nodejs` slots that a build
+targeting `js_nodejs` publishes. See
+[Object Slots](SPECIFICATION.md#object-slots) for the rule.
+
 ## Parallel builds
 
 `dkjs` accepts the same `-j` / `--jobs` option as `dk1`, which `dk0` rejects. It

@@ -347,7 +347,7 @@ When `--target-abi` names an ABI other than `--execution-abi`, objects whose slo
 came from the `execution_abi` wildcard are computed but not published: they are
 the host's slots, and the run that targets that ABI publishes them. Objects whose
 rule named a literal `execution_slot` are published whatever their terms spell.
-See "Object Slots" in the specification.
+See "Object Slots" in the [Specification].
 
 When the build key is the distribution producer key (for example the
 distribution key that the dk-distribute CI action passes with `--keys-env`),

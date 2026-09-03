@@ -82,6 +82,13 @@ effect of higher `-j` is that interleaved progress output and captured
 stdout/stderr from concurrent steps may arrive in a different real-time order;
 the build outputs themselves do not change.
 
+Which objects a `distribute` publishes is settled by the run's execution and
+target ABIs together with how each object's slot was written, so `-j` never
+moves it. A `dk1 distribute` whose `--target-abi` names an ABI other than its
+`--execution-abi` withholds the objects whose slot came from the
+`execution_abi` wildcard, at every job count. See
+[Object Slots](SPECIFICATION.md#object-slots) for the rule.
+
 ## Everything else
 
 Every command, every other option, the debug modes, the build-metadata options,
