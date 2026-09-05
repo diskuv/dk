@@ -1389,7 +1389,7 @@ cmd.exe /c "   echo hi > "...\somewhere\Release.Agnostic\some-file.txt"   "
 
 A `function.commands` command line whose first word is `--zip` creates or
 updates a zipfile inside the build engine process. The special form takes the
-same arguments as the [`zip` utility command](#utility-commands):
+same arguments as an implementation's `zip` utility command:
 `ZIPFILE[.zip] [SRCFILE...]`, `-srcdir DIR`, `-x PATTERN`, `-d`, and `-v`.
 Each argument is its own command word, and [VSL](#vsl-lexical-rules) variables
 and subshells expand in each word before the special form runs.
