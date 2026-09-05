@@ -398,8 +398,11 @@ fails closed. Record a durable acceptance ahead of the import with
 `dk0 trust accept PACKAGE_ID` (add `--key PUBKEY` to pin a key obtained
 out-of-band, so a first import over a compromised channel is denied), or pass
 `--trust-local-package LIBRARY` to accept a known producer for the current
-invocation only. `import local` records each accepted release in `etc/dk/t` so
-later imports can anchor on it.
+invocation only. An interactive acceptance, a `dk0 trust accept PACKAGE_ID`
+record with no `--key`, and `--trust-local-package` each accept the producer
+key the import presents, whichever key that is; a pin accepts one named key.
+`import local` records each accepted release in `etc/dk/t` so later imports can
+anchor on it.
 
 ```text
 inspect github-l2 -R,--repo [HOST/]OWNER/REPO [--tag TAG] [--outdir DIR]
@@ -551,9 +554,9 @@ for packages that need those capabilities.
 
 `trust accept PACKAGE_ID --key PUBKEY` pins the expected producer key, the full
 OpenBSD signify public key obtained out-of-band (for example from the package's
-page on diskuv.com). An import whose producer key differs from the pin is
-denied, so a first import over a compromised channel is denied rather than
-accepted on first use.
+page on diskuv.com). Every import of the package whose producer key differs
+from the pin is denied, the first one and each one after it, so an import over
+a compromised channel is denied for as long as the record stands.
 
 `trust accept PACKAGE_ID --run` / `--write` record pending capabilities that
 resolve into ordinary producer-key grants at the first successful import. Until
