@@ -1136,7 +1136,7 @@ There is a special edge case for the build system in install mode: the build sys
 
 A temporary directory for the form function.
 
-There is a special edge case for the build system in install mode: the build system in install mode will set the cache directory to be the OS-specific cache directory (ex. `Temporary Internet Files` on Windows, the XDG-compliant cache directory in Unix).
+There is a special edge case for the build system in install mode: the build system in install mode will set the cache directory to be the OS-specific cache directory (ex. `Temporary Internet Files` on Windows, the XDG (X Desktop Group) compliant cache directory in Unix).
 
 #### ${DATA}
 
@@ -2325,7 +2325,7 @@ To increase supply chain security guarantees, the build system will reject asset
 The following sources of attestation are recognized:
 
 - A human can sign a build by using an [OpenBSD signify key](https://www.openbsd.org/papers/bsdcan-signify.html).
-- GitHub Actions can sign a build using one of two [SLSA security levels](https://slsa.dev/spec/v1.0/levels):
+- GitHub Actions can sign a build using one of two [Supply-chain Levels for Software Artifacts (SLSA) security levels](https://slsa.dev/spec/v1.0/levels):
   - Level 2: <https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#generating-artifact-attestations-for-your-builds>
   - Level 3: <https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/increase-security-rating>
 
@@ -4433,7 +4433,7 @@ was placed manually entered (ex. configuration values) in the output block.
 'OurLibrary_Std.A.B.C'
 ```
 
-`unified.sections {}` is the type constant `section` followed by the ATX headers.
+`unified.sections {}` is the type constant `section` followed by the ATX (hash-prefixed) headers.
 
 #### unified.scriptmodver
 
@@ -5905,7 +5905,8 @@ Common inputs:
 
 ```text
 VCI       = SHA256_HEX( canonical JSON of the parsed values file CST )
-            (see "VCI - Values Canonical ID"; the values file is stripped of
+            (the values file is parsed to a concrete syntax tree (CST); see
+            "VCI - Values Canonical ID"; the values file is stripped of
              carriage returns before parsing)
 MODVER    = MODULE "@" VERSION      -- no build metadata; see "BLD"
 SLOT      = the value shell slot name, e.g. "Release.Windows_x86_64"

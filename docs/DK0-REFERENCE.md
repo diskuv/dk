@@ -121,7 +121,7 @@ add [-f unifiedscript.u] github-l2 [HOST/]OWNER/REPO[@TAG]
 
 Add the latest release - or the release with tag `TAG` - of the GitHub repository
 `[HOST/]OWNER/REPO` to the workspace. The release must have a distribution with a
-SLSA Level 2 attestation.
+Supply-chain Levels for Software Artifacts (SLSA) Level 2 attestation.
 
 ```text
 test [--diff file] [--actual file] [--actual-in-place] unifiedtest.u
@@ -455,7 +455,7 @@ maintain future incrementality.
 
 Background: The GitHub repository that `prepare-version --ci github` prints in its
 `gh api .../environments/dk-distribution` and `gh secret set --repo ...` commands
-comes from `producer.github_slsa_v1_l2.repository` (or the SLSA L3 caller repository if set)
+comes from `producer.github_slsa_v1_l2.repository` (or the SLSA Level 3 caller repository if set)
 in your latest existing `etc/dk/d/*.dist.json`. This same field is the SLSA
 attestation subject a consumer verifies at `import-github-l2`.
 
@@ -886,7 +886,7 @@ Use `--` to separate the global options from the command and its arguments.
 - `--version` - show version information and exit.
 - `-v`, `--verbose` - show command lines while building; show values when complete. Repeat for more verbosity (max three).
 - `--quiet` - don't show progress status; command lines still shown with `-v`.
-- `--global` - set defaults to XDG directories under the `dk` program name.
+- `--global` - set defaults to XDG (X Desktop Group) directories under the `dk` program name.
 - `--install PROGRAM` - *[caution]* install files to XDG directories under `PROGRAM` for forms with XDG variables (`${STATE}`, `${CACHE}`), and to home directories for `${HOME}`.
 - `-I DIR` - include directory to search for `values.json[c]` and `*.values.json[c]` (also library subdirectories, e.g. `DIR/SomeLibrary_Std/values.json`). Repeatable.
 - `--cell NAME=PATH` - add a subdivision of project source code with the given `NAME` and `PATH`; later cells override earlier cells with the same name.
@@ -920,7 +920,7 @@ run: dk0 -t "${{ github.event.head_commit.timestamp }}" ...
 ### Security options
 
 - `--integrity none|existence|checksum` - verify the local value store against the trace store. `none` is fastest but can't tell if values are evicted; `existence` checks for the existence of values (fetching from a remote value store if present); `checksum` is slowest, skips any value read without a constructive-trace entry, and removes it if permitted [default: existence].
-- `--random-seed SEED` - seed the RNG for operations needing randomness (e.g. signing build files). Highly insecure but allows reproducible trace/value stores; if unset, a seed is generated from system entropy.
+- `--random-seed SEED` - seed the random number generator (RNG) for operations needing randomness (e.g. signing build files). Highly insecure but allows reproducible trace/value stores; if unset, a seed is generated from system entropy.
 - `--trust-local-package PACKAGE_ID` - allow loading local distributions from `PACKAGE_ID`, and accept `PACKAGE_ID`'s producer key on import without the interactive accept/deny prompt. Repeatable. This is the producer/development lever for a local source tree, and its acceptance is per-invocation. For a consumer accepting a signed import, `dk0 trust accept PACKAGE_ID` records a durable acceptance without the local-resolution meaning. `--trust-local-package` never overrides signature verification or the key-rotation rules.
 - `--dangerously-trust-all` - skip the `request.ui` capability prompts and allow every privileged rule action for the process. Don't do it: record explicit grants with `dk0 trust grant` (or an interactive `[a]lways` answer) instead. It never affects the import-time signify verification.
 - `--keys-env ENV_PREFIX` - use `<ENV_PREFIX>_PUBKEY` and `<ENV_PREFIX>_SECKEY` as the build public/secret key (lines may be separated with pipes or newlines).
@@ -1105,7 +1105,7 @@ keys" sections; the value-store protections are in `SECURITY.md`.
   `--trust-local-package`, or an interactive acceptance (deny by default).
 - **The Sigstore trusted root is derived at import time.** The Fulcio CAs and
   Rekor keys that anchor the SLSA Level 2 check are refreshed through Sigstore's
-  threshold-signed TUF metadata. "Sigstore trusted root" below describes the
+  threshold-signed metadata from The Update Framework (TUF). "Sigstore trusted root" below describes the
   three guarantees this gives an importer - root substitution resistance,
   bounded staleness, and channel independence - and how the root is cached.
 - **`import local` has no transport attestation by design** (the user names a
