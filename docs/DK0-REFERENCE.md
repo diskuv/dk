@@ -689,7 +689,7 @@ sbom local --path VALUES.JSON [--slot SLOT] [--verify-content]
     [--timestamp now|RFC3339] [--pretty] [--outfile FILE]
 ```
 
-Emit a CycloneDX 1.6 software bill of materials as JSON (minified unless
+Emit a CycloneDX 1.6 software bill of materials (SBOM) as JSON (minified unless
 `--pretty`; stdout unless `--outfile FILE`).
 
 dk value ids are declaration-addressed: an object id hashes the module's
@@ -760,9 +760,10 @@ identical bytes and `diff` shows only real changes.
 Alongside the vendor properties below, components use the standard CycloneDX
 elements where the data exists: `hashes` (content and pin digests, with the
 CycloneDX algorithm names `SHA-256`, `SHA-512`, `MD5`, `SHA-1`,
-`BLAKE2b-256`), `externalReferences` (archive and repository URLs), `licenses`
-(SPDX expressions), and the top-level `dependencies` graph keyed by each
-component's `bom-ref`. The `diskuv:dk:*` properties are retained for the
+`BLAKE2b-256`), `externalReferences` (archive and repository URLs),
+`licenses` written as Software Package Data Exchange (SPDX) expressions, and
+the top-level `dependencies` graph keyed by each component's `bom-ref`. The
+`diskuv:dk:*` properties are retained for the
 content and provenance details the standard elements do not carry.
 
 Component properties (all in the `diskuv:dk:` namespace, all string valued):
