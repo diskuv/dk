@@ -149,7 +149,7 @@
                 "values": {
                     "type": "object",
                     "description": "Values to be added to the valuestore and to the task graph. The `forms[].function` field may be written as `forms[].function_` to avoid conflicts with the Lua `function` keyword.",
-                    "$schema": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json"
+                    "$schema": "https://diskuv.com/dk/schema/dk-value-1.0.json"
                 },
                 "expressions": {
                     "type": "object",

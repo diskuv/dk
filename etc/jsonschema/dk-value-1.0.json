@@ -123,7 +123,7 @@
         "$schema": {
             "description": "The JSON schema for dk build system values.json, values.json, *.values.json and *.values.jsonc. Used by VS Code for auto-completions, but otherwise ignored.",
             "type": "string",
-            "default": "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/dk-values.json"
+            "default": "https://diskuv.com/dk/schema/dk-value-1.0.json"
         },
         "generated": {
             "description": "Non-authoritative provenance stamped by a generator dialog (for example CommonsLang_OCaml.Dk.OpamLock.GenerateDriver records its tool version, rulefn and lock digest here so a later Refresh can regenerate or check the file). Never read by the build engine and excluded from canonical value ids.",
