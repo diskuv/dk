@@ -1,6 +1,6 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema",
-    "id": "https://diskuv.com/dk/schema/dk-value-1.0.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://diskuv.com/dk/schema/dk-value-1.0.json",
     "title": "JSON schema for values.json, values.json, *.values.json and *.values.jsonc build files",
     "definitions": {
         "producer": {
@@ -308,7 +308,7 @@
                                 "properties": {
                                     "bundle_id": {
                                         "type": "string",
-                                        "description": "The identifier for the bundle containing the trace and value stores, in the format 'PACKAGE.NAME@VERSION'. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system."
+                                        "description": "The identifier for the bundle containing the trace and value stores, in the format 'PACKAGE.NAME@VERSION'. The VERSION must be a semver 2.0.0 compatible version number as documented by https://semver.org/. Any 'bn-*' semver build metadata will be dropped. Any 'dk-*' metadata is reserved for the build system. DEPRECATED and read-only: the engine RENAMED this member to bundle_modver, accepts it until dk0 2.6, and no longer emits it. A document written by any engine after 2.5.202602270700 carries bundle_modver instead."
                                     },
                                     "modules": {
                                         "type": "array",
@@ -426,21 +426,51 @@
                                             "traces",
                                             "values"
                                         ]
+                                    },
+                                    "bundle_modver": {
+                                        "type": "string",
+                                        "description": "The identifier for the bundle containing the trace and value stores, in the format 'PACKAGE.NAME@VERSION'. The VERSION must be a semver 2.0.0 compatible version number. Any 'bn-*' semver build metadata will be dropped; any 'dk-*' metadata is reserved for the build system."
+                                    },
+                                    "script_module_sha256s": {
+                                        "type": "array",
+                                        "description": "The SHA-256 content hashes of the exported script modules, signed with the rest of build_to_sign.",
+                                        "items": {
+                                            "type": "string"
+                                        }
                                     }
                                 },
                                 "required": [
                                     "producer_accepts",
-                                    "bundle_id",
                                     "bundle_canonical",
                                     "distmeta",
                                     "package",
                                     "modules"
+                                ],
+                                "anyOf": [
+                                    {
+                                        "required": [
+                                            "bundle_modver"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "bundle_id"
+                                        ]
+                                    }
                                 ]
                             }
                         },
                         "required": [
                             "build_to_sign"
                         ]
+                    },
+                    "min_dk_version": {
+                        "type": "string",
+                        "description": "The minimum dk0 version that can CONSUME this release's wire format. It is a hardcoded engine constant stamped by the producing engine. Enforced at import and restore, where a running engine older than this value is refused. Excluded from the canonical form so it never affects a value id."
+                    },
+                    "partial": {
+                        "type": "boolean",
+                        "description": "Present and true only on a PARTIAL (resume) release, whose stores are incomplete."
                     }
                 },
                 "required": [
@@ -820,13 +850,19 @@
                                     },
                                     "oneOf": [
                                         {
-                                            "required": ["sha256"]
+                                            "required": [
+                                                "sha256"
+                                            ]
                                         },
                                         {
-                                            "required": ["sha1"]
+                                            "required": [
+                                                "sha1"
+                                            ]
                                         },
                                         {
-                                            "required": ["blake2b256"]
+                                            "required": [
+                                                "blake2b256"
+                                            ]
                                         }
                                     ]
                                 },
@@ -866,7 +902,9 @@
                                                         },
                                                         "oneOf": [
                                                             {
-                                                                "required": ["blake2b256"]
+                                                                "required": [
+                                                                    "blake2b256"
+                                                                ]
                                                             }
                                                         ]
                                                     }
@@ -882,7 +920,7 @@
                                             "type"
                                         ],
                                         "oneOf": [
-                                            {                                                
+                                            {
                                                 "required": [
                                                     "zip"
                                                 ]
