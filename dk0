@@ -19,6 +19,11 @@
 #
 # Purpose: Install dk0 if not present. Then invoke dk0.
 
+# The cksum_signify_* constants below are read indirectly, through the dynamic
+# eval lookup in dk_verify_manifest that builds the variable name from the host
+# ABI; that reference is invisible to the linter, so the file-wide directive on
+# the next line turns off its unused-variable warning.
+# shellcheck disable=SC2034
 set -euf
 
 # ===== BAKED TRUST ROOT (rotates rarely; updated only on key/verifier rotation) =====
@@ -536,6 +541,7 @@ downloadfile() {
         if [ -n "$DKMLSYS_CURL" ]; then
             log_trace "$DKMLSYS_CURL" --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL "$downloadfile_URL" -o "$downloadfile_FILE".tmp
         elif [ -n "$DKMLSYS_WGET" ]; then
+            # shellcheck disable=SC2046 # prints one flag or nothing; must expand to zero words
             log_trace "$DKMLSYS_WGET" $(dk_wget_https_only) -q -O "$downloadfile_FILE".tmp "$downloadfile_URL"
         else
             dk_no_downloader
@@ -544,6 +550,7 @@ downloadfile() {
         if [ -n "$DKMLSYS_CURL" ]; then
             log_trace "$DKMLSYS_CURL" --proto '=https' --proto-redir '=https' --tlsv1.2 -fL "$downloadfile_URL" -o "$downloadfile_FILE".tmp
         elif [ -n "$DKMLSYS_WGET" ]; then
+            # shellcheck disable=SC2046 # prints one flag or nothing; must expand to zero words
             log_trace "$DKMLSYS_WGET" $(dk_wget_https_only) -O "$downloadfile_FILE".tmp "$downloadfile_URL"
         else
             dk_no_downloader
@@ -695,6 +702,7 @@ esac
 # A checksum-less fetch (the manifest is trusted by SIGNATURE, not a pre-known
 # checksum). curl or wget, matching downloadfile's tool detection.
 dk_fetch() {
+  # shellcheck disable=SC2046 # prints one flag or nothing; must expand to zero words
   if [ -n "$DKMLSYS_CURL" ]; then "$DKMLSYS_CURL" --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL "$1" -o "$2"
   elif [ -n "$DKMLSYS_WGET" ]; then "$DKMLSYS_WGET" $(dk_wget_https_only) -q -O "$2" "$1"
   else dk_no_downloader; fi
@@ -741,6 +749,7 @@ dk_verify_manifest() {
   # a maintained-but-unbaked placeholder (e.g. windows_x86 until its signify job
   # ships). Both are "not provisioned" -- refuse rather than fetch and trust an
   # unverifiable verifier.
+  # shellcheck disable=SC2154 # dvm_pin is assigned by the eval above
   case "$dvm_pin" in
     '' | __*) echo "FATAL: no pinned mlfront-signify checksum for $BUILDHOST_ARCH (launcher not provisioned)" >&2; exit 3 ;;
   esac
