@@ -5,6 +5,10 @@
   "imports": [
     {
       "type": "github-l2",
+      "repo": "dkpkg/CommonsBase_Std"
+    },
+    {
+      "type": "github-l2",
       "repo": "dkpkg/CommonsLang_OCaml"
     },
     {
