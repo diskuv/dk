@@ -36,7 +36,7 @@ dk1 [global options] [--] command [command args]
 The invocation form, the workspace and project-directory rules, and every
 command are identical to `dk0` - see [Invocation](DK0-REFERENCE.md#invocation)
 and [Commands](DK0-REFERENCE.md#commands). The project directory is the one
-containing the `dk1` shell script and the `dk1.cmd` Windows batch script.
+containing the `dk1` wrapper script.
 
 `dk1` accepts one option that `dk0` does not: `-j` / `--jobs` (see
 [Parallel builds](#parallel-builds) below). Every other global option and
@@ -99,6 +99,12 @@ moves it. A `dk1 distribute` whose `--target-abi` names an ABI other than its
 `--execution-abi` withholds the objects whose slot came from the
 `execution_abi` wildcard, at every job count. See
 [Object Slots](SPECIFICATION.md#object-slots) for the rule.
+
+## Engine version selection
+
+The `dk1` wrapper script resolves the engine version it downloads exactly as `dk0` does,
+reading `DK1_BASE_URL` in place of `DK0_BASE_URL`. See
+[Engine version selection](DK0-REFERENCE.md#engine-version-selection).
 
 ## Everything else
 

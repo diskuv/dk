@@ -22,8 +22,8 @@ Use `--` to separate the global options from the command and its arguments.
 
 The **workspace** directory is the nearest ancestor directory containing a `dk.u`
 unified script with a level-2 `## workspace` section; if none, the current
-directory. In `dk0` the directory containing the `dk0` shell script and the
-`dk0.cmd` Windows batch script is the project directory.
+directory. In `dk0` the directory containing the `dk0` wrapper script is the
+project directory.
 
 You can invoke a value shell command directly from the command line. For
 example, `dk0 get-object OurStd_Std.Build.Clang@1.0.0 -s Release.Agnostic -f clang.exe`.
@@ -1283,7 +1283,7 @@ at import time by running `gh attestation trusted-root`, which refreshes it
 through Sigstore's threshold-signed TUF metadata. The chain that produces it is:
 
 ```text
-launcher (baked signify root, diskuv.com/dk manifest)
+`dk0` wrapper script (baked signify root, diskuv.com/dk manifest)
   -> dk0 binary (manifest-verified, per-arch sha256)
     -> built-in MlFront_Attestation catalog (compiled into dk0; pins gh.exe by sha256)
       -> gh.exe (checksum-verified download)
@@ -1356,30 +1356,48 @@ your package can therefore still need the earlier release to be published.
 
 ## Bootstrap scripts
 
-The reference implementation is a single-file executable.
-A `dk0` shell script (Unix) and a
-`dk0.cmd` Windows batch script are also available that bootstrap and run the single-file executable.
-They rely on a small set of external tools per platform; a different implementation may
-use different tools or none at all.
+The reference implementation is a single-file executable. A `dk0` wrapper script -
+a shell script on Unix and a `dk0.cmd` batch script on Windows - bootstraps and runs
+it. It relies on a small set of external tools per platform; a different implementation
+may use different tools or none at all.
 
 Each dk0 version installs into its own `dk0exe-<version>-<abi>` directory
-under the launcher data home (`%LOCALAPPDATA%\Programs\dk0` on Windows,
+under the `dk0` wrapper script data home (`%LOCALAPPDATA%\Programs\dk0` on Windows,
 `$XDG_DATA_HOME/dk0` or `~/.local/share/dk0` on Unix, `DKCODER_DATA_HOME`
-override). The launchers garbage collect that store on every run: the
+override). The `dk0` wrapper scripts garbage collect that store on every run: the
 version being launched is marked used, then version directories and
-superseded `verifier/mlfront-signify-*` binaries that no launcher has used
+superseded `verifier/mlfront-signify-*` binaries that no `dk0` wrapper script has used
 in 30 days are removed. Everything in the store re-downloads on demand from
 its signed manifest, so pruning is always safe and never blocks a launch.
 
+### Engine version selection
+
+The `dk0` wrapper script resolves the engine version it downloads from three sources, in
+order of precedence:
+
+- A `%% actual_version("X.Y.Z.W")` line in the `dk.u` `## workspace` section fixes
+  the version at `X.Y.Z.W`. Without that line the wrapper script resolves the latest
+  version the base URL serves.
+- `DK0_BASE_URL` is the base URL the wrapper script reads the signed manifest and the
+  `dk0` binary from, and defaults to `https://diskuv.com/dk`. A value naming a
+  `.../packages/generic/dk-dist/<version>` folder resolves the one version that
+  folder holds, which is the version a CI job pinned to that folder runs.
+- `--self-update` as the first argument makes the wrapper script resolve the latest
+  version and rewrite the `dk.u` `actual_version` line to it.
+
+The `dk0` wrapper script verifies each manifest against a baked signify public key, and
+downloads the `dk0` binary only from `github.com/dkpkg` or the dk-dist GitLab package
+registry at `gitlab.com/api/v4/projects/60486861`.
+
 ### Windows POSIX shells
 
-On Windows the `dk0` shell script runs under Git Bash, MSYS2, and Cygwin, and
+On Windows the `dk0` wrapper script runs under Git Bash, MSYS2, and Cygwin, and
 `dk0.cmd` runs under `cmd.exe` and PowerShell. Both select the `windows_x86_64` or
-`windows_x86` binaries and share one launcher data home,
+`windows_x86` binaries and share one `dk0` wrapper script data home,
 `%LOCALAPPDATA%\Programs\dk0`, so a project driven from both shells downloads
 each version once.
 
-The shell script looks for `curl` and `wget` in `/usr/bin` and `/bin` first, and then
+The wrapper script looks for `curl` and `wget` in `/usr/bin` and `/bin` first, and then
 on `PATH`. The `PATH` step is what finds `/mingw64/bin/curl` under Git for Windows.
 
 ### Windows
@@ -1389,10 +1407,10 @@ on `PATH`. The `PATH` step is what finds `/mingw64/bin/curl` under Git for Windo
 | `pwsh` in PATH           | `enter-object` interactive shell (optional; searched 1st)              |
 | `powershell` in PATH     | `enter-object` interactive shell (optional; searched 2nd)              |
 | `cmd` in PATH            | `enter-object` interactive shell (fallback; searched last)             |
-| `powershell.exe` in PATH | `dk0.cmd` batch script - for InvokeWebRequest (optional; searched 1st) |
-| `bitsadmin` in PATH      | `dk0.cmd` batch script - for download (fallback; searched last)        |
-| `certutil` in PATH       | `dk0.cmd` batch script - verify sha256sums                             |
-| `forfiles` in PATH       | `dk0.cmd` batch script - prune old dk0 versions (optional)             |
+| `powershell.exe` in PATH | `dk0` wrapper script - for InvokeWebRequest (optional; searched 1st) |
+| `bitsadmin` in PATH      | `dk0` wrapper script - for download (fallback; searched last)        |
+| `certutil` in PATH       | `dk0` wrapper script - verify sha256sums                             |
+| `forfiles` in PATH       | `dk0` wrapper script - prune old dk0 versions (optional)             |
 
 ### macOS
 
@@ -1400,44 +1418,44 @@ on `PATH`. The `PATH` step is what finds `/mingw64/bin/curl` under Git for Windo
 | ------------------- | ----------------------------------------------------------------- |
 | `/usr/bin/codesign` | executables are locally signed when `-e GLOB_PATTERN`             |
 | `/bin/sh`           | `enter-object` interactive shell unless `SHELL` env var set       |
-| `/bin/sh`           | `dk0` shell script                                                |
-| `/usr/bin/shasum`   | `dk0` shell script                                                |
-| `/usr/bin/curl`     | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/curl`         | `dk0` shell script (optional; searched 2nd)                       |
-| `/usr/bin/wget`     | `dk0` shell script (optional; searched 3rd)                       |
-| `/bin/wget`         | `dk0` shell script (optional; searched 4th)                       |
-| `curl`/`wget` in PATH | `dk0` shell script (fallback; searched last)                    |
-| `/usr/bin/mv`       | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/mv`           | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/rm`       | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/rm`           | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/uname`    | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/uname`        | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/awk`      | `dk0` shell script - to parse sha256sums (optional; searched 1st) |
-| `/bin/awk`          | `dk0` shell script (fallback; searched last)                      |
+| `/bin/sh`           | `dk0` wrapper script                                                |
+| `/usr/bin/shasum`   | `dk0` wrapper script                                                |
+| `/usr/bin/curl`     | `dk0` wrapper script (optional; searched 1st)                       |
+| `/bin/curl`         | `dk0` wrapper script (optional; searched 2nd)                       |
+| `/usr/bin/wget`     | `dk0` wrapper script (optional; searched 3rd)                       |
+| `/bin/wget`         | `dk0` wrapper script (optional; searched 4th)                       |
+| `curl`/`wget` in PATH | `dk0` wrapper script (fallback; searched last)                    |
+| `/usr/bin/mv`       | `dk0` wrapper script (optional; searched 1st)                       |
+| `/bin/mv`           | `dk0` wrapper script (fallback; searched last)                      |
+| `/usr/bin/rm`       | `dk0` wrapper script (optional; searched 1st)                       |
+| `/bin/rm`           | `dk0` wrapper script (fallback; searched last)                      |
+| `/usr/bin/uname`    | `dk0` wrapper script (optional; searched 1st)                       |
+| `/bin/uname`        | `dk0` wrapper script (fallback; searched last)                      |
+| `/usr/bin/awk`      | `dk0` wrapper script - to parse sha256sums (optional; searched 1st) |
+| `/bin/awk`          | `dk0` wrapper script (fallback; searched last)                      |
 
 ### Linux / BSDs / MSYS2 / Cygwin / Git Bash
 
 | File                 | What                                                              |
 | -------------------- | ----------------------------------------------------------------- |
 | `/bin/sh`            | `enter-object` interactive shell unless `SHELL` env var set       |
-| `/bin/sh`            | `dk0` shell script                                                |
-| `/usr/bin/shasum`    | `dk0` shell script (optional; searched 1st)                       |
-| `/usr/bin/sha256sum` | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/curl`      | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/curl`          | `dk0` shell script (optional; searched 2nd)                       |
-| `/usr/bin/wget`      | `dk0` shell script (optional; searched 3rd)                       |
-| `/bin/wget`          | `dk0` shell script (optional; searched 4th)                       |
-| `curl`/`wget` in PATH  | `dk0` shell script (fallback; searched last)                    |
-| `/usr/bin/mv`        | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/mv`            | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/rm`        | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/rm`            | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/uname`     | `dk0` shell script (optional; searched 1st)                       |
-| `/bin/uname`         | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/awk`       | `dk0` shell script - to parse sha256sums (optional; searched 1st) |
-| `/bin/awk`           | `dk0` shell script (fallback; searched last)                      |
-| `/usr/bin/cygpath`   | `dk0` shell script (optional)                                     |
+| `/bin/sh`            | `dk0` wrapper script                                                |
+| `/usr/bin/shasum`    | `dk0` wrapper script (optional; searched 1st)                       |
+| `/usr/bin/sha256sum` | `dk0` wrapper script (fallback; searched last)                      |
+| `/usr/bin/curl`      | `dk0` wrapper script (optional; searched 1st)                       |
+| `/bin/curl`          | `dk0` wrapper script (optional; searched 2nd)                       |
+| `/usr/bin/wget`      | `dk0` wrapper script (optional; searched 3rd)                       |
+| `/bin/wget`          | `dk0` wrapper script (optional; searched 4th)                       |
+| `curl`/`wget` in PATH  | `dk0` wrapper script (fallback; searched last)                    |
+| `/usr/bin/mv`        | `dk0` wrapper script (optional; searched 1st)                       |
+| `/bin/mv`            | `dk0` wrapper script (fallback; searched last)                      |
+| `/usr/bin/rm`        | `dk0` wrapper script (optional; searched 1st)                       |
+| `/bin/rm`            | `dk0` wrapper script (fallback; searched last)                      |
+| `/usr/bin/uname`     | `dk0` wrapper script (optional; searched 1st)                       |
+| `/bin/uname`         | `dk0` wrapper script (fallback; searched last)                      |
+| `/usr/bin/awk`       | `dk0` wrapper script - to parse sha256sums (optional; searched 1st) |
+| `/bin/awk`           | `dk0` wrapper script (fallback; searched last)                      |
+| `/usr/bin/cygpath`   | `dk0` wrapper script (optional)                                     |
 
 ### Dynamic linker (per ABI, not per OS)
 
