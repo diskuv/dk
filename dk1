@@ -723,12 +723,37 @@ dk_manifest_str() {
   "$DKMLSYS_GREP" "^$2=" "$1" | head -1 | cut -d= -f2
 }
 
+# [dk_ver_lt A B] returns 0 (true) iff dotted-numeric version A is STRICTLY less
+# than B, compared component by component so that 2.4.3.9 < 2.4.3.11 (a lexical
+# compare would get that backwards). A missing trailing component counts as 0, so
+# 2.4 equals 2.4.0.0; a non-numeric component also counts as 0 so we never run
+# arithmetic on unexpected text under set -e.
+dk_ver_lt() {
+  dk_ver_lt_A=$1
+  dk_ver_lt_B=$2
+  while [ -n "$dk_ver_lt_A" ] || [ -n "$dk_ver_lt_B" ]; do
+    dk_ver_lt_a=${dk_ver_lt_A%%.*}
+    dk_ver_lt_b=${dk_ver_lt_B%%.*}
+    [ -n "$dk_ver_lt_a" ] || dk_ver_lt_a=0
+    [ -n "$dk_ver_lt_b" ] || dk_ver_lt_b=0
+    case "$dk_ver_lt_a" in *[!0-9]*) dk_ver_lt_a=0 ;; esac
+    case "$dk_ver_lt_b" in *[!0-9]*) dk_ver_lt_b=0 ;; esac
+    if [ "$dk_ver_lt_a" -lt "$dk_ver_lt_b" ]; then return 0; fi
+    if [ "$dk_ver_lt_a" -gt "$dk_ver_lt_b" ]; then return 1; fi
+    case "$dk_ver_lt_A" in *.*) dk_ver_lt_A=${dk_ver_lt_A#*.} ;; *) dk_ver_lt_A= ;; esac
+    case "$dk_ver_lt_B" in *.*) dk_ver_lt_B=${dk_ver_lt_B#*.} ;; *) dk_ver_lt_B= ;; esac
+  done
+  return 1
+}
+
 # Defense-in-depth: the dk1 download URL comes from the signify-verified manifest,
-# but still restrict it to known hosts so a signed-but-malicious manifest cannot
-# redirect the fetch off github.com/dkpkg or the legacy GitLab package host.
+# but still restrict it to the exact dk0/dk1 binary repository so a signed-but-
+# malicious manifest cannot redirect the fetch off github.com/dkpkg/CommonsBase_Dk
+# or the legacy GitLab package host. The trailing slash after CommonsBase_Dk pins
+# the repository boundary so a sibling like CommonsBase_Dk_x cannot match.
 dk_allow_host() {
   case "$1" in
-    https://github.com/dkpkg/*) return 0 ;;
+    https://github.com/dkpkg/CommonsBase_Dk/*) return 0 ;;
     https://gitlab.com/api/v4/projects/60486861/*) return 0 ;;
     *) return 1 ;;
   esac
@@ -779,6 +804,22 @@ else
 fi
 dk_manifest="$tools_dir/verifier/manifest"
 dk_verify_manifest "$dk_manifest" "$majminpat_ver"
+# Downgrade guard. The signify verification proves the manifest was signed, but
+# not that it is the version this project pinned: DK1_BASE_URL (DK_BASE_URL) is
+# attacker-controllable, so a genuine OLDER signed manifest served at the pinned
+# manifest-<pin>.txt URL would otherwise be accepted. The dk.u actual_version pin
+# is a working-tree file and is NOT attacker-controllable, so treat it as the
+# expected floor and refuse a served manifest whose own version= is strictly
+# older. Only pinned runs reach here with a non-empty majminpat_ver; the unpinned
+# and --self-update paths keep majminpat_ver empty, where the manifest's version
+# is authoritative, and are left untouched.
+if [ -n "$majminpat_ver" ]; then
+  dk_served_ver=$(dk_manifest_str "$dk_manifest" version)
+  if [ -n "$dk_served_ver" ] && dk_ver_lt "$dk_served_ver" "$majminpat_ver"; then
+    printf "%s\n" "FATAL: manifest downgrade refused -- dk.u pins dk1 $majminpat_ver but $DK_BASE_URL served an older manifest (version $dk_served_ver)" >&2
+    exit 1
+  fi
+fi
 if [ -z "$majminpat_ver" ]; then
   majminpat_ver=$(dk_manifest_str "$dk_manifest" version)
   [ "$dk_selfupdate" = 0 ] && echo "dk1: no '%% actual_version' pin in dk.u; using latest $majminpat_ver (run './dk1 --self-update' to pin)" >&2

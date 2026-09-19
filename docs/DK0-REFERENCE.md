@@ -1386,8 +1386,12 @@ order of precedence:
   version and rewrite the `dk.u` `actual_version` line to it.
 
 The `dk0` wrapper script verifies each manifest against a baked signify public key, and
-downloads the `dk0` binary only from `github.com/dkpkg` or the dk-dist GitLab package
-registry at `gitlab.com/api/v4/projects/60486861`.
+downloads the `dk0` binary only from the `github.com/dkpkg/CommonsBase_Dk` repository or
+the dk-dist GitLab package registry at `gitlab.com/api/v4/projects/60486861`.
+
+When a `%% actual_version("X.Y.Z.W")` pin is present, the wrapper script refuses a
+verified manifest whose version is older than `X.Y.Z.W`. Without a pin the wrapper
+script accepts the latest version the base URL serves.
 
 ### Windows POSIX shells
 

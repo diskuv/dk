@@ -97,6 +97,14 @@ IF "%DK_WANT%"=="" (
 ) ELSE (
     SET "DK_VER=%DK_PIN%"
 )
+REM Downgrade guard (pinned runs only): DK_WANT is non-empty exactly when a dk.u
+REM pin is in effect -- not --self-update and not unpinned. DK0_BASE_URL is
+REM attacker-controllable, but the dk.u pin is a working-tree file and is not, so
+REM refuse a genuine but OLDER signed manifest served at the pinned URL.
+IF NOT "%DK_WANT%"=="" (
+    CALL :downgradeguard
+    IF !ERRORLEVEL! NEQ 0 EXIT /B 1
+)
 IF "!DK_VER!"=="" (ECHO dk0: could not resolve a dk0 version 1>&2 & EXIT /B 1)
 CALL :mval dk0_!DK_ARCH! DK_CKSUM
 IF "!DK_CKSUM!"=="" (ECHO dk0: manifest has no dk0 build for !DK_ARCH! ^(version !DK_VER!^) 1>&2 & EXIT /B 3)
@@ -199,8 +207,11 @@ EXIT /B 0
 REM :allowhost URL  -- EXIT /B 0 if URL starts with an allowlisted host prefix,
 REM else 1. Defense-in-depth over the signify-verified template (a signed-but-
 REM malicious manifest still cannot redirect the download off a known host).
+REM findstr /L /B is a literal prefix match, so the trailing slash after
+REM CommonsBase_Dk anchors the repository boundary (a sibling like
+REM CommonsBase_Dk_x cannot match).
 :allowhost
-ECHO %~1| findstr /B /L /C:"https://github.com/dkpkg/" /C:"https://gitlab.com/api/v4/projects/60486861/" >NUL 2>&1
+ECHO %~1| findstr /B /L /C:"https://github.com/dkpkg/CommonsBase_Dk/" /C:"https://gitlab.com/api/v4/projects/60486861/" >NUL 2>&1
 EXIT /B !ERRORLEVEL!
 
 REM :readpin  -- set DK_PIN to the version between the quotes on the dk.u
@@ -209,3 +220,39 @@ REM double-quote as a delimiter (a quoted "delims=^"" options string does not wo
 :readpin
 FOR /F usebackq^ tokens^=2^ delims^=^" %%V IN (`findstr /L /C:"actual_version" "%DK_PROJECT_DIR%dk.u"`) DO SET "DK_PIN=%%V"
 EXIT /B 0
+
+REM :downgradeguard  -- with a pin in effect, read the verified manifest's own
+REM version= and EXIT /B 1 if it is STRICTLY OLDER than the dk.u pin (%DK_PIN%).
+REM Equal or newer passes. Refuses a genuine but downgraded signed manifest that
+REM an attacker-controlled DK0_BASE_URL served at the pinned manifest-<pin>.txt.
+:downgradeguard
+CALL :mval version DK_SERVED_VER
+IF "!DK_SERVED_VER!"=="" EXIT /B 0
+CALL :verlt "!DK_SERVED_VER!" "%DK_PIN%"
+IF !ERRORLEVEL! EQU 0 (
+    ECHO dk0: manifest downgrade refused -- dk.u pins dk0 %DK_PIN% but %DK_BASE_URL% served an older manifest ^(version !DK_SERVED_VER!^) 1>&2
+    EXIT /B 1
+)
+EXIT /B 0
+
+REM :verlt A B  -- EXIT /B 0 iff dotted-numeric version A is STRICTLY less than B,
+REM compared component by component so 2.4.3.9 < 2.4.3.11 (cmd's IF compares two
+REM all-digit operands numerically, so a lexical "9" vs "11" is not a hazard). A
+REM missing trailing component counts as 0, so 2.4 equals 2.4.0.0.
+:verlt
+SETLOCAL ENABLEDELAYEDEXPANSION
+SET "VLA=%~1"
+SET "VLB=%~2"
+:verlt_loop
+IF "!VLA!"=="" IF "!VLB!"=="" (ENDLOCAL & EXIT /B 1)
+SET "HA=0"
+FOR /F "delims=." %%x IN ("!VLA!") DO SET "HA=%%x"
+SET "HB=0"
+FOR /F "delims=." %%x IN ("!VLB!") DO SET "HB=%%x"
+IF !HA! LSS !HB! (ENDLOCAL & EXIT /B 0)
+IF !HA! GTR !HB! (ENDLOCAL & EXIT /B 1)
+REM Drop the leading component from each (guarded so the substring operator is
+REM never applied to an empty value, which cmd expands to the literal "*.=").
+IF NOT "!VLA!"=="" (IF "!VLA!"=="!VLA:.=!" (SET "VLA=") ELSE (SET "VLA=!VLA:*.=!"))
+IF NOT "!VLB!"=="" (IF "!VLB!"=="!VLB:.=!" (SET "VLB=") ELSE (SET "VLB=!VLB:*.=!"))
+GOTO :verlt_loop
