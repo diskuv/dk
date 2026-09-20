@@ -789,7 +789,7 @@ object `{ "url": ..., "filename": ... }`. For a base-URL string the download
 URL is the base joined with the asset's `path`. For the object form the
 `filename` replaces the asset's `path` at that mirror, so one asset can be
 fetched from mirrors that disagree on the filename. An opam source, for
-example, lists the opam content-addressed cache first (where the file is named
+example, lists the opam cache first (where the file is named
 by its hash) and the upstream release second (where the file is named
 `src.tar.gz`): the cache is preferred, and a cache miss falls back to the
 upstream release. Every mirror is verified against the asset's SHA256, so the
@@ -3826,7 +3826,7 @@ Regardless of `patterns`, `request.ui.glob` never enumerates `dk0`'s build-state
 directories: the signify keys directory (which holds the secret `build.sec`), the
 data directory and the cache directory (`t/k`, `t/d` and `t/c` at their default
 locations, or their configured locations). This ensures a rule can never route
-`build.sec` or other build state into a content-addressed bundle. A user-supplied
+`build.sec` or other build state into a bundle. A user-supplied
 `patterns`/`excludes` cannot override this exclusion.
 
 The same project file may belong to different assets.
@@ -6172,7 +6172,7 @@ The dot (`.`) separated build metadata from the semver version.
 
 For example, `OurZip_Demo.S7z2.Windows7zExe@25.1.0+bn-20250101000000+diff` has build metadata `bn-20250101000000.diff`.
 
-Build metadata is deliberately **not** part of any value id. An `o` value id hashes the values file's canonical id, the form's module version, the slot and, on a cross build whose slot does not already name the target, the target ABI; it never hashes the bytes the form produced, so it is not content-addressed (see [Value Id Formulas](#value-id-formulas) and [Object Ids Hide Build Non-Determinism](#object-ids-hide-build-non-determinism)). An `a` value id hashes the declared checksum, size and path of one file, and a `b` value id hashes those records for every file of the bundle together with the module version; neither hashes the bytes of the zip. The build number (the `bn-*` build metadata) is in none of these inputs, so changing it (for example via dk0's `-n` option or a git tag) does not change the object, bundle or asset ids, which keeps distributions reproducible.
+Build metadata is deliberately **not** part of any value id. An `o` value id hashes the values file's canonical id, the form's module version, the slot and, on a cross build whose slot does not already name the target, the target ABI; it never hashes the bytes the form produced (see [Value Id Formulas](#value-id-formulas) and [Object Ids Hide Build Non-Determinism](#object-ids-hide-build-non-determinism)). An `a` value id hashes the declared checksum, size and path of one file, and a `b` value id hashes those records for every file of the bundle together with the module version; neither hashes the bytes of the zip. The build number (the `bn-*` build metadata) is in none of these inputs, so changing it (for example via dk0's `-n` option or a git tag) does not change the object, bundle or asset ids, which keeps distributions reproducible.
 
 Build metadata still participates in keys and versions (see [ID with Build Metadata](#object-id-with-build-metadata)); it is only excluded from value ids.
 

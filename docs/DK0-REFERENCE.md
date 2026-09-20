@@ -579,7 +579,7 @@ to that key: the full public key material, never the displayed fingerprint.
 When no imported release carries a producer key, the grant falls back to the
 package's keyless local distribution records and binds their values-file
 content hashes. `trust grant --values-sha256 HEX` grants to unsigned local
-content addressed by its dos2unix-ed values-file SHA-256.
+content identified by its dos2unix-ed values-file SHA-256.
 
 The capabilities are `--run` (run programs: `request.ui.spawn` and
 `request.ui.capture`) and `--write` (write files: `request.ui.writefile`).
@@ -680,8 +680,8 @@ Each module has a `builds` list (one entry per `\dk.object`, with `platform`,
 `abi` and `valueId`) and, when the module runs `get-asset`, an `assets` list
 (one entry per `\dk.asset`, with `path`, `valueId` and `byteSize`). Object
 builds have no size. Object payload bytes are not deterministic across builds,
-which rules out size as a stable identifier. Asset value blobs are content
-addressed and keep a deterministic `byteSize`.
+which rules out size as a stable identifier. Asset value blobs are identified by
+their content hash and keep a deterministic `byteSize`.
 
 Version 3 changed the format from version 2 by removing `byteSize` from each
 build and adding the per-module `assets` list. Manifests produced before this
@@ -700,7 +700,7 @@ sbom local --path VALUES.JSON [--slot SLOT] [--verify-content]
 Emit a CycloneDX 1.6 software bill of materials (SBOM) as JSON (minified unless
 `--pretty`; stdout unless `--outfile FILE`).
 
-dk object ids are not content-addressed: an object id hashes the module's
+A dk object id hashes the module's
 declaration text and slot and, on a cross build whose slot does not already
 name the target, the target ABI, deliberately excluding the content of its
 build inputs. Two releases can therefore
@@ -885,7 +885,7 @@ slot or asset path), not other versions, so re-pin after a version bump.
 | `-f FILE`, `--file FILE`          | write to `FILE` (overwriting if it exists)                                                                      |
 | `-d DIR`, `--dir DIR`             | write to directory `DIR` (creating it if needed)                                                                |
 | `-n STRIP`, `--strip STRIP`       | when writing to a directory, strip this many leading path components [default: 0]                               |
-| `-m MEMBER`, `--member MEMBER`    | when writing to a tar archive, only extract `MEMBER`; for run-object/run-asset it also implies the command path |
+| `-m MEMBER`, `--member MEMBER`    | when writing to a tar archive, only extract `MEMBER`; for run-object/run-asset it also implies the command path. `MEMBER` may omit the leading `./` that stored members carry relative to the slot root, so `bin/x.exe` and `./bin/x.exe` select the same member |
 
 ### Global options
 
@@ -1185,7 +1185,7 @@ keys" sections; the value-store protections are in `SECURITY.md`.
 | Value-store integrity of Marshal-ed ASTs | build / `get-object` path | Yes. A SHA-256 prefix guards each Marshal-ed AST and is signify-signed with a per-workspace build key (`SECURITY.md`). |
 | Rule-capability consent for `spawn` / `capture` / `writefile` / `selfignore`, keyed by signify provenance | `request.ui.*` (`BuildRequestUi`, `SecUiCapability`); `trust list/accept/grant/revoke` | Yes. Deny-by-default prompt before a rule first exercises a capability: `run` (running a program, `request.ui.spawn` and `request.ui.capture`, gated identically so capture cannot bypass a spawn denial) or `write` (`request.ui.writefile` and `request.ui.selfignore`); fails closed with no TTY, naming `dk0 trust grant`. The prompt identifies the rule by its signify provenance: the producer key fingerprint and `package@version` for a rule from an imported, signature-verified distribution, or the values-file SHA-256 for a host script or local rule. Answering `[a]lways` (or `dk0 trust grant`) persists the grant in `etc/dk/t/capabilities.json`, keyed by the full producer public key (never the fingerprint, which is the attacker-choosable keynum) or by content hash; `[y]es` allows once. A producer-key grant is honored only for values content whose SHA-256 is recorded in the `etc/dk/t/imports.json` ledger against that producer, because the producer signs each exported script module's content hash into `build_to_sign.build_script_module_sha256s`, and import records it after verifying the signature, so content tampered after import (or a local squatter) falls back to the content-hash prompt. Key acceptance at import never confers a capability, though `dk0 trust accept PACKAGE_ID --run`/`--write` records pending capabilities that become the same producer-key grants at the first successful import. The process-wide `--dangerously-trust-all` is a separate command-line escape hatch; the isolated `dk0 remote` path additionally allows the single, producer-trusted orchestration rule it runs without a prompt. The prompt warns when a program is a bare name resolved through `PATH`. |
 | Windows executable-search hardening | `dk0` process startup (`Shell.ml`) | Yes. On Windows `dk0` sets `NoDefaultCurrentDirectoryInExePath`, removing the current directory from the executable search for every program it spawns (rule spawns, precommands, function commands and subshells), so a program named by a bare name is found only through `PATH`, never from an executable dropped into the working directory. |
-| Build-state exclusion from globs | `request.ui.glob` (`BuildRequestUi`) | Yes. The signify keys directory (holding `build.sec`), the data directory and the cache directory are never enumerated, so a rule cannot route `build.sec` or other build state into a content-addressed bundle. |
+| Build-state exclusion from globs | `request.ui.glob` (`BuildRequestUi`) | Yes. The signify keys directory (holding `build.sec`), the data directory and the cache directory are never enumerated, so a rule cannot route `build.sec` or other build state into a bundle. |
 | `signify` primitive (keygen / sign / verify / checksum lists) | `signify -G` / `-S` / `-V` / `-C` | The OpenBSD signify implementation (`MlFront_Signify`), including `-C` verification of a signed SHA256/SHA512 checksum list against its files. |
 
 ### Trust model
