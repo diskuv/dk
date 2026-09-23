@@ -20,6 +20,7 @@
   },
   "editor.wordWrapColumn": 78,
   "json.schemaDownload.trustedDomains": {
+    "https://diskuv.com/dk/schema/": true,
     "https://github.com/diskuv/dk/raw/refs/heads/V2_5/etc/jsonschema/": true
   }
 }
