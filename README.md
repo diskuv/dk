@@ -12,7 +12,7 @@ Linux. `dk` fetches, builds, and runs the software locally or remotely.
 ## Install
 
 Install `dk1` (the multithreaded build system for everyday use) and `dk0` (the
-reference implementation) with one command. More options are at
+reference implementation). More options are at
 <https://diskuv.com/dk/install/>.
 
 Linux and macOS:
@@ -26,9 +26,6 @@ Windows:
 ```powershell
 powershell -ExecutionPolicy ByPass -c "[Net.ServicePointManager]::SecurityProtocol = 3072; irm https://diskuv.com/dk/install.ps1 | iex"
 ```
-
-Each installer verifies the manifest, checks the SHA-256 of the `dk1`
-and `dk0` executables for your platform against it, and puts them on your `PATH`.
 
 ### Run inside a project without installing
 
@@ -47,10 +44,6 @@ Windows:
 ```powershell
 powershell -ExecutionPolicy ByPass -c "[Net.ServicePointManager]::SecurityProtocol = 3072; irm https://diskuv.com/dk/vendor.ps1 | iex"
 ```
-
-`vendor.sh` and `vendor.ps1` write the four wrapper scripts into the
-current directory. Commit them so collaborators can run `./dk1 ...` (or `dk1 ...`
-on Windows) right after cloning.
 
 ## Commands
 
