@@ -11,7 +11,9 @@ Linux. `dk` fetches, builds, and runs the software locally or remotely.
 
 ## Install
 
-Install the `dk0` reference implementation with one command.
+Install `dk1` (the multithreaded build system for everyday use) and `dk0` (the
+reference implementation) with one command. More options are at
+<https://diskuv.com/dk/install/>.
 
 Linux and macOS:
 
@@ -25,10 +27,30 @@ Windows:
 powershell -ExecutionPolicy ByPass -c "[Net.ServicePointManager]::SecurityProtocol = 3072; irm https://diskuv.com/dk/install.ps1 | iex"
 ```
 
-Each installer downloads the single-file `dk0` executable for your platform,
-verifies its SHA-256, and puts it on your `PATH`. To run `dk` inside a checked-out
-project without a system install, use the project's `dk0` / `dk0.cmd` wrapper
-scripts instead.
+Each installer verifies the manifest, checks the SHA-256 of the `dk1`
+and `dk0` executables for your platform against it, and puts them on your `PATH`.
+
+### Run inside a project without installing
+
+To run `dk` inside an existing project without a system install, vendor the
+`dk1` / `dk1.cmd` and `dk0` / `dk0.cmd` wrapper scripts into the project. The
+wrappers download and verify the binaries.
+
+Linux and macOS:
+
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://diskuv.com/dk/vendor.sh | sh
+```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "[Net.ServicePointManager]::SecurityProtocol = 3072; irm https://diskuv.com/dk/vendor.ps1 | iex"
+```
+
+`vendor.sh` and `vendor.ps1` write the four wrapper scripts into the
+current directory. Commit them so collaborators can run `./dk1 ...` (or `dk1 ...`
+on Windows) right after cloning.
 
 ## Commands
 
@@ -50,7 +72,7 @@ The full command reference and options live at <https://diskuv.com/dk/help/lates
 | Tool      | Features better with the tool | Features better with `dk`          |
 | --------- | ----------------------------- | ---------------------------------- |
 | Nix       | Huge set of packages          | Works on Windows. Static types.    |
-| (contd.)  |                               | *Signify-backed supply chain*      |
+| (contd.)  |                               | Signify-backed supply chain        |
 | Buck2 +   | Scales to millions of files   | Works well outside of monorepo     |
 | ... Bazel | Backed by Big Tech            | Easier to adopt                    |
 | Ninja     | Integrated with CMake. Fast   | Cloud-friendly, sharable artifacts |
@@ -85,5 +107,4 @@ Those packages have independent licenses and you may be prompted to accept licen
 ## Related Open Source
 
 - DkML compiler: <https://github.com/diskuv/dkml-compiler> and <https://gitlab.com/dkml/distributions/dkml>
-- MlFront: Apache 2.0 core build libraries. <https://gitlab.com/dkml/build-tools/MlFront>. Used for 3rd party, dk0-compatible build systems.
-- DkZero: OSL 3.0. <https://gitlab.com/dkml/build-tools/MlFront>. Source code of `dk0.exe` executable used by `./dk0` and `./dk0.cmd`.
+- MlFront: Apache 2.0 core build libraries. <https://gitlab.com/dkml/build-tools/MlFront>.- DkZero: OSL 3.0. <https://gitlab.com/dkml/build-tools/MlFront>. Source code of `dk0.exe` executable used by `./dk0` and `./dk0.cmd`.
